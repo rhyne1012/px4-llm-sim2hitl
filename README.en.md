@@ -2,7 +2,7 @@
 
 [繁體中文](README.md) | **English**
 
-> **This is a translation.** The authoritative README is [README.md](README.md) (Traditional Chinese); where the two differ, follow README.md. Translated from README.md with SHA-256 `ff8e828f40c9e769abf020cbc9c5dda1a6ec4b76145057108c5384946d672439`: if `sha256sum README.md` prints something else, this translation is behind. The AI rules ([AGENTS.md](AGENTS.md)) and the folder READMEs are in Traditional Chinese only; an AI agent reads them without trouble.
+> **This is a translation.** The authoritative README is [README.md](README.md) (Traditional Chinese); where the two differ, follow README.md. Translated from README.md with SHA-256 `6ee73be35b5710da203400ccb84165b5e114d19d88dcf466105537afbe8ff1de`: if `sha256sum README.md` prints something else, this translation is behind. The AI rules ([AGENTS.md](AGENTS.md)) and the folder READMEs are in Traditional Chinese only; an AI agent reads them without trouble.
 
 Flight-control development kit: MATLAB/Simulink aircraft model → C → SITL (minimal PX4) → custom PX4 firmware → HITL on a real flight controller (Pixhawk). When you develop with an AI, its working rules are in [AGENTS.md](AGENTS.md).
 
@@ -14,10 +14,11 @@ Flight-control development kit: MATLAB/Simulink aircraft model → C → SITL (m
 
 ## The spirit of this project
 
-**The point is not a set of automation tools; it is that your AI understands this project from the start.** How the path goes from the aircraft model, the PX4 source, SITL, building and flashing to the real flight controller, where the traps are, what has already been verified and what counts as right are all written down in the docs (this README, [AGENTS.md](AGENTS.md), the folder READMEs) and in the existing checks. Once your AI has read them it can pick up where things stand without working out the whole pipeline from scratch each time, and spend its time and tokens on the real work: debugging and developing with you.
+**This is not an automation toolkit, and it should not grow into one that tries to cover every development case; it is a handover that lets your AI understand this pipeline from the start.** How the path goes from the aircraft model, the PX4 source, SITL, building and flashing to the real flight controller, where the traps are, what has already been verified and what counts as right are all written down in the docs (this README, [AGENTS.md](AGENTS.md), the folder READMEs) and in the existing checks. Once your AI has read them it can pick up where things stand without working out the whole pipeline from scratch each time, and spend its time and tokens on the real work: debugging and developing with you.
+
+An analogy: every new conversation, your AI is like a colleague on their first day at work. This package is the handover left by the people before: how the system works, where the traps are, what has already been verified, the house rules, and one basic route that has actually been run end to end (model → SITL → flashing → HITL). A handover does not do the work for the newcomer, nor does it list every situation they will meet; it lets them put their mind on your problem from day one, and know where to start when something new comes up. New lessons and the rules agreed with you go back into the handover, so the next newcomer gets up to speed faster.
 
 - **Understanding first, tools second**: commands and scripts only fix steps that are already understood. The docs say why things are done this way and where the traps are, for example the SD-card read error, the ground model that never turns the aircraft, and when the wind starts. That way the AI knows where to look when something goes wrong, and does not force things through by bypassing a safety check.
-- **Any session, any AI can pick it up**: the docs are the handover. New traps found during development, rules agreed with the human, and the numbers of your own aircraft are written back into the docs, so the next AI does not have to learn them again.
 - **Purpose**: hand this package to someone else so that they and their AI can go from changing the aircraft model and developing flight control all the way to building, flashing and HITL.
 - **Simple, light, one source**: everything lives in one place; reuse existing programs and checks; add nothing for cases that may never come.
 - **The AI speaks plainly**: the AI looks up and handles the technical details; it asks the human only about goals, choices and success criteria.
