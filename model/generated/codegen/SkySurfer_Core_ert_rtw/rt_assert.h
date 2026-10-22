@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SkySurfer_Core'.
  *
- * Model version                  : 14.12
+ * Model version                  : 14.13
  * Simulink Coder version         : 26.2 (R2026b) 22-May-2026
- * C/C++ source code generated on : Tue Oct 20 02:47:22 2026
+ * C/C++ source code generated on : Thu Oct 22 23:54:04 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: Intel->x86-64 (Linux 64)
