@@ -101,7 +101,7 @@ AI 先查好現況、提出建議，只跟人確認**目標、選擇與成功條
 
 | 改了 | 要跑 |
 |---|---|
-| 飛機模型（`model/`） | `./runbridge update-model --generate`（MATLAB）→ `./runbridge update-model` → 配平；刻意改了模型就照第 1.1 段重錄參考資料。發布新的模型 release（或回退）後，下一次跑 SITL 前先重跑 `sitl/build_sitl.py`：SITL 執行檔用絕對路徑連到 plant library，不重編會用到舊模型 |
+| 飛機模型（`model/`） | `./runbridge update-model --generate`（MATLAB）→ `./runbridge update-model` → 配平；刻意改了模型就照第 1.1 段重錄參考資料。發布新的模型 release（或回退）後，下一次跑 SITL 前先重跑 `sitl/build_sitl.py`：SITL 執行檔用絕對路徑連到 plant library，不重編會用到舊模型。slx 改了也重轉 `model_r2026a/` 的 R2026a 備份（見那裡的 README） |
 | `plant/` 的 C、`hitl/` 的 `native/`、`interface/`、`aircraft/`、`update.py` | `./runbridge update-model`（四道檢查）→ 離線測試 |
 | `hitl/host/` 等 runtime 程式 | 離線測試；影響時序時加跑 300 s 負載（背景跑，不接飛控）：先查 `ulimit -r`，有權限就直接跑並告訴人，沒有就給人第 2 節的指令；結果有疑慮再跑 600 s。報告寫實際跑了幾秒 |
 | `sitl/`、`modules/` | `sitl/build_sitl.py` → `sitl/run_sitl.py` → `analysis/response.py` |
@@ -124,6 +124,7 @@ for f in hitl/tests/test_*.py deploy/test_*.py; do n=$(basename "$f" .py); if "$
 | 資料夾 | 內容 |
 |---|---|
 | `model/` | 飛機模型來源；`generated/` 是轉好的 C 與 Simulink 參考結果 |
+| `model_r2026a/` | 同一個模型的 R2026a 備份（給只有 R2026a 的電腦），不是模型來源，不會自動更新 |
 | `images/` | README 用的圖（`overview.svg`）與嵌字工具 `embed_fonts.py` |
 | `platforms/` | 各平台的理解（目前是 `macos.md`）：和 Ubuntu 不同的平台行為、怎麼確認；不是安裝腳本 |
 | `fc/` | 各飛控的理解（目前是 `cubeorangeplus.md`）：換一塊飛控要查的事、接手用過的飛控、和 6C 不同的地方；不是安裝腳本 |
