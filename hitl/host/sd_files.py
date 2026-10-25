@@ -9,7 +9,7 @@ module outside the PX4 tree starts without changing the tree. sd-put / sd-rm cha
 SD_WRITABLE; listing and reading work anywhere under /fs/microsd.
 """
 
-import hashlib, json, os, secrets, time, uuid
+import hashlib, json, os, secrets, shlex, time, uuid
 from pathlib import Path, PurePosixPath
 from pymavlink.dialects.v20 import common as mav
 from . import mavftp
@@ -26,6 +26,25 @@ FTP_WAIT_S = 1.5  # one request: the reply (seq + 1, same req_opcode) within thi
 FTP_TRIES = 3
 SD_SESSION_TRIES = 3  # PX4 has one FTP session for every client of the link: busy or taken away -> start again
 SD_SESSION_WAIT_S = 1.0
+# CONFIG_NSH_MAXARGUMENTS of the PX4 NuttX boards (cubeorangeplus nsh defconfig: 15). nsh counts the command
+# itself, prints "too many arguments" on the console only, and still runs the line cut to this many words: a
+# module then sees an option without its value (2026-10-25 in a derived project: "Task start failed (-1)").
+NSH_MAX_WORDS = 15
+
+
+def boot_file_problems(data):
+    """Lines of a boot file that nsh would not run as written: more than NSH_MAX_WORDS words, or unparsable."""
+    problems = []
+    for number, line in enumerate(data.decode(errors='replace').splitlines(), 1):
+        try:
+            words = shlex.split(line, comments=True)
+        except ValueError as exc:
+            problems.append(f'line {number}: {exc}')
+            continue
+        if len(words) > NSH_MAX_WORDS:
+            problems.append(f'line {number}: {len(words)} words, nsh runs at most {NSH_MAX_WORDS} '
+                            f'(the command counts) and cuts the rest')
+    return problems
 
 
 class SdBusy(OperationError):
@@ -283,6 +302,9 @@ class SdFiles:
         data = Path(local).read_bytes()
         if len(data) > SD_PUT_MAX:
             raise ValueError(f'{local} is {len(data)} bytes, more than {SD_PUT_MAX}')
+        problems = boot_file_problems(data)
+        if problems:
+            raise ValueError(f'{local}: ' + '; '.join(problems))
         with self.operation_lock:
             return self._transfer(self._sd_change, path, data, out, 'sdput', str(Path(local).resolve()))
 

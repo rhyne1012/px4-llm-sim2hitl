@@ -1,0 +1,20 @@
+{
+  "name": "Example racetrack loop",
+  "note": "Example: a clockwise racetrack north of the start of hitl/scenarios/ground.json. Two 300 m straight legs (WP1 to WP2 westbound, WP6 to WP7 eastbound) are joined by semicircles of 70.6 m radius through three points at 45 deg steps (30 deg of bank at 20 m/s, 20 deg at 16 m/s), so no corner turns more than 45 deg. No takeoff or landing item: take off by hand or by script, then switch to Mission. Copy it for your own loop; mission.py and analysis/loop_tracking.py take any closed loop whose two longest segments are the straight legs.",
+  "home": [22.910275834988674, 120.31096929726908],
+  "altitude_m": 85.0,
+  "airspeed_mps": 16.0,
+  "loop_repeat": 65535,
+  "waypoints_east_north_m": [
+    [150.0, 70.0],
+    [-150.0, 70.0],
+    [-199.9, 90.7],
+    [-220.6, 140.6],
+    [-199.9, 190.5],
+    [-150.0, 211.2],
+    [150.0, 211.2],
+    [199.9, 190.5],
+    [220.6, 140.6],
+    [199.9, 90.7]
+  ]
+}

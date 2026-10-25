@@ -135,4 +135,5 @@ for f in hitl/tests/test_*.py deploy/test_*.py; do n=$(basename "$f" .py); if "$
 | `hitl/` | runtime（owner、worker、`hitl-run`）、起飛與起飛後動作腳本、`flight_test.json`（預設飛行與判定）、模型 release |
 | `deploy/` | 部署配方，每塊飛控一組：Pixhawk 6C 是 `00_native`（原生韌體＋參數，可隨時刷回）、`01_sdfix`（原生＋記憶卡修正 patch）、`02_template`（01＋範例模組 `guidance_template`＋開機檔＋`hitl.json` 指定的起飛後動作與判定）；Cube Orange+ 是同樣三層的 `*_cubeorangeplus`（`hil` 板子變體，見 `fc/`）；自建配方的 `firmware/firmware.json` 的 `recipe` 寫要套的 patch 與 `modules/` 的模組，`px4/build_firmware.py` 在 PX4 原始碼樹旁的建置樹編譯（原樹不動），patch 以固定作者與日期 commit，FC 回報的 NuttX hash 因此可預期、可核對 |
 | `px4/` | PX4 版本鎖、原始碼樹核對、修正 patch |
-| `analysis/` | 響應指標、ULog 讀檔與嚴格解析、重播比對 |
+| `analysis/` | 響應指標、ULog 讀檔與嚴格解析、重播比對、繞圈任務的航線追蹤、飛行檢視圖（衛星底圖與 setpoint） |
+| `hitl/missions/` | 繞圈任務（航線）的定義與工具 `mission.py`：一份定義產生 QGC `.plan` 和 MAVLink 上傳項目，QGC 改過的 plan 也能匯入回來；範例 `example_loop.json` |

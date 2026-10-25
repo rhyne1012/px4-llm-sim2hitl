@@ -109,6 +109,15 @@ class SdFileTests(unittest.TestCase):
             with self.assertRaises(ValueError):self.core.sd_list(path)
         with self.assertRaisesRegex(ValueError,'more than'):self.core.sd_put(self.local(bytes(sd_files.SD_PUT_MAX+1)),EXTRAS,self.root/'o')
         self.assertNotIn('FILE_TRANSFER_PROTOCOL',self.fc.counts)
+    def test_a_line_nsh_would_cut_is_not_written(self):
+        # nsh runs at most NSH_MAX_WORDS words a line, the command counted, and runs the line cut to that
+        fits=b'my_module start'+b' -x 1'*6+b' -y'
+        self.assertEqual(sd_files.boot_file_problems(fits+b'\n# '+b'w '*40+b'\n'),[])
+        with self.assertRaisesRegex(ValueError,'16 words'):self.core.sd_put(self.local(fits+b' 2\n'),EXTRAS,self.root/'o')
+        with self.assertRaisesRegex(ValueError,'quotation'):self.core.sd_put(self.local(b'echo "open\n'),EXTRAS,self.root/'o')
+        self.assertNotIn('FILE_TRANSFER_PROTOCOL',self.fc.counts)
+        for recipe in sorted((RUNTIME.parent/'deploy').glob('*/sd/etc/extras.txt')):
+            self.assertEqual(sd_files.boot_file_problems(recipe.read_bytes()),[],recipe)
     def test_lost_replies_are_asked_again(self):
         self.fc.config['ftp_drop_every']=3
         r=self.core.sd_put(self.local(LONG),EXTRAS,self.root/'out')
