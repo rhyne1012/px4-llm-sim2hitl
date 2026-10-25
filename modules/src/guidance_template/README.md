@@ -24,7 +24,7 @@
 ## 照著做一個自己的模組
 
 1. 複製 `modules/src/guidance_template/` 成新名字，改掉檔名、類別名稱、`CMakeLists.txt` 的 `MODULE`／`MAIN`；在 `sitl/px4_external/src/` 照 `guidance_template/` 加一個同樣的包裝，並列進那裡的 `CMakeLists.txt`。
-2. 改 `guidance()`（或依第 1 段討論的接法，改成要換的那一層）。
+2. 改 `guidance()`（或依第 1 段討論的接法，改成要換的那一層）。判斷邏輯多的模組（狀態機、門檻、模式交還），建議把邏輯寫成不依賴 PX4 的核心，先在電腦上單元測試，模式邏輯再用 PX4 內建的 SIH 飛機測；衍生專案的做法見 [hitl/workflow_lessons.md](../../../hitl/workflow_lessons.md) 第 3 點。
 3. SITL：照 `sitl/scenarios/template_offboard.json` 寫自己的情境，`sitl/build_sitl.py` → `sitl/run_sitl.py --scenario ...` → 自己的判定程式（照 `analysis/template_check.py`）。判定程式要先確認資料能判，再算指標：照它用 `analysis/response.py` 的 `window_problems` 檢查每個窗口，資料不能判就判不通過、寫出原因。
 4. 部署配方：照 `deploy/02_template/` 複製一份，`firmware/firmware.json` 的 `recipe.modules` 換成新模組，`sd/etc/extras.txt` 寫啟動指令，`hitl.json` 指定起飛後的動作（`hitl/commands/`）與判定程式。
 5. `./runbridge deploy-test --release deploy/<新配方>` 先看計畫，再 `--flash`。

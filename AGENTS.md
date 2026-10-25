@@ -132,7 +132,7 @@ for f in hitl/tests/test_*.py deploy/test_*.py; do n=$(basename "$f" .py); if "$
 | `plant/` | plant 核心包裝、C 真值、C 感測器、各自的檢查程式、錄製的參考資料 |
 | `sitl/` | 精簡 PX4 的 plant 模組 `plant_sim`、情境、配平、ULog 重播 |
 | `modules/` | 自己的 PX4 模組（同一份原始碼編進 SITL 與韌體；`guidance_template` 是範例，見它的 README「照著做一個自己的模組」）。韌體只編配方 `recipe.modules` 列的模組；SITL 要在 `sitl/px4_external/src/` 加包裝並列進那裡的 `CMakeLists.txt` |
-| `hitl/` | runtime（owner、worker、`hitl-run`）、起飛與起飛後動作腳本、`flight_test.json`（預設飛行與判定）、模型 release |
+| `hitl/` | runtime（owner、worker、`hitl-run`）、起飛與起飛後動作腳本、`flight_test.json`（預設飛行與判定）、模型 release；`workflow_lessons.md` 是衍生專案的流程與工具經驗與建議（任務紀錄、模擬遙控器、機上模組分層、航線與 QGC 來回、HITL／實飛切換等；框架還沒有這些程式） |
 | `deploy/` | 部署配方，每塊飛控一組：Pixhawk 6C 是 `00_native`（原生韌體＋參數，可隨時刷回）、`01_sdfix`（原生＋記憶卡修正 patch）、`02_template`（01＋範例模組 `guidance_template`＋開機檔＋`hitl.json` 指定的起飛後動作與判定）；Cube Orange+ 是同樣三層的 `*_cubeorangeplus`（`hil` 板子變體，見 `fc/`）；自建配方的 `firmware/firmware.json` 的 `recipe` 寫要套的 patch 與 `modules/` 的模組，`px4/build_firmware.py` 在 PX4 原始碼樹旁的建置樹編譯（原樹不動），patch 以固定作者與日期 commit，FC 回報的 NuttX hash 因此可預期、可核對 |
 | `px4/` | PX4 版本鎖、原始碼樹核對、修正 patch |
 | `analysis/` | 響應指標、ULog 讀檔與嚴格解析、重播比對 |
