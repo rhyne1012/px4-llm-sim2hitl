@@ -25,6 +25,8 @@ PX4 模組（Stabilized）：sensors、pwm_out_sim、control_allocator、fw_rate
 
 **SITL 沒驗到的事**：因為沒有 Commander，解鎖檢查、OFFBOARD 怎麼進入與退出、失聯保護（例如 `COM_OF_LOSS_T`）在 SITL 都沒有驗證；SITL 的導引表現 PASS 不能延伸成這些也沒問題，這些要在實體 FC 的 HITL 量。外接電腦送來的 MAVLink 也沒有經過 PX4 的接收：SITL 的 Offboard 是模組直接發布設定值，所以「`SET_ATTITUDE_TARGET` 的遮罩怎麼解讀」這類事 SITL 也驗不到。例：PX4 v1.17 固定翼的角速度模式，偏航角速度標成「忽略」會變成 NaN，`fw_rate_control` 看到任何一軸不是有限值，三軸都只輸出配平值（`FixedwingRateControl.cpp`），等於放手。
 
+**電腦版 PX4 當飛控（框架還沒有）**：上面這些精簡 SITL 驗不到的事，一個衍生專案改用完整的電腦版 PX4 取代 Cube，跑同一套 HITL 流程（owner、自動起飛、情境、判讀照用），再用 lockstep 讓它比真實時間快、能同時跑多趟。做法、踩過的坑（包括 PX4 第一筆 IMU 取樣間隔的問題）與給框架的建議見 [sitl_fc_lockstep.md](sitl_fc_lockstep.md)。
+
 目前有三種模式（`run_sitl.py` 的 `MODULES`；`plant_sim` 的模式旗標照 PX4 `commander/ModeUtil/control_mode.cpp`）：
 
 - **Acro**：`fw_rate_control` 為止。只保持「角速度為零」、不保持姿態，FC 的 `TRIM_PITCH=0` 下沒有人操控會一路低頭，所以沒有放無人操控的 Acro 參考情境。
