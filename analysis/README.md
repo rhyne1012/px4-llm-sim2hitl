@@ -8,6 +8,8 @@ SITL 與 HITL 共用的分析程式。Python 用專案的 venv（`PY="$(./runbri
 | [hitl_trace.py](hitl_trace.py) | HITL 的 `host/wire.bin` 轉成 SITL 欄位的 trace（`response.py --hitl-log` 呼叫） |
 | [ulog.py](ulog.py) | ULog 讀檔（只用 numpy）：各主題的 structured array、info（`ver_hw`、`ver_sw`）、參數、dropout、log 訊息；`intervals()` 算記錄間隔 |
 | [replay_compare.py](replay_compare.py) | ULog 重播的輸出比對與輸入記錄品質（`sitl/run_sitl.py --replay` 呼叫；做法見 [sitl README](../sitl/README.md)） |
+| [loop_tracking.py](loop_tracking.py) | 繞圈任務（例如跑道）飛得怎樣：偏離航線（往外為正）、轉彎的滾轉命令峰值、各直線段地速、逆向飛的時間、CAS／高度範圍、EKF 估的風。直線段是航點圍成的迴圈裡最長的兩段（離兩端各 25 m、離線 50 m 內），轉彎是超出直線段兩端的部分，所以航點移動（例如在 QGC 微調後匯入）也適用。預設取第二段 Mission（第一段是爬升後的進場），`--all` 取全部。`--ulog <LOG.ulg> --mission hitl/missions/example_loop.json` |
+| [flight_review.py](flight_review.py) | 一趟飛行的檢視圖：航跡疊衛星底圖（航點與接受半徑、依飛行模式上色、Offboard 依序編號、所有趟在 Mission／Offboard 時的範圍框），以及 setpoint 對實際值（滾轉、俯仰、高度、空速、正在飛去的航點），可以把其他趟疊上去（`--compare`）、另外放大一塊（`--zoom W,E,S,N`）。另印一份 JSON：每趟的範圍、FC 收到的航點和航線檔差多少、home 在空中被改了幾次。沒有航線檔時，航點用 FC 實際飛去的目標。畫圖要 matplotlib 和 Pillow（專案 venv 沒有；Ubuntu 24.04 可以用系統的 `python3`，套件 `python3-matplotlib`、`python3-pil`，中文字型 `fonts-noto-cjk`）；`--no-plots` 只用 numpy。衛星圖塊（Esri World Imagery，拍攝日期不明）第一次下載後快取在 `<cache>/map_tiles/`；`--no-map` 不用網路 |
 
 ```sh
 "$PY" -B analysis/response.py \
