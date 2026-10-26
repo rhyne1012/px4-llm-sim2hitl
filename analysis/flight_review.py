@@ -13,7 +13,8 @@ flew (waypoints moved in QGroundControl included). Times are the FC's (seconds s
 Imagery: Esri World Imagery tiles at zoom 19 (about 0.3 m per pixel at 23 deg latitude), fetched once into the
 cache (<cache>/map_tiles/) and reused; the capture date is unknown and the alignment is a few metres at best.
 --no-map draws without it (offline). The pictures need matplotlib and Pillow, which the project venv does not have:
-run with a Python that has them (e.g. the PX4 venv); the numbers (--no-plots) need only numpy.
+run with a Python that has them (on Ubuntu 24.04 the system python3 with python3-matplotlib and python3-pil; the
+Chinese labels use fonts-noto-cjk); the numbers (--no-plots) need only numpy.
 
 Writes track_map.png, setpoints.png and, with --zoom, zoom.png, and prints one JSON object: each flight's extent
 (whole flight, and Mission plus Offboard only), the FC's waypoints against the mission's, and the home position
@@ -50,7 +51,7 @@ ACTUAL_MAP, SETPOINT_MAP, OFFBOARD_MAP, OTHER_MAP, ENVELOPE_MAP = '#6db8ff', '#f
 
 
 def metres_per_degree(lat_deg):
-    """WGS84 metres per degree of latitude and of longitude (as hitl/missions/racetrack.py)."""
+    """WGS84 metres per degree of latitude and of longitude (as hitl/missions/mission.py)."""
     lat = math.radians(lat_deg)
     return (111132.92 - 559.82 * math.cos(2 * lat) + 1.175 * math.cos(4 * lat),
             111412.84 * math.cos(lat) - 93.5 * math.cos(3 * lat))
@@ -229,12 +230,15 @@ def style():
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
     from matplotlib import font_manager
+    added = []
     for path in ('/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc', '/System/Library/Fonts/PingFang.ttc'):
         if Path(path).is_file():
             font_manager.fontManager.addfont(path)
+            # a .ttc adds only its first face (Ubuntu 24.04's Noto: 'Noto Sans CJK JP', which has the TC glyphs too)
+            added.append(font_manager.FontProperties(fname=path).get_name())
     installed = {f.name for f in font_manager.fontManager.ttflist}
     families = [f for f in ('Noto Sans CJK TC', 'PingFang TC', 'Microsoft JhengHei') if f in installed]
-    plt.rcParams.update({'font.family': families + ['DejaVu Sans'],
+    plt.rcParams.update({'font.family': families + [f for f in added if f not in families] + ['DejaVu Sans'],
                          'font.size': 10, 'axes.edgecolor': '#c3c2b7', 'axes.labelcolor': INK2,
                          'xtick.color': MUTED, 'ytick.color': MUTED, 'axes.grid': True, 'grid.color': '#e1e0d9',
                          'grid.linewidth': .6, 'figure.facecolor': '#fcfcfb', 'axes.facecolor': '#fcfcfb',

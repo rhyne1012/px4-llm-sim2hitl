@@ -113,7 +113,7 @@ AI 先查好現況、提出建議，只跟人確認**目標、選擇與成功條
 
 ```sh
 OUT=<新的空資料夾>; mkdir -p "$OUT"
-for f in hitl/tests/test_*.py deploy/test_*.py; do n=$(basename "$f" .py); if "$PY" -B "$f" > "$OUT/$n.log" 2>&1; then echo "OK   $f"; else echo "FAIL $f（完整輸出 $OUT/$n.log）"; fi; done
+for f in hitl/tests/test_*.py deploy/test_*.py analysis/test_*.py; do n=$(basename "$f" .py); if "$PY" -B "$f" > "$OUT/$n.log" 2>&1; then echo "OK   $f"; else echo "FAIL $f（完整輸出 $OUT/$n.log）"; fi; done
 "$PY" -B hitl/tests/run_load.py <新的空資料夾> --duration 300   # 有疑慮再 600
 ```
 

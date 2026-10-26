@@ -26,24 +26,32 @@ FTP_WAIT_S = 1.5  # one request: the reply (seq + 1, same req_opcode) within thi
 FTP_TRIES = 3
 SD_SESSION_TRIES = 3  # PX4 has one FTP session for every client of the link: busy or taken away -> start again
 SD_SESSION_WAIT_S = 1.0
-# CONFIG_NSH_MAXARGUMENTS of the PX4 NuttX boards (cubeorangeplus nsh defconfig: 15). nsh counts the command
-# itself, prints "too many arguments" on the console only, and still runs the line cut to this many words: a
-# module then sees an option without its value (2026-10-25 in a derived project: "Task start failed (-1)").
+# A boot file line as the NuttX of PX4 v1.17 runs it (apps/nshlib nsh_parse.c, nsh_script.c; the 6C and Cube Orange+
+# nsh defconfigs: NSH_MAXARGUMENTS 15, NSH_LINELEN 128). Above 15 words, the command counted, nsh prints "too many
+# arguments" on the console only and still runs the whole line; words after the 19th it drops without a word, and a
+# module then sees an option without its value (2026-10-25 in a derived project: "Task start failed (-1)"). It reads
+# a line 127 bytes at a time: the rest of a longer line, a comment's too, runs as a line of its own.
 NSH_MAX_WORDS = 15
+NSH_MAX_LINE_BYTES = 127
 
 
 def boot_file_problems(data):
-    """Lines of a boot file that nsh would not run as written: more than NSH_MAX_WORDS words, or unparsable."""
+    """Lines of a boot file that nsh would not run as written: over NSH_MAX_LINE_BYTES bytes, more than NSH_MAX_WORDS
+    words, or unparsable."""
     problems = []
-    for number, line in enumerate(data.decode(errors='replace').splitlines(), 1):
+    for number, line in enumerate(data.split(b'\n'), 1):
+        if len(line) > NSH_MAX_LINE_BYTES:
+            problems.append(f'line {number}: {len(line)} bytes, nsh reads {NSH_MAX_LINE_BYTES} and runs the rest '
+                            'as another line')
+            continue
         try:
-            words = shlex.split(line, comments=True)
+            words = shlex.split(line.decode(errors='replace'), comments=True)
         except ValueError as exc:
             problems.append(f'line {number}: {exc}')
             continue
         if len(words) > NSH_MAX_WORDS:
-            problems.append(f'line {number}: {len(words)} words, nsh runs at most {NSH_MAX_WORDS} '
-                            f'(the command counts) and cuts the rest')
+            problems.append(f'line {number}: {len(words)} words, more than the {NSH_MAX_WORDS} nsh takes (the command '
+                            'counts): it warns on the console only and drops the words after the 19th')
     return problems
 
 

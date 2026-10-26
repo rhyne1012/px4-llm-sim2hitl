@@ -3,7 +3,7 @@
 `mission.py` 從一份航線定義（JSON）產生兩種輸出，也能把在 QGC 改過的 plan 匯入回來：
 
 - **QGC 用**：`.plan`。實飛或手動 HITL 時，在 QGroundControl 開啟再上傳。
-- **自動化用**：起飛後動作腳本（[hitl/commands](../commands/README.md)）呼叫 `mavlink_items()`，用 MAVLink 上傳同一份航點。
+- **自動化用**：`mavlink_items()` 給起飛後動作腳本（[hitl/commands](../commands/README.md)）用 MAVLink 上傳同一份航點。框架目前還沒有這樣的腳本，要用時自己寫。
 
 兩邊同源，所以 QGC 上的航線和自動化的航線不會分岔。航線分析 [loop_tracking.py](../../analysis/loop_tracking.py) 和檢視圖 [flight_review.py](../../analysis/flight_review.py) 讀同一種定義檔。
 

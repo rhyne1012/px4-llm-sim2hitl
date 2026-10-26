@@ -8,7 +8,8 @@ Window (default): the second Mission stretch (after the flight first left Missio
 10 s after entering it: on the loop already. The first Mission stretch holds the run-in from the climb, which flies
 to whatever item the FC had as current (kept on the FC across reboots and re-uploads of the same mission), so it may
 cross the field and turn back. --all: every Mission stretch, 10 s after each entry.
-Positions are east/north metres from the mission's home (vehicle_global_position, equirectangular). The mission
+Positions are east/north metres from the mission's home (vehicle_global_position, with the WGS84 metres per degree
+that hitl/missions/mission.py places the waypoints with, so a flight exactly over them is 0 m off). The mission
 JSON (hitl/missions/mission.py) gives the home and the waypoints (waypoints_east_north_m) of the closed loop. The legs
 are the loop's two longest segments, whatever the waypoints (they may be moved in QGroundControl and imported): on a
 leg means 25 m clear of both its ends and within 50 m of it. A leg is named by its side of the loop and its direction
@@ -31,6 +32,19 @@ MISSION = 3  # vehicle_status nav_state AUTO_MISSION
 SETTLE_S = 10.0
 LEG_END_MARGIN_M = 25.0   # leg samples stay this far from the leg's waypoints (turn entry and exit)
 LEG_HALF_WIDTH_M = 50.0   # and this close to the leg's line
+
+
+def metres_per_degree(lat_deg):
+    """WGS84 metres per degree of latitude and of longitude (as hitl/missions/mission.py)."""
+    lat = math.radians(lat_deg)
+    return (111132.92 - 559.82 * math.cos(2 * lat) + 1.175 * math.cos(4 * lat),
+            111412.84 * math.cos(lat) - 93.5 * math.cos(3 * lat))
+
+
+def east_north(home, lat, lon):
+    """East/north metres from home: the inverse of mission.py's offset()."""
+    m_lat, m_lon = metres_per_degree(home[0])
+    return (np.asarray(lon, dtype=float) - home[1]) * m_lon, (np.asarray(lat, dtype=float) - home[0]) * m_lat
 
 
 def euler_deg(q):
@@ -115,7 +129,6 @@ def rounded(x, digits=1):
 
 
 def metrics(log, mission, every=False):
-    lat0, lon0 = mission['home']
     wps = np.asarray(mission['waypoints_east_north_m'], dtype=float)
     loop = np.vstack([wps, wps[:1]])
     track_legs, shape = legs(wps)
@@ -139,9 +152,7 @@ def metrics(log, mission, every=False):
         return mask
 
     gp, gp_t = rows('vehicle_global_position')
-    k = 6371000.0
-    e_all = np.radians(gp['lon'] - lon0) * k * math.cos(math.radians(lat0))
-    n_all = np.radians(gp['lat'] - lat0) * k
+    e_all, n_all = east_north(mission['home'], gp['lat'], gp['lon'])
     lp, lp_t = rows('vehicle_local_position')
     m = inside(gp_t)
     e, n = e_all[m], n_all[m]

@@ -68,6 +68,16 @@ class MissionToolTests(unittest.TestCase):
         new = mission.from_plan(plan, self.definition)
         self.assertEqual((new['altitude_m'], new['airspeed_mps'], new['loop_repeat']), (80.0, 17.0, 10))
 
+    def test_no_airspeed_keeps_the_trim_airspeed(self):
+        definition = {k: v for k, v in self.definition.items() if k != 'airspeed_mps'}
+        items = mission.mavlink_items(definition)
+        self.assertEqual([item[1] for item in items].count(mission.MAV_CMD_DO_CHANGE_SPEED), 0)
+        self.assertEqual(items[-1][2][0], 0)  # DO_JUMP back to the first waypoint, now sequence 0
+        plan = mission.qgc_plan(definition)
+        self.assertNotIn('cruiseSpeed', plan['mission'])
+        self.assertEqual(plan['mission']['items'][-1]['params'][0], 1)  # its doJumpId
+        self.assertEqual(mission.from_plan(plan, definition), definition)
+
     def test_refused_plans_name_the_item(self):
         def refused(edit, needle):
             plan = copy.deepcopy(self.plan)

@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """loop_tracking.py's geometry and windows without a ULog: track error sign, Mission stretches, legs and turn ends
-taken from the waypoints (also after moving or turning the loop)."""
+taken from the waypoints (also after moving or turning the loop), positions as mission.py places the waypoints."""
 import json
 from pathlib import Path
+import sys
 import unittest
 
 import numpy as np
@@ -12,10 +13,21 @@ try:
 except ImportError:
     import loop_tracking as tracking
 
-EXAMPLE = Path(__file__).resolve().parents[1] / 'hitl' / 'missions' / 'example_loop.json'
+MISSIONS = Path(__file__).resolve().parents[1] / 'hitl' / 'missions'
+EXAMPLE = MISSIONS / 'example_loop.json'
+sys.path.insert(0, str(MISSIONS))
+import mission  # noqa: E402
 
 
 class LoopTrackingTests(unittest.TestCase):
+    def test_a_flight_over_the_waypoints_is_on_the_loop(self):
+        # positions use the projection mission.py places the waypoints with (a sphere would put this loop up to 0.9 m off)
+        definition = mission.load(EXAMPLE)
+        wps = np.asarray(definition['waypoints_east_north_m'], dtype=float)
+        lat, lon = mission.offset(definition['home'], wps[:, 0], wps[:, 1])
+        e, n = tracking.east_north(definition['home'], lat, lon)
+        np.testing.assert_allclose(tracking.path_distance(e, n, np.vstack([wps, wps[:1]])), 0, atol=1e-6)
+
     def test_sign_outside_positive(self):
         square = np.array([[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]], dtype=float)
         d = tracking.path_distance(np.array([5.0, 5.0, -2.0]), np.array([5.0, 1.0, 5.0]), square)

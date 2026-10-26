@@ -5,9 +5,9 @@
   "$PY" -B hitl/missions/mission.py [--definition D.json] --import <qgc.plan> [--dry-run]  # loop edited in QGC, back
 
 A definition (hitl/missions/README.md; example_loop.json) has a home, the waypoints in east/north metres from it, one
-altitude above home, an optional airspeed and the loop count. Automation (an after-takeoff script) imports
-mavlink_items() and uploads the same items over MAVLink. Items: DO_CHANGE_SPEED (airspeed), the waypoints at the
-relative altitude, then DO_JUMP back to the first waypoint. There is no takeoff or landing item, so the FC needs
+altitude above home, an optional airspeed and the loop count. An after-takeoff script can import mavlink_items() and
+upload the same items over MAVLink (no script in the framework does yet). Items: DO_CHANGE_SPEED (when the definition
+has an airspeed), the waypoints at the relative altitude, then DO_JUMP back to the first waypoint. There is no takeoff or landing item, so the FC needs
 MIS_TKO_LAND_REQ=0. A DO_JUMP target is a mission sequence number on the MAVLink link; in a .plan file it is the
 target's doJumpId, which QGroundControl turns into the sequence number when it uploads.
 
@@ -69,10 +69,10 @@ def waypoints(definition):
 
 def mavlink_items(definition, first_seq=0, change_speed=True):
     """(frame, command, (param1..4), lat, lon, alt) in upload order; DO_JUMP targets the first waypoint's sequence.
-    first_seq: items already uploaded before these (e.g. a SITL takeoff item). change_speed=False keeps the FC's trim
-    airspeed (e.g. an airplane that cannot fly the definition's speed)."""
-    items = [(MAV_FRAME_MISSION, MAV_CMD_DO_CHANGE_SPEED, (SPEED_TYPE_AIRSPEED, definition['airspeed_mps'], -1, 0), 0.0, 0.0, 0.0)]
-    items = items if change_speed and definition.get('airspeed_mps') else []
+    first_seq: items already uploaded before these (e.g. a SITL takeoff item). change_speed=False, or no airspeed_mps
+    in the definition, keeps the FC's trim airspeed (e.g. an airplane that cannot fly the definition's speed)."""
+    speed = definition.get('airspeed_mps') if change_speed else None
+    items = [(MAV_FRAME_MISSION, MAV_CMD_DO_CHANGE_SPEED, (SPEED_TYPE_AIRSPEED, speed, -1, 0), 0.0, 0.0, 0.0)] if speed else []
     first_waypoint = first_seq + len(items)
     items += [(MAV_FRAME_GLOBAL_RELATIVE_ALT, MAV_CMD_NAV_WAYPOINT, (0, 0, 0, math.nan), lat, lon, definition['altitude_m'])
               for lat, lon in waypoints(definition)]
@@ -92,11 +92,11 @@ def qgc_plan(definition):
         if frame == MAV_FRAME_GLOBAL_RELATIVE_ALT:
             item.update(AMSLAltAboveTerrain=None, Altitude=alt, AltitudeMode=1)
         items.append(item)
-    home = definition['home']
+    home, speed = definition['home'], definition.get('airspeed_mps')
     return {'fileType': 'Plan', 'groundStation': 'QGroundControl', 'version': 1,
-            'mission': {'cruiseSpeed': definition['airspeed_mps'], 'firmwareType': 12, 'globalPlanAltitudeMode': 1,
-                        'hoverSpeed': 5, 'items': items, 'plannedHomePosition': [home[0], home[1], 0],
-                        'vehicleType': 1, 'version': 2},
+            'mission': dict({'cruiseSpeed': speed} if speed else {},  # no airspeed: no cruiseSpeed either
+                            firmwareType=12, globalPlanAltitudeMode=1, hoverSpeed=5, items=items,
+                            plannedHomePosition=[home[0], home[1], 0], vehicleType=1, version=2),
             'geoFence': {'circles': [], 'polygons': [], 'version': 2},
             'rallyPoints': {'points': [], 'version': 2}}
 
@@ -162,8 +162,11 @@ def from_plan(plan, definition):
         problems.append(f'item {jump_i}: DO_JUMP repeats {jump_params[1]:g} times (at least 1)')
     if problems:
         raise ValueError('; '.join(problems))
-    return dict(definition, altitude_m=round(altitudes[0], DECIMALS_M), airspeed_mps=speed,
-                loop_repeat=int(jump_params[1]), waypoints_east_north_m=east_north_m)
+    new = dict(definition, altitude_m=round(altitudes[0], DECIMALS_M), loop_repeat=int(jump_params[1]),
+               waypoints_east_north_m=east_north_m)
+    if speed is not None or 'airspeed_mps' in definition:
+        new['airspeed_mps'] = speed
+    return new
 
 
 def changes(old, new, plan):
