@@ -1,5 +1,10 @@
 # analysis：判定與指標
 
+> 用途：SITL 與 HITL 共用的分析程式：判定、指標、ULog 工具。
+> 什麼時候讀：要判讀結果、寫或改判定程式、看 ULog 時。HITL 的紀錄先讀什麼，見 [hitl README](../hitl/README.md)「看結果先讀什麼」。
+> 可以跳過：只跑流程、不看細節時。
+> 小節：檔案表｜ULog 工具包（SITL、HITL、實機共用）
+
 SITL 與 HITL 共用的分析程式。Python 用專案的 venv（`PY="$(./runbridge where python)"`，`./runbridge --setup` 建的；這些程式要 numpy）。
 
 | 檔案 | 用途 |

@@ -1,5 +1,10 @@
 # hitl：HITL runtime
 
+> 用途：HITL runtime（owner、worker、`hitl-run`）的位置、執行規則、QGC 手動飛、離線測試，以及 HITL 紀錄先讀什麼。
+> 什麼時候讀：每次 HITL 前、QGC 手動飛、看 HITL 的紀錄，或改 `hitl/` 的程式時。
+> 可以跳過：只做 SITL、只改模型或文件時。
+> 小節：環境｜狀態資料夾｜執行規則｜用 QGC 搖桿手動飛（3.1）｜離線測試｜看結果先讀什麼｜程式地圖
+
 載入驗收過的模型 library，以 4 ms 步進執行，經 USB MAVLink 和實體 PX4 做 HITL。入口與常用指令見[根目錄 README](../README.md)（`./runbridge --help` 列出所有動作），安全規則見 [AGENTS](../AGENTS.md) 第 3、4 節。本文只寫 runtime 的位置、規則與測試。衍生專案在這套流程上加過的工具與經驗見 [workflow_lessons.md](workflow_lessons.md)（大部分框架還沒有，開頭寫了哪些已經搬進來）。
 
 ## 環境
@@ -65,7 +70,7 @@ QGC 的搖桿（畫面上的虛擬搖桿，或 USB 遊戲手把）經 UDP 送 MA
 
 **一次性設定**
 
-- QGC 只連 UDP：`~/.config/QGroundControl/QGroundControl.ini` 的 `[AutoConnect]`（根目錄 README「環境準備」）。改之前 QGC 要關著。
+- QGC 只連 UDP：`~/.config/QGroundControl/QGroundControl.ini` 的 `[AutoConnect]`（做法在 [platforms/ubuntu.md](../platforms/ubuntu.md) 的 QGC）。改之前 QGC 要關著。
 - 虛擬搖桿：QGC 左上 **Q 圖示 → Application Settings → General → Fly View** 區段，勾 **Virtual Joystick**；回到飛行畫面會出現兩個圓盤（mode 2：左邊上下是油門、左右是方向舵；右邊是俯仰與滾轉）。有「Auto-Center Throttle」時不要勾（固定翼的油門不回中）。
 - USB 手把：插上後 **Q 圖示 → Vehicle Setup → Joystick**，在 Active joystick 選它，**Calibrate → Start** 照提示動桿，最後啟用。PX4 的 `COM_RC_IN_MODE` 不能是 0（預設 3：遙控或搖桿、先到先用）。
 
@@ -119,3 +124,25 @@ for f in hitl/tests/test_*.py deploy/test_*.py; do "$PY" -B "$f"; done
 - 600 s 負載（不開視窗）：`"$PY" -B hitl/tests/run_load.py <新的空資料夾> --duration 600`。PASS 條件寫在 `run_load.py`：每步計算 p99 < 2 ms、最慢 < 4 ms、0 次晚到（≥ 4 ms）、每 10 s 的即時倍率在 0.99–1.01、沒有序列埠錯誤或掉 log。`--peer-mode process` 只用來診斷對照。
 - `tests/validate_library.py` 由 `update-model` 呼叫，用 Simulink 參考結果與 ABI 驗證新建的 library。
 - `tests/run_live_unarmed.py` 會連實體 PX4（不解鎖），屬實體測試；它的序列埠寫死成 macOS 的 `/dev/cu.usbmodem01`，在 Linux 不能直接用。
+
+## 看結果先讀什麼
+
+HITL 的紀錄很大，不要整份讀。例如 2026-10-20 的一趟（o200k token）：`flight/result.json` 約 5.9 萬、參數讀回每份約 9.8 萬、`host/timing.csv` 約 28 萬、`flight/operations.jsonl` 與 `flight/status.jsonl` 各約 200 萬。
+
+1. 先讀 `hitl-run` 印出的結果，以及 `manifest.json` 的 `verdict`、`reasons`、`scope` 與 `flight_summary.json`。
+2. 缺什麼再取什麼：用現有的分析工具（見 [analysis README](../analysis/README.md)）取需要的欄位、事件或時間窗，不要用 `cat` 讀整份原始檔。
+3. 要核對時回到原始資料，並寫明取了哪一段。
+
+## 程式地圖
+
+大的檔不必整份讀，先在這裡找到要看的那一段（用名字搜尋，不用行號）。這裡只是路標，實際行為以程式為準。
+
+- `host/core.py`（約 2.5 萬 token）：`Core` 一個類別管 owner 的全部工作。
+  - 連線與收發：`_io`、`_receive`、`_send_message`、`_route_inputs`；狀態：`status`、`_operations_view`。
+  - FC 傳輸：`fetch_log`／`_fetch_log`（下載飛控記錄）、`param_readback`／`_param_readback`（讀回全部參數）。
+  - 寫參數交易：`param_plan`（只看計畫）、`param_deploy`、`_param_txn_gate`、`_param_set`、`_param_rollback`、`_param_commit`；交易記號是狀態資料夾的 `param_deploy.json`（`_param_pending`）。
+  - 模型、飛手與恢復：`start`、`stop`、`stop_pilot`、`takeoff`、`recover`／`_recover`。
+- `host/transport.py`：`SerialTransport`（實體序列埠）、`FakeFC`（離線測試用的假飛控）、`FakePTY` 與 `PeerPump`（離線測試用的虛擬序列埠）。
+- `host/hitl_run.py`：`run_hitl`（一趟 `hitl-run` 的全部步驟）、`combine`（FAIL 優先於 INCOMPLETE，INCOMPLETE 優先於 PASS）、`wire_slice`（從 owner 的 `wire.bin` 切出這一趟）。
+- `autotakeoff/autotakeoff.py`：`Takeoff`（起飛流程：油門、俯仰、放手、起飛後動作、飛手接手）、`Vehicle`（帶到達時間的遙測，不用過期的資料）、`Link`（和 owner 的 UDP）。
+- `tests/test_runbridge_fake.py`（約 1.2 萬）：從 `runbridge` 入口經 IPC、`Core`、飛手到 `FakeFC` 的整條路。`tests/test_management_faults.py`（約 1.2 萬）：管理面的失敗，例如停止逾時、下載沒有進度。

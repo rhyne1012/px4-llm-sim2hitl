@@ -1,5 +1,10 @@
 # SITL：精簡 PX4＋plant 模組
 
+> 用途：精簡 SITL 的架構、建置、執行、配平與 ULog 重播，以及 SITL 驗不到的事。
+> 什麼時候讀：跑或改 SITL、做配平、比較 SITL 與 HITL 時；照小節只讀需要的那一節。
+> 可以跳過：只做 HITL、只改韌體或文件時。
+> 小節：架構｜檔案｜建置｜執行（離線模擬，不碰硬體）｜配平與丟出去（常態工具）｜ULog 重播｜已知限制與判讀
+
 這是本套件的 SITL 做法。**不跑完整 PX4 SITL、不走 MAVLink、不啟動 EKF2**：用鎖定版本的 PX4 posix build，只啟動情境需要的 PX4 模組，把 plant 寫成 PX4 模組放在同一個程序裡 lockstep 執行，估測值直接用 plant 的真值。PX4 模組的程式原封不動；不要自己重寫 PX4 模組的接線。
 
 下面的 Python 指令都用專案的 venv（`./runbridge --setup` 建的；配平與分析要 numpy）：

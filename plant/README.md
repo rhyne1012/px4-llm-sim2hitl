@@ -1,5 +1,10 @@
 # plant：核心、C Truth 與 sensors
 
+> 用途：plant（核心、C Truth、C sensors）怎麼建、怎麼驗收，以及地面、重心與氣動作用點、風這些模型的事實。
+> 什麼時候讀：改模型或 plant、換飛機（第 1.1 段）、要用風、判讀和模型有關的現象時；照小節只讀需要的那一節。
+> 可以跳過：只跑既有的 SITL／HITL 流程、只改韌體或文件時。
+> 小節：核心｜沒有 MATLAB 的機器｜手動建置與驗收｜C Truth｜C sensors｜地面｜重心與氣動作用點｜風｜plant 介面重點｜參考資料｜程式地圖
+
 飛機的 6DOF 由 `model/FW_SkySurfer_HIL.slx` 轉碼成可重入的 C 核心（`core/`）；這裡另放用 C 寫的 Truth（由核心的狀態與力算出 `PlantTruth`）與 sensors（讀 Truth）。SITL（`sitl/` 的 `plant_sim` 模組）與 HITL（`hitl/aircraft/skysurfer/adapter.c`）用同一份；同一程序可跑多架，只用標準 C。只在 Ubuntu 24.04 x86-64 驗證過。
 
 核心、C Truth、C sensors 都通過驗收。這些驗收（含四道檢查）證明的是轉碼、介面與數值和來源模型一致，**不代表模型和實機一樣**；像不像實機，看的是氣動表、推力、質量與慣量這些來源本身。平常不用單獨跑這裡的程式：`./runbridge update-model --generate`（要 MATLAB）把產生的 C 存進 `model/generated/`，`./runbridge update-model` 再把它們和 `adapter.c` 編成模型 release，同時跑四道檢查（reuse-library 閘門、`validate_core.py`、`validate_plant.py`、`hitl/tests/validate_library.py`），全部 PASS 才發布。
@@ -188,3 +193,10 @@ SkySurfer 的數字（AVL 座標原點在翼根前緣，往機尾為正；模型
 `manifest.json` 記錄是哪個 release 錄的（`model_build_id`）、library 與腳本的 SHA-256、每個 case 的初值與控制、樣本數與是否被發散保護截斷。刻意改了模型後，先確認 `update-model` 的 Simulink 對照（`validate_library.py`）通過，再用新的 active release 重錄。
 
 感測器欄位（raw 39–57）來自 C sensors（固定預設種子），只當比較對象；感測器本身的驗收在 `validate_plant.py`，adapter 的欄位對應與時序在 `hitl/tests/validate_library.py`。
+
+## 程式地圖
+
+大的檔不必整份讀，先在這裡找到要看的那一段（用名字搜尋，不用行號）。這裡只是路標，實際行為以程式為準。
+
+- `core/validate_plant.py`（約 1 萬 token）：C Truth 與 C sensors 的驗收。每一項是一個 `check_*`（例如 `check_truth`、`check_wind`、`check_geo`、`check_noise`、`check_boundaries`），`main` 依序跑。
+- `../model/PX4_HIL_preload.m`（約 1.2 萬）：模型的 PreLoadFcn／InitFcn 腳本。內容是本機暫存資料夾（`configureLocalFolders`）、HIL 介面設定、MAVLink Bus 定義與送出封包的初始值；改 HIL 埠號或 Bus 時才需要讀。

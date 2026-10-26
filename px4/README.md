@@ -1,5 +1,10 @@
 # PX4：版本鎖、原始碼樹、韌體建置
 
+> 用途：PX4 版本鎖、原始碼樹、韌體建置、記憶卡讀取問題、換 PX4 版本。
+> 什麼時候讀：編韌體、做 patch 或自建配方、飛控記錄或 SD 卡讀取有疑問、換 PX4 版本時。
+> 可以跳過：只跑 SITL 或沿用既有配方、FC 記錄也沒有疑問時。
+> 小節：取得原始碼樹（第一次）｜這台機器的原始碼樹在哪裡｜規則｜記憶卡讀取問題（PX4 v1.17.0，要告訴使用者）｜編 FC 韌體｜換 PX4 版本
+
 PX4 原始碼樹很大，**不放在專案裡**，放在專案外。本資料夾記錄用哪個版本、怎麼找到這台機器的原始碼樹、怎麼編 FC 韌體。
 
 | 檔案 | 內容 |
@@ -7,7 +12,7 @@ PX4 原始碼樹很大，**不放在專案裡**，放在專案外。本資料夾
 | [px4_lock.json](px4_lock.json) | 版本鎖：repository、tag、commit、FC 韌體說明、本機位置設定檔在哪 |
 | [check_px4_tree.py](check_px4_tree.py) | 核對這台機器的原始碼樹是否等於版本鎖（commit、沒有修改、submodule）；其他程式也用它找原始碼樹 |
 | [build_firmware.py](build_firmware.py) | 編部署配方的 FC 韌體（`./runbridge build-firmware --release deploy/<配方>` 呼叫它） |
-| [patches/](patches/) | 套在 PX4 上的修正：NuttX 的記憶卡讀取修正（原因見 [AGENTS](../AGENTS.md) 第 1 段）；Cube Orange+ 的 `hil` 板子變體（預設韌體沒有 HITL 要的 `pwm_out_sim`，見 [fc/cubeorangeplus.md](../fc/cubeorangeplus.md)） |
+| [patches/](patches/) | 套在 PX4 上的修正：NuttX 的記憶卡讀取修正（原因見下面「記憶卡讀取問題」）；Cube Orange+ 的 `hil` 板子變體（預設韌體沒有 HITL 要的 `pwm_out_sim`，見 [fc/cubeorangeplus.md](../fc/cubeorangeplus.md)） |
 
 目前鎖定 **v1.17.0**（commit `d6f12ad1c4f70ad3230afd7d86e971421e02fef4`）。SITL、FC 韌體與 HITL 都用這一個版本。
 
@@ -53,6 +58,12 @@ python3 px4/check_px4_tree.py --path <路徑> --remember
 - **配方的 patch 只套用在韌體**：`px4/build_firmware.py` 會套，SITL（`sitl/build_sitl.py`）直接編鎖定的原始碼樹，不讀配方。現有的記憶卡修正只和實體飛控有關；以後 patch 改到控制邏輯時，要先說清楚 SITL 怎麼用到同一份修改，否則兩邊測的不是同一份程式。
 - 樹裡的 `build/` 是建置產物（SITL 編在 `build/px4_sitl_default_sim2hitl`，字尾可用 `SIM2HITL_SITL_SUFFIX` 換），git 忽略，不影響核對。
 
+## 記憶卡讀取問題（PX4 v1.17.0，要告訴使用者）
+
+從 [AGENTS](../AGENTS.md) 搬來，原文不改：
+
+在 Pixhawk 6C（STM32H7）上，v1.17.0 用的 NuttX 在 SD 卡 DMA 讀取完成後沒有清除快取，曾讓自建韌體下載的飛控記錄出現 32 bytes 一段的錯誤（MAVLink 檢查碼正確，看起來像好的）。NuttX 官方修正 82d1285 不在 v1.17.0 裡，專案保存在 `px4/patches/`。自建韌體的配方都要套它（`deploy/01_sdfix` 是範例）；Cube Orange+（STM32H747，SDMMC1）是同一個驅動，它的配方也套（`01_sdfix_cubeorangeplus` 起）；`hitl-run` 會把同一份記錄下載兩次比對、再做嚴格解析，用來抓這類錯誤。原生 `00_native` 至今沒有出現過，但沒有證明不受影響。升級 PX4 版本時，先查新版是否已經包含這個修正。
+
 ## 編 FC 韌體
 
 ```bash
@@ -73,6 +84,6 @@ SITL、韌體與 HITL 要同一個版本，所以是整套一起換。先和使�
 
 1. 問使用者新樹放哪裡（專案外）；舊樹留著，回退要用。下載新的 tag。
 2. 對舊 tag 看差異：uORB 訊息（`msg/`）、固定翼模組（`src/modules/fw_*`）、專案用到的參數、開機腳本與機架（`ROMFS/`）、有配方的 board（`boards/px4/fmu-v6c/`、`boards/cubepilot/cubeorangeplus/`；Cube 的預設韌體是否已經有 `pwm_out_sim`）。兩版的參數名單用 `python3 deploy/check_params.py --compare-firmware 舊.json.xz 新.json.xz` 比。
-3. 查新版是否已經包含 `px4/patches/` 的 NuttX 修正（AGENTS 第 1 段），Cube 的 `hil` 變體 patch 是否還套得上、還需不需要。
+3. 查新版是否已經包含 `px4/patches/` 的 NuttX 修正（見「記憶卡讀取問題」），Cube 的 `hil` 變體 patch 是否還套得上、還需不需要。
 4. 改 `px4_lock.json` 的 `tag`、`commit`、`hitl_firmware.version`；`python3 px4/check_px4_tree.py --path <新樹> --remember` 要 PASS。
 5. 重編 SITL、重跑情境；每個配方重編並用 `deploy-test` 測。`deploy/00_native` 的韌體是 v1.17.0 的成品、不會自己重建，新版的原生基準怎麼取得要和使用者討論。
