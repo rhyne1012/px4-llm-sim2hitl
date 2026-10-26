@@ -8,6 +8,7 @@
 
 - 先讀本檔。README 只讀「這套專案的精神」「流程」「常用指令」「已知問題」「驗證矩陣」；`README.en.md` 是給人看的英文翻譯，不用讀。
 - 其他文件照第 6 節的地圖按任務讀，地圖寫了什麼時候必讀。讀一條規則，要連同它底下的例外一起讀。
+- 長技術文件先看標題或開頭的小節目錄，再讀能回答目前問題的完整小節；驗證帳本先看索引，再讀相關紀錄及更正。不要為了找一筆資料先讀整份。搜尋只用來定位，不能拿命中的一句代替規則、條件與例外；必要資料沒讀到就補讀。
 - 引用規則時寫編號加短標題，例如「S2 恢復與單一 owner」。
 - context 被壓縮或換人接手時：重讀本檔和目前任務的必讀文件；從紀錄找回任務、讀過的版本和還缺的證據，不靠摘要下結論。哪些權限確認過，照 P1 記在 AI 自己的記憶或筆記。
 - 寫回：規則寫回本檔或 `agents/` 對應的檔；事實寫進對應資料夾的 README；驗證與事件寫進 [records/verification.md](records/verification.md)。推翻舊結論時照 E3 回頭改正。
@@ -33,7 +34,7 @@
 
 ### 第 1 段「需求與規格」：最重要，先和人把整個工作流程談完
 
-搬到 [agents/stage1.md](agents/stage1.md)：先聽、1.1 飛機模型與配平、1.2 算法、部署與驗收（PX4 接法、一頁規格）、最小打通，以及本地化、ULog 兩個建議。**談需求、寫一頁規格、換飛機、新算法，或開始自己的專案、fork 時必讀。** 每一項要求由哪一邊回答，留在上面的 C5。
+搬到 [agents/stage1.md](agents/stage1.md)：先聽、1.1 飛機模型與配平、1.2 算法、部署與驗收（PX4 接法、一頁規格）、最小打通，以及本地化、ULog 兩個建議。**談需求、寫一頁規格、換飛機、新算法，或開始自己的專案、fork 時必讀；其中適用的建議要主動告訴使用者，由他決定。** 每一項要求由哪一邊回答，留在上面的 C5。
 
 ### 風
 
@@ -116,7 +117,7 @@ for f in hitl/tests/test_*.py deploy/test_*.py analysis/test_*.py; do n=$(basena
 | HITL、QGC 手動飛、看 HITL 紀錄 | [hitl README](hitl/README.md) | [hitl/commands](hitl/commands/README.md)、[hitl/autotakeoff](hitl/autotakeoff/README.md) |
 | 換飛控、接手用過的飛控 | [fc README](fc/README.md) | fc/<板子>.md、deploy/<配方>/README |
 | 編韌體、patch、換 PX4 版本 | [px4 README](px4/README.md) | — |
-| 引用過去的驗證或數字 | [records/verification.md](records/verification.md) | 證據資料夾 |
+| 引用過去的驗證或數字 | [records/verification.md](records/verification.md) 的索引 → 相關紀錄及更正 | 證據資料夾 |
 | context 被壓縮、換人接手 | 本檔「讀法」 | 目前任務的必讀文件 |
 
 **資料夾**：
