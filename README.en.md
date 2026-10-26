@@ -2,7 +2,7 @@
 
 [繁體中文](README.md) | **English**
 
-> **This is a translation.** The authoritative README is [README.md](README.md) (Traditional Chinese); where the two differ, follow README.md. Translated from README.md with SHA-256 `001ac7132d3da24411ad9ba847ab4855d340559edf7cb849cbd36e6c3ebc2a57`: if `sha256sum README.md` prints something else, this translation is behind. The AI rules ([AGENTS.md](AGENTS.md)) and the folder READMEs are in Traditional Chinese only; an AI agent reads them without trouble.
+> **This is a translation.** The authoritative README is [README.md](README.md) (Traditional Chinese); where the two differ, follow README.md. Translated from README.md with SHA-256 `0206773fb4a17caf4d4b1e25943083b140ccffb72b38f14b0dcf54c6127cd0ba`: if `sha256sum README.md` prints something else, this translation is behind. The AI rules ([AGENTS.md](AGENTS.md)) and the folder READMEs are in Traditional Chinese only; an AI agent reads them without trouble.
 
 Flight-control development kit: MATLAB/Simulink aircraft model → C → SITL (minimal PX4) → custom PX4 firmware → HITL on a real flight controller (Pixhawk). When you develop with an AI, its working rules are in [AGENTS.md](AGENTS.md).
 
@@ -52,6 +52,7 @@ An analogy: every new conversation, your AI is like a colleague on their first d
 3. **HITL (automatic build, flash, test)**
    - 3.1 Manual HITL (`./runbridge` + QGC)
    - 3.2 Exit check: after QGC turns HITL off, confirm the control surfaces get outputs (not done yet)
+4. **Real flight and feedback** (not in the framework yet): switching to flight, flight records, correcting the model from flight data. What a derived project learned going around the loop once, with suggestions: [hitl/sim_to_flight.md](hitl/sim_to_flight.md) (Traditional Chinese).
 
 ## Environment setup (first time)
 
