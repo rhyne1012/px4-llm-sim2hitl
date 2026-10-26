@@ -1,6 +1,6 @@
 # hitl：HITL runtime
 
-載入驗收過的模型 library，以 4 ms 步進執行，經 USB MAVLink 和實體 PX4 做 HITL。入口與常用指令見[根目錄 README](../README.md)（`./runbridge --help` 列出所有動作），安全規則見 [AGENTS](../AGENTS.md) 第 3、4 節。本文只寫 runtime 的位置、規則與測試。衍生專案在這套流程上加過的工具與經驗（框架還沒有這些程式）見 [workflow_lessons.md](workflow_lessons.md)。
+載入驗收過的模型 library，以 4 ms 步進執行，經 USB MAVLink 和實體 PX4 做 HITL。入口與常用指令見[根目錄 README](../README.md)（`./runbridge --help` 列出所有動作），安全規則見 [AGENTS](../AGENTS.md) 第 3、4 節。本文只寫 runtime 的位置、規則與測試。衍生專案在這套流程上加過的工具與經驗見 [workflow_lessons.md](workflow_lessons.md)（大部分框架還沒有，開頭寫了哪些已經搬進來）。
 
 ## 環境
 
