@@ -6,7 +6,7 @@
 
 飛控開發套件：MATLAB/Simulink 飛機模型 → 轉成 C → SITL（精簡 PX4）→ 客製 PX4 韌體 → 實體飛控（Pixhawk）HITL。用 AI 開發時，AI 的工作規則在 [AGENTS.md](AGENTS.md)。
 
-![流程總覽：需求與規格 → SITL 電腦模擬 → HITL 實體飛控；人選下一步，AI 做技術](images/overview.svg)
+![流程總覽：需求與規格 → SITL 電腦模擬 → HITL 實體飛控（→ 實飛與回饋，框架還沒有）；人選下一步，AI 做技術](images/overview.svg)
 
 **範例飛機是 SkySurfer**（固定翼）：`model/`、`hitl/aircraft/skysurfer/`、模型版本名 `skysurfer-…` 與 `SkySurfer_Core` 這些是飛機本身。套件叫 `px4-llm-sim2hitl`：資料夾用全名（Linux 是 `~/.cache/px4-llm-sim2hitl`、`~/.local/share/px4-llm-sim2hitl/venv`、`~/.config/px4-llm-sim2hitl`；這台機器實際的位置用 `./runbridge where` 查），環境變數用短名 `SIM2HITL_*`（環境變數不能有減號）。換成自己的飛機見第 1.1 段。
 
@@ -52,6 +52,7 @@
 3. **HITL（自動編譯、燒錄、測試）**
    - 3.1 手動 HITL（`./runbridge`＋QGC）
    - 3.2 出場檢查：QGC 關掉 HITL 後確認舵面有輸出（尚未完成）
+4. **實飛與回饋**（框架還沒有）：切到實飛、實飛紀錄、用飛行資料改回模型。一個衍生專案走完一圈的經驗與建議見 [hitl/sim_to_flight.md](hitl/sim_to_flight.md)。
 
 ## 環境準備（第一次）
 

@@ -2,11 +2,11 @@
 
 [繁體中文](README.md) | **English**
 
-> **This is a translation.** The authoritative README is [README.md](README.md) (Traditional Chinese); where the two differ, follow README.md. Translated from README.md with SHA-256 `001ac7132d3da24411ad9ba847ab4855d340559edf7cb849cbd36e6c3ebc2a57`: if `sha256sum README.md` prints something else, this translation is behind. The AI rules ([AGENTS.md](AGENTS.md)) and the folder READMEs are in Traditional Chinese only; an AI agent reads them without trouble.
+> **This is a translation.** The authoritative README is [README.md](README.md) (Traditional Chinese); where the two differ, follow README.md. Translated from README.md with SHA-256 `9436f2db1769232e09e0bd427f4737c2f43f412146f5ca7f121b65cebccb5cf4`: if `sha256sum README.md` prints something else, this translation is behind. The AI rules ([AGENTS.md](AGENTS.md)) and the folder READMEs are in Traditional Chinese only; an AI agent reads them without trouble.
 
 Flight-control development kit: MATLAB/Simulink aircraft model → C → SITL (minimal PX4) → custom PX4 firmware → HITL on a real flight controller (Pixhawk). When you develop with an AI, its working rules are in [AGENTS.md](AGENTS.md).
 
-![Overview: requirements & spec → SITL → HITL on the real flight controller; the human picks the next step, the AI does the work](images/overview.svg)
+![Overview: requirements & spec → SITL → HITL on the real flight controller (→ real flight and feedback, not in the framework yet); the human picks the next step, the AI does the work](images/overview.svg)
 
 **The example aircraft is SkySurfer** (fixed-wing): `model/`, `hitl/aircraft/skysurfer/`, the model release names `skysurfer-…` and `SkySurfer_Core` belong to the aircraft. The kit is called `px4-llm-sim2hitl`: folders use the full name (on Linux `~/.cache/px4-llm-sim2hitl`, `~/.local/share/px4-llm-sim2hitl/venv`, `~/.config/px4-llm-sim2hitl`; `./runbridge where` shows this machine's actual locations), environment variables the short name `SIM2HITL_*` (environment variables cannot contain a hyphen). To use your own aircraft, see stage 1.1.
 
@@ -52,6 +52,7 @@ An analogy: every new conversation, your AI is like a colleague on their first d
 3. **HITL (automatic build, flash, test)**
    - 3.1 Manual HITL (`./runbridge` + QGC)
    - 3.2 Exit check: after QGC turns HITL off, confirm the control surfaces get outputs (not done yet)
+4. **Real flight and feedback** (not in the framework yet): switching to flight, flight records, correcting the model from flight data. What a derived project learned going around the loop once, with suggestions: [hitl/sim_to_flight.md](hitl/sim_to_flight.md) (Traditional Chinese).
 
 ## Environment setup (first time)
 

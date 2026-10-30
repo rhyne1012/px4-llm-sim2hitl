@@ -1,6 +1,6 @@
 # 流程與工具：衍生專案的經驗與給框架的建議
 
-更新：2026-10-26。來源是一個衍生專案：SkySurfer 的 attitude doublet 跑道任務，Cube Orange+，PX4 v1.17.0。內容是它在 2026-10-24～26 的實作，以及 Cube HITL 與電腦版 PX4 的飛行。**第 1、2、3、6 點框架目前沒有程式**：是之後移植或自己做時的參考，不是現有功能的說明。第 4、5、7、8 點的工具已經搬進框架（各點的「框架現在有」）。電腦版 PX4 當飛控與 lockstep 的經驗另外寫在 [sitl/sitl_fc_lockstep.md](../sitl/sitl_fc_lockstep.md)。
+更新：2026-10-26（第 6 點後來的做法與實飛之後的想法見 [sim_to_flight.md](sim_to_flight.md)）。來源是一個衍生專案：SkySurfer 的 attitude doublet 跑道任務，Cube Orange+，PX4 v1.17.0。內容是它在 2026-10-24～26 的實作，以及 Cube HITL 與電腦版 PX4 的飛行。**第 1、2、3、6 點框架目前沒有程式**：是之後移植或自己做時的參考，不是現有功能的說明。第 4、5、7、8 點的工具已經搬進框架（各點的「框架現在有」）。電腦版 PX4 當飛控與 lockstep 的經驗另外寫在 [sitl/sitl_fc_lockstep.md](../sitl/sitl_fc_lockstep.md)。
 
 ## 1. 每一趟都留任務紀錄
 
@@ -56,6 +56,8 @@
 - **框架現在有**：[analysis/loop_tracking.py](../analysis/loop_tracking.py) 從航點推出直線段、轉彎與飛行方向，測試把同一個航線移動、旋轉後再算一次。還沒有：紀錄記下分析版本（第 1 點）。
 
 ## 6. HITL 和實飛之間的切換是獨立的一步
+
+**2026-10-26 更新**：衍生專案後來改成 HITL 和實飛用同一份韌體，切換只改參數，不再另外燒實飛韌體。見 [sim_to_flight.md](sim_to_flight.md) 第 1 點；下面是原本的做法。
 
 - **為什麼要另外一個工具**：參數部署只寫進 `SYS_HITL=1` 的 FC（每個值寫之前都核對），重開後也核對 `SYS_HITL=1`，所以它不能關 HITL。
 - **做法**：
