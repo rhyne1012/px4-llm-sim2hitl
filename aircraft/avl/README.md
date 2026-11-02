@@ -40,12 +40,12 @@ build_avl_mat('<job>/result.json', 'model/m_1.mat',  'model/m_1.mat',  'm1');
 
 2026-11-02：修正前再用 AVL MCP v0.5.0 重算 22 個工況（Mach 0.10），和當時的 MAT 最大差約 1e-13（總力矩用穩定軸的 `Cl'tot`、`Cn'tot`，和 importer 一致）。修正後的 MAT 就是這個資料夾現在的幾何算出來的（AVL MCP job `48ce1b06…`，60 工況）。
 
-## 另一份：VSP 氣動表（備用，現在沒用）
+## 另一份：VSP 氣動表
 
-模型裡還有一份 OpenVSP（VSPAERO）算的氣動表 `model/Skysurfer.mat`，由 `model/import_aerostates_vsp.m` 讀；`model/FW_SkySurfer_InitialFunction.m` 的 `useAVL_VSP` 設成 1 才會用。現在是 0（用 AVL），這包所有的檢查、SITL、HITL 都是 AVL。VSP 那份：
+模型裡還有一份 OpenVSP（VSPAERO）算的氣動表 `model/Skysurfer.mat`，由 `model/import_aerostates_vsp.m` 讀；`model/FW_SkySurfer_InitialFunction.m` 的 `useAVL_VSP` 設成 1 才會用。現在是 0（用 AVL），這包所有的檢查、SITL、HITL 都是 AVL。2026-11-02 起這份表由 [aircraft/vsp](../vsp/README.md) 用同一份平面形狀、同樣的工況與參考點重算。下面是**舊表**（2026-11-02 以前）的紀錄：
 
 - 沒有幾何檔，也沒記當初的參考值（翼面積、參考弦長、力矩參考點），不能重算，也不能確認力矩參考點和 AVL 相同；
 - 不知道有沒有用 2026-10-15 量測的升降舵、方向舵尺寸（那次只修了 AVL）；
 - 數字：中性點在參考點後面約 0.41 個參考弦長，升力斜率 5.24／rad（2026-11-02 修正前的 AVL 是約 0.41 個參考弦長、4.62，修正後是約 0.30、約 5.0）；範圍 α −10～15°、β −10、0、10°；另加的阻力修正 `CD_fix_VSP` 0.065（`CD_fix_AVL` 現在是 0.030）。
 
-找到 VSP 幾何時放進 `aircraft/vsp/`，可以和 AVL 互相比對（衍生專案 2026-11-02 另建了一個平面形狀相同、沒有機身的 VSP 模型：升力斜率 4.90–4.95、中性點 49.6–50.4 % MAC，和修正後的 AVL 相近）。要拿掉這份屬於模型改動（`model/` 有變動就要重新產碼）。
+舊表的幾何一直沒找到；新表和 AVL 的比較在 [aircraft/vsp](../vsp/README.md)。要拿掉這份屬於模型改動（`model/` 有變動就要重新產碼）。

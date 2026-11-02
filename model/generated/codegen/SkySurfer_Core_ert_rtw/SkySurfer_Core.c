@@ -9,7 +9,7 @@
  *
  * Model version                  : 14.15
  * Simulink Coder version         : 26.2 (R2026b) 22-May-2026
- * C/C++ source code generated on : Mon Nov  2 15:12:46 2026
+ * C/C++ source code generated on : Mon Nov  2 20:02:30 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: Intel->x86-64 (Linux 64)
@@ -3630,7 +3630,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     rtb_MatrixMultiply[0U] = frac;
     bpIndices[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     rtb_MatrixMultiply[1U] = frac;
-    bpIndices[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     rtb_MatrixMultiply[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices, rtb_MatrixMultiply,
       SkySurfer_Core_P.CD_base_tableData, SkySurfer_Core_P.CD_base_dimSizes);
@@ -3643,7 +3643,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions[0U] = frac;
     bpIndices_0[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions[1U] = frac;
-    bpIndices_0[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_0[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions[2U] = frac;
     rtb_Product_op = intrp3d_l_pw(bpIndices_0, fractions,
       SkySurfer_Core_P.CD_dp_tableData, SkySurfer_Core_P.CD_dp_dimSizes);
@@ -3662,7 +3662,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_0[0U] = frac;
     bpIndices_1[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_0[1U] = frac;
-    bpIndices_1[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_1[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_0[2U] = frac;
     rtb_Product_op = intrp3d_l_pw(bpIndices_1, fractions_0,
       SkySurfer_Core_P.CD_dq_tableData, SkySurfer_Core_P.CD_dq_dimSizes);
@@ -3681,7 +3681,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_1[0U] = frac;
     bpIndices_2[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_1[1U] = frac;
-    bpIndices_2[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_2[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_1[2U] = frac;
     rtb_Product_op = intrp3d_l_pw(bpIndices_2, fractions_1,
       SkySurfer_Core_P.CD_dr_tableData, SkySurfer_Core_P.CD_dr_dimSizes);
@@ -3704,7 +3704,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_2[0U] = frac;
     bpIndices_3[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_2[1U] = frac;
-    bpIndices_3[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_3[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_2[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_3, fractions_2,
       SkySurfer_Core_P.CD_dailR_tableData, SkySurfer_Core_P.CD_dailR_dimSizes);
@@ -3731,7 +3731,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_3[0U] = frac;
     bpIndices_4[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_3[1U] = frac;
-    bpIndices_4[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_4[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_3[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_4, fractions_3,
       SkySurfer_Core_P.CD_dailL_tableData, SkySurfer_Core_P.CD_dailL_dimSizes);
@@ -3758,7 +3758,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_4[0U] = frac;
     bpIndices_5[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_4[1U] = frac;
-    bpIndices_5[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_5[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_4[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_5, fractions_4,
       SkySurfer_Core_P.CD_dele_tableData, SkySurfer_Core_P.CD_dele_dimSizes);
@@ -3785,7 +3785,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_5[0U] = frac;
     bpIndices_6[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_5[1U] = frac;
-    bpIndices_6[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_6[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_5[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_6, fractions_5,
       SkySurfer_Core_P.CD_drud_tableData, SkySurfer_Core_P.CD_drud_dimSizes);
@@ -3815,7 +3815,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_6[0U] = frac;
     bpIndices_7[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_6[1U] = frac;
-    bpIndices_7[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_7[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_6[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_7, fractions_6,
       SkySurfer_Core_P.CS_base_tableData, SkySurfer_Core_P.CS_base_dimSizes);
@@ -3828,7 +3828,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_7[0U] = frac;
     bpIndices_8[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_7[1U] = frac;
-    bpIndices_8[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_8[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_7[2U] = frac;
     rtb_jxi = intrp3d_l_pw(bpIndices_8, fractions_7,
       SkySurfer_Core_P.CS_dp_tableData, SkySurfer_Core_P.CS_dp_dimSizes);
@@ -3846,7 +3846,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_8[0U] = frac;
     bpIndices_9[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_8[1U] = frac;
-    bpIndices_9[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_9[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_8[2U] = frac;
     rtb_jxi = intrp3d_l_pw(bpIndices_9, fractions_8,
       SkySurfer_Core_P.CS_dq_tableData, SkySurfer_Core_P.CS_dq_dimSizes);
@@ -3864,7 +3864,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_9[0U] = frac;
     bpIndices_a[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_9[1U] = frac;
-    bpIndices_a[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_a[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_9[2U] = frac;
     rtb_jxi = intrp3d_l_pw(bpIndices_a, fractions_9,
       SkySurfer_Core_P.CS_dr_tableData, SkySurfer_Core_P.CS_dr_dimSizes);
@@ -3887,7 +3887,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_a[0U] = frac;
     bpIndices_b[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_a[1U] = frac;
-    bpIndices_b[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_b[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_a[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_b, fractions_a,
       SkySurfer_Core_P.CS_dailR_tableData, SkySurfer_Core_P.CS_dailR_dimSizes);
@@ -3906,7 +3906,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_b[0U] = frac;
     bpIndices_c[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_b[1U] = frac;
-    bpIndices_c[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_c[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_b[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_c, fractions_b,
       SkySurfer_Core_P.CS_dailL_tableData, SkySurfer_Core_P.CS_dailL_dimSizes);
@@ -3925,7 +3925,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_c[0U] = frac;
     bpIndices_d[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_c[1U] = frac;
-    bpIndices_d[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_d[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_c[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_d, fractions_c,
       SkySurfer_Core_P.CS_dele_tableData, SkySurfer_Core_P.CS_dele_dimSizes);
@@ -3944,7 +3944,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_d[0U] = frac;
     bpIndices_e[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_d[1U] = frac;
-    bpIndices_e[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_e[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_d[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_e, fractions_d,
       SkySurfer_Core_P.CS_drud_tableData, SkySurfer_Core_P.CS_drud_dimSizes);
@@ -3966,7 +3966,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_e[0U] = frac;
     bpIndices_f[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_e[1U] = frac;
-    bpIndices_f[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_f[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_e[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_f, fractions_e,
       SkySurfer_Core_P.CL_base_tableData, SkySurfer_Core_P.CL_base_dimSizes);
@@ -3979,7 +3979,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_f[0U] = frac;
     bpIndices_g[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_f[1U] = frac;
-    bpIndices_g[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_g[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_f[2U] = frac;
     rtb_jxi = intrp3d_l_pw(bpIndices_g, fractions_f,
       SkySurfer_Core_P.CL_dp_tableData, SkySurfer_Core_P.CL_dp_dimSizes);
@@ -3997,7 +3997,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_g[0U] = frac;
     bpIndices_h[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_g[1U] = frac;
-    bpIndices_h[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_h[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_g[2U] = frac;
     rtb_jxi = intrp3d_l_pw(bpIndices_h, fractions_g,
       SkySurfer_Core_P.CL_dq_tableData, SkySurfer_Core_P.CL_dq_dimSizes);
@@ -4016,7 +4016,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_h[0U] = frac;
     bpIndices_i[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_h[1U] = frac;
-    bpIndices_i[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_i[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_h[2U] = frac;
     rtb_jxi = intrp3d_l_pw(bpIndices_i, fractions_h,
       SkySurfer_Core_P.CL_dr_tableData, SkySurfer_Core_P.CL_dr_dimSizes);
@@ -4039,7 +4039,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_i[0U] = frac;
     bpIndices_j[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_i[1U] = frac;
-    bpIndices_j[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_j[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_i[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_j, fractions_i,
       SkySurfer_Core_P.CL_dailR_tableData, SkySurfer_Core_P.CL_dailR_dimSizes);
@@ -4058,7 +4058,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_j[0U] = frac;
     bpIndices_k[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_j[1U] = frac;
-    bpIndices_k[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_k[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_j[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_k, fractions_j,
       SkySurfer_Core_P.CL_dailL_tableData, SkySurfer_Core_P.CL_dailL_dimSizes);
@@ -4077,7 +4077,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_k[0U] = frac;
     bpIndices_l[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_k[1U] = frac;
-    bpIndices_l[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_l[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_k[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_l, fractions_k,
       SkySurfer_Core_P.CL_dele_tableData, SkySurfer_Core_P.CL_dele_dimSizes);
@@ -4096,7 +4096,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_l[0U] = frac;
     bpIndices_m[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_l[1U] = frac;
-    bpIndices_m[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_m[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_l[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_m, fractions_l,
       SkySurfer_Core_P.CL_drud_tableData, SkySurfer_Core_P.CL_drud_dimSizes);
@@ -4118,7 +4118,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_m[0U] = frac;
     bpIndices_n[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_m[1U] = frac;
-    bpIndices_n[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_n[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_m[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_n, fractions_m,
       SkySurfer_Core_P.CMl_base_tableData, SkySurfer_Core_P.CMl_base_dimSizes);
@@ -4131,7 +4131,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_n[0U] = frac;
     bpIndices_o[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_n[1U] = frac;
-    bpIndices_o[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_o[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_n[2U] = frac;
     rtb_jxi = intrp3d_l_pw(bpIndices_o, fractions_n,
       SkySurfer_Core_P.CMl_dp_tableData, SkySurfer_Core_P.CMl_dp_dimSizes);
@@ -4149,7 +4149,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_o[0U] = frac;
     bpIndices_p[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_o[1U] = frac;
-    bpIndices_p[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_p[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_o[2U] = frac;
     rtb_jxi = intrp3d_l_pw(bpIndices_p, fractions_o,
       SkySurfer_Core_P.CMl_dq_tableData, SkySurfer_Core_P.CMl_dq_dimSizes);
@@ -4168,7 +4168,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_p[0U] = frac;
     bpIndices_q[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_p[1U] = frac;
-    bpIndices_q[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_q[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_p[2U] = frac;
     rtb_jxi = intrp3d_l_pw(bpIndices_q, fractions_p,
       SkySurfer_Core_P.CMl_dr_tableData, SkySurfer_Core_P.CMl_dr_dimSizes);
@@ -4191,7 +4191,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_q[0U] = frac;
     bpIndices_r[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_q[1U] = frac;
-    bpIndices_r[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_r[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_q[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_r, fractions_q,
       SkySurfer_Core_P.CMl_dailR_tableData, SkySurfer_Core_P.CMl_dailR_dimSizes);
@@ -4210,7 +4210,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_r[0U] = frac;
     bpIndices_s[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_r[1U] = frac;
-    bpIndices_s[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_s[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_r[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_s, fractions_r,
       SkySurfer_Core_P.CMl_dailL_tableData, SkySurfer_Core_P.CMl_dailL_dimSizes);
@@ -4229,7 +4229,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_s[0U] = frac;
     bpIndices_t[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_s[1U] = frac;
-    bpIndices_t[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_t[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_s[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_t, fractions_s,
       SkySurfer_Core_P.CMl_dele_tableData, SkySurfer_Core_P.CMl_dele_dimSizes);
@@ -4248,7 +4248,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_t[0U] = frac;
     bpIndices_u[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_t[1U] = frac;
-    bpIndices_u[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_u[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_t[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_u, fractions_t,
       SkySurfer_Core_P.CMl_drud_tableData, SkySurfer_Core_P.CMl_drud_dimSizes);
@@ -4270,7 +4270,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_u[0U] = frac;
     bpIndices_v[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_u[1U] = frac;
-    bpIndices_v[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_v[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_u[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_v, fractions_u,
       SkySurfer_Core_P.CMm_base_tableData, SkySurfer_Core_P.CMm_base_dimSizes);
@@ -4283,7 +4283,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_v[0U] = frac;
     bpIndices_w[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_v[1U] = frac;
-    bpIndices_w[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_w[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_v[2U] = frac;
     rtb_jxi = intrp3d_l_pw(bpIndices_w, fractions_v,
       SkySurfer_Core_P.CMm_dp_tableData, SkySurfer_Core_P.CMm_dp_dimSizes);
@@ -4301,7 +4301,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_w[0U] = frac;
     bpIndices_x[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_w[1U] = frac;
-    bpIndices_x[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_x[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_w[2U] = frac;
     rtb_jxi = intrp3d_l_pw(bpIndices_x, fractions_w,
       SkySurfer_Core_P.CMm_dq_tableData, SkySurfer_Core_P.CMm_dq_dimSizes);
@@ -4320,7 +4320,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_x[0U] = frac;
     bpIndices_y[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_x[1U] = frac;
-    bpIndices_y[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_y[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_x[2U] = frac;
     rtb_jxi = intrp3d_l_pw(bpIndices_y, fractions_x,
       SkySurfer_Core_P.CMm_dr_tableData, SkySurfer_Core_P.CMm_dr_dimSizes);
@@ -4343,7 +4343,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_y[0U] = frac;
     bpIndices_z[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_y[1U] = frac;
-    bpIndices_z[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_z[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_y[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_z, fractions_y,
       SkySurfer_Core_P.CMm_dailR_tableData, SkySurfer_Core_P.CMm_dailR_dimSizes);
@@ -4362,7 +4362,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_z[0U] = frac;
     bpIndices_10[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_z[1U] = frac;
-    bpIndices_10[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_10[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_z[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_10, fractions_z,
       SkySurfer_Core_P.CMm_dailL_tableData, SkySurfer_Core_P.CMm_dailL_dimSizes);
@@ -4381,7 +4381,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_10[0U] = frac;
     bpIndices_11[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_10[1U] = frac;
-    bpIndices_11[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_11[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_10[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_11, fractions_10,
       SkySurfer_Core_P.CMm_dele_tableData, SkySurfer_Core_P.CMm_dele_dimSizes);
@@ -4399,7 +4399,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_11[0U] = frac;
     bpIndices_12[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_11[1U] = frac;
-    bpIndices_12[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_12[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_11[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_12, fractions_11,
       SkySurfer_Core_P.CMm_drud_tableData, SkySurfer_Core_P.CMm_drud_dimSizes);
@@ -4421,7 +4421,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_12[0U] = frac;
     bpIndices_13[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_12[1U] = frac;
-    bpIndices_13[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_13[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_12[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_13, fractions_12,
       SkySurfer_Core_P.CMn_base_tableData, SkySurfer_Core_P.CMn_base_dimSizes);
@@ -4434,7 +4434,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_13[0U] = frac;
     bpIndices_14[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_13[1U] = frac;
-    bpIndices_14[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_14[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_13[2U] = frac;
     rtb_jxi = intrp3d_l_pw(bpIndices_14, fractions_13,
       SkySurfer_Core_P.CMn_dp_tableData, SkySurfer_Core_P.CMn_dp_dimSizes);
@@ -4453,7 +4453,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_14[0U] = frac;
     bpIndices_15[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_14[1U] = frac;
-    bpIndices_15[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_15[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_14[2U] = frac;
     rtb_jxi = intrp3d_l_pw(bpIndices_15, fractions_14,
       SkySurfer_Core_P.CMn_dq_tableData, SkySurfer_Core_P.CMn_dq_dimSizes);
@@ -4472,7 +4472,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_15[0U] = frac;
     bpIndices_16[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_15[1U] = frac;
-    bpIndices_16[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_16[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_15[2U] = frac;
     rtb_jxi = intrp3d_l_pw(bpIndices_16, fractions_15,
       SkySurfer_Core_P.CMn_dr_tableData, SkySurfer_Core_P.CMn_dr_dimSizes);
@@ -4495,7 +4495,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_16[0U] = frac;
     bpIndices_17[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_16[1U] = frac;
-    bpIndices_17[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_17[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_16[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_17, fractions_16,
       SkySurfer_Core_P.CMn_dailR_tableData, SkySurfer_Core_P.CMn_dailR_dimSizes);
@@ -4513,7 +4513,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_17[0U] = frac;
     bpIndices_18[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_17[1U] = frac;
-    bpIndices_18[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_18[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_17[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_18, fractions_17,
       SkySurfer_Core_P.CMn_dailL_tableData, SkySurfer_Core_P.CMn_dailL_dimSizes);
@@ -4532,7 +4532,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_18[0U] = frac;
     bpIndices_19[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_18[1U] = frac;
-    bpIndices_19[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_19[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_18[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_19, fractions_18,
       SkySurfer_Core_P.CMn_dele_tableData, SkySurfer_Core_P.CMn_dele_dimSizes);
@@ -4551,7 +4551,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     fractions_19[0U] = frac;
     bpIndices_1a[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_19[1U] = frac;
-    bpIndices_1a[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 2U, &frac);
+    bpIndices_1a[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_19[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices_1a, fractions_19,
       SkySurfer_Core_P.CMn_drud_tableData, SkySurfer_Core_P.CMn_drud_dimSizes);

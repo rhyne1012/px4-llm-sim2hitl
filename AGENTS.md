@@ -127,7 +127,7 @@ for f in hitl/tests/test_*.py deploy/test_*.py analysis/test_*.py; do n=$(basena
 | `images/` | README 用的圖（`overview.svg`）與嵌字工具 `embed_fonts.py` |
 | `platforms/` | 各平台的理解（目前是 `macos.md`）：和 Ubuntu 不同的平台行為、怎麼確認；不是安裝腳本 |
 | `fc/` | 各飛控的理解（目前是 `cubeorangeplus.md`）：換一塊飛控要查的事、接手用過的飛控、和 6C 不同的地方；不是安裝腳本 |
-| `aircraft/` | 飛機的氣動來源：`avl/` 是產生氣動表的 AVL 幾何、質量檔與 `run_table.py`（檢查幾何、重算、轉表；不在 `model/` 裡，改它不影響模型版本）；`thrust/` 是推力隨空速與阻力修正的出處 |
+| `aircraft/` | 飛機的氣動來源：`avl/` 是產生氣動表的 AVL 幾何、質量檔與 `run_table.py`（檢查幾何、重算、轉表；不在 `model/` 裡，改它不影響模型版本）；`vsp/` 是 VSP 幾何與 `run_table.py`（VSPAERO 穩定性導數 → 模型的 VSP 表 `model/Skysurfer.mat`，`useAVL_VSP = 1` 才用；也和 AVL 比）；`thrust/` 是推力隨空速與阻力修正的出處 |
 | `plant/` | plant 核心包裝、C 真值、C 感測器、各自的檢查程式、錄製的參考資料 |
 | `sitl/` | 精簡 PX4 的 plant 模組 `plant_sim`、情境、配平、ULog 重播；`sitl_fc_lockstep.md` 是衍生專案用電腦版 PX4 當飛控與 lockstep 的經驗與建議（框架還沒有這些程式） |
 | `modules/` | 自己的 PX4 模組（同一份原始碼編進 SITL 與韌體；`guidance_template` 是範例，見它的 README「照著做一個自己的模組」）。韌體只編配方 `recipe.modules` 列的模組；SITL 要在 `sitl/px4_external/src/` 加包裝並列進那裡的 `CMakeLists.txt` |

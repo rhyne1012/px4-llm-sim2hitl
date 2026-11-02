@@ -9,7 +9,7 @@
  *
  * Model version                  : 14.15
  * Simulink Coder version         : 26.2 (R2026b) 22-May-2026
- * C/C++ source code generated on : Mon Nov  2 15:12:46 2026
+ * C/C++ source code generated on : Mon Nov  2 20:02:30 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: Intel->x86-64 (Linux 64)
@@ -498,7 +498,7 @@ struct P_SkySurfer_Core_T_ {
                                         *   '<S97>/CS_dr'
                                         *   '<S97>/CS_drud'
                                         */
-  double AoS[3];                       /* Variable: AoS
+  double AoS[5];                       /* Variable: AoS
                                         * Referenced by:
                                         *   '<S91>/CD_base'
                                         *   '<S91>/CD_dailL'
@@ -1096,37 +1096,37 @@ struct P_SkySurfer_Core_T_ {
   double M_aero_Y0;                    /* Computed Parameter: M_aero_Y0
                                         * Referenced by: '<S7>/M_aero'
                                         */
-  double CD_base_tableData[36];        /* Expression: C_wgrp.CD_wgrp{1}
+  double CD_base_tableData[60];        /* Expression: C_wgrp.CD_wgrp{1}
                                         * Referenced by: '<S91>/CD_base'
                                         */
-  double CD_dp_tableData[36];          /* Expression: C_wgrp.CD_wgrp{4}
+  double CD_dp_tableData[60];          /* Expression: C_wgrp.CD_wgrp{4}
                                         * Referenced by: '<S91>/CD_dp'
                                         */
-  double CD_dq_tableData[36];          /* Expression: C_wgrp.CD_wgrp{5}
+  double CD_dq_tableData[60];          /* Expression: C_wgrp.CD_wgrp{5}
                                         * Referenced by: '<S91>/CD_dq'
                                         */
-  double CD_dr_tableData[36];          /* Expression: C_wgrp.CD_wgrp{6}
+  double CD_dr_tableData[60];          /* Expression: C_wgrp.CD_wgrp{6}
                                         * Referenced by: '<S91>/CD_dr'
                                         */
-  double CD_dailR_tableData[36];       /* Expression: C_wgrp.CD_wgrp{9}
+  double CD_dailR_tableData[60];       /* Expression: C_wgrp.CD_wgrp{9}
                                         * Referenced by: '<S91>/CD_dailR'
                                         */
   double Gain1_Gain;                   /* Expression: pi/180
                                         * Referenced by: '<S104>/Gain1'
                                         */
-  double CD_dailL_tableData[36];       /* Expression: C_wgrp.CD_wgrp{10}
+  double CD_dailL_tableData[60];       /* Expression: C_wgrp.CD_wgrp{10}
                                         * Referenced by: '<S91>/CD_dailL'
                                         */
   double Gain1_Gain_h;                 /* Expression: pi/180
                                         * Referenced by: '<S107>/Gain1'
                                         */
-  double CD_dele_tableData[36];        /* Expression: C_wgrp.CD_wgrp{11}
+  double CD_dele_tableData[60];        /* Expression: C_wgrp.CD_wgrp{11}
                                         * Referenced by: '<S91>/CD_dele'
                                         */
   double Gain1_Gain_d;                 /* Expression: pi/180
                                         * Referenced by: '<S105>/Gain1'
                                         */
-  double CD_drud_tableData[36];        /* Expression: C_wgrp.CD_wgrp{12}
+  double CD_drud_tableData[60];        /* Expression: C_wgrp.CD_wgrp{12}
                                         * Referenced by: '<S91>/CD_drud'
                                         */
   double Gain15_Gain;                  /* Expression: -1
@@ -1135,37 +1135,37 @@ struct P_SkySurfer_Core_T_ {
   double Gain1_Gain_dv;                /* Expression: pi/180
                                         * Referenced by: '<S106>/Gain1'
                                         */
-  double CS_base_tableData[36];        /* Expression: C_wgrp.CS_wgrp{1}
+  double CS_base_tableData[60];        /* Expression: C_wgrp.CS_wgrp{1}
                                         * Referenced by: '<S97>/CS_base'
                                         */
-  double CS_dp_tableData[36];          /* Expression: C_wgrp.CS_wgrp{4}
+  double CS_dp_tableData[60];          /* Expression: C_wgrp.CS_wgrp{4}
                                         * Referenced by: '<S97>/CS_dp'
                                         */
-  double CS_dq_tableData[36];          /* Expression: C_wgrp.CS_wgrp{5}
+  double CS_dq_tableData[60];          /* Expression: C_wgrp.CS_wgrp{5}
                                         * Referenced by: '<S97>/CS_dq'
                                         */
-  double CS_dr_tableData[36];          /* Expression: C_wgrp.CS_wgrp{6}
+  double CS_dr_tableData[60];          /* Expression: C_wgrp.CS_wgrp{6}
                                         * Referenced by: '<S97>/CS_dr'
                                         */
-  double CS_dailR_tableData[36];       /* Expression: C_wgrp.CS_wgrp{9}
+  double CS_dailR_tableData[60];       /* Expression: C_wgrp.CS_wgrp{9}
                                         * Referenced by: '<S97>/CS_dailR'
                                         */
   double Gain1_Gain_o;                 /* Expression: pi/180
                                         * Referenced by: '<S124>/Gain1'
                                         */
-  double CS_dailL_tableData[36];       /* Expression: C_wgrp.CS_wgrp{10}
+  double CS_dailL_tableData[60];       /* Expression: C_wgrp.CS_wgrp{10}
                                         * Referenced by: '<S97>/CS_dailL'
                                         */
   double Gain1_Gain_b;                 /* Expression: pi/180
                                         * Referenced by: '<S127>/Gain1'
                                         */
-  double CS_dele_tableData[36];        /* Expression: C_wgrp.CS_wgrp{11}
+  double CS_dele_tableData[60];        /* Expression: C_wgrp.CS_wgrp{11}
                                         * Referenced by: '<S97>/CS_dele'
                                         */
   double Gain1_Gain_j;                 /* Expression: pi/180
                                         * Referenced by: '<S125>/Gain1'
                                         */
-  double CS_drud_tableData[36];        /* Expression: C_wgrp.CS_wgrp{12}
+  double CS_drud_tableData[60];        /* Expression: C_wgrp.CS_wgrp{12}
                                         * Referenced by: '<S97>/CS_drud'
                                         */
   double Gain10_Gain;                  /* Expression: -1
@@ -1174,37 +1174,37 @@ struct P_SkySurfer_Core_T_ {
   double Gain1_Gain_ju;                /* Expression: pi/180
                                         * Referenced by: '<S126>/Gain1'
                                         */
-  double CL_base_tableData[36];        /* Expression: C_wgrp.CL_wgrp{1}
+  double CL_base_tableData[60];        /* Expression: C_wgrp.CL_wgrp{1}
                                         * Referenced by: '<S93>/CL_base'
                                         */
-  double CL_dp_tableData[36];          /* Expression: C_wgrp.CL_wgrp{4}
+  double CL_dp_tableData[60];          /* Expression: C_wgrp.CL_wgrp{4}
                                         * Referenced by: '<S93>/CL_dp'
                                         */
-  double CL_dq_tableData[36];          /* Expression: C_wgrp.CL_wgrp{5}
+  double CL_dq_tableData[60];          /* Expression: C_wgrp.CL_wgrp{5}
                                         * Referenced by: '<S93>/CL_dq'
                                         */
-  double CL_dr_tableData[36];          /* Expression: C_wgrp.CL_wgrp{6}
+  double CL_dr_tableData[60];          /* Expression: C_wgrp.CL_wgrp{6}
                                         * Referenced by: '<S93>/CL_dr'
                                         */
-  double CL_dailR_tableData[36];       /* Expression: C_wgrp.CL_wgrp{9}
+  double CL_dailR_tableData[60];       /* Expression: C_wgrp.CL_wgrp{9}
                                         * Referenced by: '<S93>/CL_dailR'
                                         */
   double Gain1_Gain_bf;                /* Expression: pi/180
                                         * Referenced by: '<S108>/Gain1'
                                         */
-  double CL_dailL_tableData[36];       /* Expression: C_wgrp.CL_wgrp{10}
+  double CL_dailL_tableData[60];       /* Expression: C_wgrp.CL_wgrp{10}
                                         * Referenced by: '<S93>/CL_dailL'
                                         */
   double Gain1_Gain_g;                 /* Expression: pi/180
                                         * Referenced by: '<S111>/Gain1'
                                         */
-  double CL_dele_tableData[36];        /* Expression: C_wgrp.CL_wgrp{11}
+  double CL_dele_tableData[60];        /* Expression: C_wgrp.CL_wgrp{11}
                                         * Referenced by: '<S93>/CL_dele'
                                         */
   double Gain1_Gain_n;                 /* Expression: pi/180
                                         * Referenced by: '<S109>/Gain1'
                                         */
-  double CL_drud_tableData[36];        /* Expression: C_wgrp.CL_wgrp{12}
+  double CL_drud_tableData[60];        /* Expression: C_wgrp.CL_wgrp{12}
                                         * Referenced by: '<S93>/CL_drud'
                                         */
   double Gain11_Gain;                  /* Expression: -1
@@ -1213,37 +1213,37 @@ struct P_SkySurfer_Core_T_ {
   double Gain1_Gain_p;                 /* Expression: pi/180
                                         * Referenced by: '<S110>/Gain1'
                                         */
-  double CMl_base_tableData[36];       /* Expression: C_wgrp.CMl_wgrp{1}
+  double CMl_base_tableData[60];       /* Expression: C_wgrp.CMl_wgrp{1}
                                         * Referenced by: '<S94>/CMl_base'
                                         */
-  double CMl_dp_tableData[36];         /* Expression: C_wgrp.CMl_wgrp{4}
+  double CMl_dp_tableData[60];         /* Expression: C_wgrp.CMl_wgrp{4}
                                         * Referenced by: '<S94>/CMl_dp'
                                         */
-  double CMl_dq_tableData[36];         /* Expression: C_wgrp.CMl_wgrp{5}
+  double CMl_dq_tableData[60];         /* Expression: C_wgrp.CMl_wgrp{5}
                                         * Referenced by: '<S94>/CMl_dq'
                                         */
-  double CMl_dr_tableData[36];         /* Expression: C_wgrp.CMl_wgrp{6}
+  double CMl_dr_tableData[60];         /* Expression: C_wgrp.CMl_wgrp{6}
                                         * Referenced by: '<S94>/CMl_dr'
                                         */
-  double CMl_dailR_tableData[36];      /* Expression: C_wgrp.CMl_wgrp{9}
+  double CMl_dailR_tableData[60];      /* Expression: C_wgrp.CMl_wgrp{9}
                                         * Referenced by: '<S94>/CMl_dailR'
                                         */
   double Gain1_Gain_ox;                /* Expression: pi/180
                                         * Referenced by: '<S112>/Gain1'
                                         */
-  double CMl_dailL_tableData[36];      /* Expression: C_wgrp.CMl_wgrp{10}
+  double CMl_dailL_tableData[60];      /* Expression: C_wgrp.CMl_wgrp{10}
                                         * Referenced by: '<S94>/CMl_dailL'
                                         */
   double Gain1_Gain_l;                 /* Expression: pi/180
                                         * Referenced by: '<S115>/Gain1'
                                         */
-  double CMl_dele_tableData[36];       /* Expression: C_wgrp.CMl_wgrp{11}
+  double CMl_dele_tableData[60];       /* Expression: C_wgrp.CMl_wgrp{11}
                                         * Referenced by: '<S94>/CMl_dele'
                                         */
   double Gain1_Gain_pp;                /* Expression: pi/180
                                         * Referenced by: '<S113>/Gain1'
                                         */
-  double CMl_drud_tableData[36];       /* Expression: C_wgrp.CMl_wgrp{12}
+  double CMl_drud_tableData[60];       /* Expression: C_wgrp.CMl_wgrp{12}
                                         * Referenced by: '<S94>/CMl_drud'
                                         */
   double Gain4_Gain;                   /* Expression: -1
@@ -1252,37 +1252,37 @@ struct P_SkySurfer_Core_T_ {
   double Gain1_Gain_dh;                /* Expression: pi/180
                                         * Referenced by: '<S114>/Gain1'
                                         */
-  double CMm_base_tableData[36];       /* Expression: C_wgrp.CMm_wgrp{1}
+  double CMm_base_tableData[60];       /* Expression: C_wgrp.CMm_wgrp{1}
                                         * Referenced by: '<S95>/CMm_base'
                                         */
-  double CMm_dp_tableData[36];         /* Expression: C_wgrp.CMm_wgrp{4}
+  double CMm_dp_tableData[60];         /* Expression: C_wgrp.CMm_wgrp{4}
                                         * Referenced by: '<S95>/CMm_dp'
                                         */
-  double CMm_dq_tableData[36];         /* Expression: C_wgrp.CMm_wgrp{5}
+  double CMm_dq_tableData[60];         /* Expression: C_wgrp.CMm_wgrp{5}
                                         * Referenced by: '<S95>/CMm_dq'
                                         */
-  double CMm_dr_tableData[36];         /* Expression: C_wgrp.CMm_wgrp{6}
+  double CMm_dr_tableData[60];         /* Expression: C_wgrp.CMm_wgrp{6}
                                         * Referenced by: '<S95>/CMm_dr'
                                         */
-  double CMm_dailR_tableData[36];      /* Expression: C_wgrp.CMm_wgrp{9}
+  double CMm_dailR_tableData[60];      /* Expression: C_wgrp.CMm_wgrp{9}
                                         * Referenced by: '<S95>/CMm_dailR'
                                         */
   double Gain1_Gain_db;                /* Expression: pi/180
                                         * Referenced by: '<S116>/Gain1'
                                         */
-  double CMm_dailL_tableData[36];      /* Expression: C_wgrp.CMm_wgrp{10}
+  double CMm_dailL_tableData[60];      /* Expression: C_wgrp.CMm_wgrp{10}
                                         * Referenced by: '<S95>/CMm_dailL'
                                         */
   double Gain1_Gain_ba;                /* Expression: pi/180
                                         * Referenced by: '<S119>/Gain1'
                                         */
-  double CMm_dele_tableData[36];       /* Expression: C_wgrp.CMm_wgrp{11}
+  double CMm_dele_tableData[60];       /* Expression: C_wgrp.CMm_wgrp{11}
                                         * Referenced by: '<S95>/CMm_dele'
                                         */
   double Gain1_Gain_c;                 /* Expression: pi/180
                                         * Referenced by: '<S117>/Gain1'
                                         */
-  double CMm_drud_tableData[36];       /* Expression: C_wgrp.CMm_wgrp{12}
+  double CMm_drud_tableData[60];       /* Expression: C_wgrp.CMm_wgrp{12}
                                         * Referenced by: '<S95>/CMm_drud'
                                         */
   double Gain9_Gain;                   /* Expression: -1
@@ -1291,37 +1291,37 @@ struct P_SkySurfer_Core_T_ {
   double Gain1_Gain_f;                 /* Expression: pi/180
                                         * Referenced by: '<S118>/Gain1'
                                         */
-  double CMn_base_tableData[36];       /* Expression: C_wgrp.CMn_wgrp{1}
+  double CMn_base_tableData[60];       /* Expression: C_wgrp.CMn_wgrp{1}
                                         * Referenced by: '<S96>/CMn_base'
                                         */
-  double CMn_dp_tableData[36];         /* Expression: C_wgrp.CMn_wgrp{4}
+  double CMn_dp_tableData[60];         /* Expression: C_wgrp.CMn_wgrp{4}
                                         * Referenced by: '<S96>/CMn_dp'
                                         */
-  double CMn_dq_tableData[36];         /* Expression: C_wgrp.CMn_wgrp{5}
+  double CMn_dq_tableData[60];         /* Expression: C_wgrp.CMn_wgrp{5}
                                         * Referenced by: '<S96>/CMn_dq'
                                         */
-  double CMn_dr_tableData[36];         /* Expression: C_wgrp.CMn_wgrp{6}
+  double CMn_dr_tableData[60];         /* Expression: C_wgrp.CMn_wgrp{6}
                                         * Referenced by: '<S96>/CMn_dr'
                                         */
-  double CMn_dailR_tableData[36];      /* Expression: C_wgrp.CMn_wgrp{9}
+  double CMn_dailR_tableData[60];      /* Expression: C_wgrp.CMn_wgrp{9}
                                         * Referenced by: '<S96>/CMn_dailR'
                                         */
   double Gain1_Gain_e;                 /* Expression: pi/180
                                         * Referenced by: '<S120>/Gain1'
                                         */
-  double CMn_dailL_tableData[36];      /* Expression: C_wgrp.CMn_wgrp{10}
+  double CMn_dailL_tableData[60];      /* Expression: C_wgrp.CMn_wgrp{10}
                                         * Referenced by: '<S96>/CMn_dailL'
                                         */
   double Gain1_Gain_ps;                /* Expression: pi/180
                                         * Referenced by: '<S123>/Gain1'
                                         */
-  double CMn_dele_tableData[36];       /* Expression: C_wgrp.CMn_wgrp{11}
+  double CMn_dele_tableData[60];       /* Expression: C_wgrp.CMn_wgrp{11}
                                         * Referenced by: '<S96>/CMn_dele'
                                         */
   double Gain1_Gain_os;                /* Expression: pi/180
                                         * Referenced by: '<S121>/Gain1'
                                         */
-  double CMn_drud_tableData[36];       /* Expression: C_wgrp.CMn_wgrp{12}
+  double CMn_drud_tableData[60];       /* Expression: C_wgrp.CMn_wgrp{12}
                                         * Referenced by: '<S96>/CMn_drud'
                                         */
   double Gain12_Gain;                  /* Expression: -1

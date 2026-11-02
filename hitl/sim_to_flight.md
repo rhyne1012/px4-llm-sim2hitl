@@ -221,4 +221,4 @@
 - 配方 `04_doublet_cubeorangeplus_flight`（實飛）、`05_doublet_cubeorangeplus_hitl_surfaces`（HITL 帶實體舵面）；
 - `analysis/aero_id.py`（第 6 點「氣動檢討」的方法；依賴衍生專案的 doublet 模組與任務紀錄）。
 
-已經搬進框架的：新模型（第 6、7 點）、改過的發散保護測試、`./runbridge model-cycle`、`aircraft/avl/run_table.py`、`sitl/trim.py --linearize`。
+已經搬進框架的：新模型（第 6、7 點）、改過的發散保護測試、`./runbridge model-cycle`、`aircraft/avl/run_table.py`、`sitl/trim.py --linearize`，以及重算的 VSP 表與 `aircraft/vsp/run_table.py`。

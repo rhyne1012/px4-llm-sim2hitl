@@ -6,6 +6,8 @@
 % Author
 % Oscar Hii, currently doing MS degree in National Cheng Kung University.
 % Contact: oscarhiishanmin26@gmail.com
+% 2026-11-02: Skysurfer.mat is now made by aircraft/vsp/run_table.py (VSPAERO stability sweep of the AVL planform,
+% same grid and reference point as the AVL tables). The grid is read from the data instead of being written here.
 % clear; close all; clc
 load(fullfile(fileparts(mfilename('fullpath')), 'Skysurfer.mat'));    data_w  = data_out;
 % load("aerostates_ht.mat");   data_ht = data_out;
@@ -29,7 +31,7 @@ AEROSTATES_w = [params(1:3), PARAMS].';
 % Aerostates Arrangement
 % Main Wing
 % VSPAERO FLow Conditions
-num_of_states = 6*3*2 + 1; % alpha cases*beta cases*mach cases + 1 (bcz first column is name of params)
+num_of_states = numel(data_w.mach) + 1; % cases + 1 (the first column is the name of the parameter)
 
 AEROSTATES_w(1,2:num_of_states)  = num2cell(data_w.mach);
 AEROSTATES_w(2,2:num_of_states)  = num2cell(data_w.aoa);
@@ -48,9 +50,9 @@ end
 
 % Create look-up table
 % ------------------------------------------------------------------------
-Mach    = [0.05 0.10];
-AoA     = [-10 -5 0 5 10 15];
-AoS    = [-10 0 10];
+Mach    = unique(data_w.mach);
+AoA     = unique(data_w.aoa);
+AoS     = unique(data_w.beta);
 
 % List of coefficients
 coeffs = {'CFx', 'CFy', 'CFz', 'CMx', 'CMy', 'CMz', 'CL', 'CD', 'CS', 'CMl', 'CMm', 'CMn'};

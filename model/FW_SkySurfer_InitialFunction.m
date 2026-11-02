@@ -105,9 +105,11 @@ run import_aerostates_avl.m;
 % Matched at the same CL, SkyTalon CFD minus this AVL table is 0.030 at CL 0.39 and 0.034 at CL 0.80; the old
 % value was 2.1x CFD at CL 0.39. CFD there is clean laminar flow, a lower bound (props and roughness add 30-60%).
 CD_fix_AVL = 0.030;
-% VSP
+% VSP (aircraft/vsp/run_table.py, 2026-11-02: same planform, grid and moment reference as the AVL table)
 run import_aerostates_vsp.m;
-CD_fix_VSP = 0.065;
+% VSPAERO's CD already has its own skin-friction estimate; 0.0045 makes the VSP path's total drag equal the AVL path's
+% (CD_fix_AVL above) within 0.0005 over alpha -5..10 deg at the same alpha. Was 0.065 for the old table.
+CD_fix_VSP = 0.0045;
 
 %% Propulsion: static thrust table and in-flight lapse (Propulsion subsystem, aircraft/thrust)
 % From rhyne1012/guppy-sim2hitl 126bc46 (aircraft/thrust): the GUPPY 8x6 bench static thrust (prop_8x6_data.mat
