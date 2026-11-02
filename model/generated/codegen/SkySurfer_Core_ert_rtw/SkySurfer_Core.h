@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SkySurfer_Core'.
  *
- * Model version                  : 14.16
+ * Model version                  : 14.18
  * Simulink Coder version         : 26.2 (R2026b) 22-May-2026
- * C/C++ source code generated on : Mon Nov  2 23:41:30 2026
+ * C/C++ source code generated on : Tue Nov  3 02:50:10 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: Intel->x86-64 (Linux 64)
@@ -1135,9 +1135,6 @@ struct P_SkySurfer_Core_T_ {
   double CD_drud_tableData[60];        /* Expression: C_wgrp.CD_wgrp{12}
                                         * Referenced by: '<S98>/CD_drud'
                                         */
-  double Gain15_Gain;                  /* Expression: -1
-                                        * Referenced by: '<S7>/Gain15'
-                                        */
   double Gain1_Gain_dv;                /* Expression: pi/180
                                         * Referenced by: '<S107>/Gain1'
                                         */
@@ -1173,9 +1170,6 @@ struct P_SkySurfer_Core_T_ {
                                         */
   double CS_drud_tableData[60];        /* Expression: C_wgrp.CS_wgrp{12}
                                         * Referenced by: '<S100>/CS_drud'
-                                        */
-  double Gain10_Gain;                  /* Expression: -1
-                                        * Referenced by: '<S7>/Gain10'
                                         */
   double Gain1_Gain_ju;                /* Expression: pi/180
                                         * Referenced by: '<S115>/Gain1'
@@ -1213,9 +1207,6 @@ struct P_SkySurfer_Core_T_ {
   double CL_drud_tableData[60];        /* Expression: C_wgrp.CL_wgrp{12}
                                         * Referenced by: '<S99>/CL_drud'
                                         */
-  double Gain11_Gain;                  /* Expression: -1
-                                        * Referenced by: '<S7>/Gain11'
-                                        */
   double Gain1_Gain_p;                 /* Expression: pi/180
                                         * Referenced by: '<S111>/Gain1'
                                         */
@@ -1251,9 +1242,6 @@ struct P_SkySurfer_Core_T_ {
                                         */
   double CMl_drud_tableData[60];       /* Expression: C_wgrp.CMl_wgrp{12}
                                         * Referenced by: '<S101>/CMl_drud'
-                                        */
-  double Gain4_Gain;                   /* Expression: -1
-                                        * Referenced by: '<S7>/Gain4'
                                         */
   double Gain1_Gain_dh;                /* Expression: pi/180
                                         * Referenced by: '<S119>/Gain1'
@@ -1291,9 +1279,6 @@ struct P_SkySurfer_Core_T_ {
   double CMm_drud_tableData[60];       /* Expression: C_wgrp.CMm_wgrp{12}
                                         * Referenced by: '<S102>/CMm_drud'
                                         */
-  double Gain9_Gain;                   /* Expression: -1
-                                        * Referenced by: '<S7>/Gain9'
-                                        */
   double Gain1_Gain_f;                 /* Expression: pi/180
                                         * Referenced by: '<S123>/Gain1'
                                         */
@@ -1329,9 +1314,6 @@ struct P_SkySurfer_Core_T_ {
                                         */
   double CMn_drud_tableData[60];       /* Expression: C_wgrp.CMn_wgrp{12}
                                         * Referenced by: '<S103>/CMn_drud'
-                                        */
-  double Gain12_Gain;                  /* Expression: -1
-                                        * Referenced by: '<S7>/Gain12'
                                         */
   double Gain1_Gain_dq;                /* Expression: pi/180
                                         * Referenced by: '<S127>/Gain1'
@@ -1696,7 +1678,7 @@ struct P_SkySurfer_Core_T_ {
   double RateLimiter1_FallingLim;      /* Expression: -500
                                         * Referenced by: '<S3>/Rate Limiter1'
                                         */
-  double Gain4_Gain_a;                 /* Expression: -1
+  double Gain4_Gain;                   /* Expression: -1
                                         * Referenced by: '<S3>/Gain4'
                                         */
   double TransferFcn2_A;               /* Computed Parameter: TransferFcn2_A

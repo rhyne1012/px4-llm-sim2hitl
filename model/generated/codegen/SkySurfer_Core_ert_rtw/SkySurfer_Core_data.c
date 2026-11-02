@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SkySurfer_Core'.
  *
- * Model version                  : 14.16
+ * Model version                  : 14.18
  * Simulink Coder version         : 26.2 (R2026b) 22-May-2026
- * C/C++ source code generated on : Mon Nov  2 23:41:30 2026
+ * C/C++ source code generated on : Tue Nov  3 02:50:10 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: Intel->x86-64 (Linux 64)
@@ -1970,11 +1970,6 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.0031712, 0.0019059, 0.0024993, 0.00221, 0.0026965, 0.0018229, 0.0030014,
     0.0042187, 0.0049535, 0.0050188, 0.004746, 0.0072683, 0.0066699 },
 
-  /* Expression: -1
-   * Referenced by: '<S7>/Gain15'
-   */
-  -1.0,
-
   /* Expression: pi/180
    * Referenced by: '<S107>/Gain1'
    */
@@ -2101,11 +2096,6 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -0.1092259, -0.1096517, -0.1110938, -0.1107974, -0.112889, -0.1137663,
     -0.1038537, -0.104158, -0.1064758, -0.1075712, -0.0984099, -0.1109699,
     -0.1127947, -0.1208085, -0.1142318, -0.1152133, -0.1170791, -0.1171174 },
-
-  /* Expression: -1
-   * Referenced by: '<S7>/Gain10'
-   */
-  -1.0,
 
   /* Expression: pi/180
    * Referenced by: '<S115>/Gain1'
@@ -2234,11 +2224,6 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.0093908, 0.0106017, 0.010555, 0.0090785, 0.008915, 0.013269, 0.0115614,
     0.0125847, 0.0145888, 0.0153552, -0.0035964, 0.018187, 0.0185456, 0.0201716,
     0.0204603 },
-
-  /* Expression: -1
-   * Referenced by: '<S7>/Gain11'
-   */
-  -1.0,
 
   /* Expression: pi/180
    * Referenced by: '<S111>/Gain1'
@@ -2452,11 +2437,6 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -0.0088802484218148264, 0.0084403649028147211, 0.00852128176373322,
     0.012533993430927986, 0.012549910901464187 },
 
-  /* Expression: -1
-   * Referenced by: '<S7>/Gain4'
-   */
-  -1.0,
-
   /* Expression: pi/180
    * Referenced by: '<S119>/Gain1'
    */
@@ -2657,11 +2637,6 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.0094354053577444461, 0.0041857651277105662, 0.10790824332209636,
     -0.0015092900966594196, -0.0018176345531591123, -0.0071504931409802248,
     -0.0070305575298019009 },
-
-  /* Expression: -1
-   * Referenced by: '<S7>/Gain9'
-   */
-  -1.0,
 
   /* Expression: pi/180
    * Referenced by: '<S123>/Gain1'
@@ -2865,11 +2840,6 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.040799228326907938, 0.0366963, 0.0415696, 0.041766984378004204,
     0.0463282490604282, 0.041813092000616212, 0.042217682210872687,
     0.041831539020312496, 0.04189563030608049 },
-
-  /* Expression: -1
-   * Referenced by: '<S7>/Gain12'
-   */
-  -1.0,
 
   /* Expression: pi/180
    * Referenced by: '<S127>/Gain1'

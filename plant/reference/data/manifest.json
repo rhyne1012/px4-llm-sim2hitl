@@ -1,9 +1,9 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-02T23:42:53+08:00",
-  "model_build_id": "skysurfer-b149adac5627b9a44c62fa15",
-  "release_manifest_sha256": "ea098b933d950776ba1a5c0e04fdadfd10c60a641808135d19a211f3dbb40d78",
-  "library_sha256": "541470b19f49b2ec1890660689c60bd32d71b28e59c0bd03d48bd9b21e34df53",
+  "generated_at": "2026-11-03T02:51:38+08:00",
+  "model_build_id": "skysurfer-7fb22f727bcb3f59f024a3c9",
+  "release_manifest_sha256": "354ad923c8e1dcc9a5c0ee49537b53ec798367a77eaad2014020aa6445658854",
+  "library_sha256": "10b98324ad098c65542ebd3e804461be1152d74aa07db15e95988682bebfeeb5",
   "script_sha256": "be033a14a0c64ccd25f2802162352b3ba5c1dc3ec41eab0d3b0e86b80243e0ad",
   "dt_s": 0.004,
   "output_phase": "t_k, sampled before the ode4 update (same as the HIL ABI)",

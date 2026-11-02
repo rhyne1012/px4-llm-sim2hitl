@@ -7,7 +7,8 @@
 #   joints (AVL manual, COMPONENT); the wing root then behaved like a gap (neutral point 62 % instead of 52 % geometric MAC)
 #   negative Sspace on the left wing mirrors the spacing of the right wing, so beta = 0 gives no false side force
 #   horizontal tail ANGLE 1.2 deg: an estimate that closes the flight trim at 16 m/s, not a measurement; it stands for the
-#   nose-down moment of the thrust line, the tail incidence and the elevator neutral together, none of them measured yet
+#   nose-down moment of the thrust line and the elevator neutral (not measured yet). The wing-tail incidence difference
+#   was measured as about 0 (user, 2026-11-02), so 1.2 deg is an equivalent value, not the geometry
 MainWing
 
 #Mach

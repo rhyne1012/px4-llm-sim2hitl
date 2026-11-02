@@ -30,9 +30,9 @@ def digest(path):return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 def tree(folder,prefix):
  return {prefix+str(p.relative_to(folder)):digest(p) for p in sorted(Path(folder).rglob('*')) if p.is_file() and '__pycache__' not in p.parts}
 def model_sources():
- # What stage 1 generates from: the model folder (without its generated output), the reuse-library policy
- # and the MATLAB builder itself.
- records={'model/'+str(p.relative_to(MODEL)):digest(p) for p in sorted(MODEL.rglob('*')) if p.is_file() and not p.relative_to(MODEL).parts[0].startswith(('generated','.generated'))}
+ # What stage 1 generates from: the model folder (without its generated output and its Markdown notes, which MATLAB
+ # never reads: model/README.md can change without a new generation), the reuse-library policy and the MATLAB builder.
+ records={'model/'+str(p.relative_to(MODEL)):digest(p) for p in sorted(MODEL.rglob('*')) if p.is_file() and p.suffix!='.md' and not p.relative_to(MODEL).parts[0].startswith(('generated','.generated'))}
  for f in ['.satk/reuse-libraries.json','plant/core/build_core.m','plant/core/reuse_policy_gate.m']:records[f]=digest(ROOT/f)
  return records
 def generated_manifest():
