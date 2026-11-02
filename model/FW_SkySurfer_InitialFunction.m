@@ -43,11 +43,20 @@ Psi_w                   =  0;                                   % wind direction
 
 Mass0                   =   1.3;                        % empty weight, kg
 
-Ixx                     =   2 * 0.023;                  % kg*m^2
+% Moments of inertia from the first flight test, 2026-10-26: record
+% records/20261026-1652_flight_04-doublet-cubeorangeplus-flight_none_OBSERVED, flight log on the GitHub
+% release flight-test-20261026-1652. The doublets were fitted and compared with the same fits on HITL logs of this
+% model, assuming the AVL Clp, Cmq, Cmde and the 27 deg elevator. Results: Ixx 0.02-0.03, Iyy 0.04-0.06; Izz was
+% not identifiable (no rudder excitation), so it is Ixx + Iyy (a flat airframe, as the original mass file is).
+% Before: Ixx 2*0.023, Iyy 3*0.029, Izz 0.05 (the original author's mass file times 2 and 3, reason unknown).
+% Iyy re-estimated 2026-11-02 on the corrected aero model, because the first estimate (0.050) assumed the old elevator
+% table: same-method fits on the same flight give 0.033-0.044 and the doublet replay is best at 0.04-0.045
+% (docs/tasks/20261102_aero_review.md). Two doublets only; a bifilar pendulum would settle it.
+Ixx                     =   0.023;                      % kg*m^2, flight test 2026-10-26 (0.02-0.03)
 Ixy                     =   6.56e-05;                   % kg*m^2
-Iyy                     =   3 * 0.029;                  % kg*m^2
+Iyy                     =   0.040;                      % kg*m^2, flight test 2026-10-26, re-estimated 2026-11-02 (0.033-0.05)
 Iyz                     =   2.784e-04;                  % kg*m^2
-Izz                     =   0.05;                       % kg*m^2
+Izz                     =   Ixx + Iyy;                  % kg*m^2, 0.063: not measured, Ixx + Iyy
 Ixz                     =  -2.266e-05;                  % kg*m^2
 
 Inertia0	            =  [  Ixx -Ixy -Ixz  ;...       % moment of inertia, kg*m^2
@@ -57,12 +66,18 @@ Inertia0	            =  [  Ixx -Ixy -Ixz  ;...       % moment of inertia, kg*m^2
 % Positions on the body station axis in metres (aft positive from the fuselage datum).
 % The Aerodynamic block takes -CG_m / -XREF_m as body-axis (forward positive) positions and
 % transfers the moments from XREF_m to CG_m. The AVL tables must be computed about XREF_m.
-CG_m                    =  [0.330, 0, 0];               % centre of gravity, m
+% CG of the real aircraft as flown in the first flight test (2026-10-26, user: about 65 mm behind the wing root
+% leading edge = AVL x 0.065, 25.9 % of the geometric MAC; record 20261026-1652_flight_...). Was 0.330 (50 mm, the
+% original author's mass file).
+CG_m                    =  [0.345, 0, 0];               % centre of gravity, m
 XREF_m                  =  [0.330, 0, 0];               % moment reference point of the aero tables, m
 
 cbar                    =  0.20;                        % chord length, m
 b                       =  1.41;                        % wing span, m
 S                       =  0.238;                       % wing reference area, m^2
+% Thrust line above the CG (+ gives nose down with thrust). The 2026-10-26 flight suggests about 0.12 m, but this stays 0:
+% the ground has no moment and the aero is off below 5 m/s, so takeoff thrust alone pitches the model over on the ground
+% (SITL record 20261102-1357). The horizontal tail ANGLE in the AVL file carries that nose-down moment at cruise instead.
 del_z                   =  0 ;                          % thrust z-axis offset, m
 
 % Onborad Atmosphere Model
@@ -72,29 +87,42 @@ g                       =  9.80665;                     % gravity, m/s^2
 useAVL_VSP = 0; % 0: AVL, 1: VSP
 
 % Control-surface effectiveness versus |deflection| (deg); clipped outside the breakpoints.
-Aeroelasticity_Gain_AIL     = [ 0.8  0.5];
+% The original fall with deflection (AIL 0.8 to 0.5, ELE 0.9 to 0.6, RUD 0.9 to 0.6) was the user's estimate. The
+% 2026-10-26 flight does not show that fall on the elevator or the ailerons, and flat values replay its doublets better:
+% elevator 0.8, ailerons 0.75 (docs/tasks/20261102_aero_review.md). Each value is relative to the AVL derivative and the
+% model travel (27, 30 deg). The rudder is unchanged: that flight had no rudder excitation.
+Aeroelasticity_Gain_AIL     = [ 0.75 0.75];
 Aeroelasticity_AIL          = [   5   15];
-Aeroelasticity_Gain_ELE     = [ 0.9  0.6];
+Aeroelasticity_Gain_ELE     = [ 0.8  0.8];
 Aeroelasticity_ELE          = [   5   15];
 Aeroelasticity_Gain_RUD     = [ 0.9  0.6];
 Aeroelasticity_RUD          = [   5   15];
 
 % AVL
 run import_aerostates_avl.m;
-CD_fix_AVL = 0.075;
+% Parasite drag on top of AVL (inviscid: induced drag only). 0.030 (was 0.075) carries over the SkyTalon CFD
+% finding (rhyne1012/skytalon-cfd f48784f, docs/HANDOFF_6DOF_DRAG_20261022.md): its 6DOF drag was 2.5x CFD.
+% Matched at the same CL, SkyTalon CFD minus this AVL table is 0.030 at CL 0.39 and 0.034 at CL 0.80; the old
+% value was 2.1x CFD at CL 0.39. CFD there is clean laminar flow, a lower bound (props and roughness add 30-60%).
+CD_fix_AVL = 0.030;
 % VSP
 run import_aerostates_vsp.m;
 CD_fix_VSP = 0.065;
 
+%% Propulsion: static thrust table and in-flight lapse (Propulsion subsystem, aircraft/thrust)
+% From rhyne1012/guppy-sim2hitl 126bc46 (aircraft/thrust): the GUPPY 8x6 bench static thrust (prop_8x6_data.mat
+% Lookup; command clipped to 0..1) and T = max(0, Ts - K*V*sqrt(Ts)), V true airspeed, K from the GUPPY 9/28
+% flight at 25-30 m/s. Not SkySurfer's own propeller (user choice 2026-10-25, until SkySurfer data exist). Replaces
+% the airspeed-independent 2.45 kgf * throttle. The GUPPY bench delay and 3rd-order dynamics are not ported (6 more
+% continuous states); the throttle actuator lag 5/(s+5) stays.
+PropThrust.CommandBP = [0 0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9 1];
+PropThrust.Table_N   = [0 0.53938499093055725 1.4710500240325928 2.6478900909423828 4.4131498336791992 ...
+                        6.3745501041412354 8.3849849700927734 10.395419597625732 12.307785034179688 ...
+                        14.220149993896484 16.132514953613281];
+PropThrust.LapseK    = 0.057;                   % N^0.5 s/m
+
 %% Sampling Timer
 Thil                    =  1/250;               % model fixed step, s
-
-%% HIL Setting (used by sensor_HIL and the HIL_UDP blocks)
-uT_to_gauss = 0.01;
-m_to_mm = 1000;
-ms_to_cms = 100;
-gpsFreq = 10;
-heartbeatFreq = 1;
 
 %% Ground contact
 uavData.contact.vd = 0.02;

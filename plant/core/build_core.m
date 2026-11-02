@@ -39,7 +39,7 @@ previousFolder = pwd; previousFileGen = Simulink.fileGenControl('getConfig');
 restore = onCleanup(@() core_restore(previousFolder, previousFileGen, model));
 cd(modelDir);
 copyfile(sourceFile, fullfile(cacheRoot, 'models', [model '.slx']));
-evalin('base', "run('PX4_HIL_preload.m'); lastRunModel='FW_SkySurfer_HIL'; run('FW_SkySurfer_InitialFunction.m');");
+evalin('base', "run('model_local_folders.m'); lastRunModel='FW_SkySurfer_HIL'; run('FW_SkySurfer_InitialFunction.m');");
 load_system(fullfile(cacheRoot, 'models', [model '.slx']));
 set_param(model, 'PreLoadFcn', '', 'InitFcn', '', 'EnablePacing', 'off');
 

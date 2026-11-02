@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SkySurfer_Core'.
  *
- * Model version                  : 14.13
+ * Model version                  : 14.15
  * Simulink Coder version         : 26.2 (R2026b) 22-May-2026
- * C/C++ source code generated on : Thu Oct 22 23:54:04 2026
+ * C/C++ source code generated on : Mon Nov  2 15:12:46 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: Intel->x86-64 (Linux 64)
@@ -413,6 +413,11 @@ struct P_Distanceintogusty_SkySurfer_Core_T_ {
 
 /* Parameters (default storage) */
 struct P_SkySurfer_Core_T_ {
+  struct_Mdu8JAorm6zM30ADlDKuaD PropThrust;/* Variable: PropThrust
+                                            * Referenced by:
+                                            *   '<S12>/Lapse_K'
+                                            *   '<S12>/Thrust_Lookup'
+                                            */
   struct_pj9o0ruoSIJrFqhg8Kr6MC uavData;/* Variable: uavData
                                          * Referenced by:
                                          *   '<S192>/Damper'
@@ -916,9 +921,6 @@ struct P_SkySurfer_Core_T_ {
                                         */
   double del_z;                        /* Variable: del_z
                                         * Referenced by: '<S12>/Constant1'
-                                        */
-  double g;                            /* Variable: g
-                                        * Referenced by: '<S12>/Gain1'
                                         */
   double mach_avl[2];                  /* Variable: mach_avl
                                         * Referenced by:
@@ -1523,14 +1525,11 @@ struct P_SkySurfer_Core_T_ {
   double TransferFcn3_C;               /* Computed Parameter: TransferFcn3_C
                                         * Referenced by: '<S3>/Transfer Fcn3'
                                         */
-  double kgf_Gain;                     /* Expression: 2.45
-                                        * Referenced by: '<S12>/kgf'
+  double Command_Clip_0_1_UpperSat;    /* Expression: 1
+                                        * Referenced by: '<S12>/Command_Clip_0_1'
                                         */
-  double Gain_Gain_lj;                 /* Expression: -1
-                                        * Referenced by: '<S12>/Gain'
-                                        */
-  double Constant_Value_k5;            /* Expression: 0
-                                        * Referenced by: '<S12>/Constant'
+  double Command_Clip_0_1_LowerSat;    /* Expression: 0
+                                        * Referenced by: '<S12>/Command_Clip_0_1'
                                         */
   double Wdeg1_Value;                  /* Expression: 0
                                         * Referenced by: '<S142>/Wdeg1'
@@ -1591,6 +1590,18 @@ struct P_SkySurfer_Core_T_ {
                                         */
   double Lw_Gain;                      /* Expression: 1
                                         * Referenced by: '<S157>/Lw'
+                                        */
+  double Thrust_NonNeg_UpperSat;       /* Expression: inf
+                                        * Referenced by: '<S12>/Thrust_NonNeg'
+                                        */
+  double Thrust_NonNeg_LowerSat;       /* Expression: 0
+                                        * Referenced by: '<S12>/Thrust_NonNeg'
+                                        */
+  double Gain_Gain_lj;                 /* Expression: -1
+                                        * Referenced by: '<S12>/Gain'
+                                        */
+  double Constant_Value_k5;            /* Expression: 0
+                                        * Referenced by: '<S12>/Constant'
                                         */
   double SeaLevelTemperature_Value;    /* Expression: T0
                                         * Referenced by: '<S136>/Sea Level  Temperature'

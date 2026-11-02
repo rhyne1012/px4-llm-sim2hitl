@@ -39,8 +39,8 @@
     "arbitrary_seed"
   ],
   "automation": {
-    "takeoff_throttle": 0.45,
-    "cruise_throttle": 0.35,
+    "takeoff_throttle": 0.6,
+    "cruise_throttle": 0.32,
     "rotate_cas": 12,
     "climb_pitch": 12,
     "altitude": 100,

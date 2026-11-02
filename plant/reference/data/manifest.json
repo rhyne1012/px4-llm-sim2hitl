@@ -1,10 +1,10 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-16T02:40:32+08:00",
-  "model_build_id": "skysurfer-70c7aa0f23a75a15acb086d4",
-  "release_manifest_sha256": "e7345b4fa4dfd01cd29b41d656fbebc12bbdb04c756c6bd004ffad9aa68d859e",
-  "library_sha256": "92090a52a2543aaa6b9848d9704b9f6ff8aa934e9d6f472848e9aa0017c953d3",
-  "script_sha256": "2827ec8a0adc66f32e907801586f7ba77999a2d9046df3e45a75844a90b88755",
+  "generated_at": "2026-11-02T16:05:34+08:00",
+  "model_build_id": "skysurfer-cd50a8ed4ce1ee6366c577c7",
+  "release_manifest_sha256": "bd8f896c159a8850d5d21f7ea0db247f1ece660db788a29f6141c7770641005d",
+  "library_sha256": "fec963888ded3c6bc615ee701b085fc28d510c375661bfe1f9287361e83d9228",
+  "script_sha256": "be033a14a0c64ccd25f2802162352b3ba5c1dc3ec41eab0d3b0e86b80243e0ad",
   "dt_s": 0.004,
   "output_phase": "t_k, sampled before the ode4 update (same as the HIL ABI)",
   "controls_index": [
@@ -77,7 +77,7 @@
   ],
   "raw_note": "Source units per docs/MODEL_INTERFACE.md section 6 (mag gauss, pressure hPa, GPS e7/mm/cm/s).",
   "npz_keys": "<case>__time_s, <case>__controls (N x 16), <case>__raw (N x 58)",
-  "reference_npz_sha256": "e8d8ea80c98b3210267a698f2c497e2372d821a5402d920c53c4e798376d16cd",
+  "reference_npz_sha256": "99eff458c15a2752136dc425072778261506b07aa6f751c4a9429cc879607459",
   "cases": [
     {
       "name": "ground_idle",
