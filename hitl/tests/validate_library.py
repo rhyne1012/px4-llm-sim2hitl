@@ -94,11 +94,17 @@ def validate(cache):
  try:Encoder(quality).encode(overflow,1000000);passed=False
  except ValueError:passed=True
  report['wire_range_rejection']={'status':'PASS' if passed else 'FAIL'}
+ # Uncontrolled glide from 100 m (no controls) until it hits the ground: the divergence guard must fault (code 3)
+ # instead of passing the crash on. When it hits depends on the model (6.73 s with the CG at 50 mm, 7.44 s at 65 mm,
+ # 2026-10-26), so only the fault is required, within 30 s; the time and the reason are reported. Was a fixed
+ # "before 7.068 s" from the original project, which a deliberate CG change broke.
  m.reset(True);i=header(Input);o=header(Output);fault=None
- for k in range(1900):
+ for k in range(7500):
   i.step_index=k;code=m.lib.hil_model_step(C.byref(i),C.byref(o))
-  if code:fault={'step':k,'model_time_s':k*.004,'code':code};break
- report['source_divergence_guard']={'status':'PASS' if fault and fault['code']==3 and fault['model_time_s']<7.068 else 'FAIL','fault':fault}
+  if code:
+   b=C.create_string_buffer(256);m.lib.hil_model_get_last_error(b,256)
+   fault={'step':k,'model_time_s':k*.004,'code':code,'reason':b.value.decode()};break
+ report['source_divergence_guard']={'status':'PASS' if fault and fault['code']==3 else 'FAIL','fault':fault}
  report.update(adapter_checks(cache,m))
  m.reset();worker=Worker(cache/'native'/libname('hil_worker'),m);worker.start();start=time.monotonic();trace=[]
  while time.monotonic()-start<60:

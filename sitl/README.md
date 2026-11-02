@@ -41,7 +41,7 @@ PX4 模組（Stabilized）：sensors、pwm_out_sim、control_allocator、fw_rate
 |---|---|
 | [build_sitl.py](build_sitl.py) | 在 PX4 原始碼樹編 SITL 版 PX4（加 `plant_sim` 與 `modules/` 的模組） |
 | [run_sitl.py](run_sitl.py) | 讀情境、算配平、產生參數與啟動腳本、啟動一或多個 PX4 instance、收集結果 |
-| [trim.py](trim.py) | 配平（平飛、協調轉彎）與丟出去測試；常態工具，問配平就跑它 |
+| [trim.py](trim.py) | 配平（平飛、協調轉彎）、丟出去測試、線性模型與轉移函數；常態工具，問配平就跑它 |
 | [replay.py](replay.py) | ULog 重播：PX4 `replay` 只發布控制器輸入，原生控制器重算輸出；由 `run_sitl.py --replay` 呼叫 |
 | [scenarios/](scenarios/) | 情境檔：`stabilized_steps.json` 是原生 PX4 的參考情境；`stabilized_steps_hitl.json` 是它的 HITL 版（HITL 序列與 SITL 預演共用）；`template_offboard.json` 是 `guidance_template` 範例的情境 |
 | [px4_external/src/CMakeLists.txt](px4_external/src/CMakeLists.txt) | PX4 `EXTERNAL_MODULES_LOCATION` 的模組清單 |
@@ -73,6 +73,7 @@ PX4 模組（Stabilized）：sensors、pwm_out_sim、control_allocator、fw_rate
 - **起始**（`PlantSim.hpp` 註解）：(1) 用真實時間跑到 `pwm_out_sim` 開始輸出（所有 work queue 都已建立；更早就 lockstep 會 deadlock）；(2) lockstep、disarmed、plant 固定在初值 100 步（輸出模組只在 disarmed 時套用 `PWM_MAIN_FUNC`）；(3) arm，收到第一筆 armed 輸出後 plant 才開始推進；「armed 輸出」是時間戳不早於 armed stub 發布時間的那一筆（更早的是 disarmed 時算的）。步數＝`duration` / 4 ms 四捨五入。
 - **情境檔**（`scenarios/*.json`）：`mode`（`stabilized`／`acro`／`offboard`）、`initial`（高度、空速、航向、經緯度）、`trim`、`settle_s`、`duration_s`、`steps`（`start_s`／`end_s` 從 settle 結束起算，`roll`／`pitch`／`yaw`／`throttle` 搖桿增量）、可選 `base`、`base_sticks`、`start`（要多啟動的 PX4 指令，和 `--start` 合併）、`wind`（風；格式與提醒在 `plant/wind.py`，說明在 [plant README](../plant/README.md)「風」；提醒印在畫面並寫進 `run.json` 的 `wind_reminders`；例子 `wind_steady.json`、`wind_low_altitude.json`）。`run_sitl.py` 把它轉成 `plant_sim` 讀的 `scenario.txt`（格式見 `PlantSim::load_scenario`）。
 - **配平**（`trim.py`，見下一節）：空中起始用平飛配平的攻角＝俯仰與油門；油門搖桿＝2×油門−1；Stabilized 另加基準俯仰搖桿，讓設定值等於配平俯仰。SITL 起始只帶入高度、速度、姿態（`PlantInitialConditions` 不含角速度與致動器狀態），所以轉彎配平還不能當 SITL 起始。
+- **2026-11 換了模型，下面兩點的數字還是舊模型（重心 50 mm、修正前的 AVL）的**：精簡 SITL 還沒用新模型重跑。重跑時先 `sitl/build_sitl.py`，再更新情境檔的 `reference`。
 - **settle_s**：PX4 的角速度積分器從 0 開始，而配平需要升降舵 0.4（FC 的 `TRIM_PITCH=0`），所以起始後俯仰先掉到約 −6°，約 40 s 回到配平（俯仰差 < 0.25°）；收斂後的升降舵 0.396 與離線配平一致。參考情境先 settle 40 s 再做階躍。量反應前先看 `response.py` 的 `pre_slope_per_s`（階躍前 1 s 的斜率）：不接近 0 就代表還沒穩，那一段的數字不能拿來量反應。
 - **參考情境 `stabilized_steps`**：settle 40 s 後，3–6 s roll 搖桿 0.5、9–11 s pitch 0.3、14–16 s yaw 0.5。指標用 [analysis/response.py](../analysis/response.py) 算。參考值（Ubuntu 2026-10-18，與舊機器的紀錄相同）：roll 尾窗平均 +22.32°（設定 22.5°）、上升 0.316 s、安定 0.456 s；pitch 尾窗平均 −3.39°（絕對設定值 −5.25°）、上升 1.06 s、未安定；yaw 角速度峰值 7.81 °/s（0.22 s）。這些值也存在情境檔的 `reference`：`response.py` 在結果加上 `reference_comparison`（每個指標的紀錄值、這次的值與差），只列差異、不判定；和人講好容差後填進 `reference.tolerance`，超出時結束碼 3。
 - **`base_sticks`**：絕對的基準桿量（`manual_control_setpoint` 值），取代配平算出的基準；這時 `trim` 只決定空中起始狀態。`base` 是疊加的偏移。
@@ -97,19 +98,26 @@ PX4 模組（Stabilized）：sensors、pwm_out_sim、control_allocator、fw_rate
 - **丟出去**（`--drop`，預設 20 s；0 = 不做）：從配平狀態（limiter 已到位）開始，舵面與油門固定在配平值、沒有任何控制，回報 20 s 後的空速、高度、俯仰、滾轉變化與轉彎角速度。配平正確時漂移只來自很慢的模態；配歪會明顯漂移。
 - **輸出**：表格，SI 為主並附 kts／ft；`--json` 輸出全部欄位（含舵面偏角、狀態向量、轉彎半徑、負載因數）。
 - **plant library**：預設是目前發布的模型 release 裡的那份（第一行會印出路徑）；不需要 PX4 或 SITL build。
-- **目前的配平**（release `skysurfer-f53eee94…`，100 m／328 ft，無風；命令為正規化值，升降舵 + = 抬頭）：
+- **目前的配平**（release `skysurfer-cd50a8ed…`，2026-11 的模型：重心 65 mm、修正後的 AVL；100 m／328 ft，無風；命令為正規化值，升降舵 + = 抬頭）：
 
   | 空速 | 坡度 | 攻角 | 俯仰 | 側滑 | 升降舵 | 副翼 | 方向舵 | 油門 | 轉彎角速度 |
   |---|---|---|---|---|---|---|---|---|---|
-  | 15 m/s（29.2 kts） | 0° | 3.76° | 3.76° | 0.19° | 0.3975 | −0.0005 | −0.0074 | 0.1147 | — |
-  | 20 m/s（38.9 kts） | 0° | 1.27° | 1.27° | 0.08° | 0.1540 | −0.0001 | −0.0020 | 0.1910 | — |
-  | 25 m/s（48.6 kts） | 0° | 0.12° | 0.12° | 0.03° | 0.0770 | 0.0000 | 0.0001 | 0.2874 | — |
-  | 15 m/s | 20° | 4.09° | 3.64° | −0.60° | 0.5011 | 0.0153 | 0.0757 | 0.1153 | 13.6 °/s |
-  | 20 m/s | 20° | 1.46° | 1.45° | 0.25° | 0.1745 | 0.0037 | 0.0057 | 0.1920 | 10.2 °/s |
-  | 25 m/s | 20° | 0.24° | 0.30° | 0.22° | 0.0902 | 0.0015 | −0.0002 | 0.2885 | 8.2 °/s |
+  | 15 m/s（29.2 kts） | 0° | 3.00° | 3.00° | 0.00° | 0.2727 | 0.0000 | 0.0000 | 0.2967 | — |
+  | 20 m/s（38.9 kts） | 0° | 0.84° | 0.84° | 0.00° | 0.1683 | 0.0000 | 0.0000 | 0.3912 | — |
+  | 25 m/s（48.6 kts） | 0° | −0.16° | −0.16° | 0.00° | 0.1204 | 0.0000 | 0.0000 | 0.5017 | — |
+  | 15 m/s | 20° | 3.29° | 3.00° | −0.27° | 0.3017 | 0.0129 | 0.0549 | 0.2984 | 13.6 °/s |
+  | 20 m/s | 20° | 1.00° | 1.02° | 0.23° | 0.1846 | 0.0034 | 0.0038 | 0.3927 | 10.2 °/s |
+  | 25 m/s | 20° | −0.06° | 0.01° | 0.18° | 0.1308 | 0.0014 | 0.0000 | 0.5010 | 8.2 °/s |
 
-  模型或氣動表改了之後重跑，數值以重跑結果為準。
-- **待補**：飛行品質（線性化後的短週期、長週期、荷蘭滾、螺旋、滾轉模態）。`plant_core_eval` 已可做數值線性化。
+  模型或氣動表改了之後重跑，數值以重跑結果為準（`./runbridge model-cycle` 會跑 13、16、20、25 m/s）。β=0 的側滑和副翼現在是 0：AVL 左翼的 `Sspace` 改成和右翼鏡像之後，β=0 的假側力沒了。
+- **線性模型與轉移函數**（`--linearize`，只做平飛）：
+
+  ```sh
+  "$PY" -B sitl/trim.py --airspeed 16 --drop 0 --linearize --out <檔案.json>
+  ```
+
+  在配平點對 `plant_core_eval` 做中心差分，得到 37 狀態的完整模型（含 5 個致動器、亂流濾波器）和 8 狀態的機體模型（u、v、w、p、q、r、φ、θ；輸入直接是舵面）。「拿掉致動器」是在矩陣上消去：每個命令對應的舵機狀態設成靜止值，模型和 C 都不動，所以配平、SITL、HITL 用的還是同一份 slx。轉移函數（例如 `q/elevator`、`p/aileron`，副翼是兩路的和）有含舵機與不含兩種；最後自動和完整模型在 0.5–50 rad/s 的頻率響應比，差超過 2 % 就結束碼 1。MATLAB 用 [analysis/matlab/linear_model.m](../analysis/matlab/linear_model.m) 讀成 `ss`、`zpk`。只是小信號模型：沒有飽和、速率限制、延遲。
+- **目前的模態**（16 m/s）：短週期 −11.01 ± 13.66i（17.5 rad/s、ζ 0.63）；荷蘭滾 −1.70 ± 8.36i（8.5 rad/s、ζ 0.20）；長週期 −0.093 ± 0.712i（ζ 0.13）；螺旋 +0.093（慢慢發散，倍增時間約 7 s）；滾轉 −41.0。和 37 狀態完整模型最大差 0.48 %；和 MATLAB 對 slx 做 `linmod` 的模態相同。
 
 ## ULog 重播
 

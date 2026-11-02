@@ -2,6 +2,12 @@
 # user-measured control surfaces (2026-10-15):
 #   elevator = hinged flap, 0.035 m chord, y = 0..0.165 m each side (0.33 m total); fixed stabiliser outboard
 #   rudder   = 0.025 m chord over the original span z = 0.007..0.125 m (original Xhinge values looked like chord fractions)
+# Aero review 2026-11-02 (docs/tasks/20261102_aero_review.md):
+#   both wing halves in COMPONENT 1 and tail + fin in COMPONENT 2: without it AVL applies its finite-core model across the
+#   joints (AVL manual, COMPONENT); the wing root then behaved like a gap (neutral point 62 % instead of 52 % geometric MAC)
+#   negative Sspace on the left wing mirrors the spacing of the right wing, so beta = 0 gives no false side force
+#   horizontal tail ANGLE 1.2 deg: an estimate that closes the flight trim at 16 m/s, not a measurement; it stands for the
+#   nose-down moment of the thrust line, the tail incidence and the elevator neutral together, none of them measured yet
 MainWing
 
 #Mach
@@ -18,10 +24,12 @@ MainWing
 
 #--------------------------------------------------
 SURFACE 
-LeftWing 
+LeftWing
 !Nchordwise  Cspace  Nspanwise  Sspace
-4           1.0     40         1.5
+4           1.0     40         -1.5
 
+COMPONENT
+1
 
 ANGLE
 0.0
@@ -117,10 +125,12 @@ NACA
 
 #--------------------------------------------------
 SURFACE 
-RightWing 
+RightWing
 !Nchordwise  Cspace  Nspanwise  Sspace
 4           1.0     40         1.5
 
+COMPONENT
+1
 
 ANGLE
 0.0
@@ -220,12 +230,14 @@ Horizontal tail
 !Nchordwise  Cspace  Nspanwise  Sspace
 8           1.0     40         2
 
+COMPONENT
+2
 
-YDUPLICATE 
+YDUPLICATE
 0.0
 
 ANGLE
-0.0
+1.2
 
 SCALE
 1.0   1.0   1.0
@@ -314,6 +326,8 @@ Fin
 !Nchordwise  Cspace  Nspanwise  Sspace
 8           1.0     40         2
 
+COMPONENT
+2
 
 ANGLE
 0.0

@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SkySurfer_Core'.
  *
- * Model version                  : 14.13
+ * Model version                  : 14.15
  * Simulink Coder version         : 26.2 (R2026b) 22-May-2026
- * C/C++ source code generated on : Thu Oct 22 23:54:04 2026
+ * C/C++ source code generated on : Mon Nov  2 20:02:30 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: Intel->x86-64 (Linux 64)
@@ -52,12 +52,12 @@ extern void rt_mrdivide_U1d1x3_U2d3x3_Yd1x3_snf(const double u0[3], const double
   u1[9], double y[3]);
 extern double rt_urand_Upu32_Yd_f_pw_snf(uint32_t *u);
 extern double rt_nrand_Upu32_Yd_f_pw_snf(uint32_t *u);
+extern double look1_binlcpw(double u0, const double bp0[], const double table[],
+  uint32_t maxIndex);
 extern uint32_t plook_bincpa(double u, const double bp[], uint32_t maxIndex,
   double *fraction, uint32_t *prevIndex);
 extern double intrp2d_la_pw(const uint32_t bpIndex[], const double frac[], const
   double table[], const uint32_t stride, const uint32_t maxIndex[]);
-extern double look1_binlcpw(double u0, const double bp0[], const double table[],
-  uint32_t maxIndex);
 extern uint32_t plook_binx(double u, const double bp[], uint32_t maxIndex,
   double *fraction);
 extern double intrp3d_l_pw(const uint32_t bpIndex[], const double frac[], const

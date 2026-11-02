@@ -1,10 +1,25 @@
-"""Documented CLI build using the Mac's configured existing MATLAB session."""
-import json,queue,subprocess,threading,time
+"""MATLAB through its MCP server (SIM2HITL_MATLAB_MCP, or the two usual install paths), from the command line.
+
+The server connects to an existing shared MATLAB session by default (SIM2HITL_MATLAB_MCP_MODE=new starts its own)."""
+import json,os,queue,re,subprocess,threading,time
 from pathlib import Path
-def generate(runtime):
- server=Path.home()/'.matlab/agentic-toolkits/bin/matlab-mcp-server'
- if not server.is_file():raise RuntimeError('Configure this host MATLAB MCP, or run plant/core/build_core.m in MATLAB directly; no runtime reinstall')
- proc=subprocess.Popen([str(server),'--matlab-session-mode','existing','--disable-telemetry','true'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,bufsize=1)
+def find_server():
+ candidates=[os.environ.get('SIM2HITL_MATLAB_MCP'),Path.home()/'.matlab/agentic-toolkits/bin/matlab-mcp-server',Path.home()/'.MathWorks/AgenticToolkits/v1/bin/matlab-mcp-server']
+ for candidate in candidates:
+  if candidate and Path(candidate).is_file():return Path(candidate)
+ raise RuntimeError('Configure this host MATLAB MCP, or run plant/core/build_core.m in MATLAB directly; no runtime reinstall')
+def evaluate(project,code):
+ """Run MATLAB code with the project as the current folder; returns the command window text. Without a shared session
+ (MATLAB shareMATLABSession) it starts its own, unless SIM2HITL_MATLAB_MCP_MODE says which one to use."""
+ mode=os.environ.get('SIM2HITL_MATLAB_MCP_MODE')
+ if mode:return _evaluate(project,code,mode)
+ try:return _evaluate(project,code,'existing')
+ except RuntimeError as error:
+  if 'attach' not in str(error):raise
+ return _evaluate(project,code,'new')
+def _evaluate(project,code,mode):
+ server=find_server()
+ proc=subprocess.Popen([str(server),'--matlab-session-mode',mode,'--disable-telemetry=true'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,bufsize=1)
  messages=queue.Queue()
  def read():
   for line in proc.stdout:
@@ -26,19 +41,22 @@ def generate(runtime):
   request(1,'initialize',{'protocolVersion':'2024-11-05','capabilities':{},'clientInfo':{'name':'px4-llm-sim2hitl-update','version':'1.0'}})
   proc.stdin.write(json.dumps({'jsonrpc':'2.0','method':'notifications/initialized'})+'\n');proc.stdin.flush()
   tools=request(2,'tools/list',{})['tools'];tool=next(t for t in tools if t['name']=='evaluate_matlab_code')
-  props=tool['inputSchema']['properties'];path=str(Path(runtime).parent/'plant'/'core').replace("'","''")
-  # Plant core builder (plant/core/build_core.m): reusable core C plus Simulink reference runs.
-  code="addpath('"+path+"'); bcache=build_core(); fprintf('B_EXPORT_CACHE=%s\\n',bcache);"
+  props=tool['inputSchema']['properties']
   args={'code':code}
-  if 'project_path' in props:args['project_path']=str(Path(runtime).parent)
+  if 'project_path' in props:args['project_path']=str(project)
   result=request(3,'tools/call',{'name':tool['name'],'arguments':args})
-  text='\n'.join(c.get('text','') for c in result.get('content',[]));print(text,flush=True)
-  if result.get('isError'):raise RuntimeError('MATLAB build failed')
-  import re
-  match=re.search(r'B_EXPORT_CACHE=([^\r\n]+)',text)
-  if not match:raise RuntimeError('MATLAB did not return export cache')
-  return Path(match.group(1))
+  text='\n'.join(c.get('text','') for c in result.get('content',[]))
+  if not result.get('isError'):print(text,flush=True)
+  if result.get('isError'):raise RuntimeError('MATLAB code failed: '+text[-500:])
+  return text
  finally:
   proc.stdin.close()
   try:proc.wait(timeout=3)
   except subprocess.TimeoutExpired:proc.terminate()
+def generate(runtime):
+ # Plant core builder (plant/core/build_core.m): reusable core C plus Simulink reference runs.
+ path=str(Path(runtime).parent/'plant'/'core').replace("'","''")
+ text=evaluate(Path(runtime).parent,"addpath('"+path+"'); bcache=build_core(); fprintf('B_EXPORT_CACHE=%s\\n',bcache);")
+ match=re.search(r'B_EXPORT_CACHE=([^\r\n]+)',text)
+ if not match:raise RuntimeError('MATLAB did not return export cache')
+ return Path(match.group(1))

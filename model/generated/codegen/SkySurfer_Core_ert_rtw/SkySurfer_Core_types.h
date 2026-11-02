@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SkySurfer_Core'.
  *
- * Model version                  : 14.13
+ * Model version                  : 14.15
  * Simulink Coder version         : 26.2 (R2026b) 22-May-2026
- * C/C++ source code generated on : Thu Oct 22 23:54:04 2026
+ * C/C++ source code generated on : Mon Nov  2 20:02:30 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: Intel->x86-64 (Linux 64)
@@ -29,6 +29,17 @@ typedef struct {
   double spring;
   double damper;
 } struct_E6DgqKtWQeTvqZ51i6aBTH;
+
+#endif
+
+#ifndef DEFINED_TYPEDEF_FOR_struct_Mdu8JAorm6zM30ADlDKuaD_
+#define DEFINED_TYPEDEF_FOR_struct_Mdu8JAorm6zM30ADlDKuaD_
+
+typedef struct {
+  double CommandBP[11];
+  double Table_N[11];
+  double LapseK;
+} struct_Mdu8JAorm6zM30ADlDKuaD;
 
 #endif
 
