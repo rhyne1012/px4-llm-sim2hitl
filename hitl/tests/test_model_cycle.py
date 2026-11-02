@@ -64,6 +64,16 @@ class GeneratedDifference(unittest.TestCase):
         d = model_cycle.generated_difference(a, b)
         self.assertEqual(d['results_changed'], ['codegen/r.csv'])
 
+    def test_the_generating_checkout_and_matlab_are_not_a_change(self):
+        # results/reuse_policy.json and core_build.json carry the checkout path and the MATLAB version
+        a, b = self.folders({'policy.json': '{"policy_file": "/home/a/x/.satk/r.json", "libraries": 0}',
+                             'build.json': '{"matlab": "26.1", "dt": 0.004}'},
+                            {'policy.json': '{"policy_file": "/home/b/y/.satk/r.json", "libraries": 0}',
+                             'build.json': '{"matlab": "26.2", "dt": 0.004}'})
+        self.assertEqual(model_cycle.generated_difference(a, b)['results_changed'], [])
+        a, b = self.folders({'build.json': '{"matlab": "26.1", "dt": 0.004}'}, {'build.json': '{"matlab": "26.1", "dt": 0.002}'})
+        self.assertEqual(model_cycle.generated_difference(a, b)['results_changed'], ['codegen/build.json'])
+
     def test_a_removed_file_is_a_change(self):
         a, b = self.folders({'x.c': 'int a;\n', 'y.c': 'int b;\n'}, {'x.c': 'int a;\n'})
         self.assertEqual(model_cycle.generated_difference(a, b)['code_changed'], ['codegen/y.c'])
@@ -85,6 +95,13 @@ class AvlJointLint(unittest.TestCase):
     def test_one_component_passes(self):
         text = SPLIT_WING.replace('4 1 10 1\n', '4 1 10 1\nCOMPONENT\n1\n')
         self.assertEqual(run_table.unjoined(run_table.parse_surfaces(text)), [])
+
+    def test_keywords_count_by_their_first_four_characters(self):
+        # AVL reads only the first four characters of a keyword
+        short = SPLIT_WING.replace('SURFACE', 'SURF').replace('SECTION', 'SECT')
+        self.assertEqual(run_table.unjoined(run_table.parse_surfaces(short)), [('Left', 'Right')])
+        joined = short.replace('4 1 10 1\n', '4 1 10 1\nCOMP\n1\n')
+        self.assertEqual(run_table.unjoined(run_table.parse_surfaces(joined)), [])
 
     def test_translate_and_duplicate_count(self):
         text = """T

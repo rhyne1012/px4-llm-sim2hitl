@@ -4,10 +4,13 @@
   ./runbridge model-cycle [--cache DIR] [--skip-generate] [--airspeed 13 16 20 25] [--no-sitl-build] [--out NEW_DIR]
 
 1. Code generation through MATLAB (--cache: a build_core() folder made by hand; --skip-generate: only plant C changed).
-2. What the generation changed: the generated C without comments and the Simulink reference runs, byte by byte.
+2. What the generation changed: the generated C without comments and the Simulink reference runs, byte by byte (the
+   checkout path and MATLAB version in the results' JSON files left out).
 3. Model release: compile, the four checks, publish.
-4. Trim at several airspeeds, drop test, and the linear model at the middle one (sitl/trim.py).
-5. The recorded reference data re-recorded and compared. Identical data plus identical C means nothing numeric changed.
+4. Trim at several airspeeds (every one must converge), drop test, and the linear model at the middle one (sitl/trim.py).
+5. The recorded reference data re-recorded and compared. Identical data plus identical Simulink results means nothing
+   numeric changed; generated C that differs anyway is reported as `code_changed_only` (renames, or a path the
+   reference cases do not run, such as the VSP tables while useAVL_VSP = 0: a person says which).
 6. The reduced SITL rebuilt against the new release (its executable links the plant library by absolute path).
    SIM2HITL_PX4_VENV, when set, is put first on PATH for the build (a venv for PX4's Python kept outside the PX4 tree).
 
@@ -16,7 +19,6 @@ which is then expected, not a failure. No FC is touched: SITL scenarios and HITL
 """
 import argparse
 import datetime
-import hashlib
 import json
 import os
 import re
@@ -35,6 +37,8 @@ import toolchain  # noqa: E402
 GENERATED = ROOT / 'model' / 'generated'
 REFERENCE = ROOT / 'plant' / 'reference' / 'data' / 'reference.npz'
 COMMENT_BLOCK = re.compile(r'/\*.*?\*/', re.S)
+# Result-file keys that say where and with what the code was generated, not what it computes
+IDENTITY_KEYS = {'policy_file', 'matlab'}
 
 
 class Failed(RuntimeError):
@@ -43,6 +47,21 @@ class Failed(RuntimeError):
 
 def code_without_comments(path):
     return COMMENT_BLOCK.sub('', Path(path).read_text(errors='replace'))
+
+
+def same_result(a, b):
+    """Byte-equal, or for JSON equal once the generating checkout's path and MATLAB version are left out."""
+    if a.read_bytes() == b.read_bytes():
+        return True
+    if a.suffix != '.json':
+        return False
+    try:
+        x, y = json.loads(a.read_text()), json.loads(b.read_text())
+    except ValueError:
+        return False
+    if not isinstance(x, dict) or not isinstance(y, dict):
+        return False
+    return {k: v for k, v in x.items() if k not in IDENTITY_KEYS} == {k: v for k, v in y.items() if k not in IDENTITY_KEYS}
 
 
 def generated_difference(before, after):
@@ -62,7 +81,7 @@ def generated_difference(before, after):
                 code.append(str(name))
             elif a.read_bytes() != b.read_bytes():
                 comments_only += 1
-        elif a.read_bytes() != b.read_bytes():
+        elif not same_result(a, b):
             results.append(str(name))
     return {'code_changed': code, 'results_changed': results, 'code_files_with_only_comment_changes': comments_only}
 
@@ -122,7 +141,8 @@ def main():
     parser.add_argument('--out', type=Path)
     args = parser.parse_args()
     stamp = datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d_%H%M%SZ')
-    out = args.out or toolchain.cache_root() / 'model_cycles' / f'cycle_{stamp}'
+    # Absolute: the steps run with the repository as their working folder
+    out = (args.out or toolchain.cache_root() / 'model_cycles' / f'cycle_{stamp}').resolve()
     if out.exists():
         parser.error(f'{out} exists')
     out.mkdir(parents=True)
@@ -143,13 +163,17 @@ def main():
         release = last_json(cycle.run('release', [python, '-B', HITL / 'update.py']))
         report['build_id'] = release.get('build_id')
         print(f"    {release.get('build_id')}{' (unchanged)' if release.get('unchanged') else ''}", flush=True)
-        middle = sorted(args.airspeed)[len(args.airspeed) // 2 - 1]
+        middle = sorted(args.airspeed)[(len(args.airspeed) - 1) // 2]  # the lower one of an even count
         cycle.run('trim', [python, '-B', ROOT / 'sitl/trim.py', '--airspeed', *args.airspeed, '--drop', 20, '--out', out / 'trim.json'])
         report['trim'] = [{'airspeed_m_s': r['airspeed_m_s'], 'elevator': r['elevator'], 'throttle': r['throttle'],
                            'pitch_deg': r['pitch_deg'], 'converged': r['converged']}
                           for r in json.loads((out / 'trim.json').read_text())['trims']]
         for row in report['trim']:
-            print(f"    {row['airspeed_m_s']:5.1f} m/s elevator {row['elevator']:.4f} throttle {row['throttle']:.4f} pitch {row['pitch_deg']:.2f}", flush=True)
+            print(f"    {row['airspeed_m_s']:5.1f} m/s elevator {row['elevator']:.4f} throttle {row['throttle']:.4f} pitch {row['pitch_deg']:.2f}"
+                  + ('' if row['converged'] else '   NOT CONVERGED'), flush=True)
+        failed = [row['airspeed_m_s'] for row in report['trim'] if not row['converged']]
+        if failed:
+            raise Failed(f'trim did not converge at {failed} m/s: see {out / "trim.log"}')
         cycle.run('linear model', [python, '-B', ROOT / 'sitl/trim.py', '--airspeed', middle, '--drop', 0, '--linearize', '--out', out / 'linear.json'])
         linear = json.loads((out / 'linear.json').read_text())['trims'][0]['linear']
         report['linear_modes'] = linear['modes']
@@ -157,10 +181,16 @@ def main():
         cycle.run('reference data', [python, '-B', ROOT / 'plant/reference/record_reference.py'])
         report['reference'] = arrays_difference(before / 'reference.npz', REFERENCE)
         generated = report['generated']
-        code_changed = generated != 'skipped' and bool(generated['code_changed'] or generated['results_changed'])
-        report['numeric_change'] = bool(report['reference']['changed']) or code_changed
+        results_changed = generated != 'skipped' and bool(generated['results_changed'])
+        report['numeric_change'] = bool(report['reference']['changed']) or results_changed
+        # Renamed blocks change identifiers and temporaries in the C while every result stays the same; a change on a
+        # path the reference cases do not run (for example the VSP tables while useAVL_VSP = 0) looks the same. Reported
+        # apart, for a person to say which it is.
+        report['code_changed_only'] = generated != 'skipped' and bool(generated['code_changed']) and not report['numeric_change']
         print(f"    reference: {len(report['reference']['changed'])} of {report['reference']['arrays']} arrays changed; "
-              f"numeric_change {report['numeric_change']}", flush=True)
+              f"numeric_change {report['numeric_change']}"
+              + ('; the generated C changed with identical results (renames, or a path the references do not run)'
+                 if report['code_changed_only'] else ''), flush=True)
         if not args.no_sitl_build:
             cycle.run('reduced SITL build', [python, '-B', ROOT / 'sitl/build_sitl.py'], env=px4_path_env())
         else:

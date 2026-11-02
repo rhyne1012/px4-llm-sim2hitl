@@ -154,6 +154,22 @@ def run(config, out):
     return stab[0], seconds, version.group(1).strip() if version else None
 
 
+def uneven(config):
+    """Grid lists VSPAERO cannot solve as written: the sweep takes only the first, last and count of each list, so
+    the values must be evenly spaced (and sorted), or the solver runs other angles."""
+    bad = []
+    for key in ('alpha_deg', 'beta_deg', 'mach'):
+        values = config[key]
+        steps = [b - a for a, b in zip(values, values[1:])]
+        if values != sorted(values) or any(not math.isclose(s, steps[0], rel_tol=1e-9, abs_tol=1e-9) for s in steps):
+            bad.append(f'{key} {values}')
+    return bad
+
+
+def same_grid(config, full):
+    return all(sorted(config[k]) == sorted(full[k]) for k in ('alpha_deg', 'beta_deg', 'mach'))
+
+
 def table(cases, config):
     """Cases ordered like the importer's grid: beta outer, then Mach, then alpha (data_out order)."""
     names = [g['name'] for g in config['groups']]
@@ -175,6 +191,8 @@ def table(cases, config):
 
 
 def pick(data, coeff, suffix, mach, alpha, beta):
+    if suffix not in data[coeff]:  # a group named otherwise in table.json: that row is left out
+        return None
     for k in range(len(data['mach'])):
         if math.isclose(data['mach'][k], mach) and math.isclose(data['aoa'][k], alpha) and math.isclose(data['beta'][k], beta):
             return data[coeff][suffix][k]
@@ -338,6 +356,8 @@ def main():
             (args.from_result.parent / 'comparison.md').write_text(text)
             print(text)
         if args.write_mat:
+            if not same_grid(report['config'], json.loads(args.config.read_text())):
+                parser.error(f'--write-mat needs the full grid of {args.config}; {args.from_result} has another')
             suffixes = list(DERIVS) + ['d' + g['name'] for g in report['config']['groups']]
             print(f"MAT written: {write_mat(report['data_out'], suffixes, args.from_result.parent, report['config']['reference'])}; model/ changed, next ./runbridge model-cycle")
         return 0
@@ -347,6 +367,8 @@ def main():
             config[key] = value
     if args.write_mat and (args.alpha or args.beta or args.mach):
         parser.error('--write-mat needs the full grid of the config')
+    if uneven(config):
+        parser.error(f'VSPAERO sweeps evenly spaced values only: {"; ".join(uneven(config))}')
     import toolchain
     stamp = datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d_%H%M%SZ')
     out = (args.out or toolchain.cache_root() / 'vsp_runs' / f'table_{stamp}').resolve()
@@ -381,7 +403,10 @@ def main():
         version = finished[0][2]
     data, suffixes = table(cases, config)
     report = {'openvsp': version, 'seconds': round(seconds, 1), 'jobs': jobs, 'stab': stab, 'cases': len(cases),
-              'config': config, 'summary': summary(data, config), 'data_out': data}
+              'config': config, 'data_out': data}
+    # The solve is saved before anything that reads other files or names: a failure there must not lose it
+    (out / 'result.json').write_text(json.dumps(report, indent=1))
+    report['summary'] = summary(data, config)
     if args.compare_avl:
         report['avl_summary'] = avl_summary(args.compare_avl)
     (out / 'result.json').write_text(json.dumps(report, indent=1))

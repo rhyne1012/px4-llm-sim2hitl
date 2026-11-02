@@ -7,7 +7,6 @@
 | `skysurfer_geometry.as` | 幾何（OpenVSP 的 AngelScript）：平面形狀和 `SkySurfer_wing2410_NDU.avl` 相同（主翼 NACA 2410、尾翼 NACA 0013、垂尾 NACA 0010，只有升力面、thin surface、沒有機身），加上四個舵面與水平尾翼 1.2° |
 | `table.json` | 工況、參考值、求解設定、舵面群組 |
 | `run_table.py` | 一個指令：建幾何、跑 VSPAERO 穩定性導數、讀結果、和 AVL 比、轉成模型的 MAT |
-| `skysurfer_xcheck.vsp3`、`.vspscript` | 2026-11-02 第一次交叉比對用的最小模型（沒有舵面、尾翼 0°），留作紀錄 |
 
 ## 重新產生
 
@@ -18,6 +17,10 @@
 "$PY" -B aircraft/vsp/run_table.py --from-result <run>/result.json --write-mat  # 確定了才寫 model/Skysurfer.mat（要 MATLAB）
 ./runbridge model-cycle                                                          # model/ 改了，接著跑這個
 ```
+
+- 格點（`table.json` 的 `alpha_deg`、`beta_deg`、`mach`）要由小到大、等間距：VSPAERO 只收起點、終點與點數，不等間距時會算到別的角度，所以 `run_table.py` 一開始就拒絕。
+- 算完先寫 `result.json`，再算先看的數字和 AVL 比較；那一步出錯（例如舵面群組換了名字、AVL 檔路徑打錯）不會白算。舵面群組換名字時，先看的數字裡用到舊名字的那幾行不印。
+- `--from-result … --write-mat` 只接受和 `table.json` 同一組格點的結果：快速看的小格點不會寫進模型。
 
 - OpenVSP 3.55.0 用 `SIM2HITL_VSP_ROOT` 指定（有 `opt/OpenVSP/vspscript` 的資料夾），沒設時找 `~/.local/share/OpenVSP/3.55.0`。結果放在 cache 的 `vsp_runs/`，或 `--out` 指定的新資料夾。
 - 工況和 AVL 表相同：Mach 0.05、0.10 × α −10、−5、0、5、10、15 × β −10、−5、0、5、10；Sref 0.238、Cref 0.2、Bref 1.41、力矩參考點 x 0.05 m（= AVL 的 `Xref`、模型的 `XREF_m`）。
