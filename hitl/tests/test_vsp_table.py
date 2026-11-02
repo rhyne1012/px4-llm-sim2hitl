@@ -76,16 +76,24 @@ class WindAxes(unittest.TestCase):
         data = {'aoa': [10.0, 0.0], 'beta': [0.0, 5.0],
                 'CMl': {'base': [0.1, 0.0], 'dp': [-0.4, -0.4]}, 'CMm': {'base': [-0.05, 0.2], 'dp': [0.0, 0.0]},
                 'CMn': {'base': [0.02, 0.0], 'dp': [-0.01, -0.01]}}
-        wind = vsp.wind_moments(data)
+        wind = vsp.wind_moments(data, {'bref': 1.41, 'cref': 0.2})
         a = math.radians(10.0)
         self.assertAlmostEqual(wind['CMl']['base'][0], math.cos(a) * 0.1 + math.sin(a) * 0.02)
         self.assertAlmostEqual(wind['CMn']['base'][0], -math.sin(a) * 0.1 + math.cos(a) * 0.02)
         self.assertAlmostEqual(wind['CMm']['base'][0], -0.05)
         self.assertAlmostEqual(wind['CMl']['dp'][0], math.cos(a) * -0.4 + math.sin(a) * -0.01)
-        b = math.radians(5.0)  # at alpha 0 a sideslip mixes roll and pitch
-        self.assertAlmostEqual(wind['CMl']['base'][1], math.sin(b) * 0.2)
+        b = math.radians(5.0)  # at alpha 0 a sideslip mixes roll and pitch, as moments: CMm is per cref, CMl per bref
+        self.assertAlmostEqual(wind['CMl']['base'][1], math.sin(b) * 0.2 * 0.2 / 1.41)
         self.assertAlmostEqual(wind['CMm']['base'][1], math.cos(b) * 0.2)
         self.assertEqual(data['CMl']['base'][0], 0.1)  # the input is left as it was
+
+    def test_the_rotation_keeps_the_dimensional_moment(self):
+        data = {'aoa': [5.0], 'beta': [5.0], 'CMl': {'base': [-0.003]}, 'CMm': {'base': [-0.188]}, 'CMn': {'base': [0.007]}}
+        ref = {'bref': 1.41, 'cref': 0.2}
+        wind = vsp.wind_moments(data, ref)
+        body = [-0.003 * 1.41, -0.188 * 0.2, 0.007 * 1.41]
+        back = [wind['CMl']['base'][0] * 1.41, wind['CMm']['base'][0] * 0.2, wind['CMn']['base'][0] * 1.41]
+        self.assertAlmostEqual(sum(m * m for m in body), sum(m * m for m in back))
 
 
 class Script(unittest.TestCase):

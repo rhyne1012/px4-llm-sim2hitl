@@ -30,7 +30,7 @@
 
 ## 核心
 
-- **來源邊界**：SLX 根層是 `Controls[16]` → `Actuator_Mapping` → `UAV` → `CoreSnapshot[72]`。CoreSnapshot 在 `UAV/UAV` 內以 Vector Concatenate 組成，欄位與單位見 `plant_core.h`。
+- **來源邊界**：SLX 根層是 `Controls[16]` → `Actuator_Mapping` → `UAV` → `CoreSnapshot[72]`。CoreSnapshot 在 `UAV/Airframe` 內以 Vector Concatenate 組成，欄位與單位見 `plant_core.h`。
 - **builder 只改 cache 副本**：加 Thil 的 ZOH（輸出取 t_k）；把 SETTING1 的 7 個初值常數改由根層 `InitialConditions[7]` 輸入，風速、風向與風的模式改由根層 `Wind[4]` 輸入，因為 Reusable 生成碼的模型參數是共用的全域結構，放在輸入裡才會每架各一份；亂流以參考強度 W20 = 1 m/s 產碼，輸出乘上 `Wind[3]`（見下面「風」）。其餘氣動表、質量等參數各架共用（同一架飛機）。
 - **連續狀態與 f(x, u)**（API 1.1）：37 個連續狀態（位置、機體速度、四元數、角速度、5 個致動器、16 個 Dryden 亂流濾波器、3 個陣風距離；順序與致動器對應見 `plant_core.h`）。`plant_core_get_state()` 讀出；`plant_core_eval()` 寫入狀態 x、套用命令、跑一個正常步，回傳該步 ode4 第一階的 f(t_k, x) 與 x 的 snapshot，和模擬是同一段程式。注意：(1) 新初始化的核心第一步會從初值輸入重新載入積分器，所以先步進一次再寫狀態；(2) 舵面在伺服之後有 rate limiter（記住前一次輸出），單次求值舵面最多動 2°，求平衡時同一狀態要寫入並步進數十次讓 limiter 到位（`sitl/trim.py`）。eval 之後核心已前進一步，所以在副本上做。
 - **呼叫規則**：每架配置 `plant_core_size()` 位元組；`plant_core_step()` 先回報 t_k，再積分一步。同一程序可交錯跑多架，但一次一個呼叫，不在多執行緒同時呼叫。複製狀態一律用 `plant_core_copy()`（內部指標要重新指向新位置）。
@@ -104,7 +104,7 @@ IMU 的 noise density 換成每筆標準差：σ = density·√(1/(2·dt))。沒
 
 ## 地面
 
-模型的地面是很簡化的一塊（`UAV/UAV/Ground Model`，參數在 `model/FW_SkySurfer_InitialFunction.m` 的 `uavData.contact`）。看起飛、落地的結果或換飛機前要知道：
+模型的地面是很簡化的一塊（`UAV/Airframe/Ground Model`，參數在 `model/FW_SkySurfer_InitialFunction.m` 的 `uavData.contact`）。看起飛、落地的結果或換飛機前要知道：
 
 - **只有一個接觸點，就在重心**：沒有輪子、起落架、機腹的位置。地面是一整片平地，就在模型位置的高度 0（場景的離地高度 `height_agl_m` 從這裡量），沒有地形。
 - **往上推的力**：重心低於地面時才有，像很硬的彈簧加阻尼（自然頻率 20 Hz、臨界阻尼），只推不拉。靜止時約陷下 0.6 mm。
@@ -141,7 +141,7 @@ SkySurfer 的數字（AVL 座標原點在翼根前緣，往機尾為正；模型
 - **兩種「弦長」不要混**：幾何 MAC = 0.1791 m（由 AVL 主翼各剖面的弦長與前緣位置積分）。模型的 `cbar` = 0.20 m 是 AVL 的參考弦長 `Cref`（約等於翼根弦長 0.198 m），只用來把係數換成力矩，**不是幾何 MAC**。重心原本在翼根弦長的 25 %（50 mm），2026-11 起照實機改成 33 %（65 mm）。
 - 現在的靜穩定度約 25 % MAC。更正：之前寫的 45 %（重心 50 mm、中性點 63 %）來自 AVL 左右主翼沒放同一個 `COMPONENT` 的數值問題（[aircraft/avl](../aircraft/avl/README.md)）。實飛量不到中性點本身，重心、舵面行程和慣量還沒量準，這個數字只代表模型。
 - 配平（`sitl/trim.py`）：升降舵 15 m/s 0.273、16 m/s 0.244、16.25 m/s 0.237、25 m/s 0.120；16 m/s 俯仰角 2.40°。實機 16.3 m/s 直飛時是 +0.236，但實機在 13–18 m/s 幾乎不變，模型還是變得比較多。
-- 這組配平靠 AVL 水平尾翼 `ANGLE` 1.2° 這個估計值對上，它代表推力線、尾翼安裝角和舵面中立的總和。`del_z` 不能直接設非 0：地面沒有力矩、氣動力在 5 m/s 以下是 0，起飛推力會讓模型在地上翻倒（見上面「地面」）。
+- 這組配平靠 AVL 水平尾翼 `ANGLE` 1.2° 這個估計值對上，它代表推力線和舵面中立等效應的總和（主翼與尾翼的安裝角差使用者 2026-11-02 量過約 0，所以 1.2° 不是幾何角）。`del_z` 不能直接設非 0：地面沒有力矩、氣動力在 5 m/s 以下是 0，起飛推力會讓模型在地上翻倒（見上面「地面」）。
 - 模型的慣量來自衍生專案的第一次飛試（2026-10-26）：Ixx 0.023、Iyy 0.040 kg·m²（估計範圍 Ixx 約 0.03 以下、Iyy 0.033–0.05）；Izz 0.063 = Ixx + Iyy，那趟量不到，照平面分布推。作法與依據見 [hitl/sim_to_flight.md](../hitl/sim_to_flight.md) 第 6 點。之前是原作者質量檔（0.023／0.029／0.05）的 Ixx × 2、Iyy × 3（原因不明），比實機大約一倍。只有兩次 pitch doublet，要雙線擺才定得下來。
 
 **使用者想改重心時**（AI 照這裡換算，改 `CG_m` 的第一個數，`XREF_m` 不動）：
@@ -155,7 +155,7 @@ SkySurfer 的數字（AVL 座標原點在翼根前緣，往機尾為正；模型
 
 ## 風
 
-**模型裡的風**（`model/FW_SkySurfer_HIL.slx` 的 `UAV/UAV/Environment/Wind`，Aerospace Blockset 方塊）有兩種模式，二選一，不疊加：
+**模型裡的風**（`model/FW_SkySurfer_HIL.slx` 的 `UAV/Airframe/Environment/Wind`，Aerospace Blockset 方塊）有兩種模式，二選一，不疊加：
 
 | 模式 | 內容 | 平均風從哪來 |
 |---|---|---|

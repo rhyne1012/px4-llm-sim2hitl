@@ -30,24 +30,24 @@
     }
   ],
   "reference": {
-    "recorded": "sitl/README.md: Ubuntu 24.04 x86-64, 2026-10-18, equal to the earlier macOS record",
+    "recorded": "sitl/README.md: Ubuntu 24.04 x86-64, 2026-11-03, release skysurfer-7fb22f72 (the 2026-11 model)",
     "steps": [
       {
         "axis": "roll",
-        "tail_mean": 22.32,
-        "rise_time_s": 0.316,
-        "settling_time_s": 0.456
+        "tail_mean": 22.41,
+        "rise_time_s": 0.432,
+        "settling_time_s": 0.58
       },
       {
         "axis": "pitch",
-        "tail_mean": -3.39,
-        "rise_time_s": 1.06,
-        "settled": false
+        "tail_mean": -6.14,
+        "rise_time_s": 0.832,
+        "settled": true
       },
       {
         "axis": "yaw",
-        "peak_change": 7.81,
-        "peak_time_s": 0.22
+        "peak_change": 6.98,
+        "peak_time_s": 0.212
       }
     ]
   }
