@@ -1,5 +1,5 @@
 {
-  "comment": "VSPAERO stability sweep for the model's VSP table (model/Skysurfer.mat, useAVL_VSP = 1). Same grid and reference values as aircraft/avl/table.json; xcg is the AVL Xref (the model's XREF_m). Fixed wake: a relaxed wake (10 iterations, as in the SkyTalon VSP runs) takes 7.4 min per case against 76 s and changed the derivatives by 0.5-5 % in the check (aircraft/vsp/README.md). 32 wake nodes, FarAway 5.",
+  "comment": "VSPAERO stability sweep for the model's VSP table (model/Skysurfer.mat, useAVL_VSP = 1). Same grid and reference values as aircraft/avl/table.json; xcg is the AVL Xref (the model's XREF_m). Fixed wake: a relaxed wake (10 iterations, as in the SkyTalon VSP runs) takes 7.4 min per case against 76 s and differed by a few % near cruise and by 12.5 % in Cmq at alpha 10 (aircraft/vsp/README.md). 32 wake nodes, FarAway 5.",
   "mach": [
     0.05,
     0.1
