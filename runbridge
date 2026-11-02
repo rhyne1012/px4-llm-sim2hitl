@@ -3,6 +3,7 @@
 #   ./runbridge --setup            create the Python environment (uv, from uv.lock)
 #   ./runbridge --check-python     check that environment
 #   ./runbridge update-model ...   model release (hitl/update.py: --generate, --rollback, --fc-only)
+#   ./runbridge model-cycle ...    everything to run after a change in model/ (hitl/model_cycle.py)
 #   ./runbridge where [name]       this machine's paths: venv python, cache, PX4 tree, release (hitl/where.py)
 # The venv lives outside the project: SIM2HITL_VENV, else the platform's user data folder + px4-llm-sim2hitl/venv.
 # SIM2HITL_PYTHON overrides the interpreter.
@@ -27,6 +28,8 @@ case ${1:-} in
     exec "$py" -B -c 'import platform,sys,serial,pymavlink,numpy; print(platform.platform()); print("Python "+sys.version.split()[0]); print("runtime Python PASS")' ;;
   update-model)
     shift; exec "$py" -B "$script_dir/hitl/update.py" "$@" ;;
+  model-cycle)
+    shift; exec "$py" -B "$script_dir/hitl/model_cycle.py" "$@" ;;
   where)
     shift; exec "$py" -B "$script_dir/hitl/where.py" "$@" ;;
 esac

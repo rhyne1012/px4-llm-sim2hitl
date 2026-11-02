@@ -8,10 +8,10 @@
 
 | 項目 | 內容 |
 |---|---|
-| 入口 | 根目錄的 bash 腳本 `./runbridge`：`update-model` 交給 `hitl/update.py`，`where`（這台機器實際的位置）交給 `hitl/where.py`，其他動作交給 `hitl/main.py` |
+| 入口 | 根目錄的 bash 腳本 `./runbridge`：`update-model` 交給 `hitl/update.py`，`model-cycle` 交給 `hitl/model_cycle.py`，`where`（這台機器實際的位置）交給 `hitl/where.py`，其他動作交給 `hitl/main.py` |
 | Python | `./runbridge --setup`（要 uv）依 `pyproject.toml`／`uv.lock` 建 venv，位置見 `./runbridge where venv`（Linux 是 `~/.local/share/px4-llm-sim2hitl/venv`）；`SIM2HITL_VENV` 改位置，`SIM2HITL_PYTHON` 指定直譯器。套件：pyserial 3.5、pymavlink 2.4.49、numpy 2.0.2 |
 | 檢查 | `./runbridge --check-python` 只檢查、不安裝；找不到 Python 時退出碼 4 |
-| 模型 release | `./runbridge update-model --generate`（要 MATLAB）→ `./runbridge update-model`（編譯、四道檢查、發布）。release 在 `hitl/releases/skysurfer/<平台>/<build-id>/`（平台見 `./runbridge where platform`，例如 `linux-x64`、`macos-arm64`），用哪一個由 `hitl/active/<平台>.json` 指定；兩者都在本機建、不進 git。release 含模型與 worker（`libskysurfer`、`libhil_worker`、`libskysurfer_plant`；Linux 是 `.so`、macOS 是 `.dylib`），只依賴系統 C 函式庫，跑 runtime 不需要 MATLAB。`./runbridge update-model --rollback` 切回前一個 |
+| 模型 release | `./runbridge model-cycle` 一次跑完（[model_cycle.py](model_cycle.py)：產碼、比對生成碼、發布、配平與線性模型、重錄參考資料、重編精簡 SITL，報告 `numeric_change`）；分開跑是 `./runbridge update-model --generate`（要 MATLAB）→ `./runbridge update-model`（編譯、四道檢查、發布）。release 在 `hitl/releases/skysurfer/<平台>/<build-id>/`（平台見 `./runbridge where platform`，例如 `linux-x64`、`macos-arm64`），用哪一個由 `hitl/active/<平台>.json` 指定；兩者都在本機建、不進 git。release 含模型與 worker（`libskysurfer`、`libhil_worker`、`libskysurfer_plant`；Linux 是 `.so`、macOS 是 `.dylib`），只依賴系統 C 函式庫，跑 runtime 不需要 MATLAB。`./runbridge update-model --rollback` 切回前一個 |
 | FC 序列埠 | `/dev/ttyACM*`（使用者要在 `dialout` 群組）；`--port` 預設 `auto`，依 USB 廠商碼與裝置名稱挑出 FC。FC 在 bootloader 時不連上去：名稱規則在 `host/serial_helpers.py` 的 `BOOTLOADER_LABEL`（PX4 的 `PX4 BL …`、CubePilot 出廠 ArduPilot bootloader 的 `CubeOrange+-BL`，它和韌體同一個 USB VID/PID） |
 | QGC 與自動飛手 | 只走本機 UDP：owner 從 127.0.0.1:14575 送到 QGC 的 14550；自動飛手是 14576 → 14560 |
 
@@ -27,7 +27,7 @@
 | `commands/` | 起飛後動作腳本，見 [commands README](commands/README.md) |
 | `scenarios/ground.json` | 預設場景（地面靜止） |
 | `flight_test.json` | `test-takeoff-hold`／`hitl-run` 的預設飛行與判定 |
-| `update.py`、`matlab/mcp_build.py` | 模型 release 的兩段都由 `update.py` 做；第一段經 MATLAB MCP 產碼時用 `mcp_build.py` |
+| `update.py`、`matlab/mcp_build.py` | 模型 release 的兩段都由 `update.py` 做；第一段經 MATLAB MCP 產碼時用 `mcp_build.py`：伺服器用 `SIM2HITL_MATLAB_MCP` 指定，沒指定時找 macOS 與 Linux 的預設安裝位置；先接已經開著、執行過 `shareMATLABSession` 的 MATLAB，沒有就自己開一個（約 14 s） |
 | `poc/source_columns.json` | 模型 58 個 raw 欄位的名稱 |
 | `tests/` | 離線測試、負載測試、library 驗證 |
 

@@ -41,6 +41,7 @@ SITL 預設會記 ULog（`sitl/run_sitl.py`，`--no-ulog` 可關），HITL 由 `
 | [ulog_strict.py](ulog_strict.py) | 嚴格解析整份檔案（每則訊息格式正確、剛好結束在檔尾），抓下載損壞 |
 | [ulog_export.py](ulog_export.py) | 轉成 CSV（每個主題一個檔＋參數＋訊息），給沒有 UAV Toolbox 的 MATLAB（`readtable`）、試算表或其他工具；`--list` 先看有哪些主題 |
 | [matlab/ulog_overview_plot.m](matlab/ulog_overview_plot.m) | MATLAB（UAV Toolbox 的 `ulogreader`，不需要 Java）的總覽圖範例：航向、高度與 TECS 目標、傾角與側向加速度目標、空速與 TECS 空速目標，OFFBOARD 期間灰底。複製後畫自己模組需要的主題 |
+| [matlab/linear_model.m](matlab/linear_model.m) | 讀 `sitl/trim.py --linearize --out` 的 JSON，轉成 `ss`（機體 8 狀態、完整 37 狀態）與 `zpk` 轉移函數（含舵機與不含） |
 | [template_check.py](template_check.py) | `guidance_template` 範例的自動判定（讀 ULog）；新模組照它寫自己的。資料不能判（壞值、缺段、樣本太少、時間倒退、估測標示無效）就判不通過並寫出原因，壞資料不會得到 PASS；窗口檢查和 `response.py` 共用 `window_problems`。高度階躍的基準是 `tecs_status` 的高度目標，記錄裡沒有這個主題時改用實測高度，兩者的數字不能直接比：報告的 `altitude_base_source` 寫明用了哪一個（例：SD 卡上的 `etc/logging/logger_topics.txt` 沒列 `tecs_status`） |
 
 常用主題：`vehicle_local_position`（位置、速度、`ref_alt`）、`vehicle_attitude`（`q`）、`airspeed_validated`、`vehicle_status`（`nav_state`，14 = OFFBOARD）、`tecs_status`（高度與空速的目標和內部狀態）、`fixed_wing_lateral_setpoint`／`fixed_wing_longitudinal_setpoint`、`actuator_servos`／`actuator_motors`、`log_message`（模組的 `PX4_INFO`）。SITL 的狀態是真值，HITL 與實機是 FC 上 EKF 的估測。

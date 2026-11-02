@@ -87,7 +87,7 @@ AI 先查好現況、提出建議，只跟人確認**目標、選擇與成功條
 
 ## 4. 不變量
 
-- **唯一 plant 來源**：`model/` 的 `.slx`＋初始化＋氣動 MAT／importer＋preload。轉出的 C（`model/generated/`）是建置產物，不手改；改模型後重新產碼。
+- **唯一 plant 來源**：`model/` 的一份 `.slx`＋初始化＋氣動 MAT／importer。轉出的 C（`model/generated/`）是建置產物，不手改；改模型後重新產碼。
 - **單一 owner**：同時只有一個程序持有模型與序列埠；其他指令經本機 IPC 和它溝通。
 - **通道**：`controls[0..4]` = 左副翼／右副翼／升降舵／方向舵／油門。
 - **4 ms 迴圈不呼叫 Python 或 LLM**；runtime 是最終安全判斷者，不要為了讓操作成功而放寬它的前置條件。
@@ -101,7 +101,7 @@ AI 先查好現況、提出建議，只跟人確認**目標、選擇與成功條
 
 | 改了 | 要跑 |
 |---|---|
-| 飛機模型（`model/`） | `./runbridge update-model --generate`（MATLAB）→ `./runbridge update-model` → 配平；刻意改了模型就照第 1.1 段重錄參考資料。發布新的模型 release（或回退）後，下一次跑 SITL 前先重跑 `sitl/build_sitl.py`：SITL 執行檔用絕對路徑連到 plant library，不重編會用到舊模型。slx 改了也重轉 `model_r2026a/` 的 R2026a 備份（見那裡的 README） |
+| 飛機模型（`model/`） | `./runbridge model-cycle`：產碼 → 比對生成碼 → 發布（四道檢查）→ 配平與線性模型 → 重錄參考資料並比對 → 重編精簡 SITL，第一個失敗就停，報告在 cache 的 `model_cycles/`。沒打算改飛機時（例如整理模型）`numeric_change` 必須是 false；刻意改了飛機時它本來就是 true，照第 1.1 段確認。只回退模型時，下一次跑 SITL 前自己重跑 `sitl/build_sitl.py`：SITL 執行檔用絕對路徑連到 plant library，不重編會用到舊模型 |
 | `plant/` 的 C、`hitl/` 的 `native/`、`interface/`、`aircraft/`、`update.py` | `./runbridge update-model`（四道檢查）→ 離線測試 |
 | `hitl/host/` 等 runtime 程式 | 離線測試；影響時序時加跑 300 s 負載（背景跑，不接飛控）：先查 `ulimit -r`，有權限就直接跑並告訴人，沒有就給人第 2 節的指令；結果有疑慮再跑 600 s。報告寫實際跑了幾秒 |
 | `sitl/`、`modules/` | `sitl/build_sitl.py` → `sitl/run_sitl.py` → `analysis/response.py` |
@@ -124,11 +124,10 @@ for f in hitl/tests/test_*.py deploy/test_*.py analysis/test_*.py; do n=$(basena
 | 資料夾 | 內容 |
 |---|---|
 | `model/` | 飛機模型來源；`generated/` 是轉好的 C 與 Simulink 參考結果 |
-| `model_r2026a/` | 同一個模型的 R2026a 備份（給只有 R2026a 的電腦），不是模型來源，不會自動更新 |
 | `images/` | README 用的圖（`overview.svg`）與嵌字工具 `embed_fonts.py` |
 | `platforms/` | 各平台的理解（目前是 `macos.md`）：和 Ubuntu 不同的平台行為、怎麼確認；不是安裝腳本 |
 | `fc/` | 各飛控的理解（目前是 `cubeorangeplus.md`）：換一塊飛控要查的事、接手用過的飛控、和 6C 不同的地方；不是安裝腳本 |
-| `aircraft/` | 飛機的氣動來源：`avl/` 是產生氣動表的 AVL 幾何、質量檔與轉表程式（不在 `model/` 裡，改它不影響模型版本） |
+| `aircraft/` | 飛機的氣動來源：`avl/` 是產生氣動表的 AVL 幾何、質量檔與 `run_table.py`（檢查幾何、重算、轉表；不在 `model/` 裡，改它不影響模型版本）；`thrust/` 是推力隨空速與阻力修正的出處 |
 | `plant/` | plant 核心包裝、C 真值、C 感測器、各自的檢查程式、錄製的參考資料 |
 | `sitl/` | 精簡 PX4 的 plant 模組 `plant_sim`、情境、配平、ULog 重播；`sitl_fc_lockstep.md` 是衍生專案用電腦版 PX4 當飛控與 lockstep 的經驗與建議（框架還沒有這些程式） |
 | `modules/` | 自己的 PX4 模組（同一份原始碼編進 SITL 與韌體；`guidance_template` 是範例，見它的 README「照著做一個自己的模組」）。韌體只編配方 `recipe.modules` 列的模組；SITL 要在 `sitl/px4_external/src/` 加包裝並列進那裡的 `CMakeLists.txt` |
