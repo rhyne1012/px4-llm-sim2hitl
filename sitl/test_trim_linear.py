@@ -32,7 +32,7 @@ class ActiveModel(unittest.TestCase):
     def setUpClass(cls):
         try:
             cls.core = trim.Core(trim.default_plant_lib())
-        except Exception as error:  # a machine without a model release
+        except FileNotFoundError as error:  # a machine without a model release; anything else is a failure
             raise unittest.SkipTest(f'no active model release: {error}')
         cls.result = trim.trim(cls.core, 16.0, 100.0)
         cls.linear = trim.linearize(cls.core, cls.result)

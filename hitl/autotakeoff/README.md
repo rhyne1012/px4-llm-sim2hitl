@@ -9,9 +9,9 @@
 | 檢查 | 讀回 `SYS_HITL=1` 與 `FW_MAN_P_MAX`（俯仰桿換算成角度）；確認是固定翼、未解鎖、在地上（空速 ≤ 5 m/s、高度在 ±5 m 內） | 全部通過 | 任一不符就不起飛 |
 | 模式 | 切 Stabilized，桿量先送 1 s | 進入 Stabilized | 8 s 沒進 |
 | 解鎖 | 送解鎖 | 已解鎖 | 10 s 沒解鎖 |
-| 滑跑 | 油門以每秒 1 的速度加到 `takeoff_throttle`（0.45） | 空速 ≥ `rotate_cas`（12 m/s） | 40 s 還沒到 |
+| 滑跑 | 油門以每秒 1 的速度加到 `takeoff_throttle`（0.6） | 空速 ≥ `rotate_cas`（12 m/s） | 40 s 還沒到 |
 | 爬升 | 俯仰加到 `climb_pitch`（12°），油門不變 | 高度到目標 −2 m | 180 s 還沒到就直接平飛，記為逾時 |
-| 平飛 | 油門 `cruise_throttle`（0.35）；俯仰 = `altitude_gain`（0.5°/m）× 高度差 − `climb_damping`（1°/(m/s)）× 爬升率，限 ±8° | 穩定 3 s 後跑起飛後動作（`--after`，例如 `after_takeoff_loiter` 切 Hold，見 [commands README](../commands/README.md)） | — |
+| 平飛 | 油門 `cruise_throttle`（0.32；2026-11 換成推力隨空速下降的模型後由 0.45／0.35 改來）；俯仰 = `altitude_gain`（0.5°/m）× 高度差 − `climb_damping`（1°/(m/s)）× 爬升率，限 ±8° | 穩定 3 s 後跑起飛後動作（`--after`，例如 `after_takeoff_loiter` 切 Hold，見 [commands README](../commands/README.md)） | — |
 
 - 滾轉桿和方向舵桿一直是 0，翅膀水平靠 PX4 的 Stabilized。
 - 高度是 EKF 原點以上的高度。

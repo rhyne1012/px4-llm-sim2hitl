@@ -21,6 +21,8 @@
 ./runbridge model-cycle                                           # model/ 改了，接著跑這個
 ```
 
+- 幾何檢查找到「相接卻不在同一個 `COMPONENT`」的面時，不算也不寫（結束碼 1）；確定那是真的開口才加 `--ignore-lint`。關鍵字照 AVL 只看前四個字元（`SURF`、`SECT`、`COMP` 也認得）。
+- 先看的數字用 α 0、5 與 β 0、5 的工況，舵面導數照這份幾何的名字（`elevator`、`rudder`、`aileron…`）讀；換了格點或舵面名字，那幾行就不印，不會擋住轉表。`build_avl_mat.m` 的 Mach 標籤、α 與舵面名單仍是這架飛機的，換飛機要一起改。
 - 工況和參考值在 [table.json](table.json)：Mach 0.05、0.10 × α −10、−5、0、5、10、15 × β −10、−5、0、5、10；角速度與舵面為 0；Sref 0.238、Cref 0.2、Bref 1.41、`Xref` = 質量檔的重心；輸出 total、stability、body。換飛機就換這個檔。
 - 工具經 [AVL MCP](https://github.com/rhyne1012/avl-mcp)（驗證時是 AVL 3.52）算，位置用 `SIM2HITL_AVL_MCP`、`SIM2HITL_AVL_BIN`、`SIM2HITL_AVL_WORK` 指定（沒設時找 `~/.local/share/AVL-MCP/` 底下的 AVL MCP 0.5.0 與 AVL 3.52，是衍生專案那台機器裝的位置；工作資料夾預設在 cache 的 `avl_runs/`）；側滑斜率用 β 格點相減。
 - 手動轉表時是 MATLAB（在專案根目錄）：

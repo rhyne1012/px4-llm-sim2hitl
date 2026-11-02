@@ -24,8 +24,6 @@ from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parents[1]
-KEYWORDS = ('SURFACE', 'BODY', 'COMPONENT', 'INDEX', 'YDUPLICATE', 'SCALE', 'TRANSLATE', 'ANGLE', 'SECTION', 'NOWAKE',
-            'NOALBE', 'NOLOAD', 'CDCL', 'NACA', 'AIRFOIL', 'AFILE', 'BFILE', 'DESIGN', 'CONTROL', 'CLAF')
 TOUCH_M = 1e-3
 
 
@@ -38,14 +36,15 @@ def data_lines(text):
 
 
 def parse_surfaces(text):
-    """[{name, component, sections: [(x, y, z, chord)]}], world coordinates, a YDUPLICATE adds the mirrored sections."""
+    """[{name, component, sections: [(x, y, z, chord)]}], world coordinates, a YDUPLICATE adds the mirrored sections.
+    Keywords by their first four characters, as AVL reads them (SURF, SECT, COMP ...)."""
     lines = list(data_lines(text))
     surfaces = []
     current = None
     i = 0
     while i < len(lines):
-        word = lines[i].split()[0].upper()
-        if word == 'SURFACE':
+        word = lines[i].split()[0].upper()[:4]
+        if word == 'SURF':
             current = {'name': lines[i + 1], 'component': None, 'translate': (0.0, 0.0, 0.0), 'raw': [], 'mirror': None}
             surfaces.append(current)
             i += 2
@@ -53,13 +52,13 @@ def parse_surfaces(text):
         if word == 'BODY':
             current = None
         elif current is not None:
-            if word in ('COMPONENT', 'INDEX'):
+            if word in ('COMP', 'INDE'):
                 current['component'] = int(lines[i + 1].split()[0])
-            elif word == 'TRANSLATE':
+            elif word == 'TRAN':
                 current['translate'] = tuple(float(v) for v in lines[i + 1].split()[:3])
-            elif word == 'YDUPLICATE':
+            elif word == 'YDUP':
                 current['mirror'] = float(lines[i + 1].split()[0])
-            elif word == 'SECTION':
+            elif word == 'SECT':
                 values = lines[i + 1].split()
                 current['raw'].append(tuple(float(v) for v in values[:4]))
         i += 1
@@ -172,25 +171,35 @@ def summary(result_path, config):
             f = c['total']['fields']
             if abs(f['Mach'] - mach) < 1e-9 and f['Alpha'] == alpha and f['Beta'] == beta:
                 return c
-        raise KeyError((alpha, beta))
+        return None
 
-    low, high = case(0, 0), case(5, 0)
-    fl, fh = low['total']['fields'], high['total']['fields']
-    side = case(5, 5)['total']['fields']
-    mac = config['geometric_mac']
-    neutral = (low['stability']['diagnostics']['neutral_point_x'] + high['stability']['diagnostics']['neutral_point_x']) / 2
-    d, c = high['stability']['derivatives'], high['stability']['control_derivatives']
-    aileron = sum(abs(v['Cl']) for k, v in c.items() if k.lower().startswith('aileron'))
-    return {
-        'CL at alpha 0': fl['CLtot'], 'lift slope, /rad': (fh['CLtot'] - fl['CLtot']) / math.radians(5.0),
-        'neutral point, % geometric MAC': 100 * (neutral - mac['leading_edge_x_m']) / mac['length_m'],
-        'static margin at the CG, % MAC': 100 * (neutral - config['cg_x_m']) / mac['length_m'],
-        'span efficiency e, alpha 5': fh['e'], 'Cm per elevator deg': c['elevator']['Cm'], 'Cmq': d['Cmq'], 'Clp': d['Clp'],
-        'Cl per aileron deg, both': aileron, 'Cn per rudder deg': c['rudder']['Cn'], 'Cnr': d['Cnr'],
-        'Cn per beta deg (grid)': (side["Cn'tot"] - fh["Cn'tot"]) / 5.0, 'Cl per beta deg (grid)': (side["Cl'tot"] - fh["Cl'tot"]) / 5.0,
-        'CY per beta deg (grid)': (side['CYtot'] - fh['CYtot']) / 5.0,
-        'false side force at beta 0, largest of CY Cl Cn': max(abs(fh['CYtot']), abs(fh["Cl'tot"]), abs(fh["Cn'tot"])),
-    }
+    # The numbers need alpha 0 and 5 and beta 0 and 5 in the grid, and read the control derivatives by the names in
+    # this geometry (elevator, rudder, aileron*); another grid or other names leave those rows out, nothing stops.
+    rows = {}
+    low, high, side = case(0, 0), case(5, 0), case(5, 5)
+    if low and high:
+        fl, fh = low['total']['fields'], high['total']['fields']
+        mac = config['geometric_mac']
+        neutral = (low['stability']['diagnostics']['neutral_point_x'] + high['stability']['diagnostics']['neutral_point_x']) / 2
+        d, c = high['stability']['derivatives'], high['stability']['control_derivatives']
+        rows.update({'CL at alpha 0': fl['CLtot'], 'lift slope, /rad': (fh['CLtot'] - fl['CLtot']) / math.radians(5.0),
+                     'neutral point, % geometric MAC': 100 * (neutral - mac['leading_edge_x_m']) / mac['length_m'],
+                     'static margin at the CG, % MAC': 100 * (neutral - config['cg_x_m']) / mac['length_m'],
+                     'span efficiency e, alpha 5': fh['e'], 'Cmq': d['Cmq'], 'Clp': d['Clp'], 'Cnr': d['Cnr'],
+                     'false side force at beta 0, largest of CY Cl Cn': max(abs(fh['CYtot']), abs(fh["Cl'tot"]), abs(fh["Cn'tot"]))})
+        if 'elevator' in c:
+            rows['Cm per elevator deg'] = c['elevator']['Cm']
+        ailerons = [abs(v['Cl']) for k, v in c.items() if k.lower().startswith('aileron')]
+        if ailerons:
+            rows['Cl per aileron deg, both'] = sum(ailerons)
+        if 'rudder' in c:
+            rows['Cn per rudder deg'] = c['rudder']['Cn']
+        if side:
+            fs = side['total']['fields']
+            rows.update({'Cn per beta deg (grid)': (fs["Cn'tot"] - fh["Cn'tot"]) / 5.0,
+                         'Cl per beta deg (grid)': (fs["Cl'tot"] - fh["Cl'tot"]) / 5.0,
+                         'CY per beta deg (grid)': (fs['CYtot'] - fh['CYtot']) / 5.0})
+    return rows
 
 
 def write_mat(result_path, config):
@@ -207,6 +216,7 @@ def main():
     parser.add_argument('--lint-only', action='store_true')
     parser.add_argument('--compare', type=Path, help='an older result.json')
     parser.add_argument('--write-mat', action='store_true')
+    parser.add_argument('--ignore-lint', action='store_true', help='solve (and write) although the lint found a joint')
     args = parser.parse_args()
     config = json.loads(args.config.read_text())
     geometry = (args.config.parent / config['geometry']).resolve()
@@ -215,14 +225,16 @@ def main():
         print(f'LINT: "{a}" and "{b}" touch but are not in one COMPONENT: AVL treats the joint with a finite core')
     if not problems:
         print(f'lint: {geometry.name}: every touching pair of surfaces shares a COMPONENT')
-    if args.lint_only:
+    if args.lint_only or (problems and not args.ignore_lint):
+        if problems and not args.lint_only:
+            print('Nothing solved or written: join the surfaces (COMPONENT), or --ignore-lint if the gap is real.')
         return 1 if problems else 0
     result, job = run_grid(config, geometry)
     print(f'AVL job {job}: {result}')
     numbers = summary(result, config)
     old = summary(args.compare, config) if args.compare else None
     for name, value in numbers.items():
-        print(f'  {name:48s} {value:12.5f}' + (f'   was {old[name]:12.5f}' if old else ''))
+        print(f'  {name:48s} {value:12.5f}' + (f'   was {old[name]:12.5f}' if old and name in old else ''))
     if args.write_mat:
         write_mat(result, config)
         print('MAT files written: model/ changed, next ./runbridge model-cycle')

@@ -100,5 +100,26 @@ class Script(unittest.TestCase):
         self.assertIn('SetI("AlphaNpts", 6)', text)
 
 
+class Grid(unittest.TestCase):
+    def test_the_project_grid_is_evenly_spaced(self):
+        config = vsp.json.loads((ROOT / 'aircraft/vsp/table.json').read_text())
+        self.assertEqual(vsp.uneven(config), [])
+
+    def test_an_uneven_or_unsorted_list_is_refused(self):
+        # VSPAERO takes start, end and count: 0 2 5 would be solved at 0 2.5 5
+        bad = vsp.uneven({'alpha_deg': [0, 2, 5], 'beta_deg': [5, 0, -5], 'mach': [0.05]})
+        self.assertEqual([b.split()[0] for b in bad], ['alpha_deg', 'beta_deg'])
+
+    def test_write_mat_needs_the_same_grid(self):
+        full = {'alpha_deg': [-5, 0, 5], 'beta_deg': [-5, 0, 5], 'mach': [0.05, 0.1]}
+        self.assertTrue(vsp.same_grid(dict(full), full))
+        self.assertFalse(vsp.same_grid(dict(full, alpha_deg=[5, 10], beta_deg=[0], mach=[0.05]), full))
+
+    def test_a_group_named_otherwise_is_left_out(self):
+        data = {'mach': [0.05], 'aoa': [0.0], 'beta': [0.0], 'CMm': {'base': [0.1]}}
+        self.assertIsNone(vsp.pick(data, 'CMm', 'dele', 0.05, 0, 0))
+        self.assertEqual(vsp.pick(data, 'CMm', 'base', 0.05, 0, 0), 0.1)
+
+
 if __name__ == '__main__':
     unittest.main()
