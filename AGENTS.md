@@ -87,7 +87,7 @@ AI 先查好現況、提出建議，只跟人確認**目標、選擇與成功條
 
 ## 4. 不變量
 
-- **唯一 plant 來源**：`model/` 的一份 `.slx`＋初始化＋氣動 MAT／importer。轉出的 C（`model/generated/`）是建置產物，不手改；改模型後重新產碼。
+- **唯一 plant 來源**：`model/FW_SkySurfer_HIL.slx`（專案裡只有這一份 `.slx`，是轉碼的錨點）＋初始化＋氣動 MAT／importer，說明在 [model/README.md](model/README.md)。轉出的 C（`model/generated/`）是建置產物，不手改；改模型後跑 `./runbridge model-cycle`。不要另存第二份 slx。
 - **單一 owner**：同時只有一個程序持有模型與序列埠；其他指令經本機 IPC 和它溝通。
 - **通道**：`controls[0..4]` = 左副翼／右副翼／升降舵／方向舵／油門。
 - **4 ms 迴圈不呼叫 Python 或 LLM**；runtime 是最終安全判斷者，不要為了讓操作成功而放寬它的前置條件。

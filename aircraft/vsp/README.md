@@ -22,7 +22,7 @@
 - OpenVSP 3.55.0 用 `SIM2HITL_VSP_ROOT` 指定（有 `opt/OpenVSP/vspscript` 的資料夾），沒設時找 `~/.local/share/OpenVSP/3.55.0`。結果放在 cache 的 `vsp_runs/`，或 `--out` 指定的新資料夾。
 - 工況和 AVL 表相同：Mach 0.05、0.10 × α −10、−5、0、5、10、15 × β −10、−5、0、5、10；Sref 0.238、Cref 0.2、Bref 1.41、力矩參考點 x 0.05 m（= AVL 的 `Xref`、模型的 `XREF_m`）。
 - 每個工況 VSPAERO 求解 12 次：基準、α、β、p、q、r、Mach、U 的擾動，以及四個舵面群組（右副翼、左副翼、升降舵、方向舵）。導數都是每弧度。
-- 寫 MAT 時把力矩轉成風軸：VSPAERO 的 `CMl`、`CMm`、`CMn` 是機體軸，模型的 VSP 路徑卻把它們接到輸入軸設成「Wind」的 Aerodynamic Forces and Moments 方塊（AVL 路徑是「Stability」配 Cl'、Cn'）。每個工況的旋轉是常數，所以角速度和舵面的導數照同樣方式轉。`result.json` 和比較表留在機體軸。
+- 寫 MAT 時把力矩轉成風軸：VSPAERO 的 `CMl`、`CMm`、`CMn` 是機體軸，模型的 VSP 路徑卻把它們接到輸入軸設成「Wind」的 Aerodynamic Forces and Moments 方塊（AVL 路徑是「Stability」配 Cl'、Cn'）。每個工況的旋轉是常數，所以角速度和舵面的導數照同樣方式轉。`result.json` 和比較表留在機體軸。`CMl`、`CMn` 以 Bref、`CMm` 以 Cref 正規化，所以旋轉的是乘上各自參考長度的力矩，轉完再除回去。**更正（2026-11-02 晚，在衍生專案比對風標飛測的 Clβ 時發現）**：第一版直接轉係數，側滑時把 sin β × `CMm` 直接加進 `CMl`（α 5° 的風軸 Clβ 變成 −0.215，正確約 −0.054；側滑時俯仰角速度、升降舵也會帶出假的滾轉力矩）；β = 0 時正確。已改正、用同一份 `result.json` 重寫 MAT（`--from-result … --write-mat`），比較表本來就用機體軸，不受影響。
 
 ## 設定與它們的理由
 

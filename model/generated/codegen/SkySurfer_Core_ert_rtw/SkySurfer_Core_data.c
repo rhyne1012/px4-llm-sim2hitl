@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SkySurfer_Core'.
  *
- * Model version                  : 14.15
+ * Model version                  : 14.16
  * Simulink Coder version         : 26.2 (R2026b) 22-May-2026
- * C/C++ source code generated on : Mon Nov  2 20:02:30 2026
+ * C/C++ source code generated on : Mon Nov  2 23:41:30 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: Intel->x86-64 (Linux 64)
@@ -28,8 +28,8 @@ const ConstB_SkySurfer_Core_T SkySurfer_Core_ConstB = {
 P_SkySurfer_Core_T SkySurfer_Core_P = {
   /* Variable: PropThrust
    * Referenced by:
-   *   '<S12>/Lapse_K'
-   *   '<S12>/Thrust_Lookup'
+   *   '<S13>/Lapse_K'
+   *   '<S13>/Thrust_Lookup'
    */
   {
     { 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0 },
@@ -60,142 +60,140 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
 
   /* Variable: Aeroelasticity_AIL
    * Referenced by:
-   *   '<S7>/Aeroelasticity_AIL'
-   *   '<S7>/Aeroelasticity_AIL1'
+   *   '<S7>/Effectiveness_AIL_L'
+   *   '<S7>/Effectiveness_AIL_R'
    */
   { 5.0, 15.0 },
 
   /* Variable: Aeroelasticity_ELE
-   * Referenced by: '<S7>/Aeroelasticity_ELE'
+   * Referenced by: '<S7>/Effectiveness_ELE'
    */
   { 5.0, 15.0 },
 
   /* Variable: Aeroelasticity_Gain_AIL
    * Referenced by:
-   *   '<S7>/Aeroelasticity_AIL'
-   *   '<S7>/Aeroelasticity_AIL1'
+   *   '<S7>/Effectiveness_AIL_L'
+   *   '<S7>/Effectiveness_AIL_R'
    */
-  { 0.75, 0.75 },
+  { 0.9, 0.9 },
 
   /* Variable: Aeroelasticity_Gain_ELE
-   * Referenced by: '<S7>/Aeroelasticity_ELE'
+   * Referenced by: '<S7>/Effectiveness_ELE'
    */
   { 0.8, 0.8 },
 
   /* Variable: Aeroelasticity_Gain_RUD
-   * Referenced by: '<S7>/Aeroelasticity_RUD'
+   * Referenced by: '<S7>/Effectiveness_RUD'
    */
   { 0.9, 0.6 },
 
   /* Variable: Aeroelasticity_RUD
-   * Referenced by: '<S7>/Aeroelasticity_RUD'
+   * Referenced by: '<S7>/Effectiveness_RUD'
    */
   { 5.0, 15.0 },
 
   /* Variable: AoA
    * Referenced by:
-   *   '<S91>/CD_base'
-   *   '<S91>/CD_dailL'
-   *   '<S91>/CD_dailR'
-   *   '<S91>/CD_dele'
-   *   '<S91>/CD_dp'
-   *   '<S91>/CD_dq'
-   *   '<S91>/CD_dr'
-   *   '<S91>/CD_drud'
-   *   '<S93>/CL_base'
-   *   '<S93>/CL_dailL'
-   *   '<S93>/CL_dailR'
-   *   '<S93>/CL_dele'
-   *   '<S93>/CL_dp'
-   *   '<S93>/CL_dq'
-   *   '<S93>/CL_dr'
-   *   '<S93>/CL_drud'
-   *   '<S94>/CMl_base'
-   *   '<S94>/CMl_dailL'
-   *   '<S94>/CMl_dailR'
-   *   '<S94>/CMl_dele'
-   *   '<S94>/CMl_dp'
-   *   '<S94>/CMl_dq'
-   *   '<S94>/CMl_dr'
-   *   '<S94>/CMl_drud'
-   *   '<S95>/CMm_base'
-   *   '<S95>/CMm_dailL'
-   *   '<S95>/CMm_dailR'
-   *   '<S95>/CMm_dele'
-   *   '<S95>/CMm_dp'
-   *   '<S95>/CMm_dq'
-   *   '<S95>/CMm_dr'
-   *   '<S95>/CMm_drud'
-   *   '<S96>/CMn_base'
-   *   '<S96>/CMn_dailL'
-   *   '<S96>/CMn_dailR'
-   *   '<S96>/CMn_dele'
-   *   '<S96>/CMn_dp'
-   *   '<S96>/CMn_dq'
-   *   '<S96>/CMn_dr'
-   *   '<S96>/CMn_drud'
-   *   '<S97>/CS_base'
-   *   '<S97>/CS_dailL'
-   *   '<S97>/CS_dailR'
-   *   '<S97>/CS_dele'
-   *   '<S97>/CS_dp'
-   *   '<S97>/CS_dq'
-   *   '<S97>/CS_dr'
-   *   '<S97>/CS_drud'
-   */
+   *   '<S98>/CD_base'
+   *   '<S98>/CD_dailL'
+   *   '<S98>/CD_dailR'
+   *   '<S98>/CD_dele'
+   *   '<S98>/CD_dp'
+   *   '<S98>/CD_dq'
+   *   '<S98>/CD_dr'
+   *   '<S98>/CD_drud'
+   *   '<S99>/CL_base'
+   *   '<S99>/CL_dailL'
+   *   '<S99>/CL_dailR'
+   *   '<S99>/CL_dele'
+   *   '<S99>/CL_dp'
+   *   '<S99>/CL_dq'
+   *   '<S99>/CL_dr'
+   *   '<S99>/CL_drud'
+   *   '<S100>/CS_base'
+   *   '<S100>/CS_dailL'
+   *   '<S100>/CS_dailR'
+   *   '<S100>/CS_dele'
+   *   '<S100>/CS_dp'
+   *   '<S100>/CS_dq'
+   *   '<S100>/CS_dr'
+   *   '<S100>/CS_drud'
+   *   '<S101>/CMl_base'
+   *   '<S101>/CMl_dailL'
+   *   '<S101>/CMl_dailR'
+   *   '<S101>/CMl_dele'
+   *   '<S101>/CMl_dp'
+   *   '<S101>/CMl_dq'
+   *   '<S101>/CMl_dr'
+   *   '<S101>/CMl_drud'
+   *   '<S102>/CMm_base'
+   *   '<S102>/CMm_dailL'
+   *   '<S102>/CMm_dailR'
+   *   '<S102>/CMm_dele'
+   *   '<S102>/CMm_dp'
+   *   '<S102>/CMm_dq'
+   *   '<S102>/CMm_dr'
+   *   '<S102>/CMm_drud'
+   *   '<S103>/CMn_base'
+   *   '<S103>/CMn_dailL'
+   *   '<S103>/CMn_dailR'
+   *   '<S103>/CMn_dele'
+   *   '<S103>/CMn_dp'
+   *   '<S103>/CMn_dq'
+   *   '<S103>/CMn_dr'
+   *   '<S103>/CMn_drud */
   { -10.0, -5.0, 0.0, 5.0, 10.0, 15.0 },
 
   /* Variable: AoS
    * Referenced by:
-   *   '<S91>/CD_base'
-   *   '<S91>/CD_dailL'
-   *   '<S91>/CD_dailR'
-   *   '<S91>/CD_dele'
-   *   '<S91>/CD_dp'
-   *   '<S91>/CD_dq'
-   *   '<S91>/CD_dr'
-   *   '<S91>/CD_drud'
-   *   '<S93>/CL_base'
-   *   '<S93>/CL_dailL'
-   *   '<S93>/CL_dailR'
-   *   '<S93>/CL_dele'
-   *   '<S93>/CL_dp'
-   *   '<S93>/CL_dq'
-   *   '<S93>/CL_dr'
-   *   '<S93>/CL_drud'
-   *   '<S94>/CMl_base'
-   *   '<S94>/CMl_dailL'
-   *   '<S94>/CMl_dailR'
-   *   '<S94>/CMl_dele'
-   *   '<S94>/CMl_dp'
-   *   '<S94>/CMl_dq'
-   *   '<S94>/CMl_dr'
-   *   '<S94>/CMl_drud'
-   *   '<S95>/CMm_base'
-   *   '<S95>/CMm_dailL'
-   *   '<S95>/CMm_dailR'
-   *   '<S95>/CMm_dele'
-   *   '<S95>/CMm_dp'
-   *   '<S95>/CMm_dq'
-   *   '<S95>/CMm_dr'
-   *   '<S95>/CMm_drud'
-   *   '<S96>/CMn_base'
-   *   '<S96>/CMn_dailL'
-   *   '<S96>/CMn_dailR'
-   *   '<S96>/CMn_dele'
-   *   '<S96>/CMn_dp'
-   *   '<S96>/CMn_dq'
-   *   '<S96>/CMn_dr'
-   *   '<S96>/CMn_drud'
-   *   '<S97>/CS_base'
-   *   '<S97>/CS_dailL'
-   *   '<S97>/CS_dailR'
-   *   '<S97>/CS_dele'
-   *   '<S97>/CS_dp'
-   *   '<S97>/CS_dq'
-   *   '<S97>/CS_dr'
-   *   '<S97>/CS_drud'
-   */
+   *   '<S98>/CD_base'
+   *   '<S98>/CD_dailL'
+   *   '<S98>/CD_dailR'
+   *   '<S98>/CD_dele'
+   *   '<S98>/CD_dp'
+   *   '<S98>/CD_dq'
+   *   '<S98>/CD_dr'
+   *   '<S98>/CD_drud'
+   *   '<S99>/CL_base'
+   *   '<S99>/CL_dailL'
+   *   '<S99>/CL_dailR'
+   *   '<S99>/CL_dele'
+   *   '<S99>/CL_dp'
+   *   '<S99>/CL_dq'
+   *   '<S99>/CL_dr'
+   *   '<S99>/CL_drud'
+   *   '<S100>/CS_base'
+   *   '<S100>/CS_dailL'
+   *   '<S100>/CS_dailR'
+   *   '<S100>/CS_dele'
+   *   '<S100>/CS_dp'
+   *   '<S100>/CS_dq'
+   *   '<S100>/CS_dr'
+   *   '<S100>/CS_drud'
+   *   '<S101>/CMl_base'
+   *   '<S101>/CMl_dailL'
+   *   '<S101>/CMl_dailR'
+   *   '<S101>/CMl_dele'
+   *   '<S101>/CMl_dp'
+   *   '<S101>/CMl_dq'
+   *   '<S101>/CMl_dr'
+   *   '<S101>/CMl_drud'
+   *   '<S102>/CMm_base'
+   *   '<S102>/CMm_dailL'
+   *   '<S102>/CMm_dailR'
+   *   '<S102>/CMm_dele'
+   *   '<S102>/CMm_dp'
+   *   '<S102>/CMm_dq'
+   *   '<S102>/CMm_dr'
+   *   '<S102>/CMm_drud'
+   *   '<S103>/CMn_base'
+   *   '<S103>/CMn_dailL'
+   *   '<S103>/CMn_dailR'
+   *   '<S103>/CMn_dele'
+   *   '<S103>/CMn_dp'
+   *   '<S103>/CMn_dq'
+   *   '<S103>/CMn_dr'
+   *   '<S103>/CMn_drud */
   { -10.0, -5.0, 0.0, 5.0, 10.0 },
 
   /* Variable: CD_fix_AVL
@@ -204,7 +202,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
   0.03,
 
   /* Variable: CD_fix_VSP
-   * Referenced by: '<S91>/Constant'
+   * Referenced by: '<S98>/Constant'
    */
   0.0045,
 
@@ -408,7 +406,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
   { 0.345, 0.0, 0.0 },
 
   /* Variable: CLd01
-   * Referenced by: '<S92>/CLd01'
+   * Referenced by: '<S91>/CLd01'
    */
   { 0.00797140715652045, 0.00799413017282952, 0.0080870536202324022,
     0.0081102636923621758, 0.008097273027302317, 0.00812054058396988,
@@ -432,7 +430,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.007998442048554353, 0.00766953145607964, 0.0076906811805799594 },
 
   /* Variable: CLd02
-   * Referenced by: '<S92>/CLd02'
+   * Referenced by: '<S91>/CLd02'
    */
   { 0.0081630359350370121, 0.008186056258652534, 0.0082785522189686832,
     0.0083020516784743752, 0.0082857223179623376, 0.0083092668943388417,
@@ -456,7 +454,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.007824151703166634, 0.0075063943619695433, 0.00752732649488431 },
 
   /* Variable: CLd03
-   * Referenced by: '<S92>/CLd03'
+   * Referenced by: '<S91>/CLd03'
    */
   { 0.007335288678859562, 0.0073521907879655493, 0.0074982812416111858,
     0.0075157520821786984, 0.0075345069798537709, 0.0075520998295575794,
@@ -480,7 +478,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.0072423159929260556, 0.0068947792963434907, 0.0069101149502547978 },
 
   /* Variable: CLd04
-   * Referenced by: '<S92>/CLd04'
+   * Referenced by: '<S91>/CLd04'
    */
   { -6.3717154277000314E-5, -6.4023171237459359E-5, -7.1194686596835549E-5,
     -7.1486011432205876E-5, -7.7689279107039314E-5, -7.7961191012440993E-5,
@@ -504,7 +502,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     8.7197575680115949E-5, 8.9486285236284357E-5, 8.96781378915094E-5 },
 
   /* Variable: CLp
-   * Referenced by: '<S92>/CLp'
+   * Referenced by: '<S91>/CLp'
    */
   { -0.056265232601268908, -0.056358568316042239, -0.056157101939523682,
     -0.056248476734120173, -0.054660998911897733, -0.054749035635941752,
@@ -528,7 +526,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.047805174295827077, 0.042500776351699313, 0.042571739769402213 },
 
   /* Variable: CLq
-   * Referenced by: '<S92>/CLq'
+   * Referenced by: '<S91>/CLq'
    */
   { 8.9923027128292716, 9.0135775835884857, 9.0374528159421121,
     9.0590668653246045, 9.0582065103143261, 9.0798945843190673,
@@ -550,7 +548,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     8.9919186322042552 },
 
   /* Variable: CLr
-   * Referenced by: '<S92>/CLr'
+   * Referenced by: '<S91>/CLr'
    */
   { 0.0046922258714722524, 0.004707542044103257, 0.01269470037069095,
     0.01271811879452687, 0.020556822608382909, 0.020587879681806889,
@@ -574,7 +572,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -0.034960023178388228, -0.040976732930179942, -0.04102571547973468 },
 
   /* Variable: CLtot
-   * Referenced by: '<S92>/CLtot'
+   * Referenced by: '<S91>/CLtot'
    */
   { -0.66999143892499446, -0.671657363936465, -0.25112130388477188,
     -0.25172891629746141, 0.172541130325699, 0.1730105034728045,
@@ -597,7 +595,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     1.399703310375936, 1.4032348038081679 },
 
   /* Variable: CYd01
-   * Referenced by: '<S98>/CYd01'
+   * Referenced by: '<S92>/CYd01'
    */
   { -7.537524605149621E-5, -7.5289644983068707E-5, 6.7962738346890886E-6,
     7.0524383033203141E-6, 8.9374383455022063E-5, 8.9798965693511752E-5,
@@ -621,7 +619,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.00022716841964091111, 0.000296179715569025, 0.00029683950686278018 },
 
   /* Variable: CYd02
-   * Referenced by: '<S98>/CYd02'
+   * Referenced by: '<S92>/CYd02'
    */
   { 9.4905318446759874E-5, 9.5036541415258955E-5, 1.285739982127894E-5,
     1.281942313067266E-5, -6.9746684862051015E-5, -6.99533761221531E-5,
@@ -645,7 +643,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -0.00024650970416445668, -0.00031483968205106322, -0.0003157065962573746 },
 
   /* Variable: CYd03
-   * Referenced by: '<S98>/CYd03'
+   * Referenced by: '<S92>/CYd03'
    */
   { 0.0001742917115486993, 0.00017536872149901019, 0.0001759800962596797,
     0.0001770675393345353, 0.00017632916617842551, 0.00017741876627941019,
@@ -669,7 +667,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -0.00017407803163004329, -0.00016936492941394649, -0.00017041149503999069 },
 
   /* Variable: CYd04
-   * Referenced by: '<S98>/CYd04'
+   * Referenced by: '<S92>/CYd04'
    */
   { -0.0015364833975918841, -0.0015393372979168949, -0.0016130809286467439,
     -0.0016162593870120391, -0.0016659757266580611, -0.001669434717050967,
@@ -693,7 +691,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -0.0016988529036306779, -0.001670242517317817, -0.0016742019034585551 },
 
   /* Variable: CYp
-   * Referenced by: '<S98>/CYp'
+   * Referenced by: '<S92>/CYp'
    */
   { -0.14434135294624961, -0.14462077011670429, -0.060388739083292432,
     -0.060493026026808033, 0.02656791402829781, 0.026651386759581789,
@@ -717,7 +715,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.27906640229380242, 0.27973100866352191 },
 
   /* Variable: CYq
-   * Referenced by: '<S98>/CYq'
+   * Referenced by: '<S92>/CYq'
    */
   { 0.02948243557059051, 0.030196016935270791, 0.02948243557070172,
     0.030196016935401981, 0.029482435570841618, 0.0301960169355622,
@@ -741,7 +739,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -0.030196016942458069, -0.029482435577542, -0.030196016942219048 },
 
   /* Variable: CYr
-   * Referenced by: '<S98>/CYr'
+   * Referenced by: '<S92>/CYr'
    */
   { 0.15765453616349731, 0.15788203056456451, 0.182299010705109,
     0.1826145571072314, 0.19199086189492209, 0.19236271154558959,
@@ -765,7 +763,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.16618542538059911, 0.1307171046075932, 0.13105536837103321 },
 
   /* Variable: CYtot
-   * Referenced by: '<S98>/CYtot'
+   * Referenced by: '<S92>/CYtot'
    */
   { 0.037642754135113643, 0.037699107037618418, 0.03920373751889903,
     0.039271187612810413, 0.040466356788278479, 0.040544390737655589,
@@ -789,7 +787,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -0.042157753643011359, -0.042379711574204268, -0.042485634756785733 },
 
   /* Variable: Cld01
-   * Referenced by: '<S99>/Cld01'
+   * Referenced by: '<S93>/Cld01'
    */
   { -0.001674476294061765, -0.001678241739792288, -0.001705234939823629,
     -0.001709113210317112, -0.001710617602436219, -0.0017145220766007969,
@@ -813,7 +811,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -0.00173754599792327, -0.001660546353087102, -0.0016642392753603589 },
 
   /* Variable: Cld02
-   * Referenced by: '<S99>/Cld02'
+   * Referenced by: '<S93>/Cld02'
    */
   { 0.00176792073293853, 0.001771957978459041, 0.0017995970507670371,
     0.0018037444125271189, 0.0018044638804905809, 0.0018086306237746249,
@@ -837,7 +835,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.001648688895341862, 0.001576478254936066, 0.001579951399843177 },
 
   /* Variable: Cld03
-   * Referenced by: '<S99>/Cld03'
+   * Referenced by: '<S93>/Cld03'
    */
   { 1.9063509080172769E-5, 1.91318240224765E-5, 1.3240460528618911E-5,
     1.327345514202673E-5, 7.1461203916236678E-6, 7.1428753681580312E-6,
@@ -861,7 +859,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     5.1872074714375787E-6, 1.0905537746840969E-5, 1.101206720945724E-5 },
 
   /* Variable: Cld04
-   * Referenced by: '<S99>/Cld04'
+   * Referenced by: '<S93>/Cld04'
    */
   { -9.9945534866373257E-5, -0.0001000984002792938, -4.6187483265102791E-5,
     -4.6237571234798692E-5, 1.344833356651726E-5, 1.35227255848027E-5,
@@ -885,7 +883,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.00013802061170592919, 0.00019556700948156189, 0.0001960756617529787 },
 
   /* Variable: Clp
-   * Referenced by: '<S99>/Clp'
+   * Referenced by: '<S93>/Clp'
    */
   { -0.40113118452019331, -0.40189641121521569, -0.40714973571200708,
     -0.40793685470224939, -0.408183310302472, -0.40897524952066411,
@@ -909,7 +907,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -0.39646036901939607, -0.38279068466634358, -0.38350443209255208 },
 
   /* Variable: Clq
-   * Referenced by: '<S99>/Clq'
+   * Referenced by: '<S93>/Clq'
    */
   { 0.045623607221954757, 0.0457495187882034, 0.044635873525247283,
     0.044738263068597482, 0.04330843387911576, 0.043386522153316787,
@@ -933,7 +931,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -0.039705247997599821, -0.037401351840219262, -0.037403731475863768 },
 
   /* Variable: Clr
-   * Referenced by: '<S99>/Clr'
+   * Referenced by: '<S93>/Clr'
    */
   { -0.1174169980697376, -0.11769680757024149, -0.0412721751750049,
     -0.041370985975428258, 0.035163075345671292, 0.03524513682398854,
@@ -957,31 +955,31 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.1850959597054351, 0.25576256795254182, 0.256345977912928 },
 
   /* Variable: Cltot
-   * Referenced by: '<S99>/Cltot'
+   * Referenced by: '<S93>/Cltot'
    */
-  { -0.0030371184208930141, -0.003049465346286175, -0.001096050584975101,
-    -0.001101934364351679, 0.000809640498560738, 0.00080972988002776271,
-    0.00262205137046877, 0.0026274424361365741, 0.004286112843530674,
-    0.0042959730277643948, 0.0057512632519425974, 0.0057646241972011411,
-    -0.00154198543397107, -0.0015482541322794619, -0.000556479465965561,
-    -0.00055946673904476885, 0.00041106525414386818, 0.00041111063430202427,
-    0.0013312503696393291, 0.001333987485408702, 0.002176116521423081,
-    0.0021811226681528119, 0.0029199928789953619, 0.002926776408676847,
+  { 0.015288838725047445, 0.015276491799654283, 0.017229906560965357,
+    0.017224022781588778, 0.019135597644501196, 0.019135687025968219,
+    0.020948008516409228, 0.020953399582077033, 0.022612069989471132,
+    0.022621930173704854, 0.024077220397883056, 0.0240905813431416,
+    0.0076209931389991589, 0.0076147244406907667, 0.0086064991070046674,
+    0.00860351183392546, 0.0095740438271140968, 0.0095740892072722541,
+    0.010494228942609558, 0.01049696605837893, 0.01133909509439331,
+    0.01134410124112304, 0.012082971451965591, 0.012089754981647076,
     8.1125546750869374E-14, 8.3424301847679777E-14, 2.5537239717276391E-14,
     2.4543524803570831E-14, -1.1270016720717361E-14, -1.520800793118756E-14,
     -2.6812526401704761E-14, -3.35500877803853E-14, -2.024791409297624E-14,
     -2.9733061227052957E-14, 7.67533427143254E-15, -4.902120001367197E-15,
-    0.0015419854341320741, 0.001548254132445048, 0.00055647946601625144,
-    0.0005594667390935033, -0.00041106525416623538, -0.00041111063433220841,
-    -0.00133125036969254, -0.0013339874854753069, -0.002176116521463131,
-    -0.0021811226682118688, -0.0029199928789798869, -0.0029267764086864682,
-    0.0030371184210503561, 0.0030494653464479631, 0.001096050585024641,
-    0.0011019343643992991, -0.00080964049858258476, -0.00080972988005726667,
-    -0.002622051370520758, -0.002627442436201618, -0.0042861128435698484,
-    -0.0042959730278221021, -0.00575126325192752, -0.0057646241972104809 },
+    -0.0076209931388381549, -0.0076147244405251812, -0.008606499106953977,
+    -0.0086035118338767258, -0.0095740438271364643, -0.0095740892073024365,
+    -0.010494228942662769, -0.010496966058445537, -0.011339095094433361,
+    -0.011344101241182097, -0.012082971451950116, -0.012089754981656698,
+    -0.015288838724890102, -0.015276491799492494, -0.017229906560915817,
+    -0.01722402278154116, -0.019135597644523043, -0.019135687025997723,
+    -0.020948008516461215, -0.020953399582142075, -0.022612069989510306,
+    -0.022621930173762558, -0.024077220397867978, -0.024090581343150938 },
 
   /* Variable: Cmd01
-   * Referenced by: '<S100>/Cmd01'
+   * Referenced by: '<S94>/Cmd01'
    */
   { -0.0030479633698904151, -0.0030586340894787358, -0.0031116156839106342,
     -0.003122495010830801, -0.0031284449602327711, -0.0031393701623020271,
@@ -1005,7 +1003,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -0.0029555535951334049, -0.0028263872306788121, -0.0028359624015700281 },
 
   /* Variable: Cmd02
-   * Referenced by: '<S100>/Cmd02'
+   * Referenced by: '<S94>/Cmd02'
    */
   { -0.0029709529353988862, -0.002981077589316713, -0.0030341109776703531,
     -0.0030444407628578908, -0.0030510358398567979, -0.0030614122064756932,
@@ -1029,7 +1027,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -0.003031544293605453, -0.0029000001009874652, -0.0029100971068316541 },
 
   /* Variable: Cmd03
-   * Referenced by: '<S100>/Cmd03'
+   * Referenced by: '<S94>/Cmd03'
    */
   { -0.0189483137011506, -0.018997489473266922, -0.019286073110937909,
     -0.01933627077928169, -0.019331769396651231, -0.01938223045024633,
@@ -1053,7 +1051,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -0.01859903870962094, -0.01774694808136569, -0.017793684182755221 },
 
   /* Variable: Cmd04
-   * Referenced by: '<S100>/Cmd04'
+   * Referenced by: '<S94>/Cmd04'
    */
   { 0.000244409920924069, 0.0002452624108307332, 0.00024723593679991488,
     0.00024809828371238278, 0.0002481803379115364, 0.00024904597884910549,
@@ -1077,7 +1075,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -0.0002452624108322558, -0.00023972379797262551, -0.00024055994291055671 },
 
   /* Variable: Cmp
-   * Referenced by: '<S100>/Cmp'
+   * Referenced by: '<S94>/Cmp'
    */
   { 0.01745026028997872, 0.01742167417615894, 0.01194885430140958,
     0.01190967406009655, 0.0063565103168083722, 0.00630703413329715,
@@ -1101,7 +1099,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.00499924195058679, 0.01053902430157855, 0.010616830519725919 },
 
   /* Variable: Cmq
-   * Referenced by: '<S100>/Cmq'
+   * Referenced by: '<S94>/Cmq'
    */
   { -11.82803043706927, -11.854886362639609, -11.909080132815809,
     -11.936166239464059, -11.899494537852419, -11.926604683951931,
@@ -1125,7 +1123,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -11.331095900061641, -11.357047325922849 },
 
   /* Variable: Cmr
-   * Referenced by: '<S100>/Cmr'
+   * Referenced by: '<S94>/Cmr'
    */
   { -0.062359659943153831, -0.062482462020784321, -0.06364325300622245,
     -0.063763096340885048, -0.06444248248507238, -0.06455845499662699,
@@ -1149,7 +1147,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.064672871988740166, 0.0638918440752637, 0.063991059540765255 },
 
   /* Variable: Cmtot
-   * Referenced by: '<S100>/Cmtot'
+   * Referenced by: '<S94>/Cmtot'
    */
   { 0.18623463478460839, 0.18639453146211621, 0.057792434447817752,
     0.057791232566035272, -0.072315167461501434, -0.07247931613450051,
@@ -1173,7 +1171,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -0.3222589536461592, -0.43356342772602008, -0.4341786145656833 },
 
   /* Variable: Cnd01
-   * Referenced by: '<S101>/Cnd01'
+   * Referenced by: '<S95>/Cnd01'
    */
   { -0.0001332299053741386, -0.00013385424680819959, -6.5823435235022051E-5,
     -6.6133445233013379E-5, 4.8478855474437673E-6, 4.8664571860453046E-6,
@@ -1197,7 +1195,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.0001657824382978438, 0.00022971073699525339, 0.00023077010327967221 },
 
   /* Variable: Cnd02
-   * Referenced by: '<S101>/Cnd02'
+   * Referenced by: '<S95>/Cnd02'
    */
   { 0.0001408083068976409, 0.00014139326391450811, 6.5226896635047719E-5,
     6.5473595835748377E-5, -1.3654520643507829E-5, -1.3759495633870861E-5,
@@ -1221,7 +1219,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -0.00014131414108666489, -0.00019851753111213081, -0.0001994329827150034 },
 
   /* Variable: Cnd03
-   * Referenced by: '<S101>/Cnd03'
+   * Referenced by: '<S95>/Cnd03'
    */
   { -6.74371799236166E-5, -6.784308463004781E-5, -6.9508936633605865E-5,
     -6.99232255520554E-5, -7.0538056934511231E-5, -7.095446937921197E-5,
@@ -1245,7 +1243,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     6.9777752733226925E-5, 6.7220015450290485E-5, 6.760554619862733E-5 },
 
   /* Variable: Cnd04
-   * Referenced by: '<S101>/Cnd04'
+   * Referenced by: '<S95>/Cnd04'
    */
   { 0.00059895311243374726, 0.00060012258784283693, 0.00063758187924056145,
     0.00063888719433390952, 0.00066178617738484047, 0.00066319917453810408,
@@ -1269,7 +1267,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.000664137983477369, 0.00063923356216939926, 0.000640752913453416 },
 
   /* Variable: Cnp
-   * Referenced by: '<S101>/Cnp'
+   * Referenced by: '<S95>/Cnp'
    */
   { 0.055806767536802547, 0.055890113758922839, 0.019666278686197362,
     0.019689808106715709, -0.016647560967992581, -0.016684905853368528,
@@ -1293,7 +1291,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -0.090773178909577187, -0.12851863533139221, -0.128767108142014 },
 
   /* Variable: Cnq
-   * Referenced by: '<S101>/Cnq'
+   * Referenced by: '<S95>/Cnq'
    */
   { -0.0093410034894496809, -0.0096053910174401912, -0.01328181752542946,
     -0.013556172895144049, -0.017121548910279349, -0.01740378411169452,
@@ -1317,7 +1315,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.02467337203460012, 0.0277471937822109, 0.028040022784938751 },
 
   /* Variable: Cnr
-   * Referenced by: '<S101>/Cnr'
+   * Referenced by: '<S95>/Cnr'
    */
   { -0.069122662281787844, -0.069240544850114549, -0.070223997813732689,
     -0.070348590574760755, -0.072677207588754539, -0.072818643932819671,
@@ -1341,7 +1339,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -0.08135139816914079, -0.086605457124387969, -0.086847067039903733 },
 
   /* Variable: Cntot
-   * Referenced by: '<S101>/Cntot'
+   * Referenced by: '<S95>/Cntot'
    */
   { -0.01478239795864314, -0.01480598888210154, -0.0148163031252762,
     -0.01484215030887838, -0.01518675608867537, -0.015215947568288949,
@@ -1365,73 +1363,72 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.016921105225500031, 0.01815606469633016, 0.018200655270421591 },
 
   /* Variable: Inertia0
-   * Referenced by: '<S4>/const2'
+   * Referenced by: '<S5>/const2'
    */
   { 0.023, -6.56E-5, 2.266E-5, -6.56E-5, 0.04, -0.0002784, 2.266E-5, -0.0002784,
     0.063 },
 
   /* Variable: Mach
    * Referenced by:
-   *   '<S91>/CD_base'
-   *   '<S91>/CD_dailL'
-   *   '<S91>/CD_dailR'
-   *   '<S91>/CD_dele'
-   *   '<S91>/CD_dp'
-   *   '<S91>/CD_dq'
-   *   '<S91>/CD_dr'
-   *   '<S91>/CD_drud'
-   *   '<S93>/CL_base'
-   *   '<S93>/CL_dailL'
-   *   '<S93>/CL_dailR'
-   *   '<S93>/CL_dele'
-   *   '<S93>/CL_dp'
-   *   '<S93>/CL_dq'
-   *   '<S93>/CL_dr'
-   *   '<S93>/CL_drud'
-   *   '<S94>/CMl_base'
-   *   '<S94>/CMl_dailL'
-   *   '<S94>/CMl_dailR'
-   *   '<S94>/CMl_dele'
-   *   '<S94>/CMl_dp'
-   *   '<S94>/CMl_dq'
-   *   '<S94>/CMl_dr'
-   *   '<S94>/CMl_drud'
-   *   '<S95>/CMm_base'
-   *   '<S95>/CMm_dailL'
-   *   '<S95>/CMm_dailR'
-   *   '<S95>/CMm_dele'
-   *   '<S95>/CMm_dp'
-   *   '<S95>/CMm_dq'
-   *   '<S95>/CMm_dr'
-   *   '<S95>/CMm_drud'
-   *   '<S96>/CMn_base'
-   *   '<S96>/CMn_dailL'
-   *   '<S96>/CMn_dailR'
-   *   '<S96>/CMn_dele'
-   *   '<S96>/CMn_dp'
-   *   '<S96>/CMn_dq'
-   *   '<S96>/CMn_dr'
-   *   '<S96>/CMn_drud'
-   *   '<S97>/CS_base'
-   *   '<S97>/CS_dailL'
-   *   '<S97>/CS_dailR'
-   *   '<S97>/CS_dele'
-   *   '<S97>/CS_dp'
-   *   '<S97>/CS_dq'
-   *   '<S97>/CS_dr'
-   *   '<S97>/CS_drud'
-   */
+   *   '<S98>/CD_base'
+   *   '<S98>/CD_dailL'
+   *   '<S98>/CD_dailR'
+   *   '<S98>/CD_dele'
+   *   '<S98>/CD_dp'
+   *   '<S98>/CD_dq'
+   *   '<S98>/CD_dr'
+   *   '<S98>/CD_drud'
+   *   '<S99>/CL_base'
+   *   '<S99>/CL_dailL'
+   *   '<S99>/CL_dailR'
+   *   '<S99>/CL_dele'
+   *   '<S99>/CL_dp'
+   *   '<S99>/CL_dq'
+   *   '<S99>/CL_dr'
+   *   '<S99>/CL_drud'
+   *   '<S100>/CS_base'
+   *   '<S100>/CS_dailL'
+   *   '<S100>/CS_dailR'
+   *   '<S100>/CS_dele'
+   *   '<S100>/CS_dp'
+   *   '<S100>/CS_dq'
+   *   '<S100>/CS_dr'
+   *   '<S100>/CS_drud'
+   *   '<S101>/CMl_base'
+   *   '<S101>/CMl_dailL'
+   *   '<S101>/CMl_dailR'
+   *   '<S101>/CMl_dele'
+   *   '<S101>/CMl_dp'
+   *   '<S101>/CMl_dq'
+   *   '<S101>/CMl_dr'
+   *   '<S101>/CMl_drud'
+   *   '<S102>/CMm_base'
+   *   '<S102>/CMm_dailL'
+   *   '<S102>/CMm_dailR'
+   *   '<S102>/CMm_dele'
+   *   '<S102>/CMm_dp'
+   *   '<S102>/CMm_dq'
+   *   '<S102>/CMm_dr'
+   *   '<S102>/CMm_drud'
+   *   '<S103>/CMn_base'
+   *   '<S103>/CMn_dailL'
+   *   '<S103>/CMn_dailR'
+   *   '<S103>/CMn_dele'
+   *   '<S103>/CMn_dp'
+   *   '<S103>/CMn_dq'
+   *   '<S103>/CMn_dr'
+   *   '<S103>/CMn_dru */
   { 0.05, 0.1 },
 
   /* Variable: Mass0
-   * Referenced by: '<S4>/const1'
+   * Referenced by: '<S5>/const1'
    */
   1.3,
 
   /* Variable: S
    * Referenced by:
-   *   '<S7>/Aerodynamic Forces and Moments '
-   *   '<S7>/Aerodynamic Forces and Moments 1'
+   *   '<S7>/AVL_Forces_Moments'
+   *   '<S7>/VSP_Forces_Moments'
    */
   0.238,
 
@@ -1452,77 +1449,77 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
    *   '<S90>/CDq'
    *   '<S90>/CDr'
    *   '<S90>/CDtot'
-   *   '<S92>/CLd01'
-   *   '<S92>/CLd02'
-   *   '<S92>/CLd03'
-   *   '<S92>/CLd04'
-   *   '<S92>/CLp'
-   *   '<S92>/CLq'
-   *   '<S92>/CLr'
-   *   '<S92>/CLtot'
-   *   '<S98>/CYd01'
-   *   '<S98>/CYd02'
-   *   '<S98>/CYd03'
-   *   '<S98>/CYd04'
-   *   '<S98>/CYp'
-   *   '<S98>/CYq'
-   *   '<S98>/CYr'
-   *   '<S98>/CYtot'
-   *   '<S99>/Cld01'
-   *   '<S99>/Cld02'
-   *   '<S99>/Cld03'
-   *   '<S99>/Cld04'
-   *   '<S99>/Clp'
-   *   '<S99>/Clq'
-   *   '<S99>/Clr'
-   *   '<S99>/Cltot'
-   *   '<S100>/Cmd01'
-   *   '<S100>/Cmd02'
-   *   '<S100>/Cmd03'
-   *   '<S100>/Cmd04'
-   *   '<S100>/Cmp'
-   *   '<S100>/Cmq'
-   *   '<S100>/Cmr'
-   *   '<S100>/Cmtot'
-   *   '<S101>/Cnd01'
-   *   '<S101>/Cnd02'
-   *   '<S101>/Cnd03'
-   *   '<S101>/Cnd04'
-   *   '<S101>/Cnp'
-   *   '<S101>/Cnq'
-   *   '<S101>/Cnr'
-   *   '<S101>/Cntot'
+   *   '<S91>/CLd01'
+   *   '<S91>/CLd02'
+   *   '<S91>/CLd03'
+   *   '<S91>/CLd04'
+   *   '<S91>/CLp'
+   *   '<S91>/CLq'
+   *   '<S91>/CLr'
+   *   '<S91>/CLtot'
+   *   '<S92>/CYd01'
+   *   '<S92>/CYd02'
+   *   '<S92>/CYd03'
+   *   '<S92>/CYd04'
+   *   '<S92>/CYp'
+   *   '<S92>/CYq'
+   *   '<S92>/CYr'
+   *   '<S92>/CYtot'
+   *   '<S93>/Cld01'
+   *   '<S93>/Cld02'
+   *   '<S93>/Cld03'
+   *   '<S93>/Cld04'
+   *   '<S93>/Clp'
+   *   '<S93>/Clq'
+   *   '<S93>/Clr'
+   *   '<S93>/Cltot'
+   *   '<S94>/Cmd01'
+   *   '<S94>/Cmd02'
+   *   '<S94>/Cmd03'
+   *   '<S94>/Cmd04'
+   *   '<S94>/Cmp'
+   *   '<S94>/Cmq'
+   *   '<S94>/Cmr'
+   *   '<S94>/Cmtot'
+   *   '<S95>/Cnd01'
+   *   '<S95>/Cnd02'
+   *   '<S95>/Cnd03'
+   *   '<S95>/Cnd04'
+   *   '<S95>/Cnp'
+   *   '<S95>/Cnq'
+   *   '<S95>/Cnr'
+   *   '<S95>/Cntot'
    */
   { -10.0, -5.0, 0.0, 5.0, 10.0, 15.0 },
 
   /* Variable: b
    * Referenced by:
-   *   '<S7>/Aerodynamic Forces and Moments '
-   *   '<S7>/Aerodynamic Forces and Moments 1'
+   *   '<S7>/AVL_Forces_Moments'
+   *   '<S7>/VSP_Forces_Moments'
    *   '<S90>/Multiply'
    *   '<S90>/Multiply1'
    *   '<S91>/Multiply'
    *   '<S91>/Multiply1'
    *   '<S92>/Multiply'
    *   '<S92>/Multiply1'
-   *   '<S93>/Multiply3'
-   *   '<S93>/Multiply4'
-   *   '<S94>/Multiply3'
-   *   '<S94>/Multiply4'
-   *   '<S95>/Multiply3'
-   *   '<S95>/Multiply4'
-   *   '<S96>/Multiply3'
-   *   '<S96>/Multiply4'
-   *   '<S97>/Multiply3'
-   *   '<S97>/Multiply4'
+   *   '<S93>/Multiply'
+   *   '<S93>/Multiply1'
+   *   '<S94>/Multiply'
+   *   '<S94>/Multiply1'
+   *   '<S95>/Multiply'
+   *   '<S95>/Multiply1'
    *   '<S98>/Multiply'
    *   '<S98>/Multiply1'
-   *   '<S99>/Multiply'
-   *   '<S99>/Multiply1'
-   *   '<S100>/Multiply'
-   *   '<S100>/Multiply1'
-   *   '<S101>/Multiply'
-   *   '<S101>/Multiply1'
+   *   '<S99>/Multiply3'
+   *   '<S99>/Multiply4'
+   *   '<S100>/Multiply3'
+   *   '<S100>/Multiply4'
+   *   '<S101>/Multiply3'
+   *   '<S101>/Multiply4'
+   *   '<S102>/Multiply3'
+   *   '<S102>/Multiply4'
+   *   '<S103>/Multiply3'
+   *   '<S103>/Multiply4'
    */
   1.41,
 
@@ -1536,70 +1533,70 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
    *   '<S90>/CDq'
    *   '<S90>/CDr'
    *   '<S90>/CDtot'
-   *   '<S92>/CLd01'
-   *   '<S92>/CLd02'
-   *   '<S92>/CLd03'
-   *   '<S92>/CLd04'
-   *   '<S92>/CLp'
-   *   '<S92>/CLq'
-   *   '<S92>/CLr'
-   *   '<S92>/CLtot'
-   *   '<S98>/CYd01'
-   *   '<S98>/CYd02'
-   *   '<S98>/CYd03'
-   *   '<S98>/CYd04'
-   *   '<S98>/CYp'
-   *   '<S98>/CYq'
-   *   '<S98>/CYr'
-   *   '<S98>/CYtot'
-   *   '<S99>/Cld01'
-   *   '<S99>/Cld02'
-   *   '<S99>/Cld03'
-   *   '<S99>/Cld04'
-   *   '<S99>/Clp'
-   *   '<S99>/Clq'
-   *   '<S99>/Clr'
-   *   '<S99>/Cltot'
-   *   '<S100>/Cmd01'
-   *   '<S100>/Cmd02'
-   *   '<S100>/Cmd03'
-   *   '<S100>/Cmd04'
-   *   '<S100>/Cmp'
-   *   '<S100>/Cmq'
-   *   '<S100>/Cmr'
-   *   '<S100>/Cmtot'
-   *   '<S101>/Cnd01'
-   *   '<S101>/Cnd02'
-   *   '<S101>/Cnd03'
-   *   '<S101>/Cnd04'
-   *   '<S101>/Cnp'
-   *   '<S101>/Cnq'
-   *   '<S101>/Cnr'
-   *   '<S101>/Cntot'
+   *   '<S91>/CLd01'
+   *   '<S91>/CLd02'
+   *   '<S91>/CLd03'
+   *   '<S91>/CLd04'
+   *   '<S91>/CLp'
+   *   '<S91>/CLq'
+   *   '<S91>/CLr'
+   *   '<S91>/CLtot'
+   *   '<S92>/CYd01'
+   *   '<S92>/CYd02'
+   *   '<S92>/CYd03'
+   *   '<S92>/CYd04'
+   *   '<S92>/CYp'
+   *   '<S92>/CYq'
+   *   '<S92>/CYr'
+   *   '<S92>/CYtot'
+   *   '<S93>/Cld01'
+   *   '<S93>/Cld02'
+   *   '<S93>/Cld03'
+   *   '<S93>/Cld04'
+   *   '<S93>/Clp'
+   *   '<S93>/Clq'
+   *   '<S93>/Clr'
+   *   '<S93>/Cltot'
+   *   '<S94>/Cmd01'
+   *   '<S94>/Cmd02'
+   *   '<S94>/Cmd03'
+   *   '<S94>/Cmd04'
+   *   '<S94>/Cmp'
+   *   '<S94>/Cmq'
+   *   '<S94>/Cmr'
+   *   '<S94>/Cmtot'
+   *   '<S95>/Cnd01'
+   *   '<S95>/Cnd02'
+   *   '<S95>/Cnd03'
+   *   '<S95>/Cnd04'
+   *   '<S95>/Cnp'
+   *   '<S95>/Cnq'
+   *   '<S95>/Cnr'
+   *   '<S95>/Cntot'
    */
   { -10.0, -5.0, 0.0, 5.0, 10.0 },
 
   /* Variable: cbar
    * Referenced by:
-   *   '<S7>/Aerodynamic Forces and Moments '
-   *   '<S7>/Aerodynamic Forces and Moments 1'
+   *   '<S7>/AVL_Forces_Moments'
+   *   '<S7>/VSP_Forces_Moments'
    *   '<S90>/Multiply2'
    *   '<S91>/Multiply2'
    *   '<S92>/Multiply2'
-   *   '<S93>/Multiply5'
-   *   '<S94>/Multiply5'
-   *   '<S95>/Multiply5'
-   *   '<S96>/Multiply5'
-   *   '<S97>/Multiply5'
+   *   '<S93>/Multiply2'
+   *   '<S94>/Multiply2'
+   *   '<S95>/Multiply2'
    *   '<S98>/Multiply2'
-   *   '<S99>/Multiply2'
-   *   '<S100>/Multiply2'
-   *   '<S101>/Multiply2'
+   *   '<S99>/Multiply5'
+   *   '<S100>/Multiply5'
+   *   '<S101>/Multiply5'
+   *   '<S102>/Multiply5'
+   *   '<S103>/Multiply5'
    */
   0.2,
 
   /* Variable: del_z
-   * Referenced by: '<S12>/Constant1'
+   * Referenced by: '<S13>/Constant1'
    */
   0.0,
 
@@ -1613,46 +1610,46 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
    *   '<S90>/CDq'
    *   '<S90>/CDr'
    *   '<S90>/CDtot'
-   *   '<S92>/CLd01'
-   *   '<S92>/CLd02'
-   *   '<S92>/CLd03'
-   *   '<S92>/CLd04'
-   *   '<S92>/CLp'
-   *   '<S92>/CLq'
-   *   '<S92>/CLr'
-   *   '<S92>/CLtot'
-   *   '<S98>/CYd01'
-   *   '<S98>/CYd02'
-   *   '<S98>/CYd03'
-   *   '<S98>/CYd04'
-   *   '<S98>/CYp'
-   *   '<S98>/CYq'
-   *   '<S98>/CYr'
-   *   '<S98>/CYtot'
-   *   '<S99>/Cld01'
-   *   '<S99>/Cld02'
-   *   '<S99>/Cld03'
-   *   '<S99>/Cld04'
-   *   '<S99>/Clp'
-   *   '<S99>/Clq'
-   *   '<S99>/Clr'
-   *   '<S99>/Cltot'
-   *   '<S100>/Cmd01'
-   *   '<S100>/Cmd02'
-   *   '<S100>/Cmd03'
-   *   '<S100>/Cmd04'
-   *   '<S100>/Cmp'
-   *   '<S100>/Cmq'
-   *   '<S100>/Cmr'
-   *   '<S100>/Cmtot'
-   *   '<S101>/Cnd01'
-   *   '<S101>/Cnd02'
-   *   '<S101>/Cnd03'
-   *   '<S101>/Cnd04'
-   *   '<S101>/Cnp'
-   *   '<S101>/Cnq'
-   *   '<S101>/Cnr'
-   *   '<S101>/Cntot'
+   *   '<S91>/CLd01'
+   *   '<S91>/CLd02'
+   *   '<S91>/CLd03'
+   *   '<S91>/CLd04'
+   *   '<S91>/CLp'
+   *   '<S91>/CLq'
+   *   '<S91>/CLr'
+   *   '<S91>/CLtot'
+   *   '<S92>/CYd01'
+   *   '<S92>/CYd02'
+   *   '<S92>/CYd03'
+   *   '<S92>/CYd04'
+   *   '<S92>/CYp'
+   *   '<S92>/CYq'
+   *   '<S92>/CYr'
+   *   '<S92>/CYtot'
+   *   '<S93>/Cld01'
+   *   '<S93>/Cld02'
+   *   '<S93>/Cld03'
+   *   '<S93>/Cld04'
+   *   '<S93>/Clp'
+   *   '<S93>/Clq'
+   *   '<S93>/Clr'
+   *   '<S93>/Cltot'
+   *   '<S94>/Cmd01'
+   *   '<S94>/Cmd02'
+   *   '<S94>/Cmd03'
+   *   '<S94>/Cmd04'
+   *   '<S94>/Cmp'
+   *   '<S94>/Cmq'
+   *   '<S94>/Cmr'
+   *   '<S94>/Cmtot'
+   *   '<S95>/Cnd01'
+   *   '<S95>/Cnd02'
+   *   '<S95>/Cnd03'
+   *   '<S95>/Cnd04'
+   *   '<S95>/Cnp'
+   *   '<S95>/Cnq'
+   *   '<S95>/Cnr'
+   *   '<S95>/Cntot'
    */
   { 0.05, 0.1 },
 
@@ -1755,8 +1752,8 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
 
   /* Mask Parameter: DCM2Ang_tolerance
    * Referenced by:
-   *   '<S62>/Constant'
-   *   '<S64>/Constant'
+   *   '<S67>/Constant'
+   *   '<S69>/Constant'
    */
   4.4408920985006262E-16,
 
@@ -1782,49 +1779,49 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
 
   /* Mask Parameter: DCM2Ang_action
    * Referenced by:
-   *   '<S41>/Constant'
-   *   '<S51>/Constant'
-   *   '<S53>/Constant'
+   *   '<S46>/Constant'
+   *   '<S56>/Constant'
+   *   '<S58>/Constant'
    */
   1U,
 
   /* Expression: 1
-   * Referenced by: '<S47>/Constant'
+   * Referenced by: '<S52>/Constant'
    */
   1.0,
 
   /* Expression: -1
-   * Referenced by: '<S48>/Constant'
+   * Referenced by: '<S53>/Constant'
    */
   -1.0,
 
   /* Expression: 1
-   * Referenced by: '<S43>/Constant'
+   * Referenced by: '<S48>/Constant'
    */
   1.0,
 
   /* Expression: -1
-   * Referenced by: '<S44>/Constant'
+   * Referenced by: '<S49>/Constant'
    */
   -1.0,
 
   /* Expression: 0
-   * Referenced by: '<S53>/Constant1'
+   * Referenced by: '<S58>/Constant1'
    */
   0.0,
 
   /* Expression: 0
-   * Referenced by: '<S51>/Constant1'
+   * Referenced by: '<S56>/Constant1'
    */
   0.0,
 
   /* Expression: -eye(3)
-   * Referenced by: '<S54>/Bias1'
+   * Referenced by: '<S59>/Bias1'
    */
   { -1.0, -0.0, -0.0, -0.0, -1.0, -0.0, -0.0, -0.0, -1.0 },
 
   /* Expression: -1
-   * Referenced by: '<S55>/Bias'
+   * Referenced by: '<S60>/Bias'
    */
   -1.0,
 
@@ -1838,8 +1835,18 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
    */
   0.0,
 
+  /* Expression: pi/180
+   * Referenced by: '<S96>/Gain1'
+   */
+  0.017453292519943295,
+
+  /* Expression: 1
+   * Referenced by: '<S93>/Gain'
+   */
+  1.0,
+
   /* Expression: C_wgrp.CD_wgrp{1}
-   * Referenced by: '<S91>/CD_base'
+   * Referenced by: '<S98>/CD_base'
    */
   { 0.0472247, 0.0472854, 0.029303, 0.0292947, 0.0272458, 0.0272382, 0.0411892,
     0.0411347, 0.0706463, 0.0709338, 0.115295, 0.1158552, 0.0475345, 0.0476471,
@@ -1852,7 +1859,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.0706549, 0.0709418, 0.1153082, 0.1158678 },
 
   /* Expression: C_wgrp.CD_wgrp{4}
-   * Referenced by: '<S91>/CD_dp'
+   * Referenced by: '<S98>/CD_dp'
    */
   { -0.0210015, -0.0022709, -0.0032015, -0.0032102, -0.003335, -0.0033369,
     -0.0025521, -0.0023916, -0.0030396, -0.003098, -0.0053367, -0.0054685,
@@ -1866,7 +1873,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.0022218, 0.0043492, 0.0044753 },
 
   /* Expression: C_wgrp.CD_wgrp{5}
-   * Referenced by: '<S91>/CD_dq'
+   * Referenced by: '<S98>/CD_dq'
    */
   { 0.5021852, 0.6363787, 0.2541843, 0.2564953, -0.1367178, -0.1345999,
     -0.539039, -0.5372602, -0.9378769, -0.9364125, -1.3108843, -1.309594,
@@ -1880,7 +1887,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -0.489978, -0.936629, -0.9351803, -1.3096534, -1.308388 },
 
   /* Expression: C_wgrp.CD_wgrp{6}
-   * Referenced by: '<S91>/CD_dr'
+   * Referenced by: '<S98>/CD_dr'
    */
   { -0.0418013, -0.0234493, -0.0226851, -0.0228963, -0.0219786, -0.0221444,
     -0.0200395, -0.0215155, -0.0189052, -0.0187969, -0.0152671, -0.0150736,
@@ -1894,7 +1901,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.0151691, 0.014974 },
 
   /* Expression: C_wgrp.CD_wgrp{9}
-   * Referenced by: '<S91>/CD_dailR'
+   * Referenced by: '<S98>/CD_dailR'
    */
   { -0.0317286, -0.0270819, -0.010365, -0.0103931, 0.0064201, 0.0064463,
     0.0232902, 0.0233854, 0.0400545, 0.0401757, 0.0563648, 0.0568468, -0.0270591,
@@ -1908,12 +1915,12 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.0523184, 0.0528365 },
 
   /* Expression: pi/180
-   * Referenced by: '<S104>/Gain1'
+   * Referenced by: '<S105>/Gain1'
    */
   0.017453292519943295,
 
   /* Expression: C_wgrp.CD_wgrp{10}
-   * Referenced by: '<S91>/CD_dailL'
+   * Referenced by: '<S98>/CD_dailL'
    */
   { -0.0278513, -0.0233079, -0.0078797, -0.0079043, 0.0070813, 0.0071485,
     0.0215562, 0.0215549, 0.0365188, 0.0368788, 0.052395, 0.0529133, -0.024989,
@@ -1927,12 +1934,12 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.0570076 },
 
   /* Expression: pi/180
-   * Referenced by: '<S107>/Gain1'
+   * Referenced by: '<S108>/Gain1'
    */
   0.017453292519943295,
 
   /* Expression: C_wgrp.CD_wgrp{11}
-   * Referenced by: '<S91>/CD_dele'
+   * Referenced by: '<S98>/CD_dele'
    */
   { -0.0426995, -0.035277, -0.0151323, -0.0145597, 0.0069213, 0.0070049,
     0.0283924, 0.028312, 0.0492155, 0.0487028, 0.0685449, 0.06917, -0.0386868,
@@ -1946,12 +1953,12 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.0691755 },
 
   /* Expression: pi/180
-   * Referenced by: '<S105>/Gain1'
+   * Referenced by: '<S106>/Gain1'
    */
   0.017453292519943295,
 
   /* Expression: C_wgrp.CD_wgrp{12}
-   * Referenced by: '<S91>/CD_drud'
+   * Referenced by: '<S98>/CD_drud'
    */
   { -0.0068014, -0.0018073, -0.0023889, -0.0020619, -0.002743, -0.0031222,
     -0.0042131, -0.0036904, -0.0103245, -0.0070754, -0.0074047, -0.0070277,
@@ -1969,12 +1976,12 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
   -1.0,
 
   /* Expression: pi/180
-   * Referenced by: '<S106>/Gain1'
+   * Referenced by: '<S107>/Gain1'
    */
   0.017453292519943295,
 
   /* Expression: C_wgrp.CS_wgrp{1}
-   * Referenced by: '<S97>/CS_base'
+   * Referenced by: '<S100>/CS_base'
    */
   { 0.0278017, 0.0278419, 0.0326413, 0.0327026, 0.0344075, 0.0344325, 0.0324295,
     0.0324078, 0.0270554, 0.0270668, 0.0186264, 0.0185987, 0.0136672, 0.0136839,
@@ -1987,7 +1994,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -0.0324559, -0.0324205, -0.0271423, -0.0271536, -0.0187319, -0.0187046 },
 
   /* Expression: C_wgrp.CS_wgrp{4}
-   * Referenced by: '<S97>/CS_dp'
+   * Referenced by: '<S100>/CS_dp'
    */
   { 0.0352721, 0.0355049, 0.0299989, 0.0300916, 0.0157165, 0.015772, -0.0087001,
     -0.0085729, -0.0301867, -0.0302044, -0.0414326, -0.0415281, 0.0358475,
@@ -2001,7 +2008,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -0.0294746, -0.0294849, -0.040845, -0.0409324 },
 
   /* Expression: C_wgrp.CS_wgrp{5}
-   * Referenced by: '<S97>/CS_dq'
+   * Referenced by: '<S100>/CS_dq'
    */
   { -0.0637174, -0.0629993, 0.0081736, 0.008311, 0.0789036, 0.0789235, 0.1526538,
     0.15284, 0.2236145, 0.2239257, 0.2912225, 0.2915863, -0.0332426, -0.0328667,
@@ -2014,7 +2021,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -0.1509661, -0.3807083, -0.2223043, -0.2225917, -0.2899628, -0.2903197 },
 
   /* Expression: C_wgrp.CS_wgrp{6}
-   * Referenced by: '<S97>/CS_dr'
+   * Referenced by: '<S100>/CS_dr'
    */
   { 0.1839406, 0.1843803, 0.1874143, 0.1877634, 0.1909323, 0.191071, 0.1938449,
     0.1935504, 0.1969448, 0.1972425, 0.1992859, 0.1996476, 0.1780496, 0.1783535,
@@ -2027,7 +2034,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.1971313, 0.197432, 0.1994397, 0.1998008 },
 
   /* Expression: C_wgrp.CS_wgrp{9}
-   * Referenced by: '<S97>/CS_dailR'
+   * Referenced by: '<S100>/CS_dailR'
    */
   { 0.0061091, 0.006149, 0.0057627, 0.0057907, 0.0040807, 0.0040997, 0.0009169,
     0.0009401, -0.0019546, -0.0019483, -0.0037512, -0.0038619, 0.0048412,
@@ -2040,12 +2047,12 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -0.0015367, 0.0059831, 0.0060323, 0.0082446, 0.0082641 },
 
   /* Expression: pi/180
-   * Referenced by: '<S124>/Gain1'
+   * Referenced by: '<S113>/Gain1'
    */
   0.017453292519943295,
 
   /* Expression: C_wgrp.CS_wgrp{10}
-   * Referenced by: '<S97>/CS_dailL'
+   * Referenced by: '<S100>/CS_dailL'
    */
   { -0.001928, -0.0018896, -0.0064982, -0.0065075, -0.0079329, -0.0079662,
     -0.0065153, -0.0065987, -0.0059414, -0.0059867, -0.0082516, -0.0082498,
@@ -2059,12 +2066,12 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -0.0009592, -0.0092029, 0.0018525, 0.0018514, 0.0036207, 0.0037207 },
 
   /* Expression: pi/180
-   * Referenced by: '<S127>/Gain1'
+   * Referenced by: '<S116>/Gain1'
    */
   0.017453292519943295,
 
   /* Expression: C_wgrp.CS_wgrp{11}
-   * Referenced by: '<S97>/CS_dele'
+   * Referenced by: '<S100>/CS_dele'
    */
   { 0.0210126, 0.016507, 0.0141468, 0.0141234, 0.0099854, 0.01037, 0.0071725,
     0.0064998, 0.0032914, 0.0038082, 0.0020028, -9.05E-5, 0.0085644, 0.0082923,
@@ -2077,12 +2084,12 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -0.0071744, -0.0146723, -0.0032496, -0.0037162, -0.0023497, 0.0001071 },
 
   /* Expression: pi/180
-   * Referenced by: '<S125>/Gain1'
+   * Referenced by: '<S114>/Gain1'
    */
   0.017453292519943295,
 
   /* Expression: C_wgrp.CS_wgrp{12}
-   * Referenced by: '<S97>/CS_drud'
+   * Referenced by: '<S100>/CS_drud'
    */
   { -0.102665, -0.1039739, -0.1063739, -0.0847492, -0.111842, -0.1107854,
     -0.1128579, -0.1122323, -0.1151205, -0.1150786, -0.1166077, -0.1173355,
@@ -2101,12 +2108,12 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
   -1.0,
 
   /* Expression: pi/180
-   * Referenced by: '<S126>/Gain1'
+   * Referenced by: '<S115>/Gain1'
    */
   0.017453292519943295,
 
   /* Expression: C_wgrp.CL_wgrp{1}
-   * Referenced by: '<S93>/CL_base'
+   * Referenced by: '<S99>/CL_base'
    */
   { -0.6720382, -0.6736378, -0.2581758, -0.258838, 0.1567118, 0.1570906,
     0.5727945, 0.574544, 0.9888609, 0.9914227, 1.4019733, 1.4055516, -0.6904791,
@@ -2120,7 +2127,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     1.4056359 },
 
   /* Expression: C_wgrp.CL_wgrp{4}
-   * Referenced by: '<S93>/CL_dp'
+   * Referenced by: '<S99>/CL_dp'
    */
   { 0.3348535, 0.0305104, 0.0267743, 0.0267382, 0.0237474, 0.0237755, 0.0183486,
     0.0179569, 0.0127052, 0.0127099, 0.0091134, 0.0086288, 0.0160645, 0.0159319,
@@ -2134,7 +2141,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -0.0078379 },
 
   /* Expression: C_wgrp.CL_wgrp{5}
-   * Referenced by: '<S93>/CL_dq'
+   * Referenced by: '<S99>/CL_dq'
    */
   { 11.138687, 9.0181334, 8.8224985, 8.8438258, 8.8012556, 8.8225546, 8.928203,
     8.9505882, 9.2061825, 9.2282191, 9.6269125, 9.6497447, 9.1040923, 9.1260083,
@@ -2147,7 +2154,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     9.212064, 9.2341626, 9.6311053, 9.6539732 },
 
   /* Expression: C_wgrp.CL_wgrp{6}
-   * Referenced by: '<S93>/CL_dr'
+   * Referenced by: '<S99>/CL_dr'
    */
   { 0.3213041, 0.0173537, 0.0206192, 0.0205716, 0.0230677, 0.0228535, 0.0249116,
     0.0272815, 0.0291596, 0.029163, 0.0307699, 0.0306631, 0.0078073, 0.0077199,
@@ -2161,7 +2168,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     -0.0288398, -0.0307181, -0.0306154 },
 
   /* Expression: C_wgrp.CL_wgrp{9}
-   * Referenced by: '<S93>/CL_dailR'
+   * Referenced by: '<S99>/CL_dailR'
    */
   { 0.5635271, 0.4877979, 0.4878774, 0.489259, 0.4846525, 0.4858868, 0.4777296,
     0.4788032, 0.4703805, 0.4715705, 0.4607061, 0.4644294, 0.5051723, 0.5056696,
@@ -2174,12 +2181,12 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.4660633, 0.4689948, 0.4601673, 0.4639874 },
 
   /* Expression: pi/180
-   * Referenced by: '<S108>/Gain1'
+   * Referenced by: '<S109>/Gain1'
    */
   0.017453292519943295,
 
   /* Expression: C_wgrp.CL_wgrp{10}
-   * Referenced by: '<S93>/CL_dailL'
+   * Referenced by: '<S99>/CL_dailL'
    */
   { 0.5677297, 0.492328, 0.4950469, 0.4961895, 0.4893833, 0.4906369, 0.4743688,
     0.4744028, 0.4651499, 0.4680803, 0.4592416, 0.4632145, 0.5090735, 0.5122047,
@@ -2192,12 +2199,12 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.469581, 0.4708046, 0.4600064, 0.4637034 },
 
   /* Expression: pi/180
-   * Referenced by: '<S111>/Gain1'
+   * Referenced by: '<S112>/Gain1'
    */
   0.017453292519943295,
 
   /* Expression: C_wgrp.CL_wgrp{11}
-   * Referenced by: '<S93>/CL_dele'
+   * Referenced by: '<S99>/CL_dele'
    */
   { 0.509092, 0.4331172, 0.4302524, 0.4312164, 0.4297734, 0.4308486, 0.4289928,
     0.4310086, 0.4315584, 0.4324625, 0.4264691, 0.4329146, 0.4402716, 0.4406275,
@@ -2210,12 +2217,12 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
     0.432121, 0.433024, 0.4266062, 0.433321 },
 
   /* Expression: pi/180
-   * Referenced by: '<S109>/Gain1'
+   * Referenced by: '<S110>/Gain1'
    */
   0.017453292519943295,
 
   /* Expression: C_wgrp.CL_wgrp{12}
-   * Referenced by: '<S93>/CL_drud'
+   * Referenced by: '<S99>/CL_drud'
    */
   { 0.068195, -0.0084953, -0.0110796, -0.0090282, -0.0178344, -0.0135286,
     -0.015979, -0.0164569, -0.0178217, -0.0180007, -0.0238563, -0.0205478,
@@ -2234,216 +2241,216 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
   -1.0,
 
   /* Expression: pi/180
-   * Referenced by: '<S110>/Gain1'
+   * Referenced by: '<S111>/Gain1'
    */
   0.017453292519943295,
 
   /* Expression: C_wgrp.CMl_wgrp{1}
-   * Referenced by: '<S94>/CMl_base'
+   * Referenced by: '<S101>/CMl_base'
    */
-  { -0.038829625494123561, -0.038859314582666359, -0.014486882115226659,
-    -0.0145145162031943, 0.010026653962128476, 0.010034044045440277,
-    0.035428322333370392, 0.03549477222042436, 0.06149781246374398,
-    0.061630589414807632, 0.087795117296422115, 0.087991495490876537,
-    -0.019408688247426833, -0.019448554022675035, -0.0068843494076222577,
-    -0.0068949611411241321, 0.0057144263472100757, 0.0057307323287961922,
-    0.018722814837157268, 0.018768170234437845, 0.032041908332955317,
-    0.032124287148576618, 0.045424330220609051, 0.045548617180036235,
-    -1.005352380222625E-6, -8.1409896091911969E-7, 3.7535678264668815E-6,
-    3.9353756175356988E-6, -2.9E-6, -2.9E-6, -1.7673424103463368E-5,
-    -1.8054470834150534E-5, -5.78417426180006E-5, -5.8461648774042364E-5,
-    -6.5104627600456947E-5, -6.6560451375302654E-5, 0.019409201790092045,
-    0.019449493212213675, 0.0068960355115507592, 0.0069068579762997934,
-    -0.0057198803099020911, -0.005736172608492446, -0.018793027654236332,
-    -0.018838952413450769, -0.032113673984884135, -0.032197337159238872,
-    -0.045533217526600119, -0.045660066982226383, 0.038787964023798936,
-    0.038879781426856178, 0.014504550439755137, 0.014532421462417875,
-    -0.010031836852234527, -0.010038700282882028, -0.035440067510471622,
-    -0.03550559738274657, -0.06147710111201711, -0.061610851920900205,
-    -0.087781677103142761, -0.087978393067594127 },
+  { -0.011541411427925264, -0.011571905209512659, -0.0048833474831501871,
+    -0.0049031730682406677, 0.0019469546272187831, 0.0019524819951495828,
+    0.0089638755172662642, 0.008995127534480828, 0.016045634845030625,
+    0.016102398106826357, 0.022995242853151708, 0.023086951344916892,
+    -0.00587534015039728, -0.0059000229007581707, -0.0024425218198879605,
+    -0.0024524978109684444, 0.0010765133587513397, 0.0010813909353976493,
+    0.0046675521294570824, 0.0046891831154359052, 0.00830516362823271,
+    0.0083470643499179917, 0.011801334624595672, 0.011868479559323814,
+    -1.0053523802226265E-6, -8.14098960919122E-7, 3.7535678264668824E-6,
+    3.9353756175357005E-6, -2.9E-6, -2.9E-6, -1.7673424103463368E-5,
+    -1.8054470834150534E-5, -5.78417426180006E-5, -5.8461648774042371E-5,
+    -6.5104627600456934E-5, -6.6560451375302654E-5, 0.0058729741538597249,
+    0.0058982919721269761, 0.0024490471912192967, 0.0024592713101599644,
+    -0.00108062104337453, -0.0010855821682189363, -0.0047277576128912091,
+    -0.0047499654401265, -0.0083844609580243472, -0.0084276086418300453,
+    -0.011943744254500493, -0.0120134217681373, 0.011527511867639093,
+    0.011576173880749283, 0.0048889901171789195, 0.00490912714557974,
+    -0.0019563099997782774, -0.0019618471770745057, -0.0090148867345990133,
+    -0.0090234473196614054, -0.01611449775054536, -0.016172339182221867,
+    -0.023073060811818383, -0.023165583928718047 },
 
   /* Expression: C_wgrp.CMl_wgrp{4}
-   * Referenced by: '<S94>/CMl_dp'
+   * Referenced by: '<S101>/CMl_dp'
    */
-  { -0.25101954848173558, -0.3922072099245284, -0.38135280323142567,
-    -0.38204392420784256, -0.3763556210976674, -0.37702960149784431,
-    -0.37862750021139541, -0.37930074464607405, -0.39049512347195486,
-    -0.39122254597825007, -0.40946597792206446, -0.41020648477643007,
-    -0.41481015711586439, -0.41561823719756869, -0.40667198973916124,
-    -0.40746812335754579, -0.404334347138629, -0.40511953082024976,
-    -0.40817775115977395, -0.40896486736546955, -0.41832304514862123,
-    -0.4191286637880749, -0.43477265310436658, -0.4355823286224077,
-    -0.4227575620158539, -0.42355481814244295, -0.41532716497151961,
-    -0.416103256547, -0.4142008, -0.4149869, -0.41850609731292965,
-    -0.41930810191779216, -0.42823419639881155, -0.4290537179522188,
-    -0.4435694447835688, -0.44438814132233134, -0.41478063209530175,
-    -0.41558528508710435, -0.40658811831678077, -0.4073811234648983,
-    -0.40471321172326691, -0.4054946509140222, -0.40852308768861773,
-    -0.409308612666, -0.41862833365347463, -0.41943521321922422,
-    -0.43493506980358526, -0.43574346542214815, -0.39147128710530726,
-    -0.39217045048360666, -0.38123648831812545, -0.38192302415540974,
-    -0.37672518319766768, -0.37740010700613524, -0.37905728902001695,
-    -0.38271041905199493, -0.39092069613450464, -0.39165065811481758,
-    -0.40982251364915895, -0.41056484161346318 },
+  { -0.3663985979652804, -0.40754625383883153, -0.39911807118379106,
+    -0.39988460978055407, -0.39725700137065645, -0.39801154048563081,
+    -0.40100324206103177, -0.401789024308169, -0.41072728226458072,
+    -0.41152994357054529, -0.42628194650937934, -0.42711763066885255,
+    -0.41858906242386384, -0.41938568418333794, -0.41109752736226279,
+    -0.41188635368246262, -0.40957881075235186, -0.41036700112165964,
+    -0.41380597133701547, -0.41460758994924141, -0.42341517739885648,
+    -0.42423980847637105, -0.43898010863896347, -0.4398071212268021,
+    -0.42275756201585396, -0.423554818142443, -0.41532716497151961,
+    -0.416103256547, -0.41420079999999992, -0.4149869, -0.41850609731292965,
+    -0.41930810191779216, -0.4282341963988115, -0.42905371795221886,
+    -0.4435694447835688, -0.44438814132233145, -0.41852543917154678,
+    -0.41931961363238041, -0.41103031987064531, -0.41181686288403258,
+    -0.40995296336374887, -0.41073711754860959, -0.41422343097373532,
+    -0.41502598636868832, -0.42375608991727548, -0.42458377695851107,
+    -0.43921554596477069, -0.44004406844046268, -0.406648185371125,
+    -0.407426670621209, -0.39897131205030389, -0.39973493450091557,
+    -0.39757005613685859, -0.39832464455674088, -0.40146806482053915,
+    -0.45539919116826821, -0.41112022015365524, -0.411927402862803,
+    -0.42659918639279626, -0.42743736223974527 },
 
   /* Expression: C_wgrp.CMl_wgrp{5}
-   * Referenced by: '<S94>/CMl_dq'
+   * Referenced by: '<S101>/CMl_dq'
    */
-  { 3.0869092222612253, 2.101559018220077, 2.10207072875553, 2.1072133998788645,
-    2.1047714485676003, 2.1098743252662713, 2.1058860171820579,
-    2.1111596666004866, 2.1071904416807068, 2.1123090982323962,
-    2.1066884740498208, 2.1119006970595366, 1.0649781647211134,
-    1.067617605970111, 1.0678367381185963, 1.0705939241689575,
-    1.0684144886143783, 1.0711531465858743, 1.0691771978088556,
-    1.0718480218538975, 1.0691360465945148, 1.0717876945344558,
-    1.068203486051472, 1.0708215439366271, 0.00034263394439795709,
-    0.00034249406416034407, 8.1180064867857835E-5, 7.8129162138275025E-5, 5.0E-5,
-    4.12E-5, 9.2641048331324074E-5, 8.8521787772048835E-5,
-    -3.7572532984534937E-5, -4.17089659710561E-5, 9.102685606292494E-5,
-    8.5691600674960608E-5, -1.0642888529742724, -1.066924724167513,
-    -1.0675705839278566, -1.070331263862039, -1.0687395065561063,
-    -1.0714849637596968, -1.0693348062678976, -1.0720143690043642,
-    -1.06905199761647, -1.0717087367192131, -1.0681572502514958,
-    -1.0707877996811437, -2.0961149845019236, -2.10117747342304,
-    -2.10171314671628, -2.1068463726475715, -2.1038382578240808,
-    -2.1089710368009871, -2.1069057545234608, -2.1332422052095836,
-    -2.1077022873667897, -2.1128392833481118, -2.1069522292926592,
-    -2.1121614939341349 },
+  { 0.63319979053339137, 0.34964939260370942, 0.35440053903426127,
+    0.35543924582672665, 0.35848834103108651, 0.35951656508812369,
+    0.36129716104748782, 0.36223503493131259, 0.36334358704186631,
+    0.364323111196294, 0.36424047395694387, 0.36526339046789452,
+    0.17751444405933411, 0.178042756751316, 0.18033760286428424,
+    0.18087506059341119, 0.18220948559169259, 0.18273267845583907,
+    0.18369778631000858, 0.18421305462176349, 0.18463623937380358,
+    0.18519031128928845, 0.18500140861655992, 0.18557102962677091,
+    0.00034263394439795704, 0.000342494064160344, 8.1180064867857835E-5,
+    7.8129162138275025E-5, 5.0000000000000009E-5, 4.12E-5, 9.264104833132406E-5,
+    8.8521787772048835E-5, -3.7572532984534964E-5, -4.1708965971056109E-5,
+    9.1026856062924953E-5, 8.5691600674960567E-5, -0.17677145321416007,
+    -0.17730024216391405, -0.1800681876888888, -0.18060959554051598,
+    -0.18220104541441767, -0.18273238378872744, -0.18373529180666606,
+    -0.18425861819148878, -0.18461072357446232, -0.18517104594775291,
+    -0.18484378326503356, -0.18542745899816176, -0.34819522072304626,
+    -0.34922272538928328, -0.35418702685343934, -0.35522804591334661,
+    -0.3584540073200998, -0.35949264220162613, -0.36157729607057171,
+    -0.73719538229630577, -0.363572091365914, -0.36455952374384082,
+    -0.36435184417989308, -0.36537853790142166 },
 
   /* Expression: C_wgrp.CMl_wgrp{6}
-   * Referenced by: '<S94>/CMl_dr'
+   * Referenced by: '<S101>/CMl_dr'
    */
-  { 0.0725185096626782, -0.06825840563128753, -0.027199584684268502,
-    -0.027289301422727, 0.015529529928842566, 0.015461753625783278,
-    0.05910098369494772, 0.059162315093387804, 0.10132038986691162,
-    0.10156207549334849, 0.1410328878932566, 0.14131739252104422,
-    -0.056620831827675557, -0.056809256522235119, -0.014391241116726357,
-    -0.014424273835097128, 0.029411103651381269, 0.029472525377551885,
-    0.073784718841680808, 0.073946892075945278, 0.11674592373585181,
-    0.11702269600077675, 0.15714483342604729, 0.15751699327773622,
-    -0.052743313060735673, -0.052893147868678506, -0.010017174019722009,
-    -0.010051911365394656, 0.0341965, 0.0342905, 0.078548073532062224,
-    0.078775813168740438, 0.1218152949678344, 0.12213917871690996,
-    0.16263035270456147, 0.16307586155014936, -0.056798373811525166,
-    -0.0569872237570518, -0.014459556722396837, -0.014493286355055673,
-    0.029433371989238163, 0.029493739040574837, 0.073893897357827393,
-    0.074056363652042739, 0.11679397254356634, 0.11707174243084022,
-    0.15730557595549682, 0.15767975674010221, -0.068219551154137137,
-    -0.06851426525325835, -0.027337653843750157, -0.02742753053803745,
-    0.015600068222849581, 0.015529541849180234, 0.059036996179522211,
-    0.05611443217303478, 0.10116201130639844, 0.10140376127127632,
-    0.14090782230151747, 0.141193380593583 },
+  { -0.012792111285600568, -0.053330366140371573, -0.01193601799720348,
+    -0.011979837428674093, 0.030799474553372147, 0.030861611471845431,
+    0.073816077563507582, 0.074005295549145714, 0.11564031984368425,
+    0.11594660443953428, 0.15511546322532049, 0.15549961567513018,
+    -0.0528340059170379, -0.052993425798536872, -0.010509083760170646,
+    -0.010539880161082647, 0.033323724288905461, 0.033402281143163182,
+    0.077319035341865017, 0.077519831798059574, 0.12019359976298452,
+    0.12050521071260158, 0.16063518646796177, 0.16104703160539058,
+    -0.052743313060735666, -0.0528931478686785, -0.010017174019722005,
+    -0.010051911365394656, 0.0341965, 0.0342905, 0.078548073532062238,
+    0.078775813168740438, 0.12181529496783443, 0.12213917871690996,
+    0.16263035270456147, 0.16307586155014941, -0.052852642212830474,
+    -0.053011963792714209, -0.010511012898402821, -0.010541982661020561,
+    0.033335431823244679, 0.033413240654895253, 0.077364093625322483,
+    0.0775648241339829, 0.1202147155299999, 0.12052671079751238,
+    0.16065952859107144, 0.16107162206195949, -0.053171910434037829,
+    -0.053345324507548225, -0.011947348002161778, -0.011990820730877556,
+    0.030812015341276283, 0.030873086083843947, 0.073811175379967439,
+    0.02085567389325349, 0.11560172133303101, 0.11590799575870678,
+    0.15506617289528052, 0.1554508872525075 },
 
   /* Expression: C_wgrp.CMl_wgrp{9}
-   * Referenced by: '<S94>/CMl_dailR'
+   * Referenced by: '<S101>/CMl_dailR'
    */
-  { -0.0317885349504977, -0.067278577055377667, -0.067497922928790574,
-    -0.067600304122299712, -0.068212548999993572, -0.068308197774342216,
-    -0.069384574994626289, -0.069449156228441361, -0.069817728007434562,
-    -0.0699139510889847, -0.068941142044328149, -0.069374472475457541,
-    -0.087590665298045961, -0.087660506803223834, -0.0884890535493422,
-    -0.088652853521941147, -0.089368040215184227, -0.08952068772711852,
-    -0.089830110063238516, -0.090118293229126845, -0.089108828985977717,
-    -0.089174997265066835, -0.088588910814750135, -0.087758191785248463,
-    -0.107785755437064, -0.10814193354363909, -0.10942937213650712,
-    -0.10968105824326926, -0.1095556, -0.1098085, -0.10777864867863743,
-    -0.10829840879185207, -0.10551088575367555, -0.10573449569950709,
-    -0.10121453402697429, -0.10210885773838914, -0.12478795522031243,
-    -0.12551037991951475, -0.12704027992458911, -0.12731060858237875,
-    -0.12608899228862763, -0.12640249317699256, -0.1209627569561823,
-    -0.1213248341638776, -0.11596404119059027, -0.11680022483154781,
-    -0.1094914598238205, -0.1109165956095868, -0.1340140308489384,
-    -0.13428204655593765, -0.13599412828435198, -0.13625825471908795,
-    -0.1327696053264846, -0.13308846748674549, -0.12397860530869075,
-    -0.12485934750399716, -0.11735792596666957, -0.11815663386131152,
-    -0.11217046906726601, -0.11301096299189099 },
+  { -0.082796447464586587, -0.093103367409645837, -0.094083580360167229,
+    -0.094279529472694842, -0.094358039335978042, -0.094539954185051608,
+    -0.0936437009151319, -0.093786188357041958, -0.091920291470154736,
+    -0.092090725132484, -0.088797583693744381, -0.089366832740794669,
+    -0.10146305856806402, -0.10155811286974194, -0.10282159718396221,
+    -0.10302799189879427, -0.10306038375214208, -0.10325822881057588,
+    -0.1020467907296341, -0.10239643148936432, -0.099912044828590757,
+    -0.10000839217438939, -0.0982476407124094, -0.097375067393612458,
+    -0.107785755437064, -0.1081419335436391, -0.10942937213650711,
+    -0.10968105824326926, -0.10955559999999999, -0.1098085, -0.10777864867863743,
+    -0.10829840879185207, -0.10551088575367557, -0.10573449569950712,
+    -0.10121453402697428, -0.10210885773838914, -0.11080571313920082,
+    -0.11142456417897482, -0.11277344961837299, -0.11301101884315454,
+    -0.11297964699005207, -0.1132414283626063, -0.11080214207378747,
+    -0.11112548386971363, -0.10770276288701712, -0.10848909684281509,
+    -0.10255567455155475, -0.10381466466498275, -0.1103113650704917,
+    -0.11055358589489482, -0.11208629558298021, -0.11229033827038661,
+    -0.1119697206891756, -0.11221405933247341, -0.109445118738917,
+    -0.12290245323333204, -0.10620055886893066, -0.10689611703663428,
+    -0.10249638967828024, -0.10325197358497765 },
 
   /* Expression: pi/180
-   * Referenced by: '<S112>/Gain1'
+   * Referenced by: '<S117>/Gain1'
    */
   0.017453292519943295,
 
   /* Expression: C_wgrp.CMl_wgrp{10}
-   * Referenced by: '<S94>/CMl_dailL'
+   * Referenced by: '<S101>/CMl_dailL'
    */
-  { 0.16948111678181918, 0.13429345303876705, 0.13601360868905793,
-    0.13628061656848123, 0.13275414892473539, 0.13307327534200314,
-    0.12377144420658129, 0.12385846653761913, 0.11719636032996535,
-    0.117972278710298, 0.11202335662858694, 0.11293310784935029,
-    0.12474646623310361, 0.12547133451379952, 0.12701777466943542,
-    0.12728762675391514, 0.1259285165688695, 0.12624425257309491,
-    0.12074992506736133, 0.12109013612704984, 0.11580986217845246,
-    0.11662453979218838, 0.10939435958478268, 0.11079965410485401,
-    0.10778562269975846, 0.10815828206586828, 0.10942127423826081,
-    0.10967049600500055, 0.1095081, 0.1097608, 0.10775070921068207,
-    0.1082590006211416, 0.10541494943217444, 0.10563786406402374,
-    0.10115485136057874, 0.10210011947951206, 0.087644319110577365,
-    0.087746681120597331, 0.0885113448372896, 0.088674807067735589,
-    0.089465092291504192, 0.089617798193227641, 0.089883956996590075,
-    0.090168840022396182, 0.0891793182929061, 0.089253640702114737,
-    0.0883835331049623, 0.087851333346964267, 0.067413628465208708,
-    0.067445570524524254, 0.067615538726769814, 0.067718869965945644,
-    0.068443746952485049, 0.0685442640647874, 0.069585822774695244,
-    0.0688959792195418, 0.070033804580859671, 0.070138128515362483,
-    0.0691586144094847, 0.0695738731331335 },
+  { 0.12052572289519449, 0.1105875982915881, 0.11211304802853361,
+    0.11231888433484483, 0.11186805781959364, 0.11211032114937973,
+    0.10927476489273616, 0.1093033128625336, 0.10607103193677966,
+    0.10674403901774275, 0.10240849668699398, 0.10320509912465377,
+    0.11081298933537387, 0.11143068640246868, 0.11277698736452849,
+    0.11301499997268048, 0.1128524168592713, 0.11311579760526462,
+    0.11064458985833701, 0.11094861595526453, 0.10759141795543578,
+    0.10835452563981306, 0.10250713007486588, 0.10373782728805574,
+    0.10778562269975847, 0.10815828206586826, 0.1094212742382608,
+    0.10967049600500055, 0.1095081, 0.10976079999999999, 0.10775070921068207,
+    0.10825900062114159, 0.10541494943217447, 0.10563786406402374,
+    0.10115485136057874, 0.10210011947951204, 0.10145966758709024,
+    0.1015973993137073, 0.10280981267812313, 0.10301565275044669,
+    0.10311817686411057, 0.10331517531429839, 0.10206951620162798,
+    0.10241507897172507, 0.099927381610632929, 0.10003302742290958,
+    0.097948651800902564, 0.097400730506789684, 0.092992659602969055,
+    0.093119644851884814, 0.094087898357812449, 0.094283426557486311,
+    0.094405960996701982, 0.0945889889495212, 0.093704932105441729,
+    0.080427483877847164, 0.091965713511234, 0.092155498827417193,
+    0.08885690407219235, 0.0893924793077308 },
 
   /* Expression: pi/180
-   * Referenced by: '<S115>/Gain1'
+   * Referenced by: '<S120>/Gain1'
    */
   0.017453292519943295,
 
   /* Expression: C_wgrp.CMl_wgrp{11}
-   * Referenced by: '<S94>/CMl_dele'
+   * Referenced by: '<S101>/CMl_dele'
    */
-  { 0.22907345528595155, 0.19412969022317716, 0.19329029905299644,
-    0.19391569351788618, 0.19286508594570803, 0.19323165652749133,
-    0.19128436243070387, 0.19315950682726482, 0.19080961867784538,
-    0.19112938170780522, 0.18586974938747283, 0.1894834909737679,
-    0.099151611946626417, 0.099317889793277922, 0.099157843183516822,
-    0.099474329694292943, 0.098869352436761038, 0.0991530473144373,
-    0.0983679028478166, 0.098222667799636107, 0.097602195505778727,
-    0.097937562544001877, 0.096705042592491033, 0.097014551149597852,
-    5.6258597073214759E-5, 6.93334051976333E-5, 4.6145851704953532E-5,
-    4.5041412309460816E-5, 4.92E-5, 4.88E-5, 5.7639391567510209E-5,
-    5.4827557496132817E-5, 6.2308463906672273E-5, 6.5985539685131531E-5,
-    6.9844039353231236E-5, 6.2538042748211441E-5, -0.09905670074346197,
-    -0.0992493085819274, -0.099081809934824239, -0.099400182058242054,
-    -0.098813505065082, -0.099098864707791445, -0.098253346365611977,
-    -0.098125437527899428, -0.097487193624017379, -0.097843451283779692,
-    -0.096518683721204576, -0.0968944415445146, -0.19359820187322554,
-    -0.19411602981650308, -0.19324901688075741, -0.19388507013101441,
-    -0.19277836398282219, -0.19316046490066793, -0.19132480594733298,
-    -0.19397191376359185, -0.19087081834610328, -0.1911879598474171,
-    -0.18568669529010504, -0.18950391292064825 },
+  { 0.040153150815725611, 0.029930703515514051, 0.029831048779159725,
+    0.029932066511712922, 0.029718518526587797, 0.029769753746952069,
+    0.029352210931381458, 0.029638742240685891, 0.029108935642627769,
+    0.02912997873236713, 0.027822655907444017, 0.028682350450343591,
+    0.015320245316897414, 0.01537827492749274, 0.0153383761560517,
+    0.015388374402426411, 0.015276778139828667, 0.015311718226999001,
+    0.015140087634987304, 0.015156929507648192, 0.01492529971668064,
+    0.014837389450742439, 0.014687800619149646, 0.014757335110488297,
+    5.6258597073214745E-5, 6.9333405197633281E-5, 4.6145851704953546E-5,
+    4.5041412309460809E-5, 4.92E-5, 4.88E-5, 5.7639391567510216E-5,
+    5.4827557496132824E-5, 6.2308463906672273E-5, 6.5985539685131544E-5,
+    6.9844039353231236E-5, 6.2538042748211455E-5, -0.015205439115604756,
+    -0.015287345500199711, -0.015250390949837017, -0.015301108034527111,
+    -0.015191574426926625, -0.015227349074321014, -0.015014282251585374,
+    -0.015036034659190598, -0.014805870075937375, -0.014727317316082055,
+    -0.014498846422919393, -0.014609020979863156, -0.029918197474155563,
+    -0.029856855049449019, -0.029766177179335686, -0.029871639678745156,
+    -0.029643002659434037, -0.029696863323701195, -0.02927029640006332,
+    -0.042984794710297217, -0.029037644091265736, -0.029064187091420259,
+    -0.02767715415215722, -0.028599831294408257 },
 
   /* Expression: pi/180
-   * Referenced by: '<S113>/Gain1'
+   * Referenced by: '<S118>/Gain1'
    */
   0.017453292519943295,
 
   /* Expression: C_wgrp.CMl_wgrp{12}
-   * Referenced by: '<S94>/CMl_drud'
+   * Referenced by: '<S101>/CMl_drud'
    */
-  { 0.030094773551706821, -0.0053090946204484976, -0.0015440527991524538,
-    -0.0016190678522248658, 0.00060641005541126774, 0.0023002924983806738,
-    0.0056964511526559737, 0.0060150379052089122, 0.00973163703868153,
-    0.009848437658982457, 0.012031816990976491, 0.013782909379982602,
-    -0.0069020121108028026, -0.0070798226323263436, -0.0030483077404913875,
-    -0.0030964258905384163, 0.00084324252745348943, 0.00087129909161205352,
-    0.0047125175646181554, 0.0047591328240338612, 0.00875645021628375,
-    0.0087558131307789618, 0.012791607069472879, 0.012945265477241572,
-    -0.0075113993133007016, -0.0075341715616850623, -0.0036090046511607831,
-    -0.0036168686280407068, 0.0003811, 0.0003807, 0.0044268803126625168,
-    0.0044302497627941124, 0.0084632994726881686, 0.0084857613104251158,
-    0.012294771127874415, 0.012516017907238905, -0.0069781106358281627,
-    -0.0068784501866794067, -0.0030583894591663646, -0.0030490294896584652,
-    0.00083699468079022072, 0.00081463805909160532, 0.0047209749526001049,
-    0.0047700065362976723, 0.0087213002875739659, 0.0087242986598500428,
-    0.012656550111858185, 0.012817692120137586, -0.0053799817820781529,
-    -0.0052727837382878992, -0.0024331423282881025, -0.0014870113631216164,
-    0.0021259802774214712, 0.0020358043909226445, 0.0059199848217380288,
-    0.0053356228229135376, 0.0097586458322572057, 0.00980907376781947,
-    0.01377120898698928, 0.013807631228439544 },
+  { 0.0031112252132251537, -0.0071415297002165815, -0.0032879865457383873,
+    -0.0028908852092036459, 0.00038687787146793784, 0.00059300208876980479,
+    0.0044674017408249918, 0.0045253275538220837, 0.0085308263920265311,
+    0.0085372797531569223, 0.012148348465211954, 0.0125547540715345,
+    -0.0073878315105837039, -0.0076027245135807829, -0.003519370436773439,
+    -0.0035385510876633241, 0.00039676436457271211, 0.00043297339037027518,
+    0.004440367453005075, 0.0044552404672869167, 0.0084775313177135186,
+    0.0085100725072826747, 0.012551595607091705, 0.012584724731087489,
+    -0.0075113993133007007, -0.0075341715616850623, -0.0036090046511607831,
+    -0.0036168686280407068, 0.0003811, 0.0003807, 0.0044268803126625159,
+    0.0044302497627941124, 0.0084632994726881686, 0.0084857613104251141,
+    0.012294771127874417, 0.012516017907238906, -0.00742711680974929,
+    -0.0074236853252311408, -0.003509699264449705, -0.0035399497874556937,
+    0.00041220655346274371, 0.0004177552844018396, 0.0044283614143408772,
+    0.0044536237108010685, 0.0084490379861218174, 0.0084311540896858887,
+    0.012465767550860396, 0.012563851390260533, -0.0071478774993252916,
+    -0.0071557505609117942, -0.003462910997798004, -0.0033024584786149652,
+    0.00046010175616103085, 0.00055066886851155568, 0.0044871245437793708,
+    -0.0088802484218148264, 0.0084403649028147211, 0.00852128176373322,
+    0.012533993430927986, 0.012549910901464187 },
 
   /* Expression: -1
    * Referenced by: '<S7>/Gain4'
@@ -2451,200 +2458,205 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
   -1.0,
 
   /* Expression: pi/180
-   * Referenced by: '<S114>/Gain1'
-   */
-  0.017453292519943295,
-
-  /* Expression: C_wgrp.CMm_wgrp{1}
-   * Referenced by: '<S95>/CMm_base'
-   */
-  { 0.17909942905503265, 0.17908871076398572, 0.062885552161008967,
-    0.062933887880175815, -0.053288359734033217, -0.053299749495604239,
-    -0.174085892261338, -0.17431401911911276, -0.2988744920365381,
-    -0.29936904899237232, -0.42607578645679117, -0.42675439533487458,
-    0.17993663457896603, 0.18013692220259039, 0.059012650365089708,
-    0.059020254427327064, -0.061746719838160727, -0.0618986769208009,
-    -0.18700139593533968, -0.1873158395047167, -0.31577387862309025,
-    -0.31630993870668722, -0.44728907874570029, -0.44804512340160946, 0.1800773,
-    0.1802373, 0.0575725, 0.057585, -0.0647935, -0.0649621, -0.1910211,
-    -0.1913901, -0.3214916, -0.322075, -0.4539589, -0.4547634,
-    0.17997523671354998, 0.18017267640235315, 0.059080891532265672,
-    0.059087975247989068, -0.061764311435329664, -0.061914964749288044,
-    -0.18712956420407437, -0.1874438575787529, -0.31566651528447531,
-    -0.3162029649111619, -0.44682964028963729, -0.44758586228411368,
-    0.17891760111851254, 0.17919547877985709, 0.06296438168626986,
-    0.063012167914151346, -0.053259013905536681, -0.053266840994379089,
-    -0.17381625635748996, -0.17419289926668943, -0.29826777107025004,
-    -0.29876144551004696, -0.4254563090683734, -0.42613160902333508 },
-
-  /* Expression: C_wgrp.CMm_wgrp{4}
-   * Referenced by: '<S95>/CMm_dp'
-   */
-  { -0.83047232787422065, -0.17367934680455877, -0.18829809042639994,
-    -0.18893386110975122, -0.20878691006382316, -0.20945469061922847,
-    -0.21923403300381783, -0.22011959433955958, -0.20671990645488375,
-    -0.20736085956545927, -0.186786527949373, -0.18756565226420863,
-    -0.0870088824089719, -0.086925795056230479, -0.094975509809098621,
-    -0.094947089277231167, -0.10576201674740641, -0.10587106497580302,
-    -0.11124877023305769, -0.11151227464443328, -0.10494138937764384,
-    -0.10526704287842474, -0.094507061408803439, -0.094810584276109069,
-    -0.0002276, -0.0002287, 0.0002227, 0.0002283, -4.72E-5, -4.88E-5, 0.0003327,
-    0.0003452, 0.0007915, 0.0008093, 0.0005739, 0.0005935, 0.086548657840446283,
-    0.0864784206960614, 0.095191823070251189, 0.095174471996865434,
-    0.10573192245380844, 0.10583672818433723, 0.11224696673377597,
-    0.112544261041222, 0.1054462180495452, 0.10579607354318357,
-    0.095501300336145942, 0.095842153706697145, 0.17244469805941817,
-    0.17310849101244241, 0.18807012931211811, 0.18871646428978311,
-    0.2084670240618734, 0.20912887840594291, 0.21954854316323871,
-    0.56279478420764983, 0.20657256796954024, 0.20722747403183997,
-    0.186581626820092, 0.18736564166549816 },
-
-  /* Expression: C_wgrp.CMm_wgrp{5}
-   * Referenced by: '<S95>/CMm_dq'
-   */
-  { -16.175652750708618, -11.567223421407578, -11.538245016724343,
-    -11.565303277029042, -11.528317012965385, -11.555182555686278,
-    -11.516575591582971, -11.545190354517809, -11.511289472620996,
-    -11.538591608023015, -11.501845970366672, -11.529473501617872,
-    -11.817713805940645, -11.84581690425178, -11.817939021867584,
-    -11.847489365247526, -11.800519581363812, -11.83001432800987,
-    -11.790714495565771, -11.819411117221522, -11.77757056550829,
-    -11.805490703717787, -11.760234976364627, -11.787498543689859, -11.9066977,
-    -11.9348974, -11.9073975, -11.9371704, -11.892908, -11.922691, -11.8774302,
-    -11.9064709, -11.8601118, -11.8881763, -11.842211, -11.8694494,
-    -11.818494554401534, -11.846543658398865, -11.818006073886941,
-    -11.847549988290647, -11.804966576342173, -11.834442659375425,
-    -11.792312640507454, -11.821017632387296, -11.776792329436189,
-    -11.804696463019173, -11.761734010357028, -11.788975504979121,
-    -11.540995811616039, -11.567598169227722, -11.537326353637306,
-    -11.564306162224526, -11.522356607891382, -11.549349695834673,
-    -11.521435549736555, -9.1367322718788859, -11.513129952576422,
-    -11.540499934105016, -11.50283783845437, -11.530419994062854 },
-
-  /* Expression: C_wgrp.CMm_wgrp{6}
-   * Referenced by: '<S95>/CMm_dr'
-   */
-  { -0.56853288495893217, 0.089686186955294914, 0.099212299443654187,
-    0.099509231358503591, 0.10679005547071874, 0.10766335360007868,
-    0.11069203891167914, 0.11157429241030904, 0.11544375103988723,
-    0.11592655417292995, 0.12082876440585193, 0.12155794602323527,
-    0.045870319762392767, 0.046243116070689781, 0.050844398979873237,
-    0.050871523204632896, 0.055085463402768126, 0.055320812232283433,
-    0.053890330953286825, 0.05442289183691968, 0.056486124453131017,
-    0.056977918169018038, 0.060593350669132962, 0.061158537242975722, -0.0011602,
-    -0.0011623, -0.0004314, -0.0004376, 0.0004584, 0.0004585, 0.000779,
-    0.0007839, 0.0010852, 0.0010865, 0.0013097, 0.0013233, -0.047987502478350624,
-    -0.048367288320871671, -0.051729412626638639, -0.051763502618161449,
-    -0.054945672268825053, -0.055185044487582616, -0.053039308089024323,
-    -0.053567076276860408, -0.056128852655602621, -0.056612502329467788,
-    -0.058776747580478475, -0.059318320432891404, -0.090508019446637333,
-    -0.091282610661442068, -0.10005157445904267, -0.10035193061984414,
-    -0.10640728923777937, -0.10729157677620624, -0.11108337283789381,
-    0.23036418064178829, -0.11623202453713675, -0.11671433130147658,
-    -0.12132305639981394, -0.12204907289881889 },
-
-  /* Expression: C_wgrp.CMm_wgrp{9}
-   * Referenced by: '<S95>/CMm_dailR'
-   */
-  { -0.35318103467504264, -0.18783717099696448, -0.19306051433018165,
-    -0.19371615326651753, -0.19018715506146433, -0.19079185098667437,
-    -0.17753983401453163, -0.17808208646119456, -0.16292105819291561,
-    -0.16344370737107891, -0.14746106865841696, -0.14846364711768811,
-    -0.19384828072436497, -0.1941927787315475, -0.20010268029831624,
-    -0.20068868633648543, -0.19158728538553182, -0.19220724864016897,
-    -0.17182244624624721, -0.17267249776679086, -0.15278885389292571,
-    -0.15319968417167976, -0.13738291579289388, -0.13674849971414796, -0.1947556,
-    -0.1957096, -0.200357, -0.2010586, -0.1854726, -0.1861345, -0.1554669,
-    -0.1564119, -0.132987, -0.133432, -0.1144278, -0.1159228,
-    -0.17674186924913435, -0.17806875498873304, -0.18036435085278321,
-    -0.18078037324864443, -0.16491266269482888, -0.16557937633875286,
-    -0.12578545269585367, -0.1262736533387229, -0.10073128079303673,
-    -0.10132717012554976, -0.083507762743451272, -0.085612964905330408,
-    -0.137883365911721, -0.13801187785784083, -0.13893226066867026,
-    -0.13929510806182033, -0.11832278902058346, -0.11877437986720654,
-    -0.077172667341415729, 0.0086814894913252276, -0.05533466796381098,
-    -0.055896712513028059, -0.046142003167049764, -0.046572391494469338 },
-
-  /* Expression: pi/180
-   * Referenced by: '<S116>/Gain1'
-   */
-  0.017453292519943295,
-
-  /* Expression: C_wgrp.CMm_wgrp{10}
-   * Referenced by: '<S95>/CMm_dailL'
-   */
-  { -0.30370558315270824, -0.13785582637013996, -0.13887927292906543,
-    -0.13924902486004048, -0.11891293869621243, -0.119380425145002,
-    -0.076958385059935144, -0.077341494077553, -0.055144839623161843,
-    -0.055709277896049875, -0.04576441252362333, -0.046375012264075116,
-    -0.17609100853109805, -0.17746596421920349, -0.18001678974004631,
-    -0.18042050684666772, -0.16448050458329086, -0.1651555551485345,
-    -0.12506214983143402, -0.12551803325790861, -0.10016988208779136,
-    -0.10079074081014723, -0.0828645780750596, -0.085084947764399441, -0.1940647,
-    -0.1950558, -0.2000602, -0.2007502, -0.1849862, -0.1856444, -0.1549151,
-    -0.1558553, -0.1324087, -0.1328459, -0.1137525, -0.1153496,
-    -0.1930873614346221, -0.19357102335124884, -0.19964729021532227,
-    -0.200230355627353, -0.19106887130925496, -0.19167669345230248,
-    -0.17140946780807934, -0.17224879087746725, -0.15205480415997727,
-    -0.15248170627619212, -0.13610856666287724, -0.13585100228746955,
-    -0.18618634263597844, -0.18683961397591589, -0.19230922431570624,
-    -0.19295568884589667, -0.18897904830841486, -0.18955901390233779,
-    -0.17662122458343765, -0.090725688304917868, -0.16179629176677793,
-    -0.1623970340530809, -0.14642174264075822, -0.14731481940414862 },
-
-  /* Expression: pi/180
    * Referenced by: '<S119>/Gain1'
    */
   0.017453292519943295,
 
-  /* Expression: C_wgrp.CMm_wgrp{11}
-   * Referenced by: '<S95>/CMm_dele'
+  /* Expression: C_wgrp.CMm_wgrp{1}
+   * Referenced by: '<S102>/CMm_base'
    */
-  { -1.2469405406097618, -1.0846471606204526, -1.0797544886870618,
-    -1.083217399473881, -1.077698795570708, -1.0797829035402171,
-    -1.0697023006018807, -1.0801967189907118, -1.0682087485781901,
-    -1.0701878899147614, -1.0441836526877026, -1.0623129579296355,
-    -1.116448491190158, -1.117886772214457, -1.1162882382914172,
-    -1.1198371593907324, -1.1132682901021187, -1.1165820744141073,
-    -1.108416632290766, -1.106254061123072, -1.1010895864614125,
-    -1.1067411632540567, -1.0923146873495932, -1.0955083648083401, -1.1291809,
-    -1.1307151, -1.128107, -1.1311354, -1.1254502, -1.1284642, -1.1208333,
-    -1.1237708, -1.1148183, -1.1168076, -1.1049407, -1.1074633,
-    -1.1167238109212632, -1.118192713660439, -1.1164553007487681,
-    -1.1200197164678189, -1.1136671754002643, -1.1169919564643815,
-    -1.1085776291878591, -1.1065801762661993, -1.1011590739567334,
-    -1.1069636120757682, -1.092365824186541, -1.0958974134979032,
-    -1.0812044500952669, -1.0850597001272573, -1.0799225098805114,
-    -1.0834258845256042, -1.0776377269113711, -1.0798070324082021,
-    -1.0705289361097237, -0.99464725745740812, -1.0691007732260938,
-    -1.071025036058548, -1.0439600425578026, -1.0630108136928929 },
+  { 0.17159895095754024, 0.17155556067495031, 0.059369465626214556,
+    0.0593980286924809, -0.052636059905277179, -0.052641881638031289,
+    -0.16918982097683458, -0.16939081519701465, -0.28977180329073327,
+    -0.29021920969875459, -0.41297092812278813, -0.41357016047069578,
+    0.17801079388901955, 0.17819934511711022, 0.058108417457940986,
+    0.058110796784364913, -0.061582679221169508, -0.061733054427078819,
+    -0.18576050680379227, -0.18606557657058007, -0.31345459831326339,
+    -0.31397202145044772, -0.44398418757965863, -0.44470969127029836, 0.1800773,
+    0.18023729999999996, 0.0575725, 0.057585, -0.0647935, -0.0649621, -0.1910211,
+    -0.1913901, -0.3214916, -0.322075, -0.4539589, -0.45476340000000004,
+    0.17805090028778356, 0.17823624911357042, 0.058173656209813109,
+    0.058175380582275428, -0.061598214378588319, -0.061747233086591455,
+    -0.18585768345221335, -0.1861622970441697, -0.31330460345292005,
+    -0.3138217593799249, -0.4434464379697069, -0.44417078110607644,
+    0.17142705559560992, 0.17166063114019126, 0.059444396166011965,
+    0.0594720643621694, -0.0525959982477368, -0.05259815225061483,
+    -0.16885884375436408, -0.1692363996401621, -0.28907582651743258,
+    -0.28952118184822517, -0.41225234495550828, -0.41284731527350577 },
+
+  /* Expression: C_wgrp.CMm_wgrp{4}
+   * Referenced by: '<S102>/CMm_dp'
+   */
+  { -1.2416828163226139, -0.61114550675752566, -0.617201057335963,
+    -0.61866785287060266, -0.63625750942276627, -0.63774442055713942,
+    -0.65096101011318741, -0.65270467029896417, -0.64844230646465861,
+    -0.64995278781551613, -0.64449993869714628, -0.64618733501005166,
+    -0.30890136949406194, -0.30923893667510832, -0.31295925232993227,
+    -0.31334772332338823, -0.323013539565508, -0.32354004506318124,
+    -0.33077133061189407, -0.33146040569273383, -0.32950326254538292,
+    -0.330267061937746, -0.32723015333706146, -0.32797293606890932, -0.0002276,
+    -0.00022870000000000003, 0.00022270000000000002, 0.0002283, -4.72E-5,
+    -4.8800000000000007E-5, 0.0003327, 0.0003452, 0.0007915, 0.0008093,
+    0.0005739, 0.0005935, 0.30840448552125949, 0.30875369326042218,
+    0.31314145013971206, 0.313539855964929, 0.32318107440482008,
+    0.32370117550642658, 0.33199680113037022, 0.332720383124694,
+    0.33019165509734577, 0.33098143106919109, 0.32835539922815693,
+    0.32913655573134115, 0.60892422746640251, 0.61043247812530665,
+    0.61681116863511543, 0.61828571187132275, 0.63626161966367112,
+    0.63774249952956086, 0.65177756050556868, 1.0614217205207734,
+    0.64870839117534052, 0.65023799828000739, 0.64462653325275454,
+    0.64632159641510611 },
+
+  /* Expression: C_wgrp.CMm_wgrp{5}
+   * Referenced by: '<S102>/CMm_dq'
+   */
+  { -15.932824172478661, -11.503133994855226, -11.468339643645432,
+    -11.495013473792563, -11.453806281680647, -11.480293408556285,
+    -11.43876973000925, -11.467148503708303, -11.431169693457019,
+    -11.45815673453048, -11.420522755965431, -11.44779774991447,
+    -11.801397286911932, -11.829405445742415, -11.800131285150103,
+    -11.829591349770801, -11.781607823212465, -11.811019468600929,
+    -11.77095148926508, -11.799563962788579, -11.757225125712305,
+    -11.785035504225958, -11.739582713501555, -11.76672399177685, -11.9066977,
+    -11.9348974, -11.9073975, -11.937170399999998, -11.892907999999998,
+    -11.922691, -11.877430199999997, -11.9064709, -11.8601118, -11.8881763,
+    -11.842210999999999, -11.8694494, -11.802576001505535, -11.830529559929357,
+    -11.800341225649106, -11.829792730552677, -11.78608845943597,
+    -11.81547701195678, -11.772540289954474, -11.80115692805869,
+    -11.756455274326884, -11.784246238381446, -11.741174924926575,
+    -11.768286554483351, -11.477754143682185, -11.503971858272196,
+    -11.467623347302291, -11.494214185898031, -11.447724010315556,
+    -11.474331013241827, -11.443461258061541, -8.59646900557802,
+    -11.432816370700218, -11.459864660882641, -11.42142268631391,
+    -11.448647087509933 },
+
+  /* Expression: C_wgrp.CMm_wgrp{6}
+   * Referenced by: '<S102>/CMm_dr'
+   */
+  { -0.5972217950503601, 0.035426729314892415, 0.0891705938808975,
+    0.089428873113622909, 0.1423387677521375, 0.14330125939971519,
+    0.19203209179568059, 0.1931387487785293, 0.24133131715614625,
+    0.24215224857046616, 0.28878570220963418, 0.28994225989832939,
+    0.01823624587358524, 0.018527197808363313, 0.045621518295586735,
+    0.045632537440231019, 0.073066234368772465, 0.0733446629745918,
+    0.095125004936764956, 0.095767227766704419, 0.12040700033719688,
+    0.12106677971745496, 0.14592395155688706, 0.14671060241629333, -0.0011602,
+    -0.0011623, -0.0004314, -0.0004376, 0.0004584, 0.00045850000000000003,
+    0.000779, 0.00078390000000000013, 0.0010852, 0.0010865, 0.0013097, 0.0013233,
+    -0.020357466724915476, -0.020655506030508784, -0.046511318900424113,
+    -0.04652925785528441, -0.072931716157265639, -0.073213799047756684,
+    -0.094292221917492328, -0.094929585736097138, -0.1200585489148578,
+    -0.12071033401783424, -0.14410829942087788, -0.1448713129209897,
+    -0.0364386878283226, -0.037049673151436757, -0.0900201298260681,
+    -0.090282292497276151, -0.14195915323362279, -0.14293179383308749,
+    -0.19242861451737459, 0.2143328720829534, -0.24209953505693455,
+    -0.24291994611535184, -0.28924077357550582, -0.29039467886642217 },
+
+  /* Expression: C_wgrp.CMm_wgrp{9}
+   * Referenced by: '<S102>/CMm_dailR'
+   */
+  { -0.45050055382953985, -0.29171142410582079, -0.29811459867306644,
+    -0.29899577040613023, -0.29545641293073643, -0.29627038269374351,
+    -0.2817144342633478, -0.28242242617800883, -0.26487690261189967,
+    -0.26559445203890053, -0.24568962451496959, -0.24732343158612033,
+    -0.24876700558926837, -0.24916402228190837, -0.255780746307152,
+    -0.2564797249488372, -0.24733573240562781, -0.24806437059167574,
+    -0.22690528820564748, -0.22794578366577689, -0.20661809900556147,
+    -0.20708256687866344, -0.19023105158504627, -0.18913111507585306,
+    -0.19475560000000003, -0.1957096, -0.20035700000000004, -0.20105860000000003,
+    -0.1854726, -0.18613449999999998, -0.1554669, -0.1564119, -0.132987,
+    -0.133432, -0.1144278, -0.1159228, -0.11931498221271389,
+    -0.12032336764848414, -0.12192082651969181, -0.12221396808004006,
+    -0.10625872995391958, -0.10679140590951451, -0.068026106791152452,
+    -0.068346549456823183, -0.044446285753472654, -0.044630324761706676,
+    -0.029831188961158, -0.031284535443242813, -0.024385022261886814,
+    -0.024259686638650611, -0.023576636246578325, -0.023732409727898356,
+    -0.0025435090594150625, -0.0027475852665552643, 0.037018357262670734,
+    0.13944609815980852, 0.055990431747395056, 0.056152205431556655,
+    0.061493113122367424, 0.061853793332940922 },
 
   /* Expression: pi/180
-   * Referenced by: '<S117>/Gain1'
+   * Referenced by: '<S121>/Gain1'
+   */
+  0.017453292519943295,
+
+  /* Expression: C_wgrp.CMm_wgrp{10}
+   * Referenced by: '<S102>/CMm_dailL'
+   */
+  { -0.18376352221045117, -0.024063365433957717, -0.023493827323363806,
+    -0.023654783761938053, -0.003257310997637989, -0.0034799092356318541,
+    0.037057399881395038, 0.036694434608995227, 0.056047732864240835,
+    0.056183097857473094, 0.061787383422189236, 0.062006630639520166,
+    -0.11865600375665054, -0.11971338469127521, -0.12156911438784376,
+    -0.12184963548750972, -0.10589100695455235, -0.10643122889310147,
+    -0.067381360980219573, -0.06767948721749785, -0.043940075138255347,
+    -0.04416152785264215, -0.029209451116903734, -0.030793680162236142,
+    -0.1940647, -0.1950558, -0.2000602, -0.2007502, -0.1849862,
+    -0.18564439999999996, -0.1549151, -0.1558553, -0.1324087, -0.1328459,
+    -0.1137525, -0.1153496, -0.2479993006588003, -0.24855895931101685,
+    -0.25531613736397074, -0.25601186282735788, -0.24684447387989755,
+    -0.24756044366211222, -0.2265016157305135, -0.22752915618039923,
+    -0.20588734190903077, -0.20637290347400244, -0.18879025578742553,
+    -0.18824129770031167, -0.289899161085789, -0.29070465620387731,
+    -0.29734793754543648, -0.29821924411470785, -0.29426711140708744,
+    -0.2950568761245449, -0.28083645623075321, -0.17855729286320762,
+    -0.26377050043206407, -0.26458877071006748, -0.24468569372352009,
+    -0.24617132553774096 },
+
+  /* Expression: pi/180
+   * Referenced by: '<S124>/Gain1'
+   */
+  0.017453292519943295,
+
+  /* Expression: C_wgrp.CMm_wgrp{11}
+   * Referenced by: '<S102>/CMm_dele'
+   */
+  { -1.2374177802034463, -1.0816704491647107, -1.0767536512430098,
+    -1.0802012602775319, -1.0747628685269945, -1.0768479220108309,
+    -1.0669430082349585, -1.0774118766090586, -1.065668162858602,
+    -1.0676775282702147, -1.0423710157765111, -1.0600688303926951,
+    -1.1156736813027734, -1.1170907173754649, -1.1155027905542727,
+    -1.119048561963174, -1.1124955960483134, -1.115812649572212,
+    -1.1076843771131741, -1.1054987115410586, -1.1004228207026086,
+    -1.1061579609285415, -1.0917159191557801, -1.094893786572539, -1.1291809,
+    -1.1307151, -1.128107, -1.1311354, -1.1254502, -1.1284642, -1.1208333,
+    -1.1237708, -1.1148183, -1.1168076, -1.1049407, -1.1074633,
+    -1.1160115092794249, -1.1174467435661095, -1.1157174698064294,
+    -1.1192784574288619, -1.112942148565282, -1.1162698297367395,
+    -1.107912947757991, -1.1058908874851243, -1.1005559104515517,
+    -1.1064400680327409, -1.0918672977223183, -1.095363806459023,
+    -1.0781495692287155, -1.0821723813864621, -1.0769950354996531,
+    -1.0804794625110363, -1.074780382613979, -1.0769501083394,
+    -1.0678786034069614, -0.97541511692672367, -1.0666596015584418,
+    -1.0686067892523929, -1.0422960022609584, -1.0608728670891836 },
+
+  /* Expression: pi/180
+   * Referenced by: '<S122>/Gain1'
    */
   0.017453292519943295,
 
   /* Expression: C_wgrp.CMm_wgrp{12}
-   * Referenced by: '<S95>/CMm_drud'
+   * Referenced by: '<S102>/CMm_drud'
    */
-  { -0.17856357941697407, -0.013422634585755865, -0.01215569426436669,
-    -0.0089518468504062171, -0.0013890000304881576, -0.011228139061389183,
-    -0.0073704960343489749, -0.0090905048236881447, -0.006466560547516328,
-    -0.0071978888528951845, 0.0029155975729503454, -0.00593854271082803,
-    -0.0071241595699766923, -0.007637409850319625, -0.0065889504710468314,
-    -0.006204782368540265, -0.0059185283584598843, -0.0058066573648662976,
-    -0.0032403073792980934, -0.0036622502116052959, -0.0029773548115126975,
-    -0.0025321160693378346, -0.0021021372518196585, -0.0037063495512855587,
-    0.0002454, 0.0002354, 0.0001024, 0.000101, -0.0001469, -0.00015, 0.0001725,
-    -0.0001317, -8.04E-5, -0.0001313, -0.0012529, -0.0002132,
-    0.0066367372041886193, 0.0079195326476694718, 0.006324723688044551,
-    0.0068555277827846177, 0.0056279672213267974, 0.0052553979908927422,
-    0.0035142125612784921, 0.0038289367979215086, 0.0028910900662571905,
-    0.0031710942413161057, 0.0014532389874702147, 0.002285461393560762,
-    0.0129953526393293, 0.013760563161628082, 0.0074460326991562572,
-    0.012632939551220067, 0.010976687953568459, 0.009760977457811286,
-    0.0087198799944691839, 0.095928345944806828, 0.0072622589666420847,
-    0.0070456108762292054, 0.0060023437438002994, 0.0061356442217302184 },
+  { -0.18000251968797959, -0.021364170767273712, -0.015970749314789423,
+    -0.012260035981082416, -0.0010149965854291234, -0.010896578703915501,
+    -0.002821483669821611, -0.0045256600191705895, 0.0024222040437138783,
+    0.0016783028444814628, 0.015895738929023875, 0.0072380387395667078,
+    -0.011077089866533331, -0.011707328688501996, -0.0084929884633755,
+    -0.0081164410992889645, -0.0057475802130771995, -0.0056158303018990141,
+    -0.00091380245397563087, -0.0013306499910270793, 0.0014854546509840932,
+    0.001950820376472213, 0.0045205045310386964, 0.0029232827434519317,
+    0.0002454, 0.0002354, 0.0001024, 0.00010100000000000002, -0.0001469,
+    -0.00015, 0.0001725, -0.0001317, -8.04E-5, -0.0001313,
+    -0.0012528999999999997, -0.0002132, 0.010607240721652, 0.011896638801874733,
+    0.0082219145127939049, 0.0087721958724495779, 0.0054469477940909073,
+    0.0050690001827718928, 0.0011958528270801386, 0.0014992851113393841,
+    -0.0015572200698479187, -0.0012659228719112184, -0.0051282804254841573,
+    -0.0043424575498107569, 0.020932280483835421, 0.021726179957441877,
+    0.011321766775737463, 0.016476042681048849, 0.010779600744880047,
+    0.0094354053577444461, 0.0041857651277105662, 0.10790824332209636,
+    -0.0015092900966594196, -0.0018176345531591123, -0.0071504931409802248,
+    -0.0070305575298019009 },
 
   /* Expression: -1
    * Referenced by: '<S7>/Gain9'
@@ -2652,205 +2664,207 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
   -1.0,
 
   /* Expression: pi/180
-   * Referenced by: '<S118>/Gain1'
-   */
-  0.017453292519943295,
-
-  /* Expression: C_wgrp.CMn_wgrp{1}
-   * Referenced by: '<S96>/CMn_base'
-   */
-  { -0.016351667009740622, -0.016375123698733982, -0.014827518839797386,
-    -0.014851048723664939, -0.0143557, -0.0143611, -0.014729329170964464,
-    -0.014749657458455676, -0.016079764404538406, -0.016106260417488673,
-    -0.018363849083031909, -0.018410286625270736, -0.0082106572702709945,
-    -0.0082232130572533722, -0.0074770122737259333, -0.00749685136013574,
-    -0.0072688, -0.0072729, -0.0075225311436940894, -0.0075373368728211057,
-    -0.0081535575537520829, -0.0081713656280699987, -0.0092906627391032923,
-    -0.009314050556179447, 0.00010187310374476464, 0.00010251608284987206,
-    3.6265144816643329E-5, 3.6481814904811218E-5, -1.34E-5, -1.29E-5,
-    -2.6460349212720529E-5, -2.6226247976003117E-5, 1.3648483113422052E-6,
-    1.8803251369139394E-6, 4.3326636899323494E-5, 4.33026132319514E-5,
-    0.0083990235928435072, 0.0084135256819589735, 0.0075461717132655559,
-    0.0075665350437472334, 0.0072567, 0.0072613, 0.007487520499492915,
-    0.007502577761005198, 0.0081891375302091621, 0.0082073683087086485,
-    0.0093777695108517231, 0.0094017336648625129, 0.0164726634699832,
-    0.016497259807546252, 0.014870003969613571, 0.014894365671536696, 0.0143605,
-    0.0143664, 0.014761841786529976, 0.014775216942207231, 0.016173237496795174,
-    0.016200335810659848, 0.018505180560218503, 0.018552482358902722 },
-
-  /* Expression: C_wgrp.CMn_wgrp{4}
-   * Referenced by: '<S96>/CMn_dp'
-   */
-  { 0.021051849114706395, 0.02165777406218547, 0.0043735163878583783,
-    0.0043449656584890681, -0.0112439, -0.0112568, -0.024083538189614943,
-    -0.024125810897283127, -0.037145455998234864, -0.037175387041964145,
-    -0.051809788073157517, -0.051821732974558041, 0.02100728952419971,
-    0.020993144441405723, 0.0035536520543430553, 0.0035160010909240091,
-    -0.012217, -0.0122292, -0.025016775660384218, -0.02506973492696684,
-    -0.037982598893629357, -0.037994184453343849, -0.052582825007722891,
-    -0.052592340495491427, 0.02064648628002895, 0.020657105536885947,
-    0.0030878024742757304, 0.003142168515776006, -0.0126354, -0.0126579,
-    -0.025358687706990152, -0.025343229577115198, -0.038212648169736255,
-    -0.038239548420684763, -0.052965122654408531, -0.05296937323296956,
-    0.021035693743713335, 0.021022359339646968, 0.0035782847066039777,
-    0.0035424281129102092, -0.0122797, -0.01229, -0.025098018861945751,
-    -0.025150457632609292, -0.038074950562973858, -0.038087770467292989,
-    -0.05266429691190927, -0.052674628110875324, 0.02170689982194926,
-    0.021716668443159587, 0.0044200269384826185, 0.0043918111490885356,
-    -0.0113103, -0.0113232, -0.02425283299049414, -0.0071846911416738671,
-    -0.037292556370861638, -0.037323345441336, -0.051883533530811335,
-    -0.051896840881965195 },
-
-  /* Expression: C_wgrp.CMn_wgrp{5}
-   * Referenced by: '<S96>/CMn_dq'
-   */
-  { 0.063257884484343413, 0.067294955225840086, 0.057173233335190636,
-    0.056990430161720833, 0.0461863, 0.0460865, 0.03368899785535908,
-    0.033563643100827142, 0.022313148153026319, 0.022215076517314122,
-    0.010902279196130859, 0.010724676350051733, 0.033007726743042753,
-    0.032908586096923959, 0.028076968899941317, 0.027959243026416041, 0.0229231,
-    0.0228472, 0.016792387492484771, 0.016670514948469904, 0.011328432692874261,
-    0.011265632492063556, 0.0067617292575275524, 0.006721224041220452,
-    -0.0016725114469402884, -0.0016786286712715621, -0.00097493461168842008,
-    -0.00098022063027849559, -0.0002843, -0.0002633, 0.00022016358955120912,
-    0.00022012245021723782, 0.000957673615990921, 0.00096012920597054292,
-    0.0013462115626733042, 0.0013448458943588159, -0.036146655696760406,
-    -0.036065183066339615, -0.030002879641240574, -0.029894039770214261,
-    -0.0234686, -0.0233666, -0.016778088576281078, -0.01664297048128106,
-    -0.010746452353541772, -0.010670225239773918, -0.0046595344329622788,
-    -0.0046108312234631257, -0.069783841611041064, -0.069633738567483866,
-    -0.058600476015229955, -0.058445154042085043, -0.0457875, -0.0456549,
-    -0.0338061707188589, 0.086975881405565, -0.022060171360965712,
-    -0.021962007914304991, -0.010006403156446627, -0.0098284014302901582 },
-
-  /* Expression: C_wgrp.CMn_wgrp{6}
-   * Referenced by: '<S96>/CMn_dr'
-   */
-  { -0.087716783652374966, -0.087255614237678164, -0.075825702769680939,
-    -0.075947874308036789, -0.0728726, -0.0728865, -0.0780194842768448,
-    -0.078128616140755669, -0.091731164678246435, -0.09190702536941403,
-    -0.11276229421355016, -0.11304843261649111, -0.087634534213961113,
-    -0.08777989561530361, -0.076251947745783574, -0.0764455464439926, -0.0732468,
-    -0.0732902, -0.078952687404352045, -0.079083711933782191,
-    -0.092379409534528126, -0.092576119128555331, -0.11353122748335512,
-    -0.11381137814199935, -0.087737611663625939, -0.0878415086334024,
-    -0.07640740749546869, -0.076524380170977208, -0.073372, -0.0733852,
-    -0.078986483104970209, -0.079078582387734422, -0.092382501767323322,
-    -0.092590605148085786, -0.11354860757067846, -0.1137718195069698,
-    -0.087592160622892185, -0.087736270795659987, -0.076201966318624276,
-    -0.0763945688221352, -0.0733217, -0.0733641, -0.079058705686334316,
-    -0.079190020358599636, -0.092531017531573251, -0.092728995718992915,
-    -0.11374125061902628, -0.11402118221060074, -0.0870501672474854,
-    -0.087184551136871347, -0.0757755607140319, -0.0758969913382277, -0.0728796,
-    -0.072893, -0.078164968351791431, -0.06116360843831406,
-    -0.091960940514886819, -0.092139234203932691, -0.11302912380798824,
-    -0.1133165317845742 },
-
-  /* Expression: C_wgrp.CMn_wgrp{9}
-   * Referenced by: '<S96>/CMn_dailR'
-   */
-  { -0.011662043581094021, -0.011549054117144748, -0.0051555385358632933,
-    -0.0051812466352878957, 0.0016626, 0.0016717, 0.0089747093544929931,
-    0.0089992525475822774, 0.01599206103010143, 0.016051377091520068,
-    0.022127900949059705, 0.022397703896528343, -0.013126892291150639,
-    -0.013158061301429529, -0.0061050175521038825, -0.0061332983265949756,
-    0.0015411, 0.00155, 0.0098034068997433586, 0.0098825865392984727,
-    0.017799491488634675, 0.01776046251348478, 0.025278619735042574,
-    0.025080676351590475, -0.014852746604969375, -0.014930680271613317,
-    -0.0072105364751756905, -0.00723315844818688, 0.0013317, 0.0013407,
-    0.0105900264256917, 0.010680872200007891, 0.019494945055445197,
-    0.019580676975552047, 0.027042706941289393, 0.027315676150544206,
-    -0.016821612771526846, -0.016935329076567328, -0.008383889898857402,
-    -0.0084188337526739827, 0.0010864, 0.0010913, 0.011315357675245306,
-    0.011359654830567461, 0.020915966694166184, 0.021081817114702833,
-    0.028820542932466667, 0.029123423799719304, -0.018444368198835989,
-    -0.018505657598459412, -0.0093085610725758584, -0.0093377510667156591,
-    0.000964, 0.0009697, 0.011975293223260368, 0.016280826868991904,
-    0.022148427305488206, 0.02238333546569549, 0.030739848470210211,
-    0.031066983152397067 },
-
-  /* Expression: pi/180
-   * Referenced by: '<S120>/Gain1'
-   */
-  0.017453292519943295,
-
-  /* Expression: C_wgrp.CMn_wgrp{10}
-   * Referenced by: '<S96>/CMn_dailL'
-   */
-  { 0.018209679996112078, 0.018422449634082169, 0.0092319434944095786,
-    0.00925846616143457, -0.0010215, -0.0010276, -0.011956584091365137,
-    -0.011942802780809707, -0.022086988587054664, -0.022319084608479225,
-    -0.030659897382771147, -0.031001891861205735, 0.016680746027198615,
-    0.016794051284743997, 0.0082652244598974238, 0.0083002206071596529,
-    -0.0011893, -0.0011926, -0.011316678062778541, -0.011358613207125549,
-    -0.020888169824468211, -0.021051381994823672, -0.028762539433221445,
-    -0.029069236685439929, 0.014689950313915776, 0.01477231321120958,
-    0.0070919795519531646, 0.0071140847771980556, -0.001406, -0.0014084,
-    -0.010592701520152133, -0.010681540093154359, -0.019404410464172916,
-    -0.019488902812391552, -0.026952485716891163, -0.027254013415997345,
-    0.012981041844123369, 0.01302574832362734, 0.0059767055074923144,
-    0.0060037298393257714, -0.0015958, -0.0016028, -0.0097829672965905629,
-    -0.0098610748301631961, -0.017756015320828704, -0.017719985712716629,
-    -0.025095893899025265, -0.025020909566610555, 0.011446715955803065,
-    0.011486481031724208, 0.0050806784783211933, 0.00510472294163465, -0.0016629,
-    -0.0016712, -0.0089342260971825519, -0.00463758518189724,
-    -0.01593208527624751, -0.0159965192124715, -0.022061663954783067,
-    -0.022319325568388407 },
-
-  /* Expression: pi/180
    * Referenced by: '<S123>/Gain1'
    */
   0.017453292519943295,
 
-  /* Expression: C_wgrp.CMn_wgrp{11}
-   * Referenced by: '<S96>/CMn_dele'
+  /* Expression: C_wgrp.CMn_wgrp{1}
+   * Referenced by: '<S103>/CMn_base'
    */
-  { -0.0021414230432636053, -0.00040239485965786034, -0.0011464120177576479,
-    -0.0011843870861342613, -0.0014533, -0.0015734, -0.0021722779432787162,
-    -0.0021088562418827062, -0.0024310648617214738, -0.0026253203237971714,
-    -0.0034920504041664776, -0.0028633293910805884, -0.00021013154324996943,
-    -0.00011671595111235037, -0.00045801682002395369, -0.00046662898191430081,
-    -0.000746, -0.0007844, -0.0010564540402268213, -0.0012075462486249473,
-    -0.0012513911169064165, -0.0018633692836068968, -0.0013879975665331773,
-    -0.0013950998598786747, -5.24272854089707E-5, -9.1449707072799289E-5,
-    -2.9490343681015935E-5, -2.145602892357186E-5, 1.13E-5, 1.17E-5,
-    3.3503888426975658E-5, 4.0375102959723218E-5, 7.86755065162654E-5,
-    8.8587575610025191E-5, 8.988581738419185E-5, 7.8074280074957324E-5,
-    0.00013385802767522837, 3.0093903802561598E-5, 0.000405688238569099,
-    0.00041345115125532403, 0.0007507, 0.0007877, 0.0010996491963369593,
-    0.0012718718864463076, 0.0013210031502439478, 0.0018577370177546061,
-    0.0016218631368931796, 0.0015617334096701056, 0.002125857567012065,
-    0.00030854472052746951, 0.0011146774812551324, 0.001162487511151329,
-    0.0014721, 0.0015857, 0.0022000442742554447, 0.0064218415237488353,
-    0.0024551994455802076, 0.0026238727386027842, 0.0037069651482929638,
-    0.0029291121226634551 },
+  { -0.016351667009740622, -0.016375123698733982, -0.014827518839797386,
+    -0.014851048723664937, -0.0143557, -0.014361100000000002,
+    -0.014729329170964466, -0.014749657458455674, -0.016079764404538403,
+    -0.016106260417488673, -0.018363849083031909, -0.018410286625270736,
+    -0.0082106572702709945, -0.0082232130572533722, -0.0074770122737259333,
+    -0.0074968513601357386, -0.0072688, -0.0072729, -0.00752253114369409,
+    -0.0075373368728211074, -0.0081535575537520846, -0.00817136562807,
+    -0.0092906627391032941, -0.009314050556179447, 0.00010187310374476464,
+    0.00010251608284987206, 3.6265144816643336E-5, 3.6481814904811211E-5,
+    -1.34E-5, -1.29E-5, -2.6460349212720529E-5, -2.6226247976003117E-5,
+    1.3648483113422056E-6, 1.8803251369139385E-6, 4.33266368993235E-5,
+    4.33026132319514E-5, 0.0083990235928435054, 0.0084135256819589735,
+    0.0075461717132655551, 0.0075665350437472325, 0.0072566999999999987,
+    0.0072613, 0.0074875204994929142, 0.007502577761005198,
+    0.0081891375302091621, 0.0082073683087086485, 0.0093777695108517214,
+    0.0094017336648625147, 0.0164726634699832, 0.016497259807546252,
+    0.014870003969613573, 0.014894365671536697, 0.0143605, 0.0143664,
+    0.014761841786529976, 0.014775216942207231, 0.016173237496795174,
+    0.016200335810659848, 0.018505180560218507, 0.018552482358902719 },
+
+  /* Expression: C_wgrp.CMn_wgrp{4}
+   * Referenced by: '<S103>/CMn_dp'
+   */
+  { 0.021051849114706398, 0.021657774062185463, 0.0043735163878583748,
+    0.0043449656584890646, -0.0112439, -0.0112568, -0.024083538189614943,
+    -0.024125810897283131, -0.037145455998234871, -0.037175387041964131,
+    -0.0518097880731575, -0.051821732974558027, 0.021007289524199706,
+    0.020993144441405716, 0.0035536520543430583, 0.0035160010909240117,
+    -0.012217, -0.0122292, -0.025016775660384225, -0.025069734926966833,
+    -0.037982598893629343, -0.037994184453343842, -0.052582825007722912,
+    -0.052592340495491427, 0.020646486280028926, 0.020657105536885958,
+    0.0030878024742757334, 0.0031421685157760025, -0.0126354, -0.0126579,
+    -0.025358687706990145, -0.0253432295771152, -0.038212648169736262,
+    -0.038239548420684763, -0.052965122654408552, -0.052969373232969567,
+    0.021035693743713346, 0.021022359339646982, 0.0035782847066039764,
+    0.003542428112910204, -0.0122797, -0.012290000000000002,
+    -0.025098018861945747, -0.025150457632609285, -0.038074950562973851,
+    -0.038087770467292975, -0.052664296911909284, -0.052674628110875324,
+    0.021706899821949271, 0.021716668443159576, 0.0044200269384826159,
+    0.0043918111490885391, -0.011310299999999999, -0.0113232,
+    -0.024252832990494147, -0.007184691141673874, -0.037292556370861658,
+    -0.037323345441335989, -0.051883533530811328, -0.0518968408819652 },
+
+  /* Expression: C_wgrp.CMn_wgrp{5}
+   * Referenced by: '<S103>/CMn_dq'
+   */
+  { 0.063257884484343413, 0.067294955225840086, 0.057173233335190636,
+    0.05699043016172084, 0.046186300000000007, 0.0460865, 0.033688997855359074,
+    0.033563643100827142, 0.022313148153026322, 0.022215076517314122,
+    0.010902279196130859, 0.010724676350051731, 0.033007726743042753,
+    0.032908586096923959, 0.02807696889994132, 0.027959243026416041, 0.0229231,
+    0.0228472, 0.016792387492484771, 0.016670514948469904, 0.011328432692874259,
+    0.011265632492063556, 0.0067617292575275507, 0.006721224041220452,
+    -0.0016725114469402884, -0.0016786286712715624, -0.00097493461168842008,
+    -0.00098022063027849581, -0.0002843, -0.0002633, 0.00022016358955120912,
+    0.00022012245021723782, 0.00095767361599092106, 0.00096012920597054281,
+    0.0013462115626733042, 0.0013448458943588159, -0.036146655696760406,
+    -0.036065183066339615, -0.030002879641240571, -0.029894039770214261,
+    -0.023468599999999996, -0.0233666, -0.016778088576281078,
+    -0.01664297048128106, -0.010746452353541771, -0.010670225239773916,
+    -0.0046595344329622779, -0.0046108312234631249, -0.06978384161104105,
+    -0.069633738567483866, -0.058600476015229948, -0.058445154042085036,
+    -0.0457875, -0.0456549, -0.033806170718858893, 0.086975881405565,
+    -0.022060171360965712, -0.021962007914304995, -0.010006403156446625,
+    -0.0098284014302901582 },
+
+  /* Expression: C_wgrp.CMn_wgrp{6}
+   * Referenced by: '<S103>/CMn_dr'
+   */
+  { -0.087716783652374952, -0.08725561423767815, -0.075825702769680939,
+    -0.075947874308036775, -0.0728726, -0.0728865, -0.078019484276844811,
+    -0.078128616140755669, -0.091731164678246435, -0.091907025369414044,
+    -0.11276229421355016, -0.11304843261649111, -0.087634534213961127,
+    -0.0877798956153036, -0.076251947745783588, -0.0764455464439926, -0.0732468,
+    -0.0732902, -0.078952687404352032, -0.079083711933782191,
+    -0.092379409534528126, -0.092576119128555331, -0.1135312274833551,
+    -0.11381137814199935, -0.087737611663625939, -0.0878415086334024,
+    -0.0764074074954687, -0.076524380170977208, -0.073372, -0.0733852,
+    -0.078986483104970209, -0.079078582387734422, -0.092382501767323336,
+    -0.092590605148085786, -0.11354860757067844, -0.1137718195069698,
+    -0.087592160622892171, -0.087736270795659987, -0.076201966318624262,
+    -0.0763945688221352, -0.0733217, -0.0733641, -0.079058705686334316,
+    -0.079190020358599622, -0.092531017531573279, -0.092728995718992915,
+    -0.11374125061902628, -0.11402118221060076, -0.0870501672474854,
+    -0.087184551136871347, -0.075775560714031909, -0.075896991338227693,
+    -0.0728796, -0.072893, -0.078164968351791417, -0.06116360843831406,
+    -0.091960940514886819, -0.092139234203932691, -0.11302912380798823,
+    -0.11331653178457417 },
+
+  /* Expression: C_wgrp.CMn_wgrp{9}
+   * Referenced by: '<S103>/CMn_dailR'
+   */
+  { -0.011662043581094017, -0.01154905411714475, -0.0051555385358632924,
+    -0.0051812466352878939, 0.0016626, 0.0016717, 0.0089747093544929931,
+    0.0089992525475822774, 0.01599206103010143, 0.016051377091520068,
+    0.022127900949059705, 0.022397703896528343, -0.013126892291150638,
+    -0.013158061301429529, -0.0061050175521038842, -0.0061332983265949739,
+    0.0015411, 0.00155, 0.0098034068997433586, 0.0098825865392984744,
+    0.017799491488634672, 0.01776046251348478, 0.025278619735042578,
+    0.025080676351590475, -0.014852746604969375, -0.014930680271613319,
+    -0.0072105364751756905, -0.00723315844818688, 0.0013317, 0.0013407,
+    0.0105900264256917, 0.010680872200007891, 0.019494945055445197,
+    0.019580676975552051, 0.02704270694128939, 0.027315676150544206,
+    -0.016821612771526846, -0.016935329076567328, -0.008383889898857402,
+    -0.008418833752673981, 0.0010864, 0.0010913, 0.011315357675245306,
+    0.011359654830567461, 0.020915966694166187, 0.021081817114702837,
+    0.028820542932466667, 0.029123423799719304, -0.018444368198835989,
+    -0.018505657598459412, -0.0093085610725758567, -0.00933775106671566,
+    0.0009639999999999999, 0.0009697, 0.011975293223260368, 0.0162808268689919,
+    0.022148427305488206, 0.022383335465695493, 0.030739848470210211,
+    0.031066983152397063 },
 
   /* Expression: pi/180
-   * Referenced by: '<S121>/Gain1'
+   * Referenced by: '<S125>/Gain1'
+   */
+  0.017453292519943295,
+
+  /* Expression: C_wgrp.CMn_wgrp{10}
+   * Referenced by: '<S103>/CMn_dailL'
+   */
+  { 0.018209679996112081, 0.018422449634082169, 0.0092319434944095786,
+    0.0092584661614345688, -0.0010215, -0.0010276, -0.011956584091365139,
+    -0.011942802780809706, -0.022086988587054664, -0.022319084608479225,
+    -0.030659897382771147, -0.031001891861205732, 0.016680746027198618,
+    0.016794051284743997, 0.0082652244598974255, 0.0083002206071596529,
+    -0.0011893, -0.0011926, -0.011316678062778543, -0.011358613207125549,
+    -0.020888169824468211, -0.021051381994823669, -0.028762539433221445,
+    -0.029069236685439925, 0.014689950313915776, 0.014772313211209576,
+    0.0070919795519531629, 0.0071140847771980565, -0.001406,
+    -0.0014084000000000002, -0.010592701520152133, -0.010681540093154359,
+    -0.019404410464172916, -0.019488902812391552, -0.026952485716891166,
+    -0.027254013415997345, 0.012981041844123371, 0.01302574832362734,
+    0.0059767055074923126, 0.0060037298393257705, -0.0015958, -0.0016028,
+    -0.0097829672965905629, -0.0098610748301631978, -0.017756015320828704,
+    -0.017719985712716626, -0.025095893899025265, -0.025020909566610558,
+    0.01144671595580307, 0.01148648103172421, 0.0050806784783211925,
+    0.0051047229416346495, -0.0016629, -0.0016712000000000003,
+    -0.0089342260971825536, -0.0046375851818972391, -0.015932085276247506,
+    -0.015996519212471503, -0.022061663954783067, -0.022319325568388403 },
+
+  /* Expression: pi/180
+   * Referenced by: '<S128>/Gain1'
+   */
+  0.017453292519943295,
+
+  /* Expression: C_wgrp.CMn_wgrp{11}
+   * Referenced by: '<S103>/CMn_dele'
+   */
+  { -0.0021414230432636049, -0.0004023948596578604, -0.0011464120177576479,
+    -0.0011843870861342613, -0.0014532999999999998, -0.0015733999999999998,
+    -0.0021722779432787162, -0.0021088562418827062, -0.0024310648617214738,
+    -0.0026253203237971714, -0.0034920504041664781, -0.0028633293910805884,
+    -0.00021013154324996938, -0.00011671595111235032, -0.00045801682002395363,
+    -0.0004666289819143007, -0.000746, -0.0007844, -0.0010564540402268215,
+    -0.0012075462486249475, -0.0012513911169064165, -0.001863369283606897,
+    -0.0013879975665331771, -0.0013950998598786745, -5.2427285408970706E-5,
+    -9.1449707072799275E-5, -2.9490343681015939E-5, -2.145602892357186E-5,
+    1.1299999999999999E-5, 1.17E-5, 3.3503888426975658E-5, 4.0375102959723218E-5,
+    7.86755065162654E-5, 8.8587575610025177E-5, 8.988581738419185E-5,
+    7.8074280074957338E-5, 0.00013385802767522837, 3.0093903802561608E-5,
+    0.00040568823856909896, 0.000413451151255324, 0.0007507, 0.0007877,
+    0.0010996491963369593, 0.0012718718864463076, 0.001321003150243948,
+    0.0018577370177546063, 0.0016218631368931796, 0.0015617334096701056,
+    0.002125857567012065, 0.00030854472052746962, 0.0011146774812551326,
+    0.0011624875111513285, 0.0014721, 0.0015857000000000002,
+    0.0022000442742554443, 0.0064218415237488344, 0.0024551994455802076,
+    0.0026238727386027837, 0.0037069651482929634, 0.0029291121226634551 },
+
+  /* Expression: pi/180
+   * Referenced by: '<S126>/Gain1'
    */
   0.017453292519943295,
 
   /* Expression: C_wgrp.CMn_wgrp{12}
-   * Referenced by: '<S96>/CMn_drud'
+   * Referenced by: '<S103>/CMn_drud'
    */
   { 0.038999346334771937, 0.039701605995581521, 0.040350648221740774,
     0.031631418678376794, 0.0419344, 0.0416045, 0.041806298077359715,
-    0.041882173341403886, 0.042208017336433451, 0.042288721579500407,
-    0.04166469941111127, 0.041873002124338532, 0.039553931878181729,
-    0.040880153431378422, 0.040751554946276004, 0.040945433084941904, 0.0419786,
-    0.0417024, 0.042125554183070776, 0.042231414817180832, 0.042049125787180244,
-    0.042288636259996369, 0.04170155174816309, 0.041798938872385547,
-    0.039698569673051763, 0.039777616208102468, 0.040928700581473382,
-    0.041015144134544927, 0.0417439, 0.0417532, 0.042201862787291287,
+    0.041882173341403886, 0.042208017336433451, 0.042288721579500414,
+    0.041664699411111263, 0.041873002124338525, 0.039553931878181729,
+    0.040880153431378415, 0.040751554946276004, 0.040945433084941904, 0.0419786,
+    0.0417024, 0.042125554183070776, 0.042231414817180825, 0.042049125787180244,
+    0.042288636259996362, 0.04170155174816309, 0.041798938872385547,
+    0.03969856967305177, 0.039777616208102468, 0.040928700581473389,
+    0.04101514413454492, 0.0417439, 0.0417532, 0.042201862787291287,
     0.042217428352035638, 0.041967747860536857, 0.042195913755984624,
     0.040847214147395484, 0.041588303266611816, 0.039795921013926545,
-    0.039812803106813108, 0.0402107287023743, 0.041037957173824594, 0.0414691,
+    0.0398128031068131, 0.0402107287023743, 0.041037957173824594, 0.0414691,
     0.0416746, 0.042123392268917224, 0.042295882206796448, 0.04200086756262008,
-    0.041882285052470936, 0.041545726876194129, 0.041823517354736037,
-    0.039586316193022858, 0.03974924954126921, 0.04034649847946397,
+    0.041882285052470936, 0.041545726876194122, 0.04182351735473603,
+    0.039586316193022865, 0.0397492495412692, 0.04034649847946397,
     0.040799228326907938, 0.0366963, 0.0415696, 0.041766984378004204,
-    0.0463282490604282, 0.041813092000616212, 0.042217682210872694,
-    0.041831539020312496, 0.041895630306080484 },
+    0.0463282490604282, 0.041813092000616212, 0.042217682210872687,
+    0.041831539020312496, 0.04189563030608049 },
 
   /* Expression: -1
    * Referenced by: '<S7>/Gain12'
@@ -2858,32 +2872,22 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
   -1.0,
 
   /* Expression: pi/180
-   * Referenced by: '<S122>/Gain1'
+   * Referenced by: '<S127>/Gain1'
    */
   0.017453292519943295,
-
-  /* Expression: pi/180
-   * Referenced by: '<S102>/Gain1'
-   */
-  0.017453292519943295,
-
-  /* Expression: 1
-   * Referenced by: '<S99>/Gain'
-   */
-  1.0,
 
   /* Expression: 1/2
-   * Referenced by: '<S103>/1//2rhoV^2'
+   * Referenced by: '<S97>/1//2rhoV^2'
    */
   0.5,
 
   /* Expression: 0.5
-   * Referenced by: '<S7>/Switch'
+   * Referenced by: '<S7>/Select_AVL_VSP_Force'
    */
   0.5,
 
   /* Expression: 0.5
-   * Referenced by: '<S7>/Switch1'
+   * Referenced by: '<S7>/Select_AVL_VSP_Moment'
    */
   0.5,
 
@@ -3068,22 +3072,22 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
   6.666666666666667,
 
   /* Expression: 0
-   * Referenced by: '<S13>/rho_sealevel (slug//ft^3)2'
+   * Referenced by: '<S11>/rho_sealevel (slug//ft^3)2'
    */
   0.0,
 
   /* Expression: -1
-   * Referenced by: '<S13>/Gain'
+   * Referenced by: '<S11>/Gain'
    */
   -1.0,
 
   /* Expression: pi/180
-   * Referenced by: '<S202>/Gain1'
+   * Referenced by: '<S194>/Gain1'
    */
   0.017453292519943295,
 
   /* Expression: 0.5
-   * Referenced by: '<S21>/1//2'
+   * Referenced by: '<S26>/1//2'
    */
   0.5,
 
@@ -3093,7 +3097,12 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
   0.0,
 
   /* Expression: 2
-   * Referenced by: '<S26>/Gain'
+   * Referenced by: '<S31>/Gain'
+   */
+  2.0,
+
+  /* Expression: 2
+   * Referenced by: '<S34>/Gain'
    */
   2.0,
 
@@ -3103,7 +3112,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
   2.0,
 
   /* Expression: 2
-   * Referenced by: '<S24>/Gain'
+   * Referenced by: '<S35>/Gain'
    */
   2.0,
 
@@ -3113,17 +3122,17 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
   2.0,
 
   /* Expression: 2
-   * Referenced by: '<S25>/Gain'
+   * Referenced by: '<S33>/Gain'
    */
   2.0,
 
   /* Expression: 2
-   * Referenced by: '<S28>/Gain'
+   * Referenced by: '<S73>/Gain'
    */
   2.0,
 
   /* Expression: 2
-   * Referenced by: '<S68>/Gain'
+   * Referenced by: '<S76>/Gain'
    */
   2.0,
 
@@ -3133,7 +3142,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
   2.0,
 
   /* Expression: 2
-   * Referenced by: '<S66>/Gain'
+   * Referenced by: '<S77>/Gain'
    */
   2.0,
 
@@ -3143,37 +3152,32 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
   2.0,
 
   /* Expression: 2
-   * Referenced by: '<S67>/Gain'
-   */
-  2.0,
-
-  /* Expression: 2
-   * Referenced by: '<S70>/Gain'
+   * Referenced by: '<S75>/Gain'
    */
   2.0,
 
   /* Expression: [1 1 -1]
-   * Referenced by: '<S40>/Gain1'
+   * Referenced by: '<S45>/Gain1'
    */
   { 1.0, 1.0, -1.0 },
 
   /* Expression: [1 1]
-   * Referenced by: '<S40>/Gain2'
+   * Referenced by: '<S45>/Gain2'
    */
   { 1.0, 1.0 },
 
   /* Expression: [-1 1]
-   * Referenced by: '<S40>/Gain3'
+   * Referenced by: '<S45>/Gain3'
    */
   { -1.0, 1.0 },
 
   /* Expression: zeros(3)
-   * Referenced by: '<S13>/Constant2'
+   * Referenced by: '<S11>/Constant2'
    */
   { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 },
 
   /* Expression: 0
-   * Referenced by: '<S12>/Constant4'
+   * Referenced by: '<S13>/Constant4'
    */
   0.0,
 
@@ -3188,12 +3192,12 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
   5.0,
 
   /* Expression: 1
-   * Referenced by: '<S12>/Command_Clip_0_1'
+   * Referenced by: '<S13>/Command_Clip_0_1'
    */
   1.0,
 
   /* Expression: 0
-   * Referenced by: '<S12>/Command_Clip_0_1'
+   * Referenced by: '<S13>/Command_Clip_0_1'
    */
   0.0,
 
@@ -3213,7 +3217,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
   1.0,
 
   /* Expression: -1
-   * Referenced by: '<S11>/Negate_D_to_Alt'
+   * Referenced by: '<S12>/Negate_D_to_Alt'
    */
   -1.0,
 
@@ -3304,22 +3308,22 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
   1.0,
 
   /* Expression: inf
-   * Referenced by: '<S12>/Thrust_NonNeg'
+   * Referenced by: '<S13>/Thrust_NonNeg'
    */
   0.0,
 
   /* Expression: 0
-   * Referenced by: '<S12>/Thrust_NonNeg'
+   * Referenced by: '<S13>/Thrust_NonNeg'
    */
   0.0,
 
   /* Expression: -1
-   * Referenced by: '<S12>/Gain'
+   * Referenced by: '<S13>/Gain'
    */
   -1.0,
 
   /* Expression: 0
-   * Referenced by: '<S12>/Constant'
+   * Referenced by: '<S13>/Constant'
    */
   0.0,
 
@@ -3384,22 +3388,22 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
   401.87433999999996,
 
   /* Expression: 180/pi
-   * Referenced by: '<S195>/Gain'
+   * Referenced by: '<S197>/Gain'
    */
   57.295779513082323,
 
   /* Expression: 0
-   * Referenced by: '<S197>/Constant2'
+   * Referenced by: '<S195>/Constant2'
    */
   0.0,
 
   /* Expression: 0
-   * Referenced by: '<S197>/Switch'
+   * Referenced by: '<S195>/Switch'
    */
   0.0,
 
   /* Expression: 180/pi
-   * Referenced by: '<S196>/Gain'
+   * Referenced by: '<S198>/Gain'
    */
   57.295779513082323,
 
@@ -3509,32 +3513,32 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
   1.0,
 
   /* Expression: [0 0 0]
-   * Referenced by: '<S5>/Constant6'
+   * Referenced by: '<S4>/Constant6'
    */
   { 0.0, 0.0, 0.0 },
 
   /* Expression: 5
-   * Referenced by: '<S5>/Switch2'
+   * Referenced by: '<S4>/Switch2'
    */
   5.0,
 
   /* Expression: 0
-   * Referenced by: '<S12>/Constant5'
+   * Referenced by: '<S13>/Constant5'
    */
   0.0,
 
   /* Expression: 0
-   * Referenced by: '<S12>/Constant6'
+   * Referenced by: '<S13>/Constant6'
    */
   0.0,
 
   /* Expression: [0 0 0]
-   * Referenced by: '<S5>/Constant5'
+   * Referenced by: '<S4>/Constant5'
    */
   { 0.0, 0.0, 0.0 },
 
   /* Expression: 5
-   * Referenced by: '<S5>/Switch1'
+   * Referenced by: '<S4>/Switch1'
    */
   5.0,
 
@@ -3569,7 +3573,7 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
   101325.0,
 
   /* Expression: 0
-   * Referenced by: '<S13>/Constant1'
+   * Referenced by: '<S11>/Constant1'
    */
   0.0,
 
@@ -3663,526 +3667,6 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
    */
   2000.0,
 
-  /* Computed Parameter: CD_base_maxIndex
-   * Referenced by: '<S91>/CD_base'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CD_base_dimSizes
-   * Referenced by: '<S91>/CD_base'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CD_dp_maxIndex
-   * Referenced by: '<S91>/CD_dp'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CD_dp_dimSizes
-   * Referenced by: '<S91>/CD_dp'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CD_dq_maxIndex
-   * Referenced by: '<S91>/CD_dq'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CD_dq_dimSizes
-   * Referenced by: '<S91>/CD_dq'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CD_dr_maxIndex
-   * Referenced by: '<S91>/CD_dr'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CD_dr_dimSizes
-   * Referenced by: '<S91>/CD_dr'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CD_dailR_maxIndex
-   * Referenced by: '<S91>/CD_dailR'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CD_dailR_dimSizes
-   * Referenced by: '<S91>/CD_dailR'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CD_dailL_maxIndex
-   * Referenced by: '<S91>/CD_dailL'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CD_dailL_dimSizes
-   * Referenced by: '<S91>/CD_dailL'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CD_dele_maxIndex
-   * Referenced by: '<S91>/CD_dele'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CD_dele_dimSizes
-   * Referenced by: '<S91>/CD_dele'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CD_drud_maxIndex
-   * Referenced by: '<S91>/CD_drud'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CD_drud_dimSizes
-   * Referenced by: '<S91>/CD_drud'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CS_base_maxIndex
-   * Referenced by: '<S97>/CS_base'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CS_base_dimSizes
-   * Referenced by: '<S97>/CS_base'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CS_dp_maxIndex
-   * Referenced by: '<S97>/CS_dp'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CS_dp_dimSizes
-   * Referenced by: '<S97>/CS_dp'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CS_dq_maxIndex
-   * Referenced by: '<S97>/CS_dq'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CS_dq_dimSizes
-   * Referenced by: '<S97>/CS_dq'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CS_dr_maxIndex
-   * Referenced by: '<S97>/CS_dr'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CS_dr_dimSizes
-   * Referenced by: '<S97>/CS_dr'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CS_dailR_maxIndex
-   * Referenced by: '<S97>/CS_dailR'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CS_dailR_dimSizes
-   * Referenced by: '<S97>/CS_dailR'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CS_dailL_maxIndex
-   * Referenced by: '<S97>/CS_dailL'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CS_dailL_dimSizes
-   * Referenced by: '<S97>/CS_dailL'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CS_dele_maxIndex
-   * Referenced by: '<S97>/CS_dele'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CS_dele_dimSizes
-   * Referenced by: '<S97>/CS_dele'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CS_drud_maxIndex
-   * Referenced by: '<S97>/CS_drud'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CS_drud_dimSizes
-   * Referenced by: '<S97>/CS_drud'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CL_base_maxIndex
-   * Referenced by: '<S93>/CL_base'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CL_base_dimSizes
-   * Referenced by: '<S93>/CL_base'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CL_dp_maxIndex
-   * Referenced by: '<S93>/CL_dp'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CL_dp_dimSizes
-   * Referenced by: '<S93>/CL_dp'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CL_dq_maxIndex
-   * Referenced by: '<S93>/CL_dq'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CL_dq_dimSizes
-   * Referenced by: '<S93>/CL_dq'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CL_dr_maxIndex
-   * Referenced by: '<S93>/CL_dr'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CL_dr_dimSizes
-   * Referenced by: '<S93>/CL_dr'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CL_dailR_maxIndex
-   * Referenced by: '<S93>/CL_dailR'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CL_dailR_dimSizes
-   * Referenced by: '<S93>/CL_dailR'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CL_dailL_maxIndex
-   * Referenced by: '<S93>/CL_dailL'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CL_dailL_dimSizes
-   * Referenced by: '<S93>/CL_dailL'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CL_dele_maxIndex
-   * Referenced by: '<S93>/CL_dele'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CL_dele_dimSizes
-   * Referenced by: '<S93>/CL_dele'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CL_drud_maxIndex
-   * Referenced by: '<S93>/CL_drud'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CL_drud_dimSizes
-   * Referenced by: '<S93>/CL_drud'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CMl_base_maxIndex
-   * Referenced by: '<S94>/CMl_base'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CMl_base_dimSizes
-   * Referenced by: '<S94>/CMl_base'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CMl_dp_maxIndex
-   * Referenced by: '<S94>/CMl_dp'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CMl_dp_dimSizes
-   * Referenced by: '<S94>/CMl_dp'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CMl_dq_maxIndex
-   * Referenced by: '<S94>/CMl_dq'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CMl_dq_dimSizes
-   * Referenced by: '<S94>/CMl_dq'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CMl_dr_maxIndex
-   * Referenced by: '<S94>/CMl_dr'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CMl_dr_dimSizes
-   * Referenced by: '<S94>/CMl_dr'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CMl_dailR_maxIndex
-   * Referenced by: '<S94>/CMl_dailR'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CMl_dailR_dimSizes
-   * Referenced by: '<S94>/CMl_dailR'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CMl_dailL_maxIndex
-   * Referenced by: '<S94>/CMl_dailL'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CMl_dailL_dimSizes
-   * Referenced by: '<S94>/CMl_dailL'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CMl_dele_maxIndex
-   * Referenced by: '<S94>/CMl_dele'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CMl_dele_dimSizes
-   * Referenced by: '<S94>/CMl_dele'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CMl_drud_maxIndex
-   * Referenced by: '<S94>/CMl_drud'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CMl_drud_dimSizes
-   * Referenced by: '<S94>/CMl_drud'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CMm_base_maxIndex
-   * Referenced by: '<S95>/CMm_base'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CMm_base_dimSizes
-   * Referenced by: '<S95>/CMm_base'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CMm_dp_maxIndex
-   * Referenced by: '<S95>/CMm_dp'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CMm_dp_dimSizes
-   * Referenced by: '<S95>/CMm_dp'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CMm_dq_maxIndex
-   * Referenced by: '<S95>/CMm_dq'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CMm_dq_dimSizes
-   * Referenced by: '<S95>/CMm_dq'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CMm_dr_maxIndex
-   * Referenced by: '<S95>/CMm_dr'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CMm_dr_dimSizes
-   * Referenced by: '<S95>/CMm_dr'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CMm_dailR_maxIndex
-   * Referenced by: '<S95>/CMm_dailR'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CMm_dailR_dimSizes
-   * Referenced by: '<S95>/CMm_dailR'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CMm_dailL_maxIndex
-   * Referenced by: '<S95>/CMm_dailL'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CMm_dailL_dimSizes
-   * Referenced by: '<S95>/CMm_dailL'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CMm_dele_maxIndex
-   * Referenced by: '<S95>/CMm_dele'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CMm_dele_dimSizes
-   * Referenced by: '<S95>/CMm_dele'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CMm_drud_maxIndex
-   * Referenced by: '<S95>/CMm_drud'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CMm_drud_dimSizes
-   * Referenced by: '<S95>/CMm_drud'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CMn_base_maxIndex
-   * Referenced by: '<S96>/CMn_base'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CMn_base_dimSizes
-   * Referenced by: '<S96>/CMn_base'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CMn_dp_maxIndex
-   * Referenced by: '<S96>/CMn_dp'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CMn_dp_dimSizes
-   * Referenced by: '<S96>/CMn_dp'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CMn_dq_maxIndex
-   * Referenced by: '<S96>/CMn_dq'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CMn_dq_dimSizes
-   * Referenced by: '<S96>/CMn_dq'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CMn_dr_maxIndex
-   * Referenced by: '<S96>/CMn_dr'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CMn_dr_dimSizes
-   * Referenced by: '<S96>/CMn_dr'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CMn_dailR_maxIndex
-   * Referenced by: '<S96>/CMn_dailR'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CMn_dailR_dimSizes
-   * Referenced by: '<S96>/CMn_dailR'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CMn_dailL_maxIndex
-   * Referenced by: '<S96>/CMn_dailL'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CMn_dailL_dimSizes
-   * Referenced by: '<S96>/CMn_dailL'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CMn_dele_maxIndex
-   * Referenced by: '<S96>/CMn_dele'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CMn_dele_dimSizes
-   * Referenced by: '<S96>/CMn_dele'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CMn_drud_maxIndex
-   * Referenced by: '<S96>/CMn_drud'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CMn_drud_dimSizes
-   * Referenced by: '<S96>/CMn_drud'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CDtot_maxIndex
-   * Referenced by: '<S90>/CDtot'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CDtot_dimSizes
-   * Referenced by: '<S90>/CDtot'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CDp_maxIndex
-   * Referenced by: '<S90>/CDp'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CDp_dimSizes
-   * Referenced by: '<S90>/CDp'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CDq_maxIndex
-   * Referenced by: '<S90>/CDq'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CDq_dimSizes
-   * Referenced by: '<S90>/CDq'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CDr_maxIndex
-   * Referenced by: '<S90>/CDr'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CDr_dimSizes
-   * Referenced by: '<S90>/CDr'
-   */
-  { 1U, 2U, 12U },
-
   /* Computed Parameter: CDd01_maxIndex
    * Referenced by: '<S90>/CDd01'
    */
@@ -4190,16 +3674,6 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
 
   /* Computed Parameter: CDd01_dimSizes
    * Referenced by: '<S90>/CDd01'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CDd02_maxIndex
-   * Referenced by: '<S90>/CDd02'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CDd02_dimSizes
-   * Referenced by: '<S90>/CDd02'
    */
   { 1U, 2U, 12U },
 
@@ -4223,403 +3697,933 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
    */
   { 1U, 2U, 12U },
 
-  /* Computed Parameter: CYtot_maxIndex
-   * Referenced by: '<S98>/CYtot'
+  /* Computed Parameter: CDd02_maxIndex
+   * Referenced by: '<S90>/CDd02'
    */
   { 1U, 5U, 4U },
 
-  /* Computed Parameter: CYtot_dimSizes
-   * Referenced by: '<S98>/CYtot'
+  /* Computed Parameter: CDd02_dimSizes
+   * Referenced by: '<S90>/CDd02'
    */
   { 1U, 2U, 12U },
 
-  /* Computed Parameter: CYp_maxIndex
-   * Referenced by: '<S98>/CYp'
+  /* Computed Parameter: CDtot_maxIndex
+   * Referenced by: '<S90>/CDtot'
    */
   { 1U, 5U, 4U },
 
-  /* Computed Parameter: CYp_dimSizes
-   * Referenced by: '<S98>/CYp'
+  /* Computed Parameter: CDtot_dimSizes
+   * Referenced by: '<S90>/CDtot'
    */
   { 1U, 2U, 12U },
 
-  /* Computed Parameter: CYq_maxIndex
-   * Referenced by: '<S98>/CYq'
+  /* Computed Parameter: CDp_maxIndex
+   * Referenced by: '<S90>/CDp'
    */
   { 1U, 5U, 4U },
 
-  /* Computed Parameter: CYq_dimSizes
-   * Referenced by: '<S98>/CYq'
+  /* Computed Parameter: CDp_dimSizes
+   * Referenced by: '<S90>/CDp'
    */
   { 1U, 2U, 12U },
 
-  /* Computed Parameter: CYr_maxIndex
-   * Referenced by: '<S98>/CYr'
+  /* Computed Parameter: CDr_maxIndex
+   * Referenced by: '<S90>/CDr'
    */
   { 1U, 5U, 4U },
 
-  /* Computed Parameter: CYr_dimSizes
-   * Referenced by: '<S98>/CYr'
+  /* Computed Parameter: CDr_dimSizes
+   * Referenced by: '<S90>/CDr'
    */
   { 1U, 2U, 12U },
 
-  /* Computed Parameter: CYd01_maxIndex
-   * Referenced by: '<S98>/CYd01'
+  /* Computed Parameter: CDq_maxIndex
+   * Referenced by: '<S90>/CDq'
    */
   { 1U, 5U, 4U },
 
-  /* Computed Parameter: CYd01_dimSizes
-   * Referenced by: '<S98>/CYd01'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CYd02_maxIndex
-   * Referenced by: '<S98>/CYd02'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CYd02_dimSizes
-   * Referenced by: '<S98>/CYd02'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CYd03_maxIndex
-   * Referenced by: '<S98>/CYd03'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CYd03_dimSizes
-   * Referenced by: '<S98>/CYd03'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CYd04_maxIndex
-   * Referenced by: '<S98>/CYd04'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CYd04_dimSizes
-   * Referenced by: '<S98>/CYd04'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CLtot_maxIndex
-   * Referenced by: '<S92>/CLtot'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CLtot_dimSizes
-   * Referenced by: '<S92>/CLtot'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CLp_maxIndex
-   * Referenced by: '<S92>/CLp'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CLp_dimSizes
-   * Referenced by: '<S92>/CLp'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CLq_maxIndex
-   * Referenced by: '<S92>/CLq'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CLq_dimSizes
-   * Referenced by: '<S92>/CLq'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CLr_maxIndex
-   * Referenced by: '<S92>/CLr'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CLr_dimSizes
-   * Referenced by: '<S92>/CLr'
+  /* Computed Parameter: CDq_dimSizes
+   * Referenced by: '<S90>/CDq'
    */
   { 1U, 2U, 12U },
 
   /* Computed Parameter: CLd01_maxIndex
-   * Referenced by: '<S92>/CLd01'
+   * Referenced by: '<S91>/CLd01'
    */
   { 1U, 5U, 4U },
 
   /* Computed Parameter: CLd01_dimSizes
-   * Referenced by: '<S92>/CLd01'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: CLd02_maxIndex
-   * Referenced by: '<S92>/CLd02'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: CLd02_dimSizes
-   * Referenced by: '<S92>/CLd02'
+   * Referenced by: '<S91>/CLd01'
    */
   { 1U, 2U, 12U },
 
   /* Computed Parameter: CLd03_maxIndex
-   * Referenced by: '<S92>/CLd03'
+   * Referenced by: '<S91>/CLd03'
    */
   { 1U, 5U, 4U },
 
   /* Computed Parameter: CLd03_dimSizes
-   * Referenced by: '<S92>/CLd03'
+   * Referenced by: '<S91>/CLd03'
    */
   { 1U, 2U, 12U },
 
   /* Computed Parameter: CLd04_maxIndex
-   * Referenced by: '<S92>/CLd04'
+   * Referenced by: '<S91>/CLd04'
    */
   { 1U, 5U, 4U },
 
   /* Computed Parameter: CLd04_dimSizes
-   * Referenced by: '<S92>/CLd04'
+   * Referenced by: '<S91>/CLd04'
    */
   { 1U, 2U, 12U },
 
-  /* Computed Parameter: Cltot_maxIndex
-   * Referenced by: '<S99>/Cltot'
+  /* Computed Parameter: CLd02_maxIndex
+   * Referenced by: '<S91>/CLd02'
    */
   { 1U, 5U, 4U },
 
-  /* Computed Parameter: Cltot_dimSizes
-   * Referenced by: '<S99>/Cltot'
+  /* Computed Parameter: CLd02_dimSizes
+   * Referenced by: '<S91>/CLd02'
    */
   { 1U, 2U, 12U },
 
-  /* Computed Parameter: Clp_maxIndex
-   * Referenced by: '<S99>/Clp'
+  /* Computed Parameter: CLtot_maxIndex
+   * Referenced by: '<S91>/CLtot'
    */
   { 1U, 5U, 4U },
 
-  /* Computed Parameter: Clp_dimSizes
-   * Referenced by: '<S99>/Clp'
+  /* Computed Parameter: CLtot_dimSizes
+   * Referenced by: '<S91>/CLtot'
    */
   { 1U, 2U, 12U },
 
-  /* Computed Parameter: Clq_maxIndex
-   * Referenced by: '<S99>/Clq'
+  /* Computed Parameter: CLp_maxIndex
+   * Referenced by: '<S91>/CLp'
    */
   { 1U, 5U, 4U },
 
-  /* Computed Parameter: Clq_dimSizes
-   * Referenced by: '<S99>/Clq'
+  /* Computed Parameter: CLp_dimSizes
+   * Referenced by: '<S91>/CLp'
    */
   { 1U, 2U, 12U },
 
-  /* Computed Parameter: Clr_maxIndex
-   * Referenced by: '<S99>/Clr'
+  /* Computed Parameter: CLr_maxIndex
+   * Referenced by: '<S91>/CLr'
    */
   { 1U, 5U, 4U },
 
-  /* Computed Parameter: Clr_dimSizes
-   * Referenced by: '<S99>/Clr'
+  /* Computed Parameter: CLr_dimSizes
+   * Referenced by: '<S91>/CLr'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CLq_maxIndex
+   * Referenced by: '<S91>/CLq'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CLq_dimSizes
+   * Referenced by: '<S91>/CLq'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CYd01_maxIndex
+   * Referenced by: '<S92>/CYd01'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CYd01_dimSizes
+   * Referenced by: '<S92>/CYd01'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CYd03_maxIndex
+   * Referenced by: '<S92>/CYd03'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CYd03_dimSizes
+   * Referenced by: '<S92>/CYd03'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CYd04_maxIndex
+   * Referenced by: '<S92>/CYd04'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CYd04_dimSizes
+   * Referenced by: '<S92>/CYd04'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CYd02_maxIndex
+   * Referenced by: '<S92>/CYd02'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CYd02_dimSizes
+   * Referenced by: '<S92>/CYd02'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CYtot_maxIndex
+   * Referenced by: '<S92>/CYtot'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CYtot_dimSizes
+   * Referenced by: '<S92>/CYtot'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CYp_maxIndex
+   * Referenced by: '<S92>/CYp'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CYp_dimSizes
+   * Referenced by: '<S92>/CYp'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CYr_maxIndex
+   * Referenced by: '<S92>/CYr'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CYr_dimSizes
+   * Referenced by: '<S92>/CYr'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CYq_maxIndex
+   * Referenced by: '<S92>/CYq'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CYq_dimSizes
+   * Referenced by: '<S92>/CYq'
    */
   { 1U, 2U, 12U },
 
   /* Computed Parameter: Cld01_maxIndex
-   * Referenced by: '<S99>/Cld01'
+   * Referenced by: '<S93>/Cld01'
    */
   { 1U, 5U, 4U },
 
   /* Computed Parameter: Cld01_dimSizes
-   * Referenced by: '<S99>/Cld01'
+   * Referenced by: '<S93>/Cld01'
    */
   { 1U, 2U, 12U },
 
   /* Computed Parameter: Cld02_maxIndex
-   * Referenced by: '<S99>/Cld02'
+   * Referenced by: '<S93>/Cld02'
    */
   { 1U, 5U, 4U },
 
   /* Computed Parameter: Cld02_dimSizes
-   * Referenced by: '<S99>/Cld02'
+   * Referenced by: '<S93>/Cld02'
    */
   { 1U, 2U, 12U },
 
   /* Computed Parameter: Cld03_maxIndex
-   * Referenced by: '<S99>/Cld03'
+   * Referenced by: '<S93>/Cld03'
    */
   { 1U, 5U, 4U },
 
   /* Computed Parameter: Cld03_dimSizes
-   * Referenced by: '<S99>/Cld03'
+   * Referenced by: '<S93>/Cld03'
    */
   { 1U, 2U, 12U },
 
   /* Computed Parameter: Cld04_maxIndex
-   * Referenced by: '<S99>/Cld04'
+   * Referenced by: '<S93>/Cld04'
    */
   { 1U, 5U, 4U },
 
   /* Computed Parameter: Cld04_dimSizes
-   * Referenced by: '<S99>/Cld04'
+   * Referenced by: '<S93>/Cld04'
    */
   { 1U, 2U, 12U },
 
-  /* Computed Parameter: Cmtot_maxIndex
-   * Referenced by: '<S100>/Cmtot'
+  /* Computed Parameter: Cltot_maxIndex
+   * Referenced by: '<S93>/Cltot'
    */
   { 1U, 5U, 4U },
 
-  /* Computed Parameter: Cmtot_dimSizes
-   * Referenced by: '<S100>/Cmtot'
+  /* Computed Parameter: Cltot_dimSizes
+   * Referenced by: '<S93>/Cltot'
    */
   { 1U, 2U, 12U },
 
-  /* Computed Parameter: Cmp_maxIndex
-   * Referenced by: '<S100>/Cmp'
+  /* Computed Parameter: Clp_maxIndex
+   * Referenced by: '<S93>/Clp'
    */
   { 1U, 5U, 4U },
 
-  /* Computed Parameter: Cmp_dimSizes
-   * Referenced by: '<S100>/Cmp'
+  /* Computed Parameter: Clp_dimSizes
+   * Referenced by: '<S93>/Clp'
    */
   { 1U, 2U, 12U },
 
-  /* Computed Parameter: Cmq_maxIndex
-   * Referenced by: '<S100>/Cmq'
+  /* Computed Parameter: Clr_maxIndex
+   * Referenced by: '<S93>/Clr'
    */
   { 1U, 5U, 4U },
 
-  /* Computed Parameter: Cmq_dimSizes
-   * Referenced by: '<S100>/Cmq'
+  /* Computed Parameter: Clr_dimSizes
+   * Referenced by: '<S93>/Clr'
    */
   { 1U, 2U, 12U },
 
-  /* Computed Parameter: Cmr_maxIndex
-   * Referenced by: '<S100>/Cmr'
+  /* Computed Parameter: Clq_maxIndex
+   * Referenced by: '<S93>/Clq'
    */
   { 1U, 5U, 4U },
 
-  /* Computed Parameter: Cmr_dimSizes
-   * Referenced by: '<S100>/Cmr'
+  /* Computed Parameter: Clq_dimSizes
+   * Referenced by: '<S93>/Clq'
    */
   { 1U, 2U, 12U },
 
   /* Computed Parameter: Cmd01_maxIndex
-   * Referenced by: '<S100>/Cmd01'
+   * Referenced by: '<S94>/Cmd01'
    */
   { 1U, 5U, 4U },
 
   /* Computed Parameter: Cmd01_dimSizes
-   * Referenced by: '<S100>/Cmd01'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: Cmd02_maxIndex
-   * Referenced by: '<S100>/Cmd02'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: Cmd02_dimSizes
-   * Referenced by: '<S100>/Cmd02'
+   * Referenced by: '<S94>/Cmd01'
    */
   { 1U, 2U, 12U },
 
   /* Computed Parameter: Cmd03_maxIndex
-   * Referenced by: '<S100>/Cmd03'
+   * Referenced by: '<S94>/Cmd03'
    */
   { 1U, 5U, 4U },
 
   /* Computed Parameter: Cmd03_dimSizes
-   * Referenced by: '<S100>/Cmd03'
+   * Referenced by: '<S94>/Cmd03'
    */
   { 1U, 2U, 12U },
 
   /* Computed Parameter: Cmd04_maxIndex
-   * Referenced by: '<S100>/Cmd04'
+   * Referenced by: '<S94>/Cmd04'
    */
   { 1U, 5U, 4U },
 
   /* Computed Parameter: Cmd04_dimSizes
-   * Referenced by: '<S100>/Cmd04'
+   * Referenced by: '<S94>/Cmd04'
    */
   { 1U, 2U, 12U },
 
-  /* Computed Parameter: Cntot_maxIndex
-   * Referenced by: '<S101>/Cntot'
+  /* Computed Parameter: Cmd02_maxIndex
+   * Referenced by: '<S94>/Cmd02'
    */
   { 1U, 5U, 4U },
 
-  /* Computed Parameter: Cntot_dimSizes
-   * Referenced by: '<S101>/Cntot'
+  /* Computed Parameter: Cmd02_dimSizes
+   * Referenced by: '<S94>/Cmd02'
    */
   { 1U, 2U, 12U },
 
-  /* Computed Parameter: Cnp_maxIndex
-   * Referenced by: '<S101>/Cnp'
+  /* Computed Parameter: Cmtot_maxIndex
+   * Referenced by: '<S94>/Cmtot'
    */
   { 1U, 5U, 4U },
 
-  /* Computed Parameter: Cnp_dimSizes
-   * Referenced by: '<S101>/Cnp'
+  /* Computed Parameter: Cmtot_dimSizes
+   * Referenced by: '<S94>/Cmtot'
    */
   { 1U, 2U, 12U },
 
-  /* Computed Parameter: Cnq_maxIndex
-   * Referenced by: '<S101>/Cnq'
+  /* Computed Parameter: Cmp_maxIndex
+   * Referenced by: '<S94>/Cmp'
    */
   { 1U, 5U, 4U },
 
-  /* Computed Parameter: Cnq_dimSizes
-   * Referenced by: '<S101>/Cnq'
+  /* Computed Parameter: Cmp_dimSizes
+   * Referenced by: '<S94>/Cmp'
    */
   { 1U, 2U, 12U },
 
-  /* Computed Parameter: Cnr_maxIndex
-   * Referenced by: '<S101>/Cnr'
+  /* Computed Parameter: Cmr_maxIndex
+   * Referenced by: '<S94>/Cmr'
    */
   { 1U, 5U, 4U },
 
-  /* Computed Parameter: Cnr_dimSizes
-   * Referenced by: '<S101>/Cnr'
+  /* Computed Parameter: Cmr_dimSizes
+   * Referenced by: '<S94>/Cmr'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: Cmq_maxIndex
+   * Referenced by: '<S94>/Cmq'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: Cmq_dimSizes
+   * Referenced by: '<S94>/Cmq'
    */
   { 1U, 2U, 12U },
 
   /* Computed Parameter: Cnd01_maxIndex
-   * Referenced by: '<S101>/Cnd01'
+   * Referenced by: '<S95>/Cnd01'
    */
   { 1U, 5U, 4U },
 
   /* Computed Parameter: Cnd01_dimSizes
-   * Referenced by: '<S101>/Cnd01'
-   */
-  { 1U, 2U, 12U },
-
-  /* Computed Parameter: Cnd02_maxIndex
-   * Referenced by: '<S101>/Cnd02'
-   */
-  { 1U, 5U, 4U },
-
-  /* Computed Parameter: Cnd02_dimSizes
-   * Referenced by: '<S101>/Cnd02'
+   * Referenced by: '<S95>/Cnd01'
    */
   { 1U, 2U, 12U },
 
   /* Computed Parameter: Cnd03_maxIndex
-   * Referenced by: '<S101>/Cnd03'
+   * Referenced by: '<S95>/Cnd03'
    */
   { 1U, 5U, 4U },
 
   /* Computed Parameter: Cnd03_dimSizes
-   * Referenced by: '<S101>/Cnd03'
+   * Referenced by: '<S95>/Cnd03'
    */
   { 1U, 2U, 12U },
 
   /* Computed Parameter: Cnd04_maxIndex
-   * Referenced by: '<S101>/Cnd04'
+   * Referenced by: '<S95>/Cnd04'
    */
   { 1U, 5U, 4U },
 
   /* Computed Parameter: Cnd04_dimSizes
-   * Referenced by: '<S101>/Cnd04'
+   * Referenced by: '<S95>/Cnd04'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: Cnd02_maxIndex
+   * Referenced by: '<S95>/Cnd02'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: Cnd02_dimSizes
+   * Referenced by: '<S95>/Cnd02'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: Cntot_maxIndex
+   * Referenced by: '<S95>/Cntot'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: Cntot_dimSizes
+   * Referenced by: '<S95>/Cntot'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: Cnp_maxIndex
+   * Referenced by: '<S95>/Cnp'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: Cnp_dimSizes
+   * Referenced by: '<S95>/Cnp'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: Cnr_maxIndex
+   * Referenced by: '<S95>/Cnr'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: Cnr_dimSizes
+   * Referenced by: '<S95>/Cnr'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: Cnq_maxIndex
+   * Referenced by: '<S95>/Cnq'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: Cnq_dimSizes
+   * Referenced by: '<S95>/Cnq'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CD_base_maxIndex
+   * Referenced by: '<S98>/CD_base'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CD_base_dimSizes
+   * Referenced by: '<S98>/CD_base'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CD_dp_maxIndex
+   * Referenced by: '<S98>/CD_dp'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CD_dp_dimSizes
+   * Referenced by: '<S98>/CD_dp'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CD_dq_maxIndex
+   * Referenced by: '<S98>/CD_dq'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CD_dq_dimSizes
+   * Referenced by: '<S98>/CD_dq'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CD_dr_maxIndex
+   * Referenced by: '<S98>/CD_dr'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CD_dr_dimSizes
+   * Referenced by: '<S98>/CD_dr'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CD_dailR_maxIndex
+   * Referenced by: '<S98>/CD_dailR'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CD_dailR_dimSizes
+   * Referenced by: '<S98>/CD_dailR'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CD_dailL_maxIndex
+   * Referenced by: '<S98>/CD_dailL'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CD_dailL_dimSizes
+   * Referenced by: '<S98>/CD_dailL'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CD_dele_maxIndex
+   * Referenced by: '<S98>/CD_dele'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CD_dele_dimSizes
+   * Referenced by: '<S98>/CD_dele'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CD_drud_maxIndex
+   * Referenced by: '<S98>/CD_drud'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CD_drud_dimSizes
+   * Referenced by: '<S98>/CD_drud'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CS_base_maxIndex
+   * Referenced by: '<S100>/CS_base'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CS_base_dimSizes
+   * Referenced by: '<S100>/CS_base'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CS_dp_maxIndex
+   * Referenced by: '<S100>/CS_dp'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CS_dp_dimSizes
+   * Referenced by: '<S100>/CS_dp'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CS_dq_maxIndex
+   * Referenced by: '<S100>/CS_dq'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CS_dq_dimSizes
+   * Referenced by: '<S100>/CS_dq'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CS_dr_maxIndex
+   * Referenced by: '<S100>/CS_dr'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CS_dr_dimSizes
+   * Referenced by: '<S100>/CS_dr'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CS_dailR_maxIndex
+   * Referenced by: '<S100>/CS_dailR'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CS_dailR_dimSizes
+   * Referenced by: '<S100>/CS_dailR'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CS_dailL_maxIndex
+   * Referenced by: '<S100>/CS_dailL'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CS_dailL_dimSizes
+   * Referenced by: '<S100>/CS_dailL'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CS_dele_maxIndex
+   * Referenced by: '<S100>/CS_dele'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CS_dele_dimSizes
+   * Referenced by: '<S100>/CS_dele'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CS_drud_maxIndex
+   * Referenced by: '<S100>/CS_drud'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CS_drud_dimSizes
+   * Referenced by: '<S100>/CS_drud'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CL_base_maxIndex
+   * Referenced by: '<S99>/CL_base'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CL_base_dimSizes
+   * Referenced by: '<S99>/CL_base'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CL_dp_maxIndex
+   * Referenced by: '<S99>/CL_dp'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CL_dp_dimSizes
+   * Referenced by: '<S99>/CL_dp'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CL_dq_maxIndex
+   * Referenced by: '<S99>/CL_dq'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CL_dq_dimSizes
+   * Referenced by: '<S99>/CL_dq'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CL_dr_maxIndex
+   * Referenced by: '<S99>/CL_dr'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CL_dr_dimSizes
+   * Referenced by: '<S99>/CL_dr'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CL_dailR_maxIndex
+   * Referenced by: '<S99>/CL_dailR'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CL_dailR_dimSizes
+   * Referenced by: '<S99>/CL_dailR'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CL_dailL_maxIndex
+   * Referenced by: '<S99>/CL_dailL'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CL_dailL_dimSizes
+   * Referenced by: '<S99>/CL_dailL'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CL_dele_maxIndex
+   * Referenced by: '<S99>/CL_dele'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CL_dele_dimSizes
+   * Referenced by: '<S99>/CL_dele'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CL_drud_maxIndex
+   * Referenced by: '<S99>/CL_drud'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CL_drud_dimSizes
+   * Referenced by: '<S99>/CL_drud'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CMl_base_maxIndex
+   * Referenced by: '<S101>/CMl_base'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CMl_base_dimSizes
+   * Referenced by: '<S101>/CMl_base'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CMl_dp_maxIndex
+   * Referenced by: '<S101>/CMl_dp'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CMl_dp_dimSizes
+   * Referenced by: '<S101>/CMl_dp'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CMl_dq_maxIndex
+   * Referenced by: '<S101>/CMl_dq'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CMl_dq_dimSizes
+   * Referenced by: '<S101>/CMl_dq'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CMl_dr_maxIndex
+   * Referenced by: '<S101>/CMl_dr'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CMl_dr_dimSizes
+   * Referenced by: '<S101>/CMl_dr'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CMl_dailR_maxIndex
+   * Referenced by: '<S101>/CMl_dailR'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CMl_dailR_dimSizes
+   * Referenced by: '<S101>/CMl_dailR'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CMl_dailL_maxIndex
+   * Referenced by: '<S101>/CMl_dailL'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CMl_dailL_dimSizes
+   * Referenced by: '<S101>/CMl_dailL'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CMl_dele_maxIndex
+   * Referenced by: '<S101>/CMl_dele'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CMl_dele_dimSizes
+   * Referenced by: '<S101>/CMl_dele'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CMl_drud_maxIndex
+   * Referenced by: '<S101>/CMl_drud'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CMl_drud_dimSizes
+   * Referenced by: '<S101>/CMl_drud'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CMm_base_maxIndex
+   * Referenced by: '<S102>/CMm_base'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CMm_base_dimSizes
+   * Referenced by: '<S102>/CMm_base'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CMm_dp_maxIndex
+   * Referenced by: '<S102>/CMm_dp'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CMm_dp_dimSizes
+   * Referenced by: '<S102>/CMm_dp'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CMm_dq_maxIndex
+   * Referenced by: '<S102>/CMm_dq'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CMm_dq_dimSizes
+   * Referenced by: '<S102>/CMm_dq'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CMm_dr_maxIndex
+   * Referenced by: '<S102>/CMm_dr'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CMm_dr_dimSizes
+   * Referenced by: '<S102>/CMm_dr'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CMm_dailR_maxIndex
+   * Referenced by: '<S102>/CMm_dailR'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CMm_dailR_dimSizes
+   * Referenced by: '<S102>/CMm_dailR'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CMm_dailL_maxIndex
+   * Referenced by: '<S102>/CMm_dailL'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CMm_dailL_dimSizes
+   * Referenced by: '<S102>/CMm_dailL'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CMm_dele_maxIndex
+   * Referenced by: '<S102>/CMm_dele'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CMm_dele_dimSizes
+   * Referenced by: '<S102>/CMm_dele'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CMm_drud_maxIndex
+   * Referenced by: '<S102>/CMm_drud'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CMm_drud_dimSizes
+   * Referenced by: '<S102>/CMm_drud'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CMn_base_maxIndex
+   * Referenced by: '<S103>/CMn_base'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CMn_base_dimSizes
+   * Referenced by: '<S103>/CMn_base'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CMn_dp_maxIndex
+   * Referenced by: '<S103>/CMn_dp'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CMn_dp_dimSizes
+   * Referenced by: '<S103>/CMn_dp'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CMn_dq_maxIndex
+   * Referenced by: '<S103>/CMn_dq'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CMn_dq_dimSizes
+   * Referenced by: '<S103>/CMn_dq'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CMn_dr_maxIndex
+   * Referenced by: '<S103>/CMn_dr'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CMn_dr_dimSizes
+   * Referenced by: '<S103>/CMn_dr'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CMn_dailR_maxIndex
+   * Referenced by: '<S103>/CMn_dailR'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CMn_dailR_dimSizes
+   * Referenced by: '<S103>/CMn_dailR'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CMn_dailL_maxIndex
+   * Referenced by: '<S103>/CMn_dailL'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CMn_dailL_dimSizes
+   * Referenced by: '<S103>/CMn_dailL'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CMn_dele_maxIndex
+   * Referenced by: '<S103>/CMn_dele'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CMn_dele_dimSizes
+   * Referenced by: '<S103>/CMn_dele'
+   */
+  { 1U, 2U, 12U },
+
+  /* Computed Parameter: CMn_drud_maxIndex
+   * Referenced by: '<S103>/CMn_drud'
+   */
+  { 1U, 5U, 4U },
+
+  /* Computed Parameter: CMn_drud_dimSizes
+   * Referenced by: '<S103>/CMn_drud'
    */
   { 1U, 2U, 12U },
 
@@ -4629,22 +4633,22 @@ P_SkySurfer_Core_T SkySurfer_Core_P = {
   { 11U, 6U },
 
   /* Computed Parameter: Assertion_Enabled
-   * Referenced by: '<S61>/Assertion'
+   * Referenced by: '<S66>/Assertion'
    */
   true,
 
   /* Computed Parameter: Assertion_Enabled_h
-   * Referenced by: '<S59>/Assertion'
+   * Referenced by: '<S64>/Assertion'
    */
   true,
 
   /* Computed Parameter: Assertion_Enabled_d
-   * Referenced by: '<S58>/Assertion'
+   * Referenced by: '<S63>/Assertion'
    */
   true,
 
   /* Computed Parameter: Assertion_Enabled_p
-   * Referenced by: '<S56>/Assertion'
+   * Referenced by: '<S61>/Assertion'
    */
   true,
 

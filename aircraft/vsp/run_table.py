@@ -268,30 +268,35 @@ def comparison(data, config, avl_path, cd_fix):
     return '\n'.join(lines) + '\n'
 
 
-def wind_moments(data):
+def wind_moments(data, ref):
     """CMl, CMm, CMn rotated from body to wind axes, case by case, for the model's VSP path.
 
     VSPAERO's CMl/CMm/CMn are body axes (CMl = -CMx at every alpha), but the model feeds CD, CS, CL, CMl, CMm, CMn to an
     Aerodynamic Forces and Moments block with input axes 'Wind' (the AVL path uses 'Stability' with Cl', Cn'). The
     rotation is constant within a case, so the rate and control derivatives rotate the same way; da and db would also
-    need the rotation's own derivative, but the model does not use them."""
+    need the rotation's own derivative, but the model does not use them.
+
+    CMl and CMn are per bref, CMm per cref, so the moments are rotated times their reference lengths and divided back.
+    The first version (2026-11-02) rotated the coefficients as they were: in sideslip it put sin(beta) * CMm straight
+    into CMl (Clb about -0.215 instead of about -0.05 at alpha 5)."""
     out = json.loads(json.dumps(data))
+    lengths = (ref['bref'], ref['cref'], ref['bref'])
     for k, (alpha, beta) in enumerate(zip(data['aoa'], data['beta'])):
         a, b = math.radians(alpha), math.radians(beta)
         rotation = ((math.cos(a) * math.cos(b), math.sin(b), math.sin(a) * math.cos(b)),
                     (-math.cos(a) * math.sin(b), math.cos(b), -math.sin(a) * math.sin(b)),
                     (-math.sin(a), 0.0, math.cos(a)))
         for suffix in data['CMl']:
-            body = [data[c][suffix][k] for c in ('CMl', 'CMm', 'CMn')]
-            for row, coeff in zip(rotation, ('CMl', 'CMm', 'CMn')):
-                out[coeff][suffix][k] = sum(r * m for r, m in zip(row, body))
+            body = [data[c][suffix][k] * n for c, n in zip(('CMl', 'CMm', 'CMn'), lengths)]
+            for row, coeff, n in zip(rotation, ('CMl', 'CMm', 'CMn'), lengths):
+                out[coeff][suffix][k] = sum(r * m for r, m in zip(row, body)) / n
     return out
 
 
-def write_mat(data, suffixes, out):
+def write_mat(data, suffixes, out, ref):
     from mcp_build import evaluate
     source = out / 'data_out.json'
-    source.write_text(json.dumps(wind_moments(data)))
+    source.write_text(json.dumps(wind_moments(data, ref)))
     target = ROOT / 'model' / 'Skysurfer.mat'
     code = f'''d = jsondecode(fileread('{source}'));
 data_out = struct('aoa', d.aoa(:).', 'beta', d.beta(:).', 'mach', d.mach(:).');
@@ -334,7 +339,7 @@ def main():
             print(text)
         if args.write_mat:
             suffixes = list(DERIVS) + ['d' + g['name'] for g in report['config']['groups']]
-            print(f"MAT written: {write_mat(report['data_out'], suffixes, args.from_result.parent)}; model/ changed, next ./runbridge model-cycle")
+            print(f"MAT written: {write_mat(report['data_out'], suffixes, args.from_result.parent, report['config']['reference'])}; model/ changed, next ./runbridge model-cycle")
         return 0
     config = json.loads(args.config.read_text())
     for key, value in (('alpha_deg', args.alpha), ('beta_deg', args.beta), ('mach', args.mach)):
@@ -384,7 +389,7 @@ def main():
     if args.compare_avl:
         print(json.dumps({'avl': report['avl_summary']}, indent=1))
     if args.write_mat:
-        print(f'MAT written: {write_mat(data, suffixes, out)}; model/ changed, next ./runbridge model-cycle')
+        print(f'MAT written: {write_mat(data, suffixes, out, config["reference"])}; model/ changed, next ./runbridge model-cycle')
     print(json.dumps({'out': str(out)}))
     return 0
 

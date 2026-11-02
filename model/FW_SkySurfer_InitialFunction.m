@@ -91,7 +91,10 @@ useAVL_VSP = 0; % 0: AVL, 1: VSP
 % 2026-10-26 flight does not show that fall on the elevator or the ailerons, and flat values replay its doublets better:
 % elevator 0.8, ailerons 0.75 (docs/tasks/20261102_aero_review.md). Each value is relative to the AVL derivative and the
 % model travel (27, 30 deg). The rudder is unchanged: that flight had no rudder excitation.
-Aeroelasticity_Gain_AIL     = [ 0.75 0.75];
+% Ailerons 0.75 -> 0.9 with the roll-due-to-sideslip term below (SkySurfer project, docs/tasks/20261102_ft_vane.md): 0.75 was fitted when
+% the model had almost no Clb; with it the SITL roll rate per aileron fell from 251 to 204 deg/s (10-26 flight 259-278).
+% 0.9 sits between the vane flights' own estimate (0.84) and a refit on the 10-26 rolls (about 1.0).
+Aeroelasticity_Gain_AIL     = [ 0.9  0.9 ];
 Aeroelasticity_AIL          = [   5   15];
 Aeroelasticity_Gain_ELE     = [ 0.8  0.8];
 Aeroelasticity_ELE          = [   5   15];
@@ -100,6 +103,12 @@ Aeroelasticity_RUD          = [   5   15];
 
 % AVL
 run import_aerostates_avl.m;
+% Roll due to sideslip from the 2026-11-02 vane flights (SkySurfer project, docs/tasks/20261102_ft_vane.md): their Clb/Clp and Clb/Clda
+% ratios give Clb about -0.12 /rad (+-30 %) at alpha -2..9 deg, where this AVL table has -0.015 (flat wing). The user
+% measured the dihedral as about 0, so the cause is still open. AVL table only: the VSP table is not flown, and with
+% about -0.054 at alpha 5 it is also far from the flight.
+dClb_flight = -0.105;                                       % per rad, added to the AVL Cltot at every Mach and alpha
+Cltot = Cltot + dClb_flight * deg2rad(reshape(beta_avl, 1, 1, []));
 % Parasite drag on top of AVL (inviscid: induced drag only). 0.030 (was 0.075) carries over the SkyTalon CFD
 % finding (rhyne1012/skytalon-cfd f48784f, docs/HANDOFF_6DOF_DRAG_20261022.md): its 6DOF drag was 2.5x CFD.
 % Matched at the same CL, SkyTalon CFD minus this AVL table is 0.030 at CL 0.39 and 0.034 at CL 0.80; the old

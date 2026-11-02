@@ -7,9 +7,9 @@
  *
  * Code generated for Simulink model 'SkySurfer_Core'.
  *
- * Model version                  : 14.15
+ * Model version                  : 14.16
  * Simulink Coder version         : 26.2 (R2026b) 22-May-2026
- * C/C++ source code generated on : Mon Nov  2 20:02:30 2026
+ * C/C++ source code generated on : Mon Nov  2 23:41:30 2026
  *
  * Target selection: ert.tlc
  * Embedded hardware selection: Intel->x86-64 (Linux 64)
@@ -787,9 +787,12 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
   double rtb_Lw[2];
   double frac;
   double pData_idx_0_tmp;
-  double pData_idx_2;
+  double pData_idx_0_tmp_0;
+  double pData_idx_0_tmp_1;
   double pData_tmp;
   double pData_tmp_0;
+  double pData_tmp_1;
+  double pData_tmp_2;
   double rtb_Add_h_idx_2;
   double rtb_DensityConversion;
   double rtb_Gain;
@@ -801,18 +804,10 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
   double rtb_Lv_idx_0;
   double rtb_MediumHighAltitudeIntensity;
   double rtb_Multiply;
-  double rtb_Multiply2;
-  double rtb_Multiply5_o;
-  double rtb_Product14;
-  double rtb_Product14_d;
-  double rtb_Product14_hm;
-  double rtb_Product14_k;
-  double rtb_Product16;
-  double rtb_Product16_a;
-  double rtb_Product16_j;
-  double rtb_Product16_on;
+  double rtb_Multiply1_b;
+  double rtb_Multiply1_fo;
+  double rtb_Multiply1_m;
   double rtb_Product1_ex;
-  double rtb_Product1_jf;
   double rtb_Product1_ow;
   double rtb_Product1_p4;
   double rtb_Product1_pw;
@@ -824,22 +819,26 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
   double rtb_Product2_nk;
   double rtb_Product2_p2;
   double rtb_Product3_cq;
+  double rtb_Product4;
   double rtb_Product5;
-  double rtb_Product7;
   double rtb_Product_op;
   double rtb_Q0123_idx_0;
   double rtb_Q0123_idx_1;
   double rtb_Q0123_idx_2;
   double rtb_Q0123_idx_3;
-  double rtb_Sum4_h1;
   double rtb_Sum_mi_idx_0;
   double rtb_Sum_mi_idx_1;
   double rtb_Sum_mi_idx_2;
-  double rtb_SumofControls_g;
-  double rtb_SumofControls_o;
-  double rtb_SumofDatum_ax;
-  double rtb_SumofDatum_g;
-  double rtb_SumofDatum_k;
+  double rtb_SumofControls;
+  double rtb_SumofControls1;
+  double rtb_SumofControls1_d;
+  double rtb_SumofControls1_oz;
+  double rtb_SumofControls_or;
+  double rtb_SumofDatum1;
+  double rtb_SumofDatum1_b;
+  double rtb_SumofDatum1_j;
+  double rtb_SumofDatum1_m;
+  double rtb_SumofDatum_a;
   double rtb_Switch1_idx_0;
   double rtb_Switch1_idx_1;
   double rtb_Switch1_idx_2;
@@ -856,10 +855,14 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
   double rtb_sincos_o1_idx_1;
   double rtb_sincos_o1_idx_2;
   double rtb_u2rhoV2;
+  double rtb_u2rhoV2_b;
   double rtb_u2rhoV2_e;
+  double rtb_u2rhoV2_gi;
   double rtb_u2rhoV2_i;
+  double rtb_u2rhoV2_k3;
   double rtb_u2rhoV2_m;
   double rtb_u2rhoV2_n;
+  double rtb_u2rhoV2_og;
   double rtb_w3;
   int32_t i;
   int32_t rtb_MatrixConcatenation_tmp;
@@ -1000,7 +1003,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
   /* End of Outputs for SubSystem: '<S150>/Hqgw' */
   /* End of Outputs for SubSystem: '<S150>/Hrgw' */
   if (tmp) {
-    /* Gain: '<S13>/Gain' incorporates:
+    /* Gain: '<S11>/Gain' incorporates:
      *  Inport: '<Root>/InitialConditions'
      */
     SkySurfer_Core_DW->Gain = SkySurfer_Core_P.Gain_Gain_fa *
@@ -1008,7 +1011,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
   }
 
   /* Integrator: '<S6>/XYZe' incorporates:
-   *  Constant: '<S13>/rho_sealevel (slug//ft^3)2'
+   *  Constant: '<S11>/rho_sealevel (slug//ft^3)2'
    *  SignalConversion generated from: '<S6>/XYZe'
    */
   if (SkySurfer_Core_DW->XYZe_DWORK1) {
@@ -1019,8 +1022,8 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     SkySurfer_Core_X->XYZe_CSTATE[2] = SkySurfer_Core_DW->Gain;
   }
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    *  Integrator: '<S6>/XYZe'
    */
   CoreSnapshot_Concat[0] = SkySurfer_Core_X->XYZe_CSTATE[0];
@@ -1029,8 +1032,8 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
   /* Integrator: '<S6>/XYZe' */
   rtb_Add_h_idx_2 = SkySurfer_Core_X->XYZe_CSTATE[2];
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    *  Integrator: '<S6>/XYZe'
    */
   CoreSnapshot_Concat[2] = SkySurfer_Core_X->XYZe_CSTATE[2];
@@ -1046,8 +1049,8 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
 
   rtb_Sum_mi_idx_0 = SkySurfer_Core_X->UVWb_CSTATE[0];
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    *  Integrator: '<S6>/UVWb'
    */
   CoreSnapshot_Concat[3] = SkySurfer_Core_X->UVWb_CSTATE[0];
@@ -1055,8 +1058,8 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
   /* Integrator: '<S6>/UVWb' */
   rtb_Sum_mi_idx_1 = SkySurfer_Core_X->UVWb_CSTATE[1];
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    *  Integrator: '<S6>/UVWb'
    */
   CoreSnapshot_Concat[4] = SkySurfer_Core_X->UVWb_CSTATE[1];
@@ -1064,14 +1067,14 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
   /* Integrator: '<S6>/UVWb' */
   rtb_Sum_mi_idx_2 = SkySurfer_Core_X->UVWb_CSTATE[2];
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    *  Integrator: '<S6>/UVWb'
    */
   CoreSnapshot_Concat[5] = SkySurfer_Core_X->UVWb_CSTATE[2];
   if (tmp) {
-    /* Gain: '<S21>/1//2' incorporates:
-     *  Gain: '<S202>/Gain1'
+    /* Gain: '<S26>/1//2' incorporates:
+     *  Gain: '<S194>/Gain1'
      *  Inport: '<Root>/InitialConditions'
      */
     rtb_sincos_o1_idx_0 = SkySurfer_Core_P.Gain1_Gain_m *
@@ -1081,7 +1084,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     rtb_sincos_o1_idx_2 = SkySurfer_Core_P.Gain1_Gain_m *
       SkySurfer_Core_U->InitialConditions[4] * SkySurfer_Core_P.u2_Gain;
 
-    /* Trigonometry: '<S21>/sincos' */
+    /* Trigonometry: '<S26>/sincos' */
     rtb_u[0] = cos(rtb_sincos_o1_idx_0);
     rtb_Q0123_idx_1 = sin(rtb_sincos_o1_idx_0);
     rtb_u[1] = cos(rtb_sincos_o1_idx_1);
@@ -1089,47 +1092,47 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     rtb_u[2] = cos(rtb_sincos_o1_idx_2);
     rtb_Q0123_idx_0 = sin(rtb_sincos_o1_idx_2);
 
-    /* Fcn: '<S21>/q0' incorporates:
-     *  Fcn: '<S21>/q1'
-     *  Trigonometry: '<S21>/sincos'
+    /* Fcn: '<S26>/q0' incorporates:
+     *  Fcn: '<S26>/q1'
+     *  Trigonometry: '<S26>/sincos'
      */
     rtb_Q0123_idx_3 = rtb_u[0] * rtb_u[1];
     rtb_Thr = rtb_Q0123_idx_1 * rtb_Q0123_idx_2;
 
-    /* Fcn: '<S21>/q0' incorporates:
-     *  Trigonometry: '<S21>/sincos'
+    /* Fcn: '<S26>/q0' incorporates:
+     *  Trigonometry: '<S26>/sincos'
      */
     SkySurfer_Core_DW->q0 = rtb_Q0123_idx_3 * rtb_u[2] + rtb_Thr *
       rtb_Q0123_idx_0;
 
-    /* Fcn: '<S21>/q1' incorporates:
-     *  Trigonometry: '<S21>/sincos'
+    /* Fcn: '<S26>/q1' incorporates:
+     *  Trigonometry: '<S26>/sincos'
      */
     SkySurfer_Core_DW->q1 = rtb_Q0123_idx_3 * rtb_Q0123_idx_0 - rtb_Thr * rtb_u
       [2];
 
-    /* Fcn: '<S21>/q2' incorporates:
-     *  Fcn: '<S21>/q3'
-     *  Trigonometry: '<S21>/sincos'
+    /* Fcn: '<S26>/q2' incorporates:
+     *  Fcn: '<S26>/q3'
+     *  Trigonometry: '<S26>/sincos'
      */
     rtb_Q0123_idx_1 *= rtb_u[1];
     rtb_Q0123_idx_2 *= rtb_u[0];
 
-    /* Fcn: '<S21>/q2' incorporates:
-     *  Trigonometry: '<S21>/sincos'
+    /* Fcn: '<S26>/q2' incorporates:
+     *  Trigonometry: '<S26>/sincos'
      */
     SkySurfer_Core_DW->q2 = rtb_Q0123_idx_2 * rtb_u[2] + rtb_Q0123_idx_1 *
       rtb_Q0123_idx_0;
 
-    /* Fcn: '<S21>/q3' incorporates:
-     *  Trigonometry: '<S21>/sincos'
+    /* Fcn: '<S26>/q3' incorporates:
+     *  Trigonometry: '<S26>/sincos'
      */
     SkySurfer_Core_DW->q3 = rtb_Q0123_idx_1 * rtb_u[2] - rtb_Q0123_idx_2 *
       rtb_Q0123_idx_0;
   }
 
-  /* Integrator: '<S14>/Q0123' incorporates:
-   *  SignalConversion generated from: '<S14>/Q0123'
+  /* Integrator: '<S15>/Q0123' incorporates:
+   *  SignalConversion generated from: '<S15>/Q0123'
    */
   if (SkySurfer_Core_DW->Q0123_DWORK1) {
     SkySurfer_Core_X->Q0123_CSTATE[0] = SkySurfer_Core_DW->q0;
@@ -1140,44 +1143,44 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
 
   rtb_Q0123_idx_0 = SkySurfer_Core_X->Q0123_CSTATE[0];
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
-   *  Integrator: '<S14>/Q0123'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
+   *  Integrator: '<S15>/Q0123'
    */
   CoreSnapshot_Concat[6] = SkySurfer_Core_X->Q0123_CSTATE[0];
 
-  /* Integrator: '<S14>/Q0123' */
+  /* Integrator: '<S15>/Q0123' */
   rtb_Q0123_idx_1 = SkySurfer_Core_X->Q0123_CSTATE[1];
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
-   *  Integrator: '<S14>/Q0123'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
+   *  Integrator: '<S15>/Q0123'
    */
   CoreSnapshot_Concat[7] = SkySurfer_Core_X->Q0123_CSTATE[1];
 
-  /* Integrator: '<S14>/Q0123' */
+  /* Integrator: '<S15>/Q0123' */
   rtb_Q0123_idx_2 = SkySurfer_Core_X->Q0123_CSTATE[2];
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
-   *  Integrator: '<S14>/Q0123'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
+   *  Integrator: '<S15>/Q0123'
    */
   CoreSnapshot_Concat[8] = SkySurfer_Core_X->Q0123_CSTATE[2];
 
-  /* Integrator: '<S14>/Q0123' */
+  /* Integrator: '<S15>/Q0123' */
   rtb_Q0123_idx_3 = SkySurfer_Core_X->Q0123_CSTATE[3];
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
-   *  Integrator: '<S14>/Q0123'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
+   *  Integrator: '<S15>/Q0123'
    */
   CoreSnapshot_Concat[9] = SkySurfer_Core_X->Q0123_CSTATE[3];
 
   /* Integrator: '<S6>/PQR' */
   rtb_u[0] = SkySurfer_Core_X->PQR_CSTATE[0];
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    *  Integrator: '<S6>/PQR'
    */
   CoreSnapshot_Concat[10] = SkySurfer_Core_X->PQR_CSTATE[0];
@@ -1185,8 +1188,8 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
   /* Integrator: '<S6>/PQR' */
   rtb_u[1] = SkySurfer_Core_X->PQR_CSTATE[1];
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    *  Integrator: '<S6>/PQR'
    */
   CoreSnapshot_Concat[11] = SkySurfer_Core_X->PQR_CSTATE[1];
@@ -1194,19 +1197,19 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
   /* Integrator: '<S6>/PQR' */
   rtb_u[2] = SkySurfer_Core_X->PQR_CSTATE[2];
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    *  Integrator: '<S6>/PQR'
    */
   CoreSnapshot_Concat[12] = SkySurfer_Core_X->PQR_CSTATE[2];
 
-  /* Sqrt: '<S34>/sqrt' incorporates:
-   *  Integrator: '<S14>/Q0123'
-   *  Product: '<S35>/Product'
-   *  Product: '<S35>/Product1'
-   *  Product: '<S35>/Product2'
-   *  Product: '<S35>/Product3'
-   *  Sum: '<S35>/Sum'
+  /* Sqrt: '<S39>/sqrt' incorporates:
+   *  Integrator: '<S15>/Q0123'
+   *  Product: '<S40>/Product'
+   *  Product: '<S40>/Product1'
+   *  Product: '<S40>/Product2'
+   *  Product: '<S40>/Product3'
+   *  Sum: '<S40>/Sum'
    */
   rtb_jxi = sqrt(((SkySurfer_Core_X->Q0123_CSTATE[0] *
                    SkySurfer_Core_X->Q0123_CSTATE[0] +
@@ -1217,148 +1220,148 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
                  SkySurfer_Core_X->Q0123_CSTATE[3] *
                  SkySurfer_Core_X->Q0123_CSTATE[3]);
 
-  /* Product: '<S33>/Product' incorporates:
-   *  Integrator: '<S14>/Q0123'
+  /* Product: '<S38>/Product' incorporates:
+   *  Integrator: '<S15>/Q0123'
    */
   rtb_Thr = SkySurfer_Core_X->Q0123_CSTATE[0] / rtb_jxi;
 
-  /* Product: '<S33>/Product1' incorporates:
-   *  Integrator: '<S14>/Q0123'
+  /* Product: '<S38>/Product1' incorporates:
+   *  Integrator: '<S15>/Q0123'
    */
   rtb_Thrust_NonNeg = SkySurfer_Core_X->Q0123_CSTATE[1] / rtb_jxi;
 
-  /* Product: '<S33>/Product2' incorporates:
-   *  Integrator: '<S14>/Q0123'
+  /* Product: '<S38>/Product2' incorporates:
+   *  Integrator: '<S15>/Q0123'
    */
   rtb_Product2_p2 = SkySurfer_Core_X->Q0123_CSTATE[2] / rtb_jxi;
 
-  /* Product: '<S33>/Product3' incorporates:
-   *  Integrator: '<S14>/Q0123'
+  /* Product: '<S38>/Product3' incorporates:
+   *  Integrator: '<S15>/Q0123'
    */
   rtb_jxi = SkySurfer_Core_X->Q0123_CSTATE[3] / rtb_jxi;
 
-  /* Product: '<S23>/Product3' incorporates:
-   *  Product: '<S27>/Product3'
+  /* Product: '<S28>/Product3' incorporates:
+   *  Product: '<S32>/Product3'
    */
   rtb_sincos_o1_idx_2 = rtb_Thr * rtb_Thr;
 
-  /* Product: '<S23>/Product2' incorporates:
-   *  Product: '<S27>/Product2'
+  /* Product: '<S28>/Product2' incorporates:
+   *  Product: '<S32>/Product2'
    */
   rtb_sincos_o1_idx_1 = rtb_Thrust_NonNeg * rtb_Thrust_NonNeg;
 
-  /* Product: '<S23>/Product1' incorporates:
-   *  Product: '<S27>/Product1'
-   *  Product: '<S31>/Product1'
+  /* Product: '<S28>/Product1' incorporates:
+   *  Product: '<S32>/Product1'
+   *  Product: '<S36>/Product1'
    */
   rtb_sincos_o1_idx_0 = rtb_Product2_p2 * rtb_Product2_p2;
 
-  /* Product: '<S23>/Product' incorporates:
-   *  Product: '<S27>/Product'
-   *  Product: '<S31>/Product'
+  /* Product: '<S28>/Product' incorporates:
+   *  Product: '<S32>/Product'
+   *  Product: '<S36>/Product'
    */
   rtb_VectorConcatenate_idx_6 = rtb_jxi * rtb_jxi;
 
-  /* Sum: '<S23>/Sum' incorporates:
-   *  Product: '<S23>/Product'
-   *  Product: '<S23>/Product1'
-   *  Product: '<S23>/Product2'
-   *  Product: '<S23>/Product3'
+  /* Sum: '<S28>/Sum' incorporates:
+   *  Product: '<S28>/Product'
+   *  Product: '<S28>/Product1'
+   *  Product: '<S28>/Product2'
+   *  Product: '<S28>/Product3'
    */
   rtb_VectorConcatenate_et[0] = ((rtb_sincos_o1_idx_2 + rtb_sincos_o1_idx_1) -
     rtb_sincos_o1_idx_0) - rtb_VectorConcatenate_idx_6;
 
-  /* Product: '<S26>/Product3' incorporates:
-   *  Product: '<S24>/Product3'
+  /* Product: '<S31>/Product3' incorporates:
+   *  Product: '<S29>/Product3'
    */
   rtb_sigma_ugsigma_vg = rtb_jxi * rtb_Thr;
 
-  /* Product: '<S26>/Product2' incorporates:
-   *  Product: '<S24>/Product2'
+  /* Product: '<S31>/Product2' incorporates:
+   *  Product: '<S29>/Product2'
    */
   rtb_LowAltitudeScaleLength = rtb_Thrust_NonNeg * rtb_Product2_p2;
 
-  /* Gain: '<S26>/Gain' incorporates:
-   *  Product: '<S26>/Product2'
-   *  Product: '<S26>/Product3'
-   *  Sum: '<S26>/Sum'
+  /* Gain: '<S31>/Gain' incorporates:
+   *  Product: '<S31>/Product2'
+   *  Product: '<S31>/Product3'
+   *  Sum: '<S31>/Sum'
    */
   rtb_VectorConcatenate_et[1] = (rtb_LowAltitudeScaleLength -
     rtb_sigma_ugsigma_vg) * SkySurfer_Core_P.Gain_Gain_e;
 
-  /* Product: '<S29>/Product2' incorporates:
-   *  Product: '<S25>/Product2'
+  /* Product: '<S34>/Product2' incorporates:
+   *  Product: '<S30>/Product2'
    */
   rtb_Lv_idx_0 = rtb_Thrust_NonNeg * rtb_jxi;
 
-  /* Product: '<S29>/Product1' incorporates:
-   *  Product: '<S25>/Product1'
+  /* Product: '<S34>/Product1' incorporates:
+   *  Product: '<S30>/Product1'
    */
   rtb_DensityConversion = rtb_Thr * rtb_Product2_p2;
 
-  /* Gain: '<S29>/Gain' incorporates:
-   *  Product: '<S29>/Product1'
-   *  Product: '<S29>/Product2'
-   *  Sum: '<S29>/Sum'
+  /* Gain: '<S34>/Gain' incorporates:
+   *  Product: '<S34>/Product1'
+   *  Product: '<S34>/Product2'
+   *  Sum: '<S34>/Sum'
    */
   rtb_VectorConcatenate_et[2] = (rtb_DensityConversion + rtb_Lv_idx_0) *
     SkySurfer_Core_P.Gain_Gain_l;
 
-  /* Gain: '<S24>/Gain' incorporates:
-   *  Sum: '<S24>/Sum'
+  /* Gain: '<S29>/Gain' incorporates:
+   *  Sum: '<S29>/Sum'
    */
   rtb_VectorConcatenate_et[3] = (rtb_sigma_ugsigma_vg +
     rtb_LowAltitudeScaleLength) * SkySurfer_Core_P.Gain_Gain_c;
 
-  /* Sum: '<S27>/Sum' incorporates:
-   *  Sum: '<S31>/Sum'
+  /* Sum: '<S32>/Sum' incorporates:
+   *  Sum: '<S36>/Sum'
    */
   rtb_sincos_o1_idx_2 -= rtb_sincos_o1_idx_1;
   rtb_VectorConcatenate_et[4] = (rtb_sincos_o1_idx_2 + rtb_sincos_o1_idx_0) -
     rtb_VectorConcatenate_idx_6;
 
-  /* Product: '<S30>/Product1' incorporates:
-   *  Product: '<S28>/Product1'
+  /* Product: '<S35>/Product1' incorporates:
+   *  Product: '<S33>/Product1'
    */
   rtb_sincos_o1_idx_1 = rtb_Thr * rtb_Thrust_NonNeg;
 
-  /* Product: '<S30>/Product2' incorporates:
-   *  Product: '<S28>/Product2'
+  /* Product: '<S35>/Product2' incorporates:
+   *  Product: '<S33>/Product2'
    */
   rtb_sigma_ugsigma_vg = rtb_Product2_p2 * rtb_jxi;
 
-  /* Gain: '<S30>/Gain' incorporates:
-   *  Product: '<S30>/Product1'
-   *  Product: '<S30>/Product2'
-   *  Sum: '<S30>/Sum'
+  /* Gain: '<S35>/Gain' incorporates:
+   *  Product: '<S35>/Product1'
+   *  Product: '<S35>/Product2'
+   *  Sum: '<S35>/Sum'
    */
   rtb_VectorConcatenate_et[5] = (rtb_sigma_ugsigma_vg - rtb_sincos_o1_idx_1) *
     SkySurfer_Core_P.Gain_Gain_g;
 
-  /* Gain: '<S25>/Gain' incorporates:
-   *  Sum: '<S25>/Sum'
+  /* Gain: '<S30>/Gain' incorporates:
+   *  Sum: '<S30>/Sum'
    */
   rtb_VectorConcatenate_et[6] = (rtb_Lv_idx_0 - rtb_DensityConversion) *
     SkySurfer_Core_P.Gain_Gain_j;
 
-  /* Gain: '<S28>/Gain' incorporates:
-   *  Sum: '<S28>/Sum'
+  /* Gain: '<S33>/Gain' incorporates:
+   *  Sum: '<S33>/Sum'
    */
   rtb_VectorConcatenate_et[7] = (rtb_sincos_o1_idx_1 + rtb_sigma_ugsigma_vg) *
     SkySurfer_Core_P.Gain_Gain_n;
 
-  /* Sum: '<S31>/Sum' */
+  /* Sum: '<S36>/Sum' */
   rtb_VectorConcatenate_et[8] = (rtb_sincos_o1_idx_2 - rtb_sincos_o1_idx_0) +
     rtb_VectorConcatenate_idx_6;
 
-  /* Reshape: '<S32>/Reshape (9) to [3x3] column-major' */
+  /* Reshape: '<S37>/Reshape (9) to [3x3] column-major' */
   memcpy(&rtb_Reshape9to3x3columnmajor[0], &rtb_VectorConcatenate_et[0], 9U *
          sizeof(double));
 
   /* Product: '<S18>/Product' incorporates:
    *  Integrator: '<S6>/UVWb'
    *  Math: '<S6>/Transpose'
-   *  Reshape: '<S32>/Reshape (9) to [3x3] column-major'
+   *  Reshape: '<S37>/Reshape (9) to [3x3] column-major'
    */
   rtb_Thr = SkySurfer_Core_X->UVWb_CSTATE[1];
   rtb_Thrust_NonNeg = SkySurfer_Core_X->UVWb_CSTATE[0];
@@ -1370,25 +1373,25 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
 
     /* Reshape: '<S18>/Reshape2' incorporates:
      *  Math: '<S6>/Transpose'
-     *  Reshape: '<S32>/Reshape (9) to [3x3] column-major'
+     *  Reshape: '<S37>/Reshape (9) to [3x3] column-major'
      */
     SkySurfer_Core_DW->Reshape2[i] = rtb_sincos_o1_idx_2;
 
-    /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-     *  Concatenate: '<S5>/CoreSnapshot_Concat'
+    /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+     *  Concatenate: '<S4>/CoreSnapshot_Concat'
      */
     CoreSnapshot_Concat[i + 13] = rtb_sincos_o1_idx_2;
   }
 
   /* End of Product: '<S18>/Product' */
 
-  /* Sqrt: '<S76>/sqrt' incorporates:
-   *  Integrator: '<S14>/Q0123'
-   *  Product: '<S77>/Product'
-   *  Product: '<S77>/Product1'
-   *  Product: '<S77>/Product2'
-   *  Product: '<S77>/Product3'
-   *  Sum: '<S77>/Sum'
+  /* Sqrt: '<S81>/sqrt' incorporates:
+   *  Integrator: '<S15>/Q0123'
+   *  Product: '<S82>/Product'
+   *  Product: '<S82>/Product1'
+   *  Product: '<S82>/Product2'
+   *  Product: '<S82>/Product3'
+   *  Sum: '<S82>/Sum'
    */
   rtb_Thr = sqrt(((SkySurfer_Core_X->Q0123_CSTATE[0] *
                    SkySurfer_Core_X->Q0123_CSTATE[0] +
@@ -1399,143 +1402,143 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
                  SkySurfer_Core_X->Q0123_CSTATE[3] *
                  SkySurfer_Core_X->Q0123_CSTATE[3]);
 
-  /* Product: '<S75>/Product' incorporates:
-   *  Integrator: '<S14>/Q0123'
+  /* Product: '<S80>/Product' incorporates:
+   *  Integrator: '<S15>/Q0123'
    */
   rtb_Thrust_NonNeg = SkySurfer_Core_X->Q0123_CSTATE[0] / rtb_Thr;
 
-  /* Product: '<S75>/Product1' incorporates:
-   *  Integrator: '<S14>/Q0123'
+  /* Product: '<S80>/Product1' incorporates:
+   *  Integrator: '<S15>/Q0123'
    */
   rtb_Product2_p2 = SkySurfer_Core_X->Q0123_CSTATE[1] / rtb_Thr;
 
-  /* Product: '<S75>/Product2' incorporates:
-   *  Integrator: '<S14>/Q0123'
+  /* Product: '<S80>/Product2' incorporates:
+   *  Integrator: '<S15>/Q0123'
    */
   rtb_jxi = SkySurfer_Core_X->Q0123_CSTATE[2] / rtb_Thr;
 
-  /* Product: '<S75>/Product3' incorporates:
-   *  Integrator: '<S14>/Q0123'
+  /* Product: '<S80>/Product3' incorporates:
+   *  Integrator: '<S15>/Q0123'
    */
   rtb_Thr = SkySurfer_Core_X->Q0123_CSTATE[3] / rtb_Thr;
 
-  /* Product: '<S65>/Product3' incorporates:
-   *  Product: '<S69>/Product3'
+  /* Product: '<S70>/Product3' incorporates:
+   *  Product: '<S74>/Product3'
    */
   rtb_sincos_o1_idx_2 = rtb_Thrust_NonNeg * rtb_Thrust_NonNeg;
 
-  /* Product: '<S65>/Product2' incorporates:
-   *  Product: '<S69>/Product2'
+  /* Product: '<S70>/Product2' incorporates:
+   *  Product: '<S74>/Product2'
    */
   rtb_sincos_o1_idx_1 = rtb_Product2_p2 * rtb_Product2_p2;
 
-  /* Product: '<S65>/Product1' incorporates:
-   *  Product: '<S69>/Product1'
-   *  Product: '<S73>/Product1'
+  /* Product: '<S70>/Product1' incorporates:
+   *  Product: '<S74>/Product1'
+   *  Product: '<S78>/Product1'
    */
   rtb_sincos_o1_idx_0 = rtb_jxi * rtb_jxi;
 
-  /* Product: '<S65>/Product' incorporates:
-   *  Product: '<S69>/Product'
-   *  Product: '<S73>/Product'
+  /* Product: '<S70>/Product' incorporates:
+   *  Product: '<S74>/Product'
+   *  Product: '<S78>/Product'
    */
   rtb_VectorConcatenate_idx_6 = rtb_Thr * rtb_Thr;
 
-  /* Sum: '<S65>/Sum' incorporates:
-   *  Product: '<S65>/Product'
-   *  Product: '<S65>/Product1'
-   *  Product: '<S65>/Product2'
-   *  Product: '<S65>/Product3'
+  /* Sum: '<S70>/Sum' incorporates:
+   *  Product: '<S70>/Product'
+   *  Product: '<S70>/Product1'
+   *  Product: '<S70>/Product2'
+   *  Product: '<S70>/Product3'
    */
   rtb_VectorConcatenate_et[0] = ((rtb_sincos_o1_idx_2 + rtb_sincos_o1_idx_1) -
     rtb_sincos_o1_idx_0) - rtb_VectorConcatenate_idx_6;
 
-  /* Product: '<S68>/Product3' incorporates:
-   *  Product: '<S66>/Product3'
+  /* Product: '<S73>/Product3' incorporates:
+   *  Product: '<S71>/Product3'
    */
   rtb_sigma_ugsigma_vg = rtb_Thr * rtb_Thrust_NonNeg;
 
-  /* Product: '<S68>/Product2' incorporates:
-   *  Product: '<S66>/Product2'
+  /* Product: '<S73>/Product2' incorporates:
+   *  Product: '<S71>/Product2'
    */
   rtb_LowAltitudeScaleLength = rtb_Product2_p2 * rtb_jxi;
 
-  /* Gain: '<S68>/Gain' incorporates:
-   *  Product: '<S68>/Product2'
-   *  Product: '<S68>/Product3'
-   *  Sum: '<S68>/Sum'
+  /* Gain: '<S73>/Gain' incorporates:
+   *  Product: '<S73>/Product2'
+   *  Product: '<S73>/Product3'
+   *  Sum: '<S73>/Sum'
    */
   rtb_VectorConcatenate_et[1] = (rtb_LowAltitudeScaleLength -
     rtb_sigma_ugsigma_vg) * SkySurfer_Core_P.Gain_Gain_js;
 
-  /* Product: '<S71>/Product2' incorporates:
-   *  Product: '<S67>/Product2'
+  /* Product: '<S76>/Product2' incorporates:
+   *  Product: '<S72>/Product2'
    */
   rtb_Lv_idx_0 = rtb_Product2_p2 * rtb_Thr;
 
-  /* Product: '<S71>/Product1' incorporates:
-   *  Product: '<S67>/Product1'
+  /* Product: '<S76>/Product1' incorporates:
+   *  Product: '<S72>/Product1'
    */
   rtb_DensityConversion = rtb_Thrust_NonNeg * rtb_jxi;
 
-  /* Gain: '<S71>/Gain' incorporates:
-   *  Product: '<S71>/Product1'
-   *  Product: '<S71>/Product2'
-   *  Sum: '<S71>/Sum'
+  /* Gain: '<S76>/Gain' incorporates:
+   *  Product: '<S76>/Product1'
+   *  Product: '<S76>/Product2'
+   *  Sum: '<S76>/Sum'
    */
   rtb_VectorConcatenate_et[2] = (rtb_DensityConversion + rtb_Lv_idx_0) *
     SkySurfer_Core_P.Gain_Gain_b;
 
-  /* Gain: '<S66>/Gain' incorporates:
-   *  Sum: '<S66>/Sum'
+  /* Gain: '<S71>/Gain' incorporates:
+   *  Sum: '<S71>/Sum'
    */
   rtb_VectorConcatenate_et[3] = (rtb_sigma_ugsigma_vg +
     rtb_LowAltitudeScaleLength) * SkySurfer_Core_P.Gain_Gain_la;
 
-  /* Sum: '<S69>/Sum' incorporates:
-   *  Sum: '<S73>/Sum'
+  /* Sum: '<S74>/Sum' incorporates:
+   *  Sum: '<S78>/Sum'
    */
   rtb_sincos_o1_idx_2 -= rtb_sincos_o1_idx_1;
   rtb_VectorConcatenate_et[4] = (rtb_sincos_o1_idx_2 + rtb_sincos_o1_idx_0) -
     rtb_VectorConcatenate_idx_6;
 
-  /* Product: '<S72>/Product1' incorporates:
-   *  Product: '<S70>/Product1'
+  /* Product: '<S77>/Product1' incorporates:
+   *  Product: '<S75>/Product1'
    */
   rtb_sincos_o1_idx_1 = rtb_Thrust_NonNeg * rtb_Product2_p2;
 
-  /* Product: '<S72>/Product2' incorporates:
-   *  Product: '<S70>/Product2'
+  /* Product: '<S77>/Product2' incorporates:
+   *  Product: '<S75>/Product2'
    */
   rtb_sigma_ugsigma_vg = rtb_jxi * rtb_Thr;
 
-  /* Gain: '<S72>/Gain' incorporates:
-   *  Product: '<S72>/Product1'
-   *  Product: '<S72>/Product2'
-   *  Sum: '<S72>/Sum'
+  /* Gain: '<S77>/Gain' incorporates:
+   *  Product: '<S77>/Product1'
+   *  Product: '<S77>/Product2'
+   *  Sum: '<S77>/Sum'
    */
   rtb_VectorConcatenate_et[5] = (rtb_sigma_ugsigma_vg - rtb_sincos_o1_idx_1) *
     SkySurfer_Core_P.Gain_Gain_ah;
 
-  /* Gain: '<S67>/Gain' incorporates:
-   *  Sum: '<S67>/Sum'
+  /* Gain: '<S72>/Gain' incorporates:
+   *  Sum: '<S72>/Sum'
    */
   rtb_VectorConcatenate_et[6] = (rtb_Lv_idx_0 - rtb_DensityConversion) *
     SkySurfer_Core_P.Gain_Gain_eu;
 
-  /* Gain: '<S70>/Gain' incorporates:
-   *  Sum: '<S70>/Sum'
+  /* Gain: '<S75>/Gain' incorporates:
+   *  Sum: '<S75>/Sum'
    */
   rtb_VectorConcatenate_et[7] = (rtb_sincos_o1_idx_1 + rtb_sigma_ugsigma_vg) *
     SkySurfer_Core_P.Gain_Gain_k;
 
-  /* Sum: '<S73>/Sum' */
+  /* Sum: '<S78>/Sum' */
   rtb_VectorConcatenate_et[8] = (rtb_sincos_o1_idx_2 - rtb_sincos_o1_idx_0) +
     rtb_VectorConcatenate_idx_6;
 
-  /* Gain: '<S40>/Gain1' incorporates:
-   *  Reshape: '<S74>/Reshape (9) to [3x3] column-major'
-   *  Selector: '<S40>/Selector1'
+  /* Gain: '<S45>/Gain1' incorporates:
+   *  Reshape: '<S79>/Reshape (9) to [3x3] column-major'
+   *  Selector: '<S45>/Selector1'
    */
   rtb_Product2_p2 = SkySurfer_Core_P.Gain1_Gain_cp[0] *
     rtb_VectorConcatenate_et[3];
@@ -1544,34 +1547,34 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
   rtb_sincos_o1_idx_1 = SkySurfer_Core_P.Gain1_Gain_cp[2] *
     rtb_VectorConcatenate_et[6];
 
-  /* Gain: '<S40>/Gain2' incorporates:
-   *  Reshape: '<S74>/Reshape (9) to [3x3] column-major'
-   *  Selector: '<S40>/Selector2'
+  /* Gain: '<S45>/Gain2' incorporates:
+   *  Reshape: '<S79>/Reshape (9) to [3x3] column-major'
+   *  Selector: '<S45>/Selector2'
    */
   rtb_Thr = SkySurfer_Core_P.Gain2_Gain[0] * rtb_VectorConcatenate_et[7];
 
-  /* Gain: '<S40>/Gain3' incorporates:
-   *  Reshape: '<S74>/Reshape (9) to [3x3] column-major'
-   *  Selector: '<S40>/Selector3'
+  /* Gain: '<S45>/Gain3' incorporates:
+   *  Reshape: '<S79>/Reshape (9) to [3x3] column-major'
+   *  Selector: '<S45>/Selector3'
    */
   rtb_sincos_o1_idx_0 = SkySurfer_Core_P.Gain3_Gain[0] *
     rtb_VectorConcatenate_et[1];
 
-  /* Gain: '<S40>/Gain2' incorporates:
-   *  Reshape: '<S74>/Reshape (9) to [3x3] column-major'
-   *  Selector: '<S40>/Selector2'
+  /* Gain: '<S45>/Gain2' incorporates:
+   *  Reshape: '<S79>/Reshape (9) to [3x3] column-major'
+   *  Selector: '<S45>/Selector2'
    */
   rtb_Thrust_NonNeg = SkySurfer_Core_P.Gain2_Gain[1] * rtb_VectorConcatenate_et
     [8];
 
-  /* Gain: '<S40>/Gain3' incorporates:
-   *  Reshape: '<S74>/Reshape (9) to [3x3] column-major'
-   *  Selector: '<S40>/Selector3'
+  /* Gain: '<S45>/Gain3' incorporates:
+   *  Reshape: '<S79>/Reshape (9) to [3x3] column-major'
+   *  Selector: '<S45>/Selector3'
    */
   rtb_VectorConcatenate_idx_6 = SkySurfer_Core_P.Gain3_Gain[1] *
     rtb_VectorConcatenate_et[4];
 
-  /* If: '<S36>/If' */
+  /* If: '<S41>/If' */
   rtPrevAction = SkySurfer_Core_DW->If_ActiveSubsystem;
   if (rtsiIsModeUpdateTimeStep(&SkySurfer_Core_M->solverInfo)) {
     rtAction = (int8_t)(!(rtb_sincos_o1_idx_1 >= 1.0) && !(rtb_sincos_o1_idx_1 <=
@@ -1587,14 +1590,14 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
   }
 
   if (rtAction == 0) {
-    /* Outputs for IfAction SubSystem: '<S36>/AxisRotZeroR3' incorporates:
-     *  ActionPort: '<S39>/Action Port'
+    /* Outputs for IfAction SubSystem: '<S41>/AxisRotZeroR3' incorporates:
+     *  ActionPort: '<S44>/Action Port'
      */
-    /* Fcn: '<S39>/Fcn1' */
+    /* Fcn: '<S44>/Fcn1' */
     rtb_Merge_a[0] = rt_atan2d_snf(rtb_sincos_o1_idx_0,
       rtb_VectorConcatenate_idx_6);
 
-    /* If: '<S46>/If' */
+    /* If: '<S51>/If' */
     rtPrevAction = SkySurfer_Core_DW->If_ActiveSubsystem_a;
     if (rtsiIsModeUpdateTimeStep(&SkySurfer_Core_M->solverInfo)) {
       if (rtb_sincos_o1_idx_1 > 1.0) {
@@ -1617,75 +1620,75 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
 
     switch (rtAction) {
      case 0:
-      /* Outputs for IfAction SubSystem: '<S46>/If Action Subsystem' incorporates:
-       *  ActionPort: '<S47>/Action Port'
+      /* Outputs for IfAction SubSystem: '<S51>/If Action Subsystem' incorporates:
+       *  ActionPort: '<S52>/Action Port'
        */
       if (rtmIsMajorTimeStep(SkySurfer_Core_M) &&
           SkySurfer_Core_M->Timing.TaskCounters.TID[1] == 0) {
-        /* Merge: '<S46>/Merge' incorporates:
-         *  Constant: '<S47>/Constant'
+        /* Merge: '<S51>/Merge' incorporates:
+         *  Constant: '<S52>/Constant'
          */
         SkySurfer_Core_DW->Merge_i = SkySurfer_Core_P.Constant_Value;
       }
 
-      /* End of Outputs for SubSystem: '<S46>/If Action Subsystem' */
+      /* End of Outputs for SubSystem: '<S51>/If Action Subsystem' */
       break;
 
      case 1:
-      /* Outputs for IfAction SubSystem: '<S46>/If Action Subsystem1' incorporates:
-       *  ActionPort: '<S48>/Action Port'
+      /* Outputs for IfAction SubSystem: '<S51>/If Action Subsystem1' incorporates:
+       *  ActionPort: '<S53>/Action Port'
        */
       if (rtmIsMajorTimeStep(SkySurfer_Core_M) &&
           SkySurfer_Core_M->Timing.TaskCounters.TID[1] == 0) {
-        /* Merge: '<S46>/Merge' incorporates:
-         *  Constant: '<S48>/Constant'
+        /* Merge: '<S51>/Merge' incorporates:
+         *  Constant: '<S53>/Constant'
          */
         SkySurfer_Core_DW->Merge_i = SkySurfer_Core_P.Constant_Value_i;
       }
 
-      /* End of Outputs for SubSystem: '<S46>/If Action Subsystem1' */
+      /* End of Outputs for SubSystem: '<S51>/If Action Subsystem1' */
       break;
 
      default:
-      /* Outputs for IfAction SubSystem: '<S46>/If Action Subsystem2' incorporates:
-       *  ActionPort: '<S49>/Action Port'
+      /* Outputs for IfAction SubSystem: '<S51>/If Action Subsystem2' incorporates:
+       *  ActionPort: '<S54>/Action Port'
        */
-      /* Merge: '<S46>/Merge' incorporates:
-       *  SignalConversion generated from: '<S49>/In'
+      /* Merge: '<S51>/Merge' incorporates:
+       *  SignalConversion generated from: '<S54>/In'
        */
       SkySurfer_Core_DW->Merge_i = rtb_sincos_o1_idx_1;
 
-      /* End of Outputs for SubSystem: '<S46>/If Action Subsystem2' */
+      /* End of Outputs for SubSystem: '<S51>/If Action Subsystem2' */
       break;
     }
 
-    /* End of If: '<S46>/If' */
+    /* End of If: '<S51>/If' */
 
-    /* Fcn: '<S39>/Fcn2' */
+    /* Fcn: '<S44>/Fcn2' */
     if (SkySurfer_Core_DW->Merge_i > 1.0) {
-      rtb_Multiply = 1.0;
+      rtb_q1dot = 1.0;
     } else if (SkySurfer_Core_DW->Merge_i < -1.0) {
-      rtb_Multiply = -1.0;
+      rtb_q1dot = -1.0;
     } else {
-      rtb_Multiply = SkySurfer_Core_DW->Merge_i;
+      rtb_q1dot = SkySurfer_Core_DW->Merge_i;
     }
 
-    rtb_Merge_a[1] = asin(rtb_Multiply);
+    rtb_Merge_a[1] = asin(rtb_q1dot);
 
-    /* End of Fcn: '<S39>/Fcn2' */
+    /* End of Fcn: '<S44>/Fcn2' */
 
-    /* Fcn: '<S39>/Fcn3' */
+    /* Fcn: '<S44>/Fcn3' */
     rtb_Merge_a[2] = 0.0;
 
-    /* End of Outputs for SubSystem: '<S36>/AxisRotZeroR3' */
+    /* End of Outputs for SubSystem: '<S41>/AxisRotZeroR3' */
   } else {
-    /* Outputs for IfAction SubSystem: '<S36>/AxisRotDefault' incorporates:
-     *  ActionPort: '<S38>/Action Port'
+    /* Outputs for IfAction SubSystem: '<S41>/AxisRotDefault' incorporates:
+     *  ActionPort: '<S43>/Action Port'
      */
-    /* Fcn: '<S38>/Fcn1' */
+    /* Fcn: '<S43>/Fcn1' */
     rtb_Merge_a[0] = rt_atan2d_snf(rtb_Product2_p2, rtb_sincos_o1_idx_2);
 
-    /* If: '<S42>/If' */
+    /* If: '<S47>/If' */
     rtPrevAction = SkySurfer_Core_DW->If_ActiveSubsystem_i;
     if (rtsiIsModeUpdateTimeStep(&SkySurfer_Core_M->solverInfo)) {
       if (rtb_sincos_o1_idx_1 > 1.0) {
@@ -1708,95 +1711,95 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
 
     switch (rtAction) {
      case 0:
-      /* Outputs for IfAction SubSystem: '<S42>/If Action Subsystem' incorporates:
-       *  ActionPort: '<S43>/Action Port'
+      /* Outputs for IfAction SubSystem: '<S47>/If Action Subsystem' incorporates:
+       *  ActionPort: '<S48>/Action Port'
        */
       if (rtmIsMajorTimeStep(SkySurfer_Core_M) &&
           SkySurfer_Core_M->Timing.TaskCounters.TID[1] == 0) {
-        /* Merge: '<S42>/Merge' incorporates:
-         *  Constant: '<S43>/Constant'
+        /* Merge: '<S47>/Merge' incorporates:
+         *  Constant: '<S48>/Constant'
          */
         SkySurfer_Core_DW->Merge = SkySurfer_Core_P.Constant_Value_f;
       }
 
-      /* End of Outputs for SubSystem: '<S42>/If Action Subsystem' */
+      /* End of Outputs for SubSystem: '<S47>/If Action Subsystem' */
       break;
 
      case 1:
-      /* Outputs for IfAction SubSystem: '<S42>/If Action Subsystem1' incorporates:
-       *  ActionPort: '<S44>/Action Port'
+      /* Outputs for IfAction SubSystem: '<S47>/If Action Subsystem1' incorporates:
+       *  ActionPort: '<S49>/Action Port'
        */
       if (rtmIsMajorTimeStep(SkySurfer_Core_M) &&
           SkySurfer_Core_M->Timing.TaskCounters.TID[1] == 0) {
-        /* Merge: '<S42>/Merge' incorporates:
-         *  Constant: '<S44>/Constant'
+        /* Merge: '<S47>/Merge' incorporates:
+         *  Constant: '<S49>/Constant'
          */
         SkySurfer_Core_DW->Merge = SkySurfer_Core_P.Constant_Value_k;
       }
 
-      /* End of Outputs for SubSystem: '<S42>/If Action Subsystem1' */
+      /* End of Outputs for SubSystem: '<S47>/If Action Subsystem1' */
       break;
 
      default:
-      /* Outputs for IfAction SubSystem: '<S42>/If Action Subsystem2' incorporates:
-       *  ActionPort: '<S45>/Action Port'
+      /* Outputs for IfAction SubSystem: '<S47>/If Action Subsystem2' incorporates:
+       *  ActionPort: '<S50>/Action Port'
        */
-      /* Merge: '<S42>/Merge' incorporates:
-       *  SignalConversion generated from: '<S45>/In'
+      /* Merge: '<S47>/Merge' incorporates:
+       *  SignalConversion generated from: '<S50>/In'
        */
       SkySurfer_Core_DW->Merge = rtb_sincos_o1_idx_1;
 
-      /* End of Outputs for SubSystem: '<S42>/If Action Subsystem2' */
+      /* End of Outputs for SubSystem: '<S47>/If Action Subsystem2' */
       break;
     }
 
-    /* End of If: '<S42>/If' */
+    /* End of If: '<S47>/If' */
 
-    /* Fcn: '<S38>/Fcn2' */
+    /* Fcn: '<S43>/Fcn2' */
     if (SkySurfer_Core_DW->Merge > 1.0) {
-      rtb_Multiply = 1.0;
+      rtb_q1dot = 1.0;
     } else if (SkySurfer_Core_DW->Merge < -1.0) {
-      rtb_Multiply = -1.0;
+      rtb_q1dot = -1.0;
     } else {
-      rtb_Multiply = SkySurfer_Core_DW->Merge;
+      rtb_q1dot = SkySurfer_Core_DW->Merge;
     }
 
-    rtb_Merge_a[1] = asin(rtb_Multiply);
+    rtb_Merge_a[1] = asin(rtb_q1dot);
 
-    /* End of Fcn: '<S38>/Fcn2' */
+    /* End of Fcn: '<S43>/Fcn2' */
 
-    /* Fcn: '<S38>/Fcn3' */
+    /* Fcn: '<S43>/Fcn3' */
     rtb_Merge_a[2] = rt_atan2d_snf(rtb_Thr, rtb_Thrust_NonNeg);
 
-    /* End of Outputs for SubSystem: '<S36>/AxisRotDefault' */
+    /* End of Outputs for SubSystem: '<S41>/AxisRotDefault' */
   }
 
-  /* End of If: '<S36>/If' */
+  /* End of If: '<S41>/If' */
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[16] = rtb_Merge_a[2];
   CoreSnapshot_Concat[17] = rtb_Merge_a[1];
   CoreSnapshot_Concat[18] = rtb_Merge_a[0];
   if (tmp) {
     for (i = 0; i < 3; i++) {
-      /* Concatenate: '<S15>/Matrix Concatenation' incorporates:
-       *  Constant: '<S13>/Constant2'
-       *  Constant: '<S4>/const2'
+      /* Concatenate: '<S16>/Matrix Concatenation' incorporates:
+       *  Constant: '<S11>/Constant2'
+       *  Constant: '<S5>/const2'
        */
       rtb_Thr = SkySurfer_Core_P.Inertia0[3 * i];
       rtb_MatrixConcatenation[6 * i] = rtb_Thr;
       rtb_MatrixConcatenation[6 * i + 3] = SkySurfer_Core_P.Constant2_Value_k[3 *
         i];
 
-      /* Selector: '<S16>/Selector2' */
+      /* Selector: '<S14>/Selector2' */
       SkySurfer_Core_DW->Selector2[3 * i] = rtb_Thr;
 
-      /* Concatenate: '<S15>/Matrix Concatenation' incorporates:
-       *  Constant: '<S13>/Constant2'
-       *  Constant: '<S4>/const2'
-       *  Selector: '<S16>/Selector2'
+      /* Concatenate: '<S16>/Matrix Concatenation' incorporates:
+       *  Constant: '<S11>/Constant2'
+       *  Constant: '<S5>/const2'
+       *  Selector: '<S14>/Selector2'
        */
       rtb_MatrixConcatenation_tmp = 3 * i + 1;
       rtb_Thr = SkySurfer_Core_P.Inertia0[rtb_MatrixConcatenation_tmp];
@@ -1804,13 +1807,13 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
       rtb_MatrixConcatenation[6 * i + 4] =
         SkySurfer_Core_P.Constant2_Value_k[rtb_MatrixConcatenation_tmp];
 
-      /* Selector: '<S16>/Selector2' */
+      /* Selector: '<S14>/Selector2' */
       SkySurfer_Core_DW->Selector2[rtb_MatrixConcatenation_tmp] = rtb_Thr;
 
-      /* Concatenate: '<S15>/Matrix Concatenation' incorporates:
-       *  Constant: '<S13>/Constant2'
-       *  Constant: '<S4>/const2'
-       *  Selector: '<S16>/Selector2'
+      /* Concatenate: '<S16>/Matrix Concatenation' incorporates:
+       *  Constant: '<S11>/Constant2'
+       *  Constant: '<S5>/const2'
+       *  Selector: '<S14>/Selector2'
        */
       rtb_MatrixConcatenation_tmp = 3 * i + 2;
       rtb_Thr = SkySurfer_Core_P.Inertia0[rtb_MatrixConcatenation_tmp];
@@ -1818,7 +1821,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
       rtb_MatrixConcatenation[6 * i + 5] =
         SkySurfer_Core_P.Constant2_Value_k[rtb_MatrixConcatenation_tmp];
 
-      /* Selector: '<S16>/Selector2' */
+      /* Selector: '<S14>/Selector2' */
       SkySurfer_Core_DW->Selector2[rtb_MatrixConcatenation_tmp] = rtb_Thr;
     }
   }
@@ -1827,19 +1830,19 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
   rtb_Thr = SkySurfer_Core_P.TransferFcn3_C *
     SkySurfer_Core_X->TransferFcn3_CSTATE;
 
-  /* Saturate: '<S12>/Command_Clip_0_1' */
+  /* Saturate: '<S13>/Command_Clip_0_1' */
   if (rtb_Thr > SkySurfer_Core_P.Command_Clip_0_1_UpperSat) {
-    rtb_Multiply = SkySurfer_Core_P.Command_Clip_0_1_UpperSat;
+    rtb_q1dot = SkySurfer_Core_P.Command_Clip_0_1_UpperSat;
   } else if (rtb_Thr < SkySurfer_Core_P.Command_Clip_0_1_LowerSat) {
-    rtb_Multiply = SkySurfer_Core_P.Command_Clip_0_1_LowerSat;
+    rtb_q1dot = SkySurfer_Core_P.Command_Clip_0_1_LowerSat;
   } else {
-    rtb_Multiply = rtb_Thr;
+    rtb_q1dot = rtb_Thr;
   }
 
-  /* Lookup_n-D: '<S12>/Thrust_Lookup' incorporates:
-   *  Saturate: '<S12>/Command_Clip_0_1'
+  /* Lookup_n-D: '<S13>/Thrust_Lookup' incorporates:
+   *  Saturate: '<S13>/Command_Clip_0_1'
    */
-  rtb_Thrust_NonNeg = look1_binlcpw(rtb_Multiply,
+  rtb_Thrust_NonNeg = look1_binlcpw(rtb_q1dot,
     SkySurfer_Core_P.PropThrust.CommandBP, SkySurfer_Core_P.PropThrust.Table_N,
     10U);
   if (tmp) {
@@ -2006,7 +2009,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     SkySurfer_Core_DW->DistanceintoGustxLimitedtogustlengthd)) *
     (SkySurfer_Core_P.DiscreteWindGustModelOn_v_m[2] / 2.0);
 
-  /* Gain: '<S11>/Negate_D_to_Alt' */
+  /* Gain: '<S12>/Negate_D_to_Alt' */
   rtb_Product2_p2 = SkySurfer_Core_P.Negate_D_to_Alt_Gain * rtb_Add_h_idx_2;
 
   /* Unit Conversion - from: m to: ft
@@ -2053,8 +2056,8 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
      Expression: output = (3.28084*input) + (0) */
   rtb_UnitConversion_d = 3.280839895013123 * rtb_Product2_p2;
 
-  /* Sqrt: '<S11>/Sqrt' incorporates:
-   *  DotProduct: '<S11>/Dot Product'
+  /* Sqrt: '<S12>/Sqrt' incorporates:
+   *  DotProduct: '<S12>/Dot Product'
    */
   SkySurfer_Core_DW->Sqrt = sqrt((SkySurfer_Core_DW->Reshape2[0] *
     SkySurfer_Core_DW->Reshape2[0] + SkySurfer_Core_DW->Reshape2[1] *
@@ -2071,12 +2074,12 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
   /* Unit Conversion - from: m/s to: ft/s
      Expression: output = (3.28084*input) + (0) */
   if (SkySurfer_Core_DW->Sqrt > SkySurfer_Core_P.Drydenairspeedfloor_UpperSat) {
-    rtb_Multiply = SkySurfer_Core_P.Drydenairspeedfloor_UpperSat;
+    rtb_q1dot = SkySurfer_Core_P.Drydenairspeedfloor_UpperSat;
   } else if (SkySurfer_Core_DW->Sqrt <
              SkySurfer_Core_P.Drydenairspeedfloor_LowerSat) {
-    rtb_Multiply = SkySurfer_Core_P.Drydenairspeedfloor_LowerSat;
+    rtb_q1dot = SkySurfer_Core_P.Drydenairspeedfloor_LowerSat;
   } else {
-    rtb_Multiply = SkySurfer_Core_DW->Sqrt;
+    rtb_q1dot = SkySurfer_Core_DW->Sqrt;
   }
 
   /* UnitConversion: '<S158>/Unit Conversion' incorporates:
@@ -2087,7 +2090,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
    *  filters use 5 m/s (0 m/s on the ground made the derivatives infinite;
    *  why the block had been commented out).
    */
-  rtb_UnitConversion_n = 3.280839895013123 * rtb_Multiply;
+  rtb_UnitConversion_n = 3.280839895013123 * rtb_q1dot;
 
   /* Saturate: '<S185>/Limit Function 10ft to 1000ft' */
   if (rtb_UnitConversion_d > SkySurfer_Core_P.LimitFunction10ftto1000ft_UpperSat)
@@ -2103,14 +2106,14 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
   /* End of Saturate: '<S185>/Limit Function 10ft to 1000ft' */
 
   /* Fcn: '<S185>/Low Altitude Scale Length' */
-  rtb_Multiply = 0.000823 * rtb_jxi + 0.177;
-  if (rtb_Multiply < 0.0) {
-    rtb_Multiply = -rt_powd_snf(-rtb_Multiply, 1.2);
+  rtb_q1dot = 0.000823 * rtb_jxi + 0.177;
+  if (rtb_q1dot < 0.0) {
+    rtb_q1dot = -rt_powd_snf(-rtb_q1dot, 1.2);
   } else {
-    rtb_Multiply = rt_powd_snf(rtb_Multiply, 1.2);
+    rtb_q1dot = rt_powd_snf(rtb_q1dot, 1.2);
   }
 
-  rtb_LowAltitudeScaleLength = rtb_jxi / rtb_Multiply;
+  rtb_LowAltitudeScaleLength = rtb_jxi / rtb_q1dot;
 
   /* End of Fcn: '<S185>/Low Altitude Scale Length' */
   if (tmp) {
@@ -2136,7 +2139,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
   /* End of Saturate: '<S168>/Limit Height h<1000ft' */
 
   /* Fcn: '<S168>/Low Altitude Intensity' */
-  rtb_Multiply = 0.000823 * rtb_VectorConcatenate_idx_6 + 0.177;
+  rtb_q1dot = 0.000823 * rtb_VectorConcatenate_idx_6 + 0.177;
   if (tmp) {
     /* Gain: '<S168>/sigma_wg ' incorporates:
      *  Constant: '<S141>/Windspeed at 20ft (6m)'
@@ -2150,16 +2153,16 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
   }
 
   /* Fcn: '<S168>/Low Altitude Intensity' */
-  if (rtb_Multiply < 0.0) {
-    rtb_Multiply = -rt_powd_snf(-rtb_Multiply, 0.4);
+  if (rtb_q1dot < 0.0) {
+    rtb_q1dot = -rt_powd_snf(-rtb_q1dot, 0.4);
   } else {
-    rtb_Multiply = rt_powd_snf(rtb_Multiply, 0.4);
+    rtb_q1dot = rt_powd_snf(rtb_q1dot, 0.4);
   }
 
   /* Product: '<S168>/sigma_ug, sigma_vg' incorporates:
    *  Fcn: '<S168>/Low Altitude Intensity'
    */
-  rtb_sigma_ugsigma_vg = 1.0 / rtb_Multiply * SkySurfer_Core_DW->sigma_wg;
+  rtb_sigma_ugsigma_vg = 1.0 / rtb_q1dot * SkySurfer_Core_DW->sigma_wg;
 
   /* Interpolation_n-D: '<S167>/Medium//High Altitude Intensity' incorporates:
    *  PreLookup: '<S167>/PreLook-Up Index Search  (altitude)'
@@ -2578,16 +2581,16 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     /* Product: '<S183>/Product' incorporates:
      *  Reshape: '<S183>/Reshape'
      *  Reshape: '<S183>/Reshape1'
-     *  Reshape: '<S32>/Reshape (9) to [3x3] column-major'
+     *  Reshape: '<S37>/Reshape (9) to [3x3] column-major'
      */
     rtb_w3 = 0.0;
     rtb_Gain3 = 0.0;
     rtb_Gain4 = 0.0;
     for (i = 0; i < 3; i++) {
-      rtb_Multiply = rtb_Reshape1_g[i];
-      rtb_w3 += rtb_Reshape9to3x3columnmajor[3 * i] * rtb_Multiply;
-      rtb_Gain3 += rtb_Reshape9to3x3columnmajor[3 * i + 1] * rtb_Multiply;
-      rtb_Gain4 += rtb_Reshape9to3x3columnmajor[3 * i + 2] * rtb_Multiply;
+      rtb_q1dot = rtb_Reshape1_g[i];
+      rtb_w3 += rtb_Reshape9to3x3columnmajor[3 * i] * rtb_q1dot;
+      rtb_Gain3 += rtb_Reshape9to3x3columnmajor[3 * i + 1] * rtb_q1dot;
+      rtb_Gain4 += rtb_Reshape9to3x3columnmajor[3 * i + 2] * rtb_q1dot;
     }
 
     rtb_Merge_a[2] = rtb_Gain4;
@@ -2638,16 +2641,16 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     /* Product: '<S181>/Product' incorporates:
      *  Reshape: '<S181>/Reshape'
      *  Reshape: '<S181>/Reshape1'
-     *  Reshape: '<S32>/Reshape (9) to [3x3] column-major'
+     *  Reshape: '<S37>/Reshape (9) to [3x3] column-major'
      */
     rtb_w3 = 0.0;
     rtb_Gain3 = 0.0;
     rtb_Gain4 = 0.0;
     for (i = 0; i < 3; i++) {
-      rtb_Multiply = rtb_Merge_a[i];
-      rtb_w3 += rtb_Reshape9to3x3columnmajor[3 * i] * rtb_Multiply;
-      rtb_Gain3 += rtb_Reshape9to3x3columnmajor[3 * i + 1] * rtb_Multiply;
-      rtb_Gain4 += rtb_Reshape9to3x3columnmajor[3 * i + 2] * rtb_Multiply;
+      rtb_q1dot = rtb_Merge_a[i];
+      rtb_w3 += rtb_Reshape9to3x3columnmajor[3 * i] * rtb_q1dot;
+      rtb_Gain3 += rtb_Reshape9to3x3columnmajor[3 * i + 1] * rtb_q1dot;
+      rtb_Gain4 += rtb_Reshape9to3x3columnmajor[3 * i + 2] * rtb_q1dot;
     }
 
     /* Sum: '<S177>/Sum1' incorporates:
@@ -2695,16 +2698,16 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
      Expression: output = (0.3048*input) + (0) */
   if ((int32_t)SkySurfer_Core_U->Wind[2] == 1) {
     /* Product: '<S142>/Transform from Inertial to Body axes' incorporates:
-     *  Reshape: '<S32>/Reshape (9) to [3x3] column-major'
+     *  Reshape: '<S37>/Reshape (9) to [3x3] column-major'
      */
     rtb_w3 = 0.0;
     rtb_Gain3 = 0.0;
     rtb_Gain4 = 0.0;
     for (i = 0; i < 3; i++) {
-      rtb_Multiply = SkySurfer_Core_DW->Product1[i];
-      rtb_w3 += rtb_Reshape9to3x3columnmajor[3 * i] * rtb_Multiply;
-      rtb_Gain3 += rtb_Reshape9to3x3columnmajor[3 * i + 1] * rtb_Multiply;
-      rtb_Gain4 += rtb_Reshape9to3x3columnmajor[3 * i + 2] * rtb_Multiply;
+      rtb_q1dot = SkySurfer_Core_DW->Product1[i];
+      rtb_w3 += rtb_Reshape9to3x3columnmajor[3 * i] * rtb_q1dot;
+      rtb_Gain3 += rtb_Reshape9to3x3columnmajor[3 * i + 1] * rtb_q1dot;
+      rtb_Gain4 += rtb_Reshape9to3x3columnmajor[3 * i + 2] * rtb_q1dot;
     }
 
     rtb_Reshape1_g[2] = rtb_Gain4;
@@ -2715,15 +2718,15 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
   } else {
     if (rtb_UnitConversion_d > SkySurfer_Core_P.uftinf_UpperSat) {
       /* Saturate: '<S144>/3ft-->inf' */
-      rtb_Multiply = SkySurfer_Core_P.uftinf_UpperSat;
+      rtb_q1dot = SkySurfer_Core_P.uftinf_UpperSat;
     } else if (rtb_UnitConversion_d < SkySurfer_Core_P.uftinf_LowerSat) {
       /* Saturate: '<S144>/3ft-->inf' */
-      rtb_Multiply = SkySurfer_Core_P.uftinf_LowerSat;
+      rtb_q1dot = SkySurfer_Core_P.uftinf_LowerSat;
     } else {
       /* Saturate: '<S144>/3ft-->inf' incorporates:
        *  UnitConversion: '<S190>/Unit Conversion'
        */
-      rtb_Multiply = rtb_UnitConversion_d;
+      rtb_q1dot = rtb_UnitConversion_d;
     }
 
     /* Product: '<S144>/Product' incorporates:
@@ -2735,49 +2738,49 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
      * About '<S144>/ln(h//z0)':
      *  Operator: log
      */
-    rtb_VectorConcatenate_idx_6 = log(SkySurfer_Core_P.hz0_Gain * rtb_Multiply) /
+    rtb_VectorConcatenate_idx_6 = log(SkySurfer_Core_P.hz0_Gain * rtb_q1dot) /
       SkySurfer_Core_DW->lnref_heightz0;
 
     /* Product: '<S144>/Transform from Inertial to Body axes' incorporates:
      *  Product: '<S144>/Product1'
-     *  Reshape: '<S32>/Reshape (9) to [3x3] column-major'
+     *  Reshape: '<S37>/Reshape (9) to [3x3] column-major'
      */
-    rtb_Multiply2 = 0.0;
-    rtb_Product7 = 0.0;
-    rtb_Product3_cq = 0.0;
+    rtb_Product_op = 0.0;
+    rtb_Product1_p4 = 0.0;
+    rtb_Product2_h = 0.0;
     for (i = 0; i < 3; i++) {
-      rtb_Multiply = rtb_VectorConcatenate_idx_6 *
+      rtb_q1dot = rtb_VectorConcatenate_idx_6 *
         SkySurfer_Core_DW->Windspeedatreferenceheight[i];
-      rtb_Multiply2 += rtb_Reshape9to3x3columnmajor[3 * i] * rtb_Multiply;
-      rtb_Product7 += rtb_Reshape9to3x3columnmajor[3 * i + 1] * rtb_Multiply;
-      rtb_Product3_cq += rtb_Reshape9to3x3columnmajor[3 * i + 2] * rtb_Multiply;
+      rtb_Product_op += rtb_Reshape9to3x3columnmajor[3 * i] * rtb_q1dot;
+      rtb_Product1_p4 += rtb_Reshape9to3x3columnmajor[3 * i + 1] * rtb_q1dot;
+      rtb_Product2_h += rtb_Reshape9to3x3columnmajor[3 * i + 2] * rtb_q1dot;
     }
 
     rtb_Reshape1_g[0] = 0.3048 * rtb_Merge_a[0] * SkySurfer_Core_U->Wind[3] +
-      (rtb_sincos_o1_idx_0 + rtb_Multiply2);
+      (rtb_sincos_o1_idx_0 + rtb_Product_op);
     rtb_Reshape1_g[1] = 0.3048 * rtb_Merge_a[1] * SkySurfer_Core_U->Wind[3] +
-      (rtb_sincos_o1_idx_1 + rtb_Product7);
+      (rtb_sincos_o1_idx_1 + rtb_Product1_p4);
     rtb_Reshape1_g[2] = 0.3048 * rtb_Merge_a[2] * SkySurfer_Core_U->Wind[3] +
-      (rtb_sincos_o1_idx_2 + rtb_Product3_cq);
+      (rtb_sincos_o1_idx_2 + rtb_Product2_h);
   }
 
   /* End of MultiPortSwitch: '<S131>/VB' */
 
-  /* Sum: '<S11>/Add1' */
+  /* Sum: '<S12>/Add1' */
   rtb_sincos_o1_idx_0 = rtb_Sum_mi_idx_0 - rtb_Reshape1_g[0];
   rtb_sincos_o1_idx_1 = rtb_Sum_mi_idx_1 - rtb_Reshape1_g[1];
   rtb_sincos_o1_idx_2 = rtb_Sum_mi_idx_2 - rtb_Reshape1_g[2];
 
-  /* Outputs for Enabled SubSystem: '<S5>/Aerodynamic' incorporates:
+  /* Outputs for Enabled SubSystem: '<S4>/Aerodynamic' incorporates:
    *  EnablePort: '<S7>/Enable'
    */
   /* Product: '<S201>/Product' incorporates:
-   *  AerodynamicForcesAndMoments: '<S7>/Aerodynamic Forces and Moments '
+   *  AerodynamicForcesAndMoments: '<S7>/VSP_Forces_Moments'
    */
   rtb_Switch1_idx_0 = rtb_sincos_o1_idx_0 * rtb_sincos_o1_idx_0;
 
   /* Product: '<S201>/Product2' incorporates:
-   *  AerodynamicForcesAndMoments: '<S7>/Aerodynamic Forces and Moments '
+   *  AerodynamicForcesAndMoments: '<S7>/VSP_Forces_Moments'
    */
   rtb_Switch1_idx_1 = rtb_sincos_o1_idx_2 * rtb_sincos_o1_idx_2;
 
@@ -2785,50 +2788,50 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
    *  Product: '<S201>/Product'
    *  Product: '<S201>/Product1'
    *  Product: '<S201>/Product2'
-   *  Sum: '<S128>/Sum'
+   *  Sum: '<S104>/Sum'
    */
   rtb_Switch1_idx_2 = (rtb_sincos_o1_idx_1 * rtb_sincos_o1_idx_1 +
                        rtb_Switch1_idx_0) + rtb_Switch1_idx_1;
 
-  /* End of Outputs for SubSystem: '<S5>/Aerodynamic' */
+  /* End of Outputs for SubSystem: '<S4>/Aerodynamic' */
 
-  /* Sqrt: '<S197>/Airspeed' incorporates:
+  /* Sqrt: '<S195>/Airspeed' incorporates:
    *  Sum: '<S201>/Sum'
    */
   rtb_sigma_ugsigma_vg = sqrt(rtb_Switch1_idx_2);
 
-  /* Sum: '<S12>/Thrust_Lapse' incorporates:
-   *  Gain: '<S12>/Lapse_K'
-   *  Product: '<S12>/Lapse_Product'
-   *  Sqrt: '<S12>/Sqrt_Thrust'
+  /* Sum: '<S13>/Thrust_Lapse' incorporates:
+   *  Gain: '<S13>/Lapse_K'
+   *  Product: '<S13>/Lapse_Product'
+   *  Sqrt: '<S13>/Sqrt_Thrust'
    */
   rtb_Thrust_NonNeg -= rtb_sigma_ugsigma_vg * sqrt(rtb_Thrust_NonNeg) *
     SkySurfer_Core_P.PropThrust.LapseK;
 
-  /* Saturate: '<S12>/Thrust_NonNeg' */
+  /* Saturate: '<S13>/Thrust_NonNeg' */
   if (rtb_Thrust_NonNeg > SkySurfer_Core_P.Thrust_NonNeg_UpperSat) {
     rtb_Thrust_NonNeg = SkySurfer_Core_P.Thrust_NonNeg_UpperSat;
   } else if (rtb_Thrust_NonNeg < SkySurfer_Core_P.Thrust_NonNeg_LowerSat) {
     rtb_Thrust_NonNeg = SkySurfer_Core_P.Thrust_NonNeg_LowerSat;
   }
 
-  /* End of Saturate: '<S12>/Thrust_NonNeg' */
+  /* End of Saturate: '<S13>/Thrust_NonNeg' */
 
-  /* Gain: '<S12>/Gain' incorporates:
-   *  Constant: '<S12>/Constant1'
-   *  Product: '<S12>/Product'
+  /* Gain: '<S13>/Gain' incorporates:
+   *  Constant: '<S13>/Constant1'
+   *  Product: '<S13>/Product'
    */
   rtb_LowAltitudeScaleLength = rtb_Thrust_NonNeg * SkySurfer_Core_P.del_z *
     SkySurfer_Core_P.Gain_Gain_lj;
 
   /* Saturate: '<S136>/Limit  altitude  to troposhere' */
   if (rtb_Product2_p2 > SkySurfer_Core_P.Limitaltitudetotroposhere_UpperSat) {
-    rtb_Multiply = SkySurfer_Core_P.Limitaltitudetotroposhere_UpperSat;
+    rtb_q1dot = SkySurfer_Core_P.Limitaltitudetotroposhere_UpperSat;
   } else if (rtb_Product2_p2 <
              SkySurfer_Core_P.Limitaltitudetotroposhere_LowerSat) {
-    rtb_Multiply = SkySurfer_Core_P.Limitaltitudetotroposhere_LowerSat;
+    rtb_q1dot = SkySurfer_Core_P.Limitaltitudetotroposhere_LowerSat;
   } else {
-    rtb_Multiply = rtb_Product2_p2;
+    rtb_q1dot = rtb_Product2_p2;
   }
 
   /* Sum: '<S136>/Sum1' incorporates:
@@ -2837,7 +2840,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
    *  Saturate: '<S136>/Limit  altitude  to troposhere'
    */
   rtb_VectorConcatenate_idx_6 = SkySurfer_Core_P.SeaLevelTemperature_Value -
-    SkySurfer_Core_P.LapseRate_Gain * rtb_Multiply;
+    SkySurfer_Core_P.LapseRate_Gain * rtb_q1dot;
 
   /* Gain: '<S136>/1//T0' */
   rtb_jxi = SkySurfer_Core_P.uT0_Gain * rtb_VectorConcatenate_idx_6;
@@ -2893,28 +2896,28 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
    */
   rtb_q0dot = sqrt(SkySurfer_Core_P.gammaR_Gain * rtb_VectorConcatenate_idx_6);
 
-  /* Product: '<S194>/Product1' incorporates:
-   *  Sqrt: '<S194>/vt'
+  /* Product: '<S196>/Product1' incorporates:
+   *  Sqrt: '<S196>/vt'
    */
   /* Unit Conversion - from: m/s to: m/s
      Expression: output = (1*input) + (0) */
   rtb_Product1_ow = rtb_sigma_ugsigma_vg / rtb_q0dot;
 
-  /* Trigonometry: '<S197>/Incidence' */
+  /* Trigonometry: '<S195>/Incidence' */
   rtb_q1dot = rt_atan2d_snf(rtb_sincos_o1_idx_2, rtb_sincos_o1_idx_0);
 
-  /* Gain: '<S195>/Gain' */
+  /* Gain: '<S197>/Gain' */
   rtb_Gain = SkySurfer_Core_P.Gain_Gain_k3 * rtb_q1dot;
 
-  /* Switch: '<S197>/Switch' incorporates:
-   *  Constant: '<S197>/Constant2'
-   *  Trigonometry: '<S197>/Sideslip'
+  /* Switch: '<S195>/Switch' incorporates:
+   *  Constant: '<S195>/Constant2'
+   *  Trigonometry: '<S195>/Sideslip'
    */
-  if (rtb_sigma_ugsigma_vg > SkySurfer_Core_P.Switch_Threshold_j) {
-    /* Product: '<S197>/Product' */
+  if (rtb_sigma_ugsigma_vg > SkySurfer_Core_P.Switch_Threshold) {
+    /* Product: '<S195>/Product' */
     rtb_Gain_h = rtb_sincos_o1_idx_1 / rtb_sigma_ugsigma_vg;
 
-    /* Trigonometry: '<S197>/Sideslip' */
+    /* Trigonometry: '<S195>/Sideslip' */
     if (rtb_Gain_h > 1.0) {
       rtb_Gain_h = 1.0;
     } else if (rtb_Gain_h < -1.0) {
@@ -2926,9 +2929,9 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     rtb_q1dot = SkySurfer_Core_P.Constant2_Value_h;
   }
 
-  /* End of Switch: '<S197>/Switch' */
+  /* End of Switch: '<S195>/Switch' */
 
-  /* Gain: '<S196>/Gain' */
+  /* Gain: '<S198>/Gain' */
   rtb_Gain_h = SkySurfer_Core_P.Gain_Gain_d * rtb_q1dot;
   if (tmp) {
     /* UnitConversion: '<S153>/Unit Conversion' incorporates:
@@ -3014,11 +3017,11 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     }
 
     /* Fcn: '<S161>/sqrt(0.8//V)' */
-    rtb_Multiply = 0.8 / rtb_UnitConversion_n;
-    if (rtb_Multiply < 0.0) {
-      rtb_Multiply = -sqrt(-rtb_Multiply);
+    rtb_q1dot = 0.8 / rtb_UnitConversion_n;
+    if (rtb_q1dot < 0.0) {
+      rtb_q1dot = -sqrt(-rtb_q1dot);
     } else {
-      rtb_Multiply = sqrt(rtb_Multiply);
+      rtb_q1dot = sqrt(rtb_q1dot);
     }
 
     /* Product: '<S161>/w3' */
@@ -3042,9 +3045,9 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
      *  Product: '<S161>/w2'
      *  Sum: '<S161>/Sum'
      */
-    SkySurfer_Core_DW->w_kq[0] = (rtb_Multiply / rtb_Gain3 *
-      SkySurfer_Core_DW->u16 * SkySurfer_Core_DW->Product[3] -
-      SkySurfer_Core_X->pgw_p_CSTATE[0]) * rtb_w3;
+    SkySurfer_Core_DW->w_kq[0] = (rtb_q1dot / rtb_Gain3 * SkySurfer_Core_DW->u16
+      * SkySurfer_Core_DW->Product[3] - SkySurfer_Core_X->pgw_p_CSTATE[0]) *
+      rtb_w3;
 
     /* Math: '<S161>/L^1//3' incorporates:
      *  Constant: '<S161>/Constant1'
@@ -3064,9 +3067,9 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
      *  Product: '<S161>/w2'
      *  Sum: '<S161>/Sum'
      */
-    SkySurfer_Core_DW->w_kq[1] = (rtb_Multiply / rtb_Gain3 *
-      SkySurfer_Core_DW->u16 * SkySurfer_Core_DW->Product[3] -
-      SkySurfer_Core_X->pgw_p_CSTATE[1]) * rtb_w3;
+    SkySurfer_Core_DW->w_kq[1] = (rtb_q1dot / rtb_Gain3 * SkySurfer_Core_DW->u16
+      * SkySurfer_Core_DW->Product[3] - SkySurfer_Core_X->pgw_p_CSTATE[1]) *
+      rtb_w3;
 
     /* Product: '<S161>/sigma_w' incorporates:
      *  Integrator: '<S161>/pgw_p'
@@ -3270,16 +3273,16 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     /* Product: '<S175>/Product' incorporates:
      *  Reshape: '<S175>/Reshape'
      *  Reshape: '<S175>/Reshape1'
-     *  Reshape: '<S32>/Reshape (9) to [3x3] column-major'
+     *  Reshape: '<S37>/Reshape (9) to [3x3] column-major'
      */
     rtb_w3 = 0.0;
     rtb_Gain3 = 0.0;
     rtb_Gain4 = 0.0;
     for (i = 0; i < 3; i++) {
-      rtb_Multiply = rtb_Merge_a[i];
-      rtb_w3 += rtb_Reshape9to3x3columnmajor[3 * i] * rtb_Multiply;
-      rtb_Gain3 += rtb_Reshape9to3x3columnmajor[3 * i + 1] * rtb_Multiply;
-      rtb_Gain4 += rtb_Reshape9to3x3columnmajor[3 * i + 2] * rtb_Multiply;
+      rtb_q1dot = rtb_Merge_a[i];
+      rtb_w3 += rtb_Reshape9to3x3columnmajor[3 * i] * rtb_q1dot;
+      rtb_Gain3 += rtb_Reshape9to3x3columnmajor[3 * i + 1] * rtb_q1dot;
+      rtb_Gain4 += rtb_Reshape9to3x3columnmajor[3 * i + 2] * rtb_q1dot;
     }
 
     rtb_Reshape1_g[2] = rtb_Gain4;
@@ -3333,16 +3336,16 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     /* Product: '<S173>/Product' incorporates:
      *  Reshape: '<S173>/Reshape'
      *  Reshape: '<S173>/Reshape1'
-     *  Reshape: '<S32>/Reshape (9) to [3x3] column-major'
+     *  Reshape: '<S37>/Reshape (9) to [3x3] column-major'
      */
     rtb_w3 = 0.0;
     rtb_Gain3 = 0.0;
     rtb_Gain4 = 0.0;
     for (i = 0; i < 3; i++) {
-      rtb_Multiply = rtb_Reshape1_g[i];
-      rtb_w3 += rtb_Reshape9to3x3columnmajor[3 * i] * rtb_Multiply;
-      rtb_Gain3 += rtb_Reshape9to3x3columnmajor[3 * i + 1] * rtb_Multiply;
-      rtb_Gain4 += rtb_Reshape9to3x3columnmajor[3 * i + 2] * rtb_Multiply;
+      rtb_q1dot = rtb_Reshape1_g[i];
+      rtb_w3 += rtb_Reshape9to3x3columnmajor[3 * i] * rtb_q1dot;
+      rtb_Gain3 += rtb_Reshape9to3x3columnmajor[3 * i + 1] * rtb_q1dot;
+      rtb_Gain4 += rtb_Reshape9to3x3columnmajor[3 * i + 2] * rtb_q1dot;
     }
 
     /* Sum: '<S169>/Sum1' incorporates:
@@ -3380,7 +3383,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
    *  Constant: '<S131>/Constant2'
    *  Inport: '<Root>/Wind'
    *  Product: '<S131>/TurbulenceScale2'
-   *  Switch: '<S5>/Switch2'
+   *  Switch: '<S4>/Switch2'
    */
   if ((int32_t)SkySurfer_Core_U->Wind[2] == 1) {
     rtb_Reshape1_g[0] = SkySurfer_Core_P.Constant2_Value_m[0];
@@ -3394,8 +3397,8 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
 
   /* End of MultiPortSwitch: '<S131>/AR' */
 
-  /* Sum: '<S11>/Add4' incorporates:
-   *  Switch: '<S5>/Switch2'
+  /* Sum: '<S12>/Add4' incorporates:
+   *  Switch: '<S4>/Switch2'
    */
   rtb_UnitConversion_d = rtb_Reshape1_g[0] + rtb_u[0];
   rtb_UnitConversion_n = rtb_Reshape1_g[1] + rtb_u[1];
@@ -3407,9 +3410,9 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
 
   /* RateLimiter: '<S3>/Rate Limiter' */
   if (!(SkySurfer_Core_DW->LastMajorTime == (rtMinusInf))) {
-    rtb_Multiply = SkySurfer_Core_M->Timing.t[0];
-    rtb_Gain8 = rtb_Multiply - SkySurfer_Core_DW->LastMajorTime;
-    if (SkySurfer_Core_DW->LastMajorTime == rtb_Multiply) {
+    rtb_q1dot = SkySurfer_Core_M->Timing.t[0];
+    rtb_Gain8 = rtb_q1dot - SkySurfer_Core_DW->LastMajorTime;
+    if (SkySurfer_Core_DW->LastMajorTime == rtb_q1dot) {
       if (SkySurfer_Core_DW->PrevLimited) {
         /* TransferFcn: '<S3>/Transfer Fcn' incorporates:
          *  RateLimiter: '<S3>/Rate Limiter'
@@ -3417,18 +3420,18 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
         SkySurfer_Core_DW->RateLimiter = SkySurfer_Core_DW->PrevY;
       }
     } else {
-      rtb_Multiply2 = rtb_Gain8 * SkySurfer_Core_P.RateLimiter_RisingLim;
-      rtb_Multiply = SkySurfer_Core_DW->RateLimiter - SkySurfer_Core_DW->PrevY;
-      if (rtb_Multiply > rtb_Multiply2) {
+      rtb_Product_op = rtb_Gain8 * SkySurfer_Core_P.RateLimiter_RisingLim;
+      rtb_q1dot = SkySurfer_Core_DW->RateLimiter - SkySurfer_Core_DW->PrevY;
+      if (rtb_q1dot > rtb_Product_op) {
         /* TransferFcn: '<S3>/Transfer Fcn' incorporates:
          *  RateLimiter: '<S3>/Rate Limiter'
          */
         SkySurfer_Core_DW->RateLimiter = SkySurfer_Core_DW->PrevY +
-          rtb_Multiply2;
+          rtb_Product_op;
         Compare = true;
       } else {
         rtb_Gain8 *= SkySurfer_Core_P.RateLimiter_FallingLim;
-        if (rtb_Multiply < rtb_Gain8) {
+        if (rtb_q1dot < rtb_Gain8) {
           /* TransferFcn: '<S3>/Transfer Fcn' incorporates:
            *  RateLimiter: '<S3>/Rate Limiter'
            */
@@ -3456,9 +3459,9 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
 
   /* RateLimiter: '<S3>/Rate Limiter3' */
   if (!(SkySurfer_Core_DW->LastMajorTime_e == (rtMinusInf))) {
-    rtb_Multiply = SkySurfer_Core_M->Timing.t[0];
-    rtb_Gain8 = rtb_Multiply - SkySurfer_Core_DW->LastMajorTime_e;
-    if (SkySurfer_Core_DW->LastMajorTime_e == rtb_Multiply) {
+    rtb_q1dot = SkySurfer_Core_M->Timing.t[0];
+    rtb_Gain8 = rtb_q1dot - SkySurfer_Core_DW->LastMajorTime_e;
+    if (SkySurfer_Core_DW->LastMajorTime_e == rtb_q1dot) {
       if (SkySurfer_Core_DW->PrevLimited_j) {
         /* TransferFcn: '<S3>/Transfer Fcn4' incorporates:
          *  RateLimiter: '<S3>/Rate Limiter3'
@@ -3466,19 +3469,18 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
         SkySurfer_Core_DW->RateLimiter3 = SkySurfer_Core_DW->PrevY_p;
       }
     } else {
-      rtb_Multiply2 = rtb_Gain8 * SkySurfer_Core_P.RateLimiter3_RisingLim;
-      rtb_Multiply = SkySurfer_Core_DW->RateLimiter3 -
-        SkySurfer_Core_DW->PrevY_p;
-      if (rtb_Multiply > rtb_Multiply2) {
+      rtb_Product_op = rtb_Gain8 * SkySurfer_Core_P.RateLimiter3_RisingLim;
+      rtb_q1dot = SkySurfer_Core_DW->RateLimiter3 - SkySurfer_Core_DW->PrevY_p;
+      if (rtb_q1dot > rtb_Product_op) {
         /* TransferFcn: '<S3>/Transfer Fcn4' incorporates:
          *  RateLimiter: '<S3>/Rate Limiter3'
          */
         SkySurfer_Core_DW->RateLimiter3 = SkySurfer_Core_DW->PrevY_p +
-          rtb_Multiply2;
+          rtb_Product_op;
         Compare = true;
       } else {
         rtb_Gain8 *= SkySurfer_Core_P.RateLimiter3_FallingLim;
-        if (rtb_Multiply < rtb_Gain8) {
+        if (rtb_q1dot < rtb_Gain8) {
           /* TransferFcn: '<S3>/Transfer Fcn4' incorporates:
            *  RateLimiter: '<S3>/Rate Limiter3'
            */
@@ -3507,9 +3509,9 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
 
   /* RateLimiter: '<S3>/Rate Limiter1' */
   if (!(SkySurfer_Core_DW->LastMajorTime_p == (rtMinusInf))) {
-    rtb_Multiply = SkySurfer_Core_M->Timing.t[0];
-    rtb_Gain8 = rtb_Multiply - SkySurfer_Core_DW->LastMajorTime_p;
-    if (SkySurfer_Core_DW->LastMajorTime_p == rtb_Multiply) {
+    rtb_q1dot = SkySurfer_Core_M->Timing.t[0];
+    rtb_Gain8 = rtb_q1dot - SkySurfer_Core_DW->LastMajorTime_p;
+    if (SkySurfer_Core_DW->LastMajorTime_p == rtb_q1dot) {
       if (SkySurfer_Core_DW->PrevLimited_j4) {
         /* TransferFcn: '<S3>/Transfer Fcn1' incorporates:
          *  RateLimiter: '<S3>/Rate Limiter1'
@@ -3517,19 +3519,18 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
         SkySurfer_Core_DW->RateLimiter1 = SkySurfer_Core_DW->PrevY_d;
       }
     } else {
-      rtb_Multiply2 = rtb_Gain8 * SkySurfer_Core_P.RateLimiter1_RisingLim;
-      rtb_Multiply = SkySurfer_Core_DW->RateLimiter1 -
-        SkySurfer_Core_DW->PrevY_d;
-      if (rtb_Multiply > rtb_Multiply2) {
+      rtb_Product_op = rtb_Gain8 * SkySurfer_Core_P.RateLimiter1_RisingLim;
+      rtb_q1dot = SkySurfer_Core_DW->RateLimiter1 - SkySurfer_Core_DW->PrevY_d;
+      if (rtb_q1dot > rtb_Product_op) {
         /* TransferFcn: '<S3>/Transfer Fcn1' incorporates:
          *  RateLimiter: '<S3>/Rate Limiter1'
          */
         SkySurfer_Core_DW->RateLimiter1 = SkySurfer_Core_DW->PrevY_d +
-          rtb_Multiply2;
+          rtb_Product_op;
         Compare = true;
       } else {
         rtb_Gain8 *= SkySurfer_Core_P.RateLimiter1_FallingLim;
-        if (rtb_Multiply < rtb_Gain8) {
+        if (rtb_q1dot < rtb_Gain8) {
           /* TransferFcn: '<S3>/Transfer Fcn1' incorporates:
            *  RateLimiter: '<S3>/Rate Limiter1'
            */
@@ -3558,9 +3559,9 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
 
   /* RateLimiter: '<S3>/Rate Limiter2' */
   if (!(SkySurfer_Core_DW->LastMajorTime_d == (rtMinusInf))) {
-    rtb_Multiply = SkySurfer_Core_M->Timing.t[0];
-    rtb_Gain8 = rtb_Multiply - SkySurfer_Core_DW->LastMajorTime_d;
-    if (SkySurfer_Core_DW->LastMajorTime_d == rtb_Multiply) {
+    rtb_q1dot = SkySurfer_Core_M->Timing.t[0];
+    rtb_Gain8 = rtb_q1dot - SkySurfer_Core_DW->LastMajorTime_d;
+    if (SkySurfer_Core_DW->LastMajorTime_d == rtb_q1dot) {
       if (SkySurfer_Core_DW->PrevLimited_n) {
         /* TransferFcn: '<S3>/Transfer Fcn2' incorporates:
          *  RateLimiter: '<S3>/Rate Limiter2'
@@ -3568,19 +3569,18 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
         SkySurfer_Core_DW->RateLimiter2 = SkySurfer_Core_DW->PrevY_m;
       }
     } else {
-      rtb_Multiply2 = rtb_Gain8 * SkySurfer_Core_P.RateLimiter2_RisingLim;
-      rtb_Multiply = SkySurfer_Core_DW->RateLimiter2 -
-        SkySurfer_Core_DW->PrevY_m;
-      if (rtb_Multiply > rtb_Multiply2) {
+      rtb_Product_op = rtb_Gain8 * SkySurfer_Core_P.RateLimiter2_RisingLim;
+      rtb_q1dot = SkySurfer_Core_DW->RateLimiter2 - SkySurfer_Core_DW->PrevY_m;
+      if (rtb_q1dot > rtb_Product_op) {
         /* TransferFcn: '<S3>/Transfer Fcn2' incorporates:
          *  RateLimiter: '<S3>/Rate Limiter2'
          */
         SkySurfer_Core_DW->RateLimiter2 = SkySurfer_Core_DW->PrevY_m +
-          rtb_Multiply2;
+          rtb_Product_op;
         Compare = true;
       } else {
         rtb_Gain8 *= SkySurfer_Core_P.RateLimiter2_FallingLim;
-        if (rtb_Multiply < rtb_Gain8) {
+        if (rtb_q1dot < rtb_Gain8) {
           /* TransferFcn: '<S3>/Transfer Fcn2' incorporates:
            *  RateLimiter: '<S3>/Rate Limiter2'
            */
@@ -3608,7 +3608,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
    */
   Compare = (rtb_sigma_ugsigma_vg > SkySurfer_Core_P.CompareToConstant_const);
   if (tmp) {
-    /* Outputs for Enabled SubSystem: '<S5>/Aerodynamic' incorporates:
+    /* Outputs for Enabled SubSystem: '<S4>/Aerodynamic' incorporates:
      *  EnablePort: '<S7>/Enable'
      */
     if (rtsiIsModeUpdateTimeStep(&SkySurfer_Core_M->solverInfo)) {
@@ -3616,2293 +3616,2162 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
       SkySurfer_Core_DW->Aerodynamic_MODE = Compare;
     }
 
-    /* End of Outputs for SubSystem: '<S5>/Aerodynamic' */
+    /* End of Outputs for SubSystem: '<S4>/Aerodynamic' */
   }
 
-  /* Outputs for Enabled SubSystem: '<S5>/Aerodynamic' incorporates:
+  /* Outputs for Enabled SubSystem: '<S4>/Aerodynamic' incorporates:
    *  EnablePort: '<S7>/Enable'
    */
   if (SkySurfer_Core_DW->Aerodynamic_MODE) {
-    /* Lookup_n-D: '<S91>/CD_base' incorporates:
+    /* Lookup_n-D: '<S90>/CDd01' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U, &frac);
+    bpIndices[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
     rtb_MatrixMultiply[0U] = frac;
-    bpIndices[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
+    bpIndices[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
     rtb_MatrixMultiply[1U] = frac;
-    bpIndices[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
+    bpIndices[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U, &frac);
     rtb_MatrixMultiply[2U] = frac;
     rtb_Product3_cq = intrp3d_l_pw(bpIndices, rtb_MatrixMultiply,
-      SkySurfer_Core_P.CD_base_tableData, SkySurfer_Core_P.CD_base_dimSizes);
-
-    /* Lookup_n-D: '<S91>/CD_dp' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_0[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions[0U] = frac;
-    bpIndices_0[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions[1U] = frac;
-    bpIndices_0[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions[2U] = frac;
-    rtb_Product_op = intrp3d_l_pw(bpIndices_0, fractions,
-      SkySurfer_Core_P.CD_dp_tableData, SkySurfer_Core_P.CD_dp_dimSizes);
-
-    /* Gain: '<S91>/Multiply' incorporates:
-     *  Product: '<S91>/Product1'
-     */
-    rtb_Multiply = SkySurfer_Core_P.b / 2.0 * (rtb_Product_op *
-      rtb_UnitConversion_d);
-
-    /* Lookup_n-D: '<S91>/CD_dq' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_1[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_0[0U] = frac;
-    bpIndices_1[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_0[1U] = frac;
-    bpIndices_1[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_0[2U] = frac;
-    rtb_Product_op = intrp3d_l_pw(bpIndices_1, fractions_0,
-      SkySurfer_Core_P.CD_dq_tableData, SkySurfer_Core_P.CD_dq_dimSizes);
-
-    /* Gain: '<S91>/Multiply2' incorporates:
-     *  Product: '<S91>/Product2'
-     */
-    rtb_Multiply2 = SkySurfer_Core_P.cbar / 2.0 * (rtb_Product_op *
-      rtb_UnitConversion_n);
-
-    /* Lookup_n-D: '<S91>/CD_dr' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_2[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_1[0U] = frac;
-    bpIndices_2[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_1[1U] = frac;
-    bpIndices_2[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_1[2U] = frac;
-    rtb_Product_op = intrp3d_l_pw(bpIndices_2, fractions_1,
-      SkySurfer_Core_P.CD_dr_tableData, SkySurfer_Core_P.CD_dr_dimSizes);
-
-    /* Sum: '<S91>/Sum of Datum' incorporates:
-     *  Gain: '<S91>/Multiply1'
-     *  Product: '<S91>/Product10'
-     *  Product: '<S91>/Product3'
-     *  Sum: '<S91>/Sum1'
-     */
-    rtb_Multiply = (SkySurfer_Core_P.b / 2.0 * (rtb_Product_op *
-      rtb_MediumHighAltitudeIntensity) + (rtb_Multiply + rtb_Multiply2)) /
-      rtb_sigma_ugsigma_vg + rtb_Product3_cq;
-
-    /* Lookup_n-D: '<S91>/CD_dailR' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_3[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_2[0U] = frac;
-    bpIndices_3[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_2[1U] = frac;
-    bpIndices_3[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_2[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_3, fractions_2,
-      SkySurfer_Core_P.CD_dailR_tableData, SkySurfer_Core_P.CD_dailR_dimSizes);
+      SkySurfer_Core_P.CDd01, SkySurfer_Core_P.CDd01_dimSizes);
 
     /* Product: '<S7>/Product' incorporates:
      *  Abs: '<S7>/Abs'
-     *  Lookup_n-D: '<S7>/Aeroelasticity_AIL'
+     *  Lookup_n-D: '<S7>/Effectiveness_AIL_R'
      */
     rtb_Product_op = look1_binlcpw(fabs(rtb_w3),
       SkySurfer_Core_P.Aeroelasticity_AIL,
       SkySurfer_Core_P.Aeroelasticity_Gain_AIL, 1U) * rtb_w3;
 
-    /* Product: '<S91>/Product4' incorporates:
-     *  Gain: '<S104>/Gain1'
-     */
-    rtb_Multiply2 = SkySurfer_Core_P.Gain1_Gain * rtb_Product_op *
-      rtb_Product3_cq;
+    /* Product: '<S90>/Product4' */
+    rtb_Product4 = rtb_Product3_cq * rtb_Product_op;
 
-    /* Lookup_n-D: '<S91>/CD_dailL' incorporates:
+    /* Lookup_n-D: '<S90>/CDd03' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_4[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
+    bpIndices_0[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
       &frac);
-    fractions_3[0U] = frac;
-    bpIndices_4[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_3[1U] = frac;
-    bpIndices_4[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_3[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_4, fractions_3,
-      SkySurfer_Core_P.CD_dailL_tableData, SkySurfer_Core_P.CD_dailL_dimSizes);
-
-    /* Product: '<S7>/Product1' incorporates:
-     *  Abs: '<S7>/Abs1'
-     *  Lookup_n-D: '<S7>/Aeroelasticity_AIL1'
-     */
-    rtb_Product1_p4 = look1_binlcpw(fabs(rtb_Gain3),
-      SkySurfer_Core_P.Aeroelasticity_AIL,
-      SkySurfer_Core_P.Aeroelasticity_Gain_AIL, 1U) * rtb_Gain3;
-
-    /* Product: '<S91>/Product7' incorporates:
-     *  Gain: '<S107>/Gain1'
-     */
-    rtb_Product7 = SkySurfer_Core_P.Gain1_Gain_h * rtb_Product1_p4 *
-      rtb_Product3_cq;
-
-    /* Lookup_n-D: '<S91>/CD_dele' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_5[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
+    fractions[0U] = frac;
+    bpIndices_0[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions[1U] = frac;
+    bpIndices_0[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
       &frac);
-    fractions_4[0U] = frac;
-    bpIndices_5[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_4[1U] = frac;
-    bpIndices_5[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_4[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_5, fractions_4,
-      SkySurfer_Core_P.CD_dele_tableData, SkySurfer_Core_P.CD_dele_dimSizes);
+    fractions[2U] = frac;
+    rtb_Product3_cq = intrp3d_l_pw(bpIndices_0, fractions,
+      SkySurfer_Core_P.CDd03, SkySurfer_Core_P.CDd03_dimSizes);
 
     /* Product: '<S7>/Product2' incorporates:
      *  Abs: '<S7>/Abs2'
-     *  Lookup_n-D: '<S7>/Aeroelasticity_ELE'
+     *  Lookup_n-D: '<S7>/Effectiveness_ELE'
      */
-    rtb_Product2_h = look1_binlcpw(fabs(rtb_Gain4),
+    rtb_Product1_p4 = look1_binlcpw(fabs(rtb_Gain4),
       SkySurfer_Core_P.Aeroelasticity_ELE,
       SkySurfer_Core_P.Aeroelasticity_Gain_ELE, 1U) * rtb_Gain4;
 
-    /* Product: '<S91>/Product5' incorporates:
-     *  Gain: '<S105>/Gain1'
-     */
-    rtb_Product5 = SkySurfer_Core_P.Gain1_Gain_d * rtb_Product2_h *
-      rtb_Product3_cq;
+    /* Product: '<S90>/Product5' */
+    rtb_Product5 = rtb_Product3_cq * rtb_Product1_p4;
 
-    /* Lookup_n-D: '<S91>/CD_drud' incorporates:
+    /* Lookup_n-D: '<S90>/CDd04' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_6[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
+    bpIndices_1[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
       &frac);
-    fractions_5[0U] = frac;
-    bpIndices_6[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_5[1U] = frac;
-    bpIndices_6[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_5[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_6, fractions_5,
-      SkySurfer_Core_P.CD_drud_tableData, SkySurfer_Core_P.CD_drud_dimSizes);
+    fractions_0[0U] = frac;
+    bpIndices_1[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_0[1U] = frac;
+    bpIndices_1[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_0[2U] = frac;
+    rtb_Product3_cq = intrp3d_l_pw(bpIndices_1, fractions_0,
+      SkySurfer_Core_P.CDd04, SkySurfer_Core_P.CDd04_dimSizes);
 
     /* Product: '<S7>/Product3' incorporates:
      *  Abs: '<S7>/Abs3'
-     *  Lookup_n-D: '<S7>/Aeroelasticity_RUD'
+     *  Lookup_n-D: '<S7>/Effectiveness_RUD'
      */
-    rtb_q1dot = look1_binlcpw(fabs(rtb_Gain8),
+    rtb_Product2_h = look1_binlcpw(fabs(rtb_Gain8),
       SkySurfer_Core_P.Aeroelasticity_RUD,
       SkySurfer_Core_P.Aeroelasticity_Gain_RUD, 1U) * rtb_Gain8;
 
-    /* Sum: '<S91>/Sum of Controls' incorporates:
-     *  Gain: '<S106>/Gain1'
-     *  Gain: '<S7>/Gain15'
-     *  Product: '<S91>/Product6'
-     */
-    rtb_Multiply2 = SkySurfer_Core_P.Gain15_Gain * rtb_q1dot *
-      SkySurfer_Core_P.Gain1_Gain_dv * rtb_Product3_cq + ((rtb_Multiply2 +
-      rtb_Product7) + rtb_Product5);
+    /* Product: '<S90>/Product6' */
+    rtb_jxi = rtb_Product3_cq * rtb_Product2_h;
 
-    /* Lookup_n-D: '<S97>/CS_base' incorporates:
+    /* Lookup_n-D: '<S90>/CDd02' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_7[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
+    bpIndices_2[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
       &frac);
-    fractions_6[0U] = frac;
-    bpIndices_7[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_6[1U] = frac;
-    bpIndices_7[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_6[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_7, fractions_6,
-      SkySurfer_Core_P.CS_base_tableData, SkySurfer_Core_P.CS_base_dimSizes);
-
-    /* Lookup_n-D: '<S97>/CS_dp' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_8[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
+    fractions_1[0U] = frac;
+    bpIndices_2[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_1[1U] = frac;
+    bpIndices_2[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
       &frac);
-    fractions_7[0U] = frac;
-    bpIndices_8[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_7[1U] = frac;
-    bpIndices_8[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_7[2U] = frac;
-    rtb_jxi = intrp3d_l_pw(bpIndices_8, fractions_7,
-      SkySurfer_Core_P.CS_dp_tableData, SkySurfer_Core_P.CS_dp_dimSizes);
-
-    /* Gain: '<S97>/Multiply3' incorporates:
-     *  Product: '<S97>/Product8'
-     */
-    rtb_Product7 = SkySurfer_Core_P.b / 2.0 * (rtb_jxi * rtb_UnitConversion_d);
-
-    /* Lookup_n-D: '<S97>/CS_dq' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_9[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_8[0U] = frac;
-    bpIndices_9[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_8[1U] = frac;
-    bpIndices_9[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_8[2U] = frac;
-    rtb_jxi = intrp3d_l_pw(bpIndices_9, fractions_8,
-      SkySurfer_Core_P.CS_dq_tableData, SkySurfer_Core_P.CS_dq_dimSizes);
-
-    /* Gain: '<S97>/Multiply5' incorporates:
-     *  Product: '<S97>/Product11'
-     */
-    rtb_Product5 = SkySurfer_Core_P.cbar / 2.0 * (rtb_jxi * rtb_UnitConversion_n);
-
-    /* Lookup_n-D: '<S97>/CS_dr' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_a[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_9[0U] = frac;
-    bpIndices_a[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_9[1U] = frac;
-    bpIndices_a[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_9[2U] = frac;
-    rtb_jxi = intrp3d_l_pw(bpIndices_a, fractions_9,
-      SkySurfer_Core_P.CS_dr_tableData, SkySurfer_Core_P.CS_dr_dimSizes);
-
-    /* Sum: '<S97>/Sum of Datum1' incorporates:
-     *  Gain: '<S97>/Multiply4'
-     *  Product: '<S97>/Product12'
-     *  Product: '<S97>/Product9'
-     *  Sum: '<S97>/Sum3'
-     */
-    rtb_Product7 = (SkySurfer_Core_P.b / 2.0 * (rtb_jxi *
-      rtb_MediumHighAltitudeIntensity) + (rtb_Product7 + rtb_Product5)) /
-      rtb_sigma_ugsigma_vg + rtb_Product3_cq;
-
-    /* Lookup_n-D: '<S97>/CS_dailR' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_b[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_a[0U] = frac;
-    bpIndices_b[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_a[1U] = frac;
-    bpIndices_b[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_a[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_b, fractions_a,
-      SkySurfer_Core_P.CS_dailR_tableData, SkySurfer_Core_P.CS_dailR_dimSizes);
-
-    /* Product: '<S97>/Product13' incorporates:
-     *  Gain: '<S124>/Gain1'
-     */
-    rtb_Product5 = SkySurfer_Core_P.Gain1_Gain_o * rtb_Product_op *
-      rtb_Product3_cq;
-
-    /* Lookup_n-D: '<S97>/CS_dailL' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_c[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_b[0U] = frac;
-    bpIndices_c[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_b[1U] = frac;
-    bpIndices_c[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_b[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_c, fractions_b,
-      SkySurfer_Core_P.CS_dailL_tableData, SkySurfer_Core_P.CS_dailL_dimSizes);
-
-    /* Product: '<S97>/Product16' incorporates:
-     *  Gain: '<S127>/Gain1'
-     */
-    rtb_Product16 = SkySurfer_Core_P.Gain1_Gain_b * rtb_Product1_p4 *
-      rtb_Product3_cq;
-
-    /* Lookup_n-D: '<S97>/CS_dele' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_d[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_c[0U] = frac;
-    bpIndices_d[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_c[1U] = frac;
-    bpIndices_d[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_c[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_d, fractions_c,
-      SkySurfer_Core_P.CS_dele_tableData, SkySurfer_Core_P.CS_dele_dimSizes);
-
-    /* Product: '<S97>/Product14' incorporates:
-     *  Gain: '<S125>/Gain1'
-     */
-    rtb_Product14 = SkySurfer_Core_P.Gain1_Gain_j * rtb_Product2_h *
-      rtb_Product3_cq;
-
-    /* Lookup_n-D: '<S97>/CS_drud' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_e[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_d[0U] = frac;
-    bpIndices_e[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_d[1U] = frac;
-    bpIndices_e[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_d[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_e, fractions_d,
-      SkySurfer_Core_P.CS_drud_tableData, SkySurfer_Core_P.CS_drud_dimSizes);
-
-    /* Sum: '<S97>/Sum of Controls1' incorporates:
-     *  Gain: '<S126>/Gain1'
-     *  Gain: '<S7>/Gain10'
-     *  Product: '<S97>/Product15'
-     */
-    rtb_Product5 = SkySurfer_Core_P.Gain10_Gain * rtb_q1dot *
-      SkySurfer_Core_P.Gain1_Gain_ju * rtb_Product3_cq + ((rtb_Product5 +
-      rtb_Product16) + rtb_Product14);
-
-    /* Lookup_n-D: '<S93>/CL_base' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_f[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_e[0U] = frac;
-    bpIndices_f[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_e[1U] = frac;
-    bpIndices_f[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_e[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_f, fractions_e,
-      SkySurfer_Core_P.CL_base_tableData, SkySurfer_Core_P.CL_base_dimSizes);
-
-    /* Lookup_n-D: '<S93>/CL_dp' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_g[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_f[0U] = frac;
-    bpIndices_g[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_f[1U] = frac;
-    bpIndices_g[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_f[2U] = frac;
-    rtb_jxi = intrp3d_l_pw(bpIndices_g, fractions_f,
-      SkySurfer_Core_P.CL_dp_tableData, SkySurfer_Core_P.CL_dp_dimSizes);
-
-    /* Gain: '<S93>/Multiply3' incorporates:
-     *  Product: '<S93>/Product8'
-     */
-    rtb_Product16 = SkySurfer_Core_P.b / 2.0 * (rtb_jxi * rtb_UnitConversion_d);
-
-    /* Lookup_n-D: '<S93>/CL_dq' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_h[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_g[0U] = frac;
-    bpIndices_h[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_g[1U] = frac;
-    bpIndices_h[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_g[2U] = frac;
-    rtb_jxi = intrp3d_l_pw(bpIndices_h, fractions_g,
-      SkySurfer_Core_P.CL_dq_tableData, SkySurfer_Core_P.CL_dq_dimSizes);
-
-    /* Gain: '<S93>/Multiply5' incorporates:
-     *  Product: '<S93>/Product11'
-     */
-    rtb_Product14 = SkySurfer_Core_P.cbar / 2.0 * (rtb_jxi *
-      rtb_UnitConversion_n);
-
-    /* Lookup_n-D: '<S93>/CL_dr' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_i[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_h[0U] = frac;
-    bpIndices_i[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_h[1U] = frac;
-    bpIndices_i[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_h[2U] = frac;
-    rtb_jxi = intrp3d_l_pw(bpIndices_i, fractions_h,
-      SkySurfer_Core_P.CL_dr_tableData, SkySurfer_Core_P.CL_dr_dimSizes);
-
-    /* Sum: '<S93>/Sum of Datum1' incorporates:
-     *  Gain: '<S93>/Multiply4'
-     *  Product: '<S93>/Product12'
-     *  Product: '<S93>/Product9'
-     *  Sum: '<S93>/Sum3'
-     */
-    rtb_Product14 = (SkySurfer_Core_P.b / 2.0 * (rtb_jxi *
-      rtb_MediumHighAltitudeIntensity) + (rtb_Product16 + rtb_Product14)) /
-      rtb_sigma_ugsigma_vg + rtb_Product3_cq;
-
-    /* Lookup_n-D: '<S93>/CL_dailR' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_j[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_i[0U] = frac;
-    bpIndices_j[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_i[1U] = frac;
-    bpIndices_j[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_i[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_j, fractions_i,
-      SkySurfer_Core_P.CL_dailR_tableData, SkySurfer_Core_P.CL_dailR_dimSizes);
-
-    /* Product: '<S93>/Product13' incorporates:
-     *  Gain: '<S108>/Gain1'
-     */
-    rtb_Product16 = SkySurfer_Core_P.Gain1_Gain_bf * rtb_Product_op *
-      rtb_Product3_cq;
-
-    /* Lookup_n-D: '<S93>/CL_dailL' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_k[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_j[0U] = frac;
-    bpIndices_k[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_j[1U] = frac;
-    bpIndices_k[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_j[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_k, fractions_j,
-      SkySurfer_Core_P.CL_dailL_tableData, SkySurfer_Core_P.CL_dailL_dimSizes);
-
-    /* Product: '<S93>/Product16' incorporates:
-     *  Gain: '<S111>/Gain1'
-     */
-    rtb_Product16_j = SkySurfer_Core_P.Gain1_Gain_g * rtb_Product1_p4 *
-      rtb_Product3_cq;
-
-    /* Lookup_n-D: '<S93>/CL_dele' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_l[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_k[0U] = frac;
-    bpIndices_l[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_k[1U] = frac;
-    bpIndices_l[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_k[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_l, fractions_k,
-      SkySurfer_Core_P.CL_dele_tableData, SkySurfer_Core_P.CL_dele_dimSizes);
-
-    /* Product: '<S93>/Product14' incorporates:
-     *  Gain: '<S109>/Gain1'
-     */
-    rtb_Product14_d = SkySurfer_Core_P.Gain1_Gain_n * rtb_Product2_h *
-      rtb_Product3_cq;
-
-    /* Lookup_n-D: '<S93>/CL_drud' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_m[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_l[0U] = frac;
-    bpIndices_m[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_l[1U] = frac;
-    bpIndices_m[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_l[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_m, fractions_l,
-      SkySurfer_Core_P.CL_drud_tableData, SkySurfer_Core_P.CL_drud_dimSizes);
-
-    /* Sum: '<S93>/Sum of Controls1' incorporates:
-     *  Gain: '<S110>/Gain1'
-     *  Gain: '<S7>/Gain11'
-     *  Product: '<S93>/Product15'
-     */
-    rtb_Product14_d = SkySurfer_Core_P.Gain11_Gain * rtb_q1dot *
-      SkySurfer_Core_P.Gain1_Gain_p * rtb_Product3_cq + ((rtb_Product16 +
-      rtb_Product16_j) + rtb_Product14_d);
-
-    /* Lookup_n-D: '<S94>/CMl_base' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_n[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_m[0U] = frac;
-    bpIndices_n[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_m[1U] = frac;
-    bpIndices_n[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_m[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_n, fractions_m,
-      SkySurfer_Core_P.CMl_base_tableData, SkySurfer_Core_P.CMl_base_dimSizes);
-
-    /* Lookup_n-D: '<S94>/CMl_dp' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_o[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_n[0U] = frac;
-    bpIndices_o[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_n[1U] = frac;
-    bpIndices_o[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_n[2U] = frac;
-    rtb_jxi = intrp3d_l_pw(bpIndices_o, fractions_n,
-      SkySurfer_Core_P.CMl_dp_tableData, SkySurfer_Core_P.CMl_dp_dimSizes);
-
-    /* Gain: '<S94>/Multiply3' incorporates:
-     *  Product: '<S94>/Product8'
-     */
-    rtb_Product16 = SkySurfer_Core_P.b / 2.0 * (rtb_jxi * rtb_UnitConversion_d);
-
-    /* Lookup_n-D: '<S94>/CMl_dq' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_p[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_o[0U] = frac;
-    bpIndices_p[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_o[1U] = frac;
-    bpIndices_p[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_o[2U] = frac;
-    rtb_jxi = intrp3d_l_pw(bpIndices_p, fractions_o,
-      SkySurfer_Core_P.CMl_dq_tableData, SkySurfer_Core_P.CMl_dq_dimSizes);
-
-    /* Gain: '<S94>/Multiply5' incorporates:
-     *  Product: '<S94>/Product11'
-     */
-    rtb_Product16_j = SkySurfer_Core_P.cbar / 2.0 * (rtb_jxi *
-      rtb_UnitConversion_n);
-
-    /* Lookup_n-D: '<S94>/CMl_dr' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_q[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_p[0U] = frac;
-    bpIndices_q[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_p[1U] = frac;
-    bpIndices_q[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_p[2U] = frac;
-    rtb_jxi = intrp3d_l_pw(bpIndices_q, fractions_p,
-      SkySurfer_Core_P.CMl_dr_tableData, SkySurfer_Core_P.CMl_dr_dimSizes);
-
-    /* Sum: '<S94>/Sum of Datum1' incorporates:
-     *  Gain: '<S94>/Multiply4'
-     *  Product: '<S94>/Product12'
-     *  Product: '<S94>/Product9'
-     *  Sum: '<S94>/Sum3'
-     */
-    rtb_Product16 = (SkySurfer_Core_P.b / 2.0 * (rtb_jxi *
-      rtb_MediumHighAltitudeIntensity) + (rtb_Product16 + rtb_Product16_j)) /
-      rtb_sigma_ugsigma_vg + rtb_Product3_cq;
-
-    /* Lookup_n-D: '<S94>/CMl_dailR' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_r[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_q[0U] = frac;
-    bpIndices_r[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_q[1U] = frac;
-    bpIndices_r[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_q[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_r, fractions_q,
-      SkySurfer_Core_P.CMl_dailR_tableData, SkySurfer_Core_P.CMl_dailR_dimSizes);
-
-    /* Product: '<S94>/Product13' incorporates:
-     *  Gain: '<S112>/Gain1'
-     */
-    rtb_Product16_j = SkySurfer_Core_P.Gain1_Gain_ox * rtb_Product_op *
-      rtb_Product3_cq;
-
-    /* Lookup_n-D: '<S94>/CMl_dailL' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_s[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_r[0U] = frac;
-    bpIndices_s[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_r[1U] = frac;
-    bpIndices_s[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_r[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_s, fractions_r,
-      SkySurfer_Core_P.CMl_dailL_tableData, SkySurfer_Core_P.CMl_dailL_dimSizes);
-
-    /* Product: '<S94>/Product16' incorporates:
-     *  Gain: '<S115>/Gain1'
-     */
-    rtb_Product16_a = SkySurfer_Core_P.Gain1_Gain_l * rtb_Product1_p4 *
-      rtb_Product3_cq;
-
-    /* Lookup_n-D: '<S94>/CMl_dele' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_t[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_s[0U] = frac;
-    bpIndices_t[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_s[1U] = frac;
-    bpIndices_t[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_s[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_t, fractions_s,
-      SkySurfer_Core_P.CMl_dele_tableData, SkySurfer_Core_P.CMl_dele_dimSizes);
-
-    /* Product: '<S94>/Product14' incorporates:
-     *  Gain: '<S113>/Gain1'
-     */
-    rtb_Product14_k = SkySurfer_Core_P.Gain1_Gain_pp * rtb_Product2_h *
-      rtb_Product3_cq;
-
-    /* Lookup_n-D: '<S94>/CMl_drud' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_u[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_t[0U] = frac;
-    bpIndices_u[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_t[1U] = frac;
-    bpIndices_u[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_t[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_u, fractions_t,
-      SkySurfer_Core_P.CMl_drud_tableData, SkySurfer_Core_P.CMl_drud_dimSizes);
-
-    /* Sum: '<S94>/Sum of Controls1' incorporates:
-     *  Gain: '<S114>/Gain1'
-     *  Gain: '<S7>/Gain4'
-     *  Product: '<S94>/Product15'
-     */
-    rtb_Product16_j = SkySurfer_Core_P.Gain4_Gain * rtb_q1dot *
-      SkySurfer_Core_P.Gain1_Gain_dh * rtb_Product3_cq + ((rtb_Product16_j +
-      rtb_Product16_a) + rtb_Product14_k);
-
-    /* Lookup_n-D: '<S95>/CMm_base' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_v[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_u[0U] = frac;
-    bpIndices_v[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_u[1U] = frac;
-    bpIndices_v[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_u[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_v, fractions_u,
-      SkySurfer_Core_P.CMm_base_tableData, SkySurfer_Core_P.CMm_base_dimSizes);
-
-    /* Lookup_n-D: '<S95>/CMm_dp' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_w[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_v[0U] = frac;
-    bpIndices_w[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_v[1U] = frac;
-    bpIndices_w[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_v[2U] = frac;
-    rtb_jxi = intrp3d_l_pw(bpIndices_w, fractions_v,
-      SkySurfer_Core_P.CMm_dp_tableData, SkySurfer_Core_P.CMm_dp_dimSizes);
-
-    /* Gain: '<S95>/Multiply3' incorporates:
-     *  Product: '<S95>/Product8'
-     */
-    rtb_Product16_a = SkySurfer_Core_P.b / 2.0 * (rtb_jxi * rtb_UnitConversion_d);
-
-    /* Lookup_n-D: '<S95>/CMm_dq' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_x[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_w[0U] = frac;
-    bpIndices_x[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_w[1U] = frac;
-    bpIndices_x[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_w[2U] = frac;
-    rtb_jxi = intrp3d_l_pw(bpIndices_x, fractions_w,
-      SkySurfer_Core_P.CMm_dq_tableData, SkySurfer_Core_P.CMm_dq_dimSizes);
-
-    /* Gain: '<S95>/Multiply5' incorporates:
-     *  Product: '<S95>/Product11'
-     */
-    rtb_Product14_k = SkySurfer_Core_P.cbar / 2.0 * (rtb_jxi *
-      rtb_UnitConversion_n);
-
-    /* Lookup_n-D: '<S95>/CMm_dr' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_y[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_x[0U] = frac;
-    bpIndices_y[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_x[1U] = frac;
-    bpIndices_y[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_x[2U] = frac;
-    rtb_jxi = intrp3d_l_pw(bpIndices_y, fractions_x,
-      SkySurfer_Core_P.CMm_dr_tableData, SkySurfer_Core_P.CMm_dr_dimSizes);
-
-    /* Sum: '<S95>/Sum of Datum1' incorporates:
-     *  Gain: '<S95>/Multiply4'
-     *  Product: '<S95>/Product12'
-     *  Product: '<S95>/Product9'
-     *  Sum: '<S95>/Sum3'
-     */
-    rtb_Product16_a = (SkySurfer_Core_P.b / 2.0 * (rtb_jxi *
-      rtb_MediumHighAltitudeIntensity) + (rtb_Product16_a + rtb_Product14_k)) /
-      rtb_sigma_ugsigma_vg + rtb_Product3_cq;
-
-    /* Lookup_n-D: '<S95>/CMm_dailR' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_z[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_y[0U] = frac;
-    bpIndices_z[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_y[1U] = frac;
-    bpIndices_z[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_y[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_z, fractions_y,
-      SkySurfer_Core_P.CMm_dailR_tableData, SkySurfer_Core_P.CMm_dailR_dimSizes);
-
-    /* Product: '<S95>/Product13' incorporates:
-     *  Gain: '<S116>/Gain1'
-     */
-    rtb_Product14_k = SkySurfer_Core_P.Gain1_Gain_db * rtb_Product_op *
-      rtb_Product3_cq;
-
-    /* Lookup_n-D: '<S95>/CMm_dailL' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_10[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_z[0U] = frac;
-    bpIndices_10[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_z[1U] = frac;
-    bpIndices_10[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_z[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_10, fractions_z,
-      SkySurfer_Core_P.CMm_dailL_tableData, SkySurfer_Core_P.CMm_dailL_dimSizes);
-
-    /* Product: '<S95>/Product16' incorporates:
-     *  Gain: '<S119>/Gain1'
-     */
-    rtb_Product16_on = SkySurfer_Core_P.Gain1_Gain_ba * rtb_Product1_p4 *
-      rtb_Product3_cq;
-
-    /* Lookup_n-D: '<S95>/CMm_dele' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_11[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_10[0U] = frac;
-    bpIndices_11[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_10[1U] = frac;
-    bpIndices_11[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_10[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_11, fractions_10,
-      SkySurfer_Core_P.CMm_dele_tableData, SkySurfer_Core_P.CMm_dele_dimSizes);
-
-    /* Product: '<S95>/Product14' incorporates:
-     *  Gain: '<S117>/Gain1'
-     */
-    rtb_jxi = SkySurfer_Core_P.Gain1_Gain_c * rtb_Product2_h * rtb_Product3_cq;
-
-    /* Lookup_n-D: '<S95>/CMm_drud' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_12[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_11[0U] = frac;
-    bpIndices_12[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_11[1U] = frac;
-    bpIndices_12[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_11[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_12, fractions_11,
-      SkySurfer_Core_P.CMm_drud_tableData, SkySurfer_Core_P.CMm_drud_dimSizes);
-
-    /* Sum: '<S95>/Sum of Controls1' incorporates:
-     *  Gain: '<S118>/Gain1'
-     *  Gain: '<S7>/Gain9'
-     *  Product: '<S95>/Product15'
-     */
-    rtb_Product14_k = SkySurfer_Core_P.Gain9_Gain * rtb_q1dot *
-      SkySurfer_Core_P.Gain1_Gain_f * rtb_Product3_cq + ((rtb_Product14_k +
-      rtb_Product16_on) + rtb_jxi);
-
-    /* Lookup_n-D: '<S96>/CMn_base' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_13[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_12[0U] = frac;
-    bpIndices_13[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_12[1U] = frac;
-    bpIndices_13[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_12[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_13, fractions_12,
-      SkySurfer_Core_P.CMn_base_tableData, SkySurfer_Core_P.CMn_base_dimSizes);
-
-    /* Lookup_n-D: '<S96>/CMn_dp' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_14[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_13[0U] = frac;
-    bpIndices_14[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_13[1U] = frac;
-    bpIndices_14[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_13[2U] = frac;
-    rtb_jxi = intrp3d_l_pw(bpIndices_14, fractions_13,
-      SkySurfer_Core_P.CMn_dp_tableData, SkySurfer_Core_P.CMn_dp_dimSizes);
-
-    /* Gain: '<S96>/Multiply3' incorporates:
-     *  Product: '<S96>/Product8'
-     */
-    rtb_Product16_on = SkySurfer_Core_P.b / 2.0 * (rtb_jxi *
-      rtb_UnitConversion_d);
-
-    /* Lookup_n-D: '<S96>/CMn_dq' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_15[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_14[0U] = frac;
-    bpIndices_15[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_14[1U] = frac;
-    bpIndices_15[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_14[2U] = frac;
-    rtb_jxi = intrp3d_l_pw(bpIndices_15, fractions_14,
-      SkySurfer_Core_P.CMn_dq_tableData, SkySurfer_Core_P.CMn_dq_dimSizes);
-
-    /* Gain: '<S96>/Multiply5' incorporates:
-     *  Product: '<S96>/Product11'
-     */
-    rtb_Multiply5_o = SkySurfer_Core_P.cbar / 2.0 * (rtb_jxi *
-      rtb_UnitConversion_n);
-
-    /* Lookup_n-D: '<S96>/CMn_dr' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_16[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_15[0U] = frac;
-    bpIndices_16[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_15[1U] = frac;
-    bpIndices_16[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_15[2U] = frac;
-    rtb_jxi = intrp3d_l_pw(bpIndices_16, fractions_15,
-      SkySurfer_Core_P.CMn_dr_tableData, SkySurfer_Core_P.CMn_dr_dimSizes);
-
-    /* Sum: '<S96>/Sum of Datum1' incorporates:
-     *  Gain: '<S96>/Multiply4'
-     *  Product: '<S96>/Product12'
-     *  Product: '<S96>/Product9'
-     *  Sum: '<S96>/Sum3'
-     */
-    rtb_Product16_on = (SkySurfer_Core_P.b / 2.0 * (rtb_jxi *
-      rtb_MediumHighAltitudeIntensity) + (rtb_Product16_on + rtb_Multiply5_o)) /
-      rtb_sigma_ugsigma_vg + rtb_Product3_cq;
-
-    /* Lookup_n-D: '<S96>/CMn_dailR' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_17[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_16[0U] = frac;
-    bpIndices_17[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_16[1U] = frac;
-    bpIndices_17[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_16[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_17, fractions_16,
-      SkySurfer_Core_P.CMn_dailR_tableData, SkySurfer_Core_P.CMn_dailR_dimSizes);
-
-    /* Product: '<S96>/Product13' incorporates:
-     *  Gain: '<S120>/Gain1'
-     */
-    rtb_jxi = SkySurfer_Core_P.Gain1_Gain_e * rtb_Product_op * rtb_Product3_cq;
-
-    /* Lookup_n-D: '<S96>/CMn_dailL' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_18[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_17[0U] = frac;
-    bpIndices_18[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_17[1U] = frac;
-    bpIndices_18[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_17[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_18, fractions_17,
-      SkySurfer_Core_P.CMn_dailL_tableData, SkySurfer_Core_P.CMn_dailL_dimSizes);
-
-    /* Product: '<S96>/Product16' incorporates:
-     *  Gain: '<S123>/Gain1'
-     */
-    rtb_Multiply5_o = SkySurfer_Core_P.Gain1_Gain_ps * rtb_Product1_p4 *
-      rtb_Product3_cq;
-
-    /* Lookup_n-D: '<S96>/CMn_dele' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_19[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_18[0U] = frac;
-    bpIndices_19[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_18[1U] = frac;
-    bpIndices_19[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_18[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_19, fractions_18,
-      SkySurfer_Core_P.CMn_dele_tableData, SkySurfer_Core_P.CMn_dele_dimSizes);
-
-    /* Product: '<S96>/Product14' incorporates:
-     *  Gain: '<S121>/Gain1'
-     */
-    rtb_Product14_hm = SkySurfer_Core_P.Gain1_Gain_os * rtb_Product2_h *
-      rtb_Product3_cq;
-
-    /* Lookup_n-D: '<S96>/CMn_drud' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_1a[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
-      &frac);
-    fractions_19[0U] = frac;
-    bpIndices_1a[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
-    fractions_19[1U] = frac;
-    bpIndices_1a[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
-    fractions_19[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_1a, fractions_19,
-      SkySurfer_Core_P.CMn_drud_tableData, SkySurfer_Core_P.CMn_drud_dimSizes);
-
-    /* SignalConversion generated from: '<S7>/Aerodynamic Forces and Moments ' incorporates:
-     *  Gain: '<S122>/Gain1'
-     *  Gain: '<S7>/Gain12'
-     *  Product: '<S96>/Product15'
-     *  Sum: '<S96>/Sum of Controls1'
-     *  Sum: '<S96>/Sum4'
-     */
-    rtb_Product16_on += SkySurfer_Core_P.Gain12_Gain * rtb_q1dot *
-      SkySurfer_Core_P.Gain1_Gain_dq * rtb_Product3_cq + ((rtb_jxi +
-      rtb_Multiply5_o) + rtb_Product14_hm);
+    fractions_1[2U] = frac;
+    rtb_Product3_cq = intrp3d_l_pw(bpIndices_2, fractions_1,
+      SkySurfer_Core_P.CDd02, SkySurfer_Core_P.CDd02_dimSizes);
+
+    /* Product: '<S7>/Product1' incorporates:
+     *  Abs: '<S7>/Abs1'
+     *  Lookup_n-D: '<S7>/Effectiveness_AIL_L'
+     */
+    rtb_q1dot = look1_binlcpw(fabs(rtb_Gain3),
+      SkySurfer_Core_P.Aeroelasticity_AIL,
+      SkySurfer_Core_P.Aeroelasticity_Gain_AIL, 1U) * rtb_Gain3;
+
+    /* Sum: '<S90>/Sum of Controls' incorporates:
+     *  Product: '<S90>/Product7'
+     */
+    rtb_SumofControls = ((rtb_Product3_cq * rtb_q1dot + rtb_Product4) +
+                         rtb_Product5) + rtb_jxi;
 
     /* Lookup_n-D: '<S90>/CDtot' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_1b[0U] = plook_binc(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_3[0U] = plook_binc(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
       &frac);
-    fractions_1a[0U] = frac;
-    bpIndices_1b[1U] = plook_binc(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
+    fractions_2[0U] = frac;
+    bpIndices_3[1U] = plook_binc(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_2[1U] = frac;
+    bpIndices_3[2U] = plook_binc(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
       &frac);
-    fractions_1a[1U] = frac;
-    bpIndices_1b[2U] = plook_binc(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
-    fractions_1a[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_1b, fractions_1a,
+    fractions_2[2U] = frac;
+    rtb_Product3_cq = intrp3d_l_pw(bpIndices_3, fractions_2,
       SkySurfer_Core_P.CDtot, SkySurfer_Core_P.CDtot_dimSizes);
 
     /* Lookup_n-D: '<S90>/CDp' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_1c[0U] = plook_binc(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_4[0U] = plook_binc(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
       &frac);
-    fractions_1b[0U] = frac;
-    bpIndices_1c[1U] = plook_binc(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
+    fractions_3[0U] = frac;
+    bpIndices_4[1U] = plook_binc(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_3[1U] = frac;
+    bpIndices_4[2U] = plook_binc(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
       &frac);
-    fractions_1b[1U] = frac;
-    bpIndices_1c[2U] = plook_binc(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
-    fractions_1b[2U] = frac;
-    rtb_jxi = intrp3d_l_pw(bpIndices_1c, fractions_1b, SkySurfer_Core_P.CDp,
+    fractions_3[2U] = frac;
+    rtb_jxi = intrp3d_l_pw(bpIndices_4, fractions_3, SkySurfer_Core_P.CDp,
       SkySurfer_Core_P.CDp_dimSizes);
 
-    /* Gain: '<S102>/Gain1' */
-    rtb_Product2_nj = SkySurfer_Core_P.Gain1_Gain_i * rtb_Gain;
+    /* Gain: '<S96>/Gain1' */
+    rtb_Product2_nj = SkySurfer_Core_P.Gain1_Gain * rtb_Gain;
 
     /* Fcn: '<S7>/Stab_p' incorporates:
      *  Fcn: '<S7>/Stab_r'
      */
-    rtb_SumofDatum_k = cos(rtb_Product2_nj);
-    rtb_SumofControls_g = sin(rtb_Product2_nj);
-    rtb_Product1_ex = rtb_UnitConversion_d * rtb_SumofDatum_k +
-      rtb_MediumHighAltitudeIntensity * rtb_SumofControls_g;
+    rtb_Product5 = cos(rtb_Product2_nj);
+    rtb_Multiply1_b = sin(rtb_Product2_nj);
+    rtb_Product4 = rtb_UnitConversion_d * rtb_Product5 +
+      rtb_MediumHighAltitudeIntensity * rtb_Multiply1_b;
 
     /* Gain: '<S90>/Multiply' incorporates:
      *  Product: '<S90>/Product1'
      */
-    rtb_Multiply5_o = SkySurfer_Core_P.b / 2.0 * (rtb_jxi * rtb_Product1_ex);
-
-    /* Lookup_n-D: '<S90>/CDq' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_1d[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
-      &frac);
-    fractions_1c[0U] = frac;
-    bpIndices_1d[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
-    fractions_1c[1U] = frac;
-    bpIndices_1d[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
-    fractions_1c[2U] = frac;
-    rtb_jxi = intrp3d_l_pw(bpIndices_1d, fractions_1c, SkySurfer_Core_P.CDq,
-      SkySurfer_Core_P.CDq_dimSizes);
-
-    /* Gain: '<S90>/Multiply2' incorporates:
-     *  Product: '<S90>/Product2'
-     */
-    rtb_Product14_hm = SkySurfer_Core_P.cbar / 2.0 * (rtb_jxi *
-      rtb_UnitConversion_n);
+    rtb_Multiply = SkySurfer_Core_P.b / 2.0 * (rtb_jxi * rtb_Product4);
 
     /* Lookup_n-D: '<S90>/CDr' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_1e[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_5[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
       &frac);
-    fractions_1d[0U] = frac;
-    bpIndices_1e[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
+    fractions_4[0U] = frac;
+    bpIndices_5[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_4[1U] = frac;
+    bpIndices_5[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
       &frac);
-    fractions_1d[1U] = frac;
-    bpIndices_1e[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
-    fractions_1d[2U] = frac;
-    rtb_jxi = intrp3d_l_pw(bpIndices_1e, fractions_1d, SkySurfer_Core_P.CDr,
+    fractions_4[2U] = frac;
+    rtb_jxi = intrp3d_l_pw(bpIndices_5, fractions_4, SkySurfer_Core_P.CDr,
       SkySurfer_Core_P.CDr_dimSizes);
 
     /* Fcn: '<S7>/Stab_r' */
-    rtb_u2rhoV2 = rtb_MediumHighAltitudeIntensity * rtb_SumofDatum_k -
-      rtb_UnitConversion_d * rtb_SumofControls_g;
+    rtb_Product5 = rtb_MediumHighAltitudeIntensity * rtb_Product5 -
+      rtb_UnitConversion_d * rtb_Multiply1_b;
 
-    /* Lookup_n-D: '<S90>/CDd01' incorporates:
+    /* Lookup_n-D: '<S90>/CDq' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_1f[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_6[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
       &frac);
-    fractions_1e[0U] = frac;
-    bpIndices_1f[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
+    fractions_5[0U] = frac;
+    bpIndices_6[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_5[1U] = frac;
+    bpIndices_6[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
       &frac);
-    fractions_1e[1U] = frac;
-    bpIndices_1f[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
-    fractions_1e[2U] = frac;
-    rtb_Product2_nj = intrp3d_l_pw(bpIndices_1f, fractions_1e,
-      SkySurfer_Core_P.CDd01, SkySurfer_Core_P.CDd01_dimSizes);
-
-    /* Lookup_n-D: '<S90>/CDd02' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_1g[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
-      &frac);
-    fractions_1f[0U] = frac;
-    bpIndices_1g[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
-    fractions_1f[1U] = frac;
-    bpIndices_1g[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
-    fractions_1f[2U] = frac;
-    rtb_Product2_g5 = intrp3d_l_pw(bpIndices_1g, fractions_1f,
-      SkySurfer_Core_P.CDd02, SkySurfer_Core_P.CDd02_dimSizes);
-
-    /* Lookup_n-D: '<S90>/CDd03' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_1h[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
-      &frac);
-    fractions_1g[0U] = frac;
-    bpIndices_1h[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
-    fractions_1g[1U] = frac;
-    bpIndices_1h[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
-    fractions_1g[2U] = frac;
-    rtb_Product2_n = intrp3d_l_pw(bpIndices_1h, fractions_1g,
-      SkySurfer_Core_P.CDd03, SkySurfer_Core_P.CDd03_dimSizes);
-
-    /* Lookup_n-D: '<S90>/CDd04' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_1i[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
-      &frac);
-    fractions_1h[0U] = frac;
-    bpIndices_1i[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
-    fractions_1h[1U] = frac;
-    bpIndices_1i[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
-    fractions_1h[2U] = frac;
-    rtb_Product2_bq = intrp3d_l_pw(bpIndices_1i, fractions_1h,
-      SkySurfer_Core_P.CDd04, SkySurfer_Core_P.CDd04_dimSizes);
+    fractions_5[2U] = frac;
+    rtb_Product2_nj = intrp3d_l_pw(bpIndices_6, fractions_5,
+      SkySurfer_Core_P.CDq, SkySurfer_Core_P.CDq_dimSizes);
 
     /* Sum: '<S90>/Sum4' incorporates:
      *  Constant: '<S90>/Constant'
      *  Gain: '<S90>/Multiply1'
+     *  Gain: '<S90>/Multiply2'
      *  Product: '<S90>/Product10'
+     *  Product: '<S90>/Product2'
      *  Product: '<S90>/Product3'
-     *  Product: '<S90>/Product4'
-     *  Product: '<S90>/Product5'
-     *  Product: '<S90>/Product6'
-     *  Product: '<S90>/Product7'
-     *  Sum: '<S90>/Sum of Controls'
      *  Sum: '<S90>/Sum of Datum'
      *  Sum: '<S90>/Sum1'
      */
-    rtb_jxi = (((SkySurfer_Core_P.b / 2.0 * (rtb_jxi * rtb_u2rhoV2) +
-                 (rtb_Multiply5_o + rtb_Product14_hm)) / rtb_sigma_ugsigma_vg +
+    rtb_jxi = ((((SkySurfer_Core_P.cbar / 2.0 * (rtb_Product2_nj *
+      rtb_UnitConversion_n) + rtb_Multiply) + SkySurfer_Core_P.b / 2.0 *
+                 (rtb_jxi * rtb_Product5)) / rtb_sigma_ugsigma_vg +
                 rtb_Product3_cq) + SkySurfer_Core_P.CD_fix_AVL) +
-      (((rtb_Product2_nj * rtb_Product_op + rtb_Product2_g5 * rtb_Product1_p4) +
-        rtb_Product2_n * rtb_Product2_h) + rtb_Product2_bq * rtb_q1dot);
+      rtb_SumofControls;
 
-    /* Lookup_n-D: '<S98>/CYtot' incorporates:
+    /* Lookup_n-D: '<S91>/CLd01' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_1j[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_7[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
       &frac);
-    fractions_1i[0U] = frac;
-    bpIndices_1j[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
+    fractions_6[0U] = frac;
+    bpIndices_7[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_6[1U] = frac;
+    bpIndices_7[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
       &frac);
-    fractions_1i[1U] = frac;
-    bpIndices_1j[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+    fractions_6[2U] = frac;
+    rtb_Product2_nj = intrp3d_l_pw(bpIndices_7, fractions_6,
+      SkySurfer_Core_P.CLd01, SkySurfer_Core_P.CLd01_dimSizes);
+
+    /* Lookup_n-D: '<S91>/CLd03' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_8[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
       &frac);
-    fractions_1i[2U] = frac;
-    rtb_Product2_nj = intrp3d_l_pw(bpIndices_1j, fractions_1i,
+    fractions_7[0U] = frac;
+    bpIndices_8[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_7[1U] = frac;
+    bpIndices_8[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_7[2U] = frac;
+    rtb_Product2_g5 = intrp3d_l_pw(bpIndices_8, fractions_7,
+      SkySurfer_Core_P.CLd03, SkySurfer_Core_P.CLd03_dimSizes);
+
+    /* Lookup_n-D: '<S91>/CLd04' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_9[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_8[0U] = frac;
+    bpIndices_9[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_8[1U] = frac;
+    bpIndices_9[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_8[2U] = frac;
+    rtb_Product2_n = intrp3d_l_pw(bpIndices_9, fractions_8,
+      SkySurfer_Core_P.CLd04, SkySurfer_Core_P.CLd04_dimSizes);
+
+    /* Lookup_n-D: '<S91>/CLd02' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_a[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_9[0U] = frac;
+    bpIndices_a[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_9[1U] = frac;
+    bpIndices_a[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_9[2U] = frac;
+    rtb_Product2_bq = intrp3d_l_pw(bpIndices_a, fractions_9,
+      SkySurfer_Core_P.CLd02, SkySurfer_Core_P.CLd02_dimSizes);
+
+    /* Lookup_n-D: '<S91>/CLtot' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_b[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_a[0U] = frac;
+    bpIndices_b[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_a[1U] = frac;
+    bpIndices_b[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_a[2U] = frac;
+    rtb_Product2_nk = intrp3d_l_pw(bpIndices_b, fractions_a,
+      SkySurfer_Core_P.CLtot, SkySurfer_Core_P.CLtot_dimSizes);
+
+    /* Lookup_n-D: '<S91>/CLp' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_c[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_b[0U] = frac;
+    bpIndices_c[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_b[1U] = frac;
+    bpIndices_c[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_b[2U] = frac;
+    rtb_Product3_cq = intrp3d_l_pw(bpIndices_c, fractions_b,
+      SkySurfer_Core_P.CLp, SkySurfer_Core_P.CLp_dimSizes);
+
+    /* Gain: '<S91>/Multiply' incorporates:
+     *  Product: '<S91>/Product1'
+     */
+    rtb_SumofControls = SkySurfer_Core_P.b / 2.0 * (rtb_Product3_cq *
+      rtb_Product4);
+
+    /* Lookup_n-D: '<S91>/CLr' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_d[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_c[0U] = frac;
+    bpIndices_d[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_c[1U] = frac;
+    bpIndices_d[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_c[2U] = frac;
+    rtb_Product3_cq = intrp3d_l_pw(bpIndices_d, fractions_c,
+      SkySurfer_Core_P.CLr, SkySurfer_Core_P.CLr_dimSizes);
+
+    /* Gain: '<S91>/Multiply1' incorporates:
+     *  Product: '<S91>/Product3'
+     */
+    rtb_Multiply = SkySurfer_Core_P.b / 2.0 * (rtb_Product3_cq * rtb_Product5);
+
+    /* Lookup_n-D: '<S91>/CLq' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_e[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_d[0U] = frac;
+    bpIndices_e[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_d[1U] = frac;
+    bpIndices_e[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_d[2U] = frac;
+    rtb_Product3_cq = intrp3d_l_pw(bpIndices_e, fractions_d,
+      SkySurfer_Core_P.CLq, SkySurfer_Core_P.CLq_dimSizes);
+
+    /* Sum: '<S91>/Sum4' incorporates:
+     *  Gain: '<S91>/Multiply2'
+     *  Product: '<S91>/Product10'
+     *  Product: '<S91>/Product2'
+     *  Product: '<S91>/Product4'
+     *  Product: '<S91>/Product5'
+     *  Product: '<S91>/Product6'
+     *  Product: '<S91>/Product7'
+     *  Sum: '<S91>/Sum of Controls'
+     *  Sum: '<S91>/Sum of Datum'
+     *  Sum: '<S91>/Sum1'
+     */
+    rtb_SumofControls = (((SkySurfer_Core_P.cbar / 2.0 * (rtb_Product3_cq *
+      rtb_UnitConversion_n) + rtb_SumofControls) + rtb_Multiply) /
+                         rtb_sigma_ugsigma_vg + rtb_Product2_nk) +
+      (((rtb_Product2_nj * rtb_Product_op + rtb_Product2_bq * rtb_q1dot) +
+        rtb_Product2_g5 * rtb_Product1_p4) + rtb_Product2_n * rtb_Product2_h);
+
+    /* Lookup_n-D: '<S92>/CYd01' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_f[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_e[0U] = frac;
+    bpIndices_f[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_e[1U] = frac;
+    bpIndices_f[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_e[2U] = frac;
+    rtb_Product2_nj = intrp3d_l_pw(bpIndices_f, fractions_e,
+      SkySurfer_Core_P.CYd01, SkySurfer_Core_P.CYd01_dimSizes);
+
+    /* Lookup_n-D: '<S92>/CYd03' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_g[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_f[0U] = frac;
+    bpIndices_g[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_f[1U] = frac;
+    bpIndices_g[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_f[2U] = frac;
+    rtb_Product2_g5 = intrp3d_l_pw(bpIndices_g, fractions_f,
+      SkySurfer_Core_P.CYd03, SkySurfer_Core_P.CYd03_dimSizes);
+
+    /* Lookup_n-D: '<S92>/CYd04' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_h[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_g[0U] = frac;
+    bpIndices_h[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_g[1U] = frac;
+    bpIndices_h[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_g[2U] = frac;
+    rtb_Product2_n = intrp3d_l_pw(bpIndices_h, fractions_g,
+      SkySurfer_Core_P.CYd04, SkySurfer_Core_P.CYd04_dimSizes);
+
+    /* Lookup_n-D: '<S92>/CYd02' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_i[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_h[0U] = frac;
+    bpIndices_i[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_h[1U] = frac;
+    bpIndices_i[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_h[2U] = frac;
+    rtb_Product2_bq = intrp3d_l_pw(bpIndices_i, fractions_h,
+      SkySurfer_Core_P.CYd02, SkySurfer_Core_P.CYd02_dimSizes);
+
+    /* Lookup_n-D: '<S92>/CYtot' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_j[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_i[0U] = frac;
+    bpIndices_j[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_i[1U] = frac;
+    bpIndices_j[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_i[2U] = frac;
+    rtb_Product2_nk = intrp3d_l_pw(bpIndices_j, fractions_i,
       SkySurfer_Core_P.CYtot, SkySurfer_Core_P.CYtot_dimSizes);
 
-    /* Lookup_n-D: '<S98>/CYp' incorporates:
+    /* Lookup_n-D: '<S92>/CYp' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_1k[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_k[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
       &frac);
-    fractions_1j[0U] = frac;
-    bpIndices_1k[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
+    fractions_j[0U] = frac;
+    bpIndices_k[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_j[1U] = frac;
+    bpIndices_k[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
       &frac);
-    fractions_1j[1U] = frac;
-    bpIndices_1k[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
-    fractions_1j[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_1k, fractions_1j,
+    fractions_j[2U] = frac;
+    rtb_Product3_cq = intrp3d_l_pw(bpIndices_k, fractions_j,
       SkySurfer_Core_P.CYp, SkySurfer_Core_P.CYp_dimSizes);
 
-    /* Gain: '<S98>/Multiply' incorporates:
-     *  Product: '<S98>/Product1'
+    /* Gain: '<S92>/Multiply' incorporates:
+     *  Product: '<S92>/Product1'
      */
-    rtb_Multiply5_o = SkySurfer_Core_P.b / 2.0 * (rtb_Product3_cq *
-      rtb_Product1_ex);
+    rtb_Multiply = SkySurfer_Core_P.b / 2.0 * (rtb_Product3_cq * rtb_Product4);
 
-    /* Lookup_n-D: '<S98>/CYq' incorporates:
+    /* Lookup_n-D: '<S92>/CYr' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_1l[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_l[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
       &frac);
-    fractions_1k[0U] = frac;
-    bpIndices_1l[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
+    fractions_k[0U] = frac;
+    bpIndices_l[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_k[1U] = frac;
+    bpIndices_l[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
       &frac);
-    fractions_1k[1U] = frac;
-    bpIndices_1l[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
-    fractions_1k[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_1l, fractions_1k,
-      SkySurfer_Core_P.CYq, SkySurfer_Core_P.CYq_dimSizes);
-
-    /* Gain: '<S98>/Multiply2' incorporates:
-     *  Product: '<S98>/Product2'
-     */
-    rtb_Product14_hm = SkySurfer_Core_P.cbar / 2.0 * (rtb_Product3_cq *
-      rtb_UnitConversion_n);
-
-    /* Lookup_n-D: '<S98>/CYr' incorporates:
-     *  SignalConversion generated from: '<S90>/CDd01'
-     */
-    bpIndices_1m[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
-      &frac);
-    fractions_1l[0U] = frac;
-    bpIndices_1m[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
-    fractions_1l[1U] = frac;
-    bpIndices_1m[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
-    fractions_1l[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_1m, fractions_1l,
+    fractions_k[2U] = frac;
+    rtb_Product3_cq = intrp3d_l_pw(bpIndices_l, fractions_k,
       SkySurfer_Core_P.CYr, SkySurfer_Core_P.CYr_dimSizes);
 
+    /* Gain: '<S92>/Multiply1' incorporates:
+     *  Product: '<S92>/Product3'
+     */
+    rtb_Multiply1_b = SkySurfer_Core_P.b / 2.0 * (rtb_Product3_cq * rtb_Product5);
+
+    /* Lookup_n-D: '<S92>/CYq' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_m[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_l[0U] = frac;
+    bpIndices_m[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_l[1U] = frac;
+    bpIndices_m[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_l[2U] = frac;
+    rtb_Product3_cq = intrp3d_l_pw(bpIndices_m, fractions_l,
+      SkySurfer_Core_P.CYq, SkySurfer_Core_P.CYq_dimSizes);
+
+    /* Sum: '<S92>/Sum4' incorporates:
+     *  Gain: '<S92>/Multiply2'
+     *  Product: '<S92>/Product10'
+     *  Product: '<S92>/Product2'
+     *  Product: '<S92>/Product4'
+     *  Product: '<S92>/Product5'
+     *  Product: '<S92>/Product6'
+     *  Product: '<S92>/Product7'
+     *  Sum: '<S92>/Sum of Controls'
+     *  Sum: '<S92>/Sum of Datum'
+     *  Sum: '<S92>/Sum1'
+     */
+    rtb_Multiply1_b = (((SkySurfer_Core_P.cbar / 2.0 * (rtb_Product3_cq *
+      rtb_UnitConversion_n) + rtb_Multiply) + rtb_Multiply1_b) /
+                       rtb_sigma_ugsigma_vg + rtb_Product2_nk) +
+      (((rtb_Product2_nj * rtb_Product_op + rtb_Product2_bq * rtb_q1dot) +
+        rtb_Product2_g5 * rtb_Product1_p4) + rtb_Product2_n * rtb_Product2_h);
+
+    /* Lookup_n-D: '<S93>/Cld01' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_n[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_m[0U] = frac;
+    bpIndices_n[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_m[1U] = frac;
+    bpIndices_n[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_m[2U] = frac;
+    rtb_Product2_nj = intrp3d_l_pw(bpIndices_n, fractions_m,
+      SkySurfer_Core_P.Cld01, SkySurfer_Core_P.Cld01_dimSizes);
+
+    /* Lookup_n-D: '<S93>/Cld02' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_o[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_n[0U] = frac;
+    bpIndices_o[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_n[1U] = frac;
+    bpIndices_o[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_n[2U] = frac;
+    rtb_Product2_g5 = intrp3d_l_pw(bpIndices_o, fractions_n,
+      SkySurfer_Core_P.Cld02, SkySurfer_Core_P.Cld02_dimSizes);
+
+    /* Lookup_n-D: '<S93>/Cld03' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_p[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_o[0U] = frac;
+    bpIndices_p[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_o[1U] = frac;
+    bpIndices_p[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_o[2U] = frac;
+    rtb_Product2_n = intrp3d_l_pw(bpIndices_p, fractions_o,
+      SkySurfer_Core_P.Cld03, SkySurfer_Core_P.Cld03_dimSizes);
+
+    /* Lookup_n-D: '<S93>/Cld04' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_q[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_p[0U] = frac;
+    bpIndices_q[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_p[1U] = frac;
+    bpIndices_q[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_p[2U] = frac;
+    rtb_Product2_bq = intrp3d_l_pw(bpIndices_q, fractions_p,
+      SkySurfer_Core_P.Cld04, SkySurfer_Core_P.Cld04_dimSizes);
+
+    /* Lookup_n-D: '<S93>/Cltot' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_r[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_q[0U] = frac;
+    bpIndices_r[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_q[1U] = frac;
+    bpIndices_r[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_q[2U] = frac;
+    rtb_Product2_nk = intrp3d_l_pw(bpIndices_r, fractions_q,
+      SkySurfer_Core_P.Cltot, SkySurfer_Core_P.Cltot_dimSizes);
+
+    /* Lookup_n-D: '<S93>/Clp' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_s[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_r[0U] = frac;
+    bpIndices_s[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_r[1U] = frac;
+    bpIndices_s[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_r[2U] = frac;
+    rtb_Product3_cq = intrp3d_l_pw(bpIndices_s, fractions_r,
+      SkySurfer_Core_P.Clp, SkySurfer_Core_P.Clp_dimSizes);
+
+    /* Gain: '<S93>/Multiply' incorporates:
+     *  Product: '<S93>/Product1'
+     */
+    rtb_Multiply = SkySurfer_Core_P.b / 2.0 * (rtb_Product3_cq * rtb_Product4);
+
+    /* Lookup_n-D: '<S93>/Clr' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_t[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_s[0U] = frac;
+    bpIndices_t[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_s[1U] = frac;
+    bpIndices_t[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_s[2U] = frac;
+    rtb_Product3_cq = intrp3d_l_pw(bpIndices_t, fractions_s,
+      SkySurfer_Core_P.Clr, SkySurfer_Core_P.Clr_dimSizes);
+
+    /* Gain: '<S93>/Multiply1' incorporates:
+     *  Product: '<S93>/Product3'
+     */
+    rtb_Multiply1_fo = SkySurfer_Core_P.b / 2.0 * (rtb_Product3_cq *
+      rtb_Product5);
+
+    /* Lookup_n-D: '<S93>/Clq' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_u[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_t[0U] = frac;
+    bpIndices_u[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_t[1U] = frac;
+    bpIndices_u[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_t[2U] = frac;
+    rtb_Product3_cq = intrp3d_l_pw(bpIndices_u, fractions_t,
+      SkySurfer_Core_P.Clq, SkySurfer_Core_P.Clq_dimSizes);
+
+    /* Sum: '<S93>/Sum4' incorporates:
+     *  Gain: '<S93>/Gain'
+     *  Gain: '<S93>/Multiply2'
+     *  Product: '<S93>/Product10'
+     *  Product: '<S93>/Product2'
+     *  Product: '<S93>/Product4'
+     *  Product: '<S93>/Product5'
+     *  Product: '<S93>/Product6'
+     *  Product: '<S93>/Product7'
+     *  Sum: '<S93>/Sum of Controls'
+     *  Sum: '<S93>/Sum of Datum'
+     *  Sum: '<S93>/Sum1'
+     */
+    rtb_Multiply = (((SkySurfer_Core_P.cbar / 2.0 * (rtb_Product3_cq *
+      rtb_UnitConversion_n) + rtb_Multiply) + rtb_Multiply1_fo) /
+                    rtb_sigma_ugsigma_vg + rtb_Product2_nk) + (((rtb_Product2_nj
+      * rtb_Product_op + rtb_Product2_g5 * rtb_q1dot) + rtb_Product2_n *
+      rtb_Product1_p4) + rtb_Product2_bq * rtb_Product2_h) *
+      SkySurfer_Core_P.Gain_Gain;
+
+    /* Lookup_n-D: '<S94>/Cmd01' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_v[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_u[0U] = frac;
+    bpIndices_v[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_u[1U] = frac;
+    bpIndices_v[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_u[2U] = frac;
+    rtb_Product2_nj = intrp3d_l_pw(bpIndices_v, fractions_u,
+      SkySurfer_Core_P.Cmd01, SkySurfer_Core_P.Cmd01_dimSizes);
+
+    /* Lookup_n-D: '<S94>/Cmd03' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_w[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_v[0U] = frac;
+    bpIndices_w[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_v[1U] = frac;
+    bpIndices_w[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_v[2U] = frac;
+    rtb_Product2_g5 = intrp3d_l_pw(bpIndices_w, fractions_v,
+      SkySurfer_Core_P.Cmd03, SkySurfer_Core_P.Cmd03_dimSizes);
+
+    /* Lookup_n-D: '<S94>/Cmd04' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_x[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_w[0U] = frac;
+    bpIndices_x[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_w[1U] = frac;
+    bpIndices_x[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_w[2U] = frac;
+    rtb_Product2_n = intrp3d_l_pw(bpIndices_x, fractions_w,
+      SkySurfer_Core_P.Cmd04, SkySurfer_Core_P.Cmd04_dimSizes);
+
+    /* Lookup_n-D: '<S94>/Cmd02' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_y[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_x[0U] = frac;
+    bpIndices_y[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_x[1U] = frac;
+    bpIndices_y[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_x[2U] = frac;
+    rtb_Product2_bq = intrp3d_l_pw(bpIndices_y, fractions_x,
+      SkySurfer_Core_P.Cmd02, SkySurfer_Core_P.Cmd02_dimSizes);
+
+    /* Lookup_n-D: '<S94>/Cmtot' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_z[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_y[0U] = frac;
+    bpIndices_z[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U, &frac);
+    fractions_y[1U] = frac;
+    bpIndices_z[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_y[2U] = frac;
+    rtb_Product2_nk = intrp3d_l_pw(bpIndices_z, fractions_y,
+      SkySurfer_Core_P.Cmtot, SkySurfer_Core_P.Cmtot_dimSizes);
+
+    /* Lookup_n-D: '<S94>/Cmp' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_10[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_z[0U] = frac;
+    bpIndices_10[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
+      &frac);
+    fractions_z[1U] = frac;
+    bpIndices_10[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_z[2U] = frac;
+    rtb_Product3_cq = intrp3d_l_pw(bpIndices_10, fractions_z,
+      SkySurfer_Core_P.Cmp, SkySurfer_Core_P.Cmp_dimSizes);
+
+    /* Gain: '<S94>/Multiply' incorporates:
+     *  Product: '<S94>/Product1'
+     */
+    rtb_Multiply1_fo = SkySurfer_Core_P.b / 2.0 * (rtb_Product3_cq *
+      rtb_Product4);
+
+    /* Lookup_n-D: '<S94>/Cmr' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_11[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_10[0U] = frac;
+    bpIndices_11[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
+      &frac);
+    fractions_10[1U] = frac;
+    bpIndices_11[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_10[2U] = frac;
+    rtb_Product3_cq = intrp3d_l_pw(bpIndices_11, fractions_10,
+      SkySurfer_Core_P.Cmr, SkySurfer_Core_P.Cmr_dimSizes);
+
+    /* Gain: '<S94>/Multiply1' incorporates:
+     *  Product: '<S94>/Product3'
+     */
+    rtb_Multiply1_m = SkySurfer_Core_P.b / 2.0 * (rtb_Product3_cq * rtb_Product5);
+
+    /* Lookup_n-D: '<S94>/Cmq' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_12[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_11[0U] = frac;
+    bpIndices_12[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
+      &frac);
+    fractions_11[1U] = frac;
+    bpIndices_12[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_11[2U] = frac;
+    rtb_Product3_cq = intrp3d_l_pw(bpIndices_12, fractions_11,
+      SkySurfer_Core_P.Cmq, SkySurfer_Core_P.Cmq_dimSizes);
+
+    /* Sum: '<S94>/Sum4' incorporates:
+     *  Gain: '<S94>/Multiply2'
+     *  Product: '<S94>/Product10'
+     *  Product: '<S94>/Product2'
+     *  Product: '<S94>/Product4'
+     *  Product: '<S94>/Product5'
+     *  Product: '<S94>/Product6'
+     *  Product: '<S94>/Product7'
+     *  Sum: '<S94>/Sum of Controls'
+     *  Sum: '<S94>/Sum of Datum'
+     *  Sum: '<S94>/Sum1'
+     */
+    rtb_Multiply1_fo = (((SkySurfer_Core_P.cbar / 2.0 * (rtb_Product3_cq *
+      rtb_UnitConversion_n) + rtb_Multiply1_fo) + rtb_Multiply1_m) /
+                        rtb_sigma_ugsigma_vg + rtb_Product2_nk) +
+      (((rtb_Product2_nj * rtb_Product_op + rtb_Product2_bq * rtb_q1dot) +
+        rtb_Product2_g5 * rtb_Product1_p4) + rtb_Product2_n * rtb_Product2_h);
+
+    /* Lookup_n-D: '<S95>/Cnd01' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_13[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_12[0U] = frac;
+    bpIndices_13[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
+      &frac);
+    fractions_12[1U] = frac;
+    bpIndices_13[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_12[2U] = frac;
+    rtb_Product2_nj = intrp3d_l_pw(bpIndices_13, fractions_12,
+      SkySurfer_Core_P.Cnd01, SkySurfer_Core_P.Cnd01_dimSizes);
+
+    /* Lookup_n-D: '<S95>/Cnd03' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_14[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_13[0U] = frac;
+    bpIndices_14[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
+      &frac);
+    fractions_13[1U] = frac;
+    bpIndices_14[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_13[2U] = frac;
+    rtb_Product2_g5 = intrp3d_l_pw(bpIndices_14, fractions_13,
+      SkySurfer_Core_P.Cnd03, SkySurfer_Core_P.Cnd03_dimSizes);
+
+    /* Lookup_n-D: '<S95>/Cnd04' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_15[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_14[0U] = frac;
+    bpIndices_15[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
+      &frac);
+    fractions_14[1U] = frac;
+    bpIndices_15[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_14[2U] = frac;
+    rtb_Product2_n = intrp3d_l_pw(bpIndices_15, fractions_14,
+      SkySurfer_Core_P.Cnd04, SkySurfer_Core_P.Cnd04_dimSizes);
+
+    /* Lookup_n-D: '<S95>/Cnd02' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_16[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_15[0U] = frac;
+    bpIndices_16[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
+      &frac);
+    fractions_15[1U] = frac;
+    bpIndices_16[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_15[2U] = frac;
+    rtb_Product2_bq = intrp3d_l_pw(bpIndices_16, fractions_15,
+      SkySurfer_Core_P.Cnd02, SkySurfer_Core_P.Cnd02_dimSizes);
+
+    /* Lookup_n-D: '<S95>/Cntot' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_17[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_16[0U] = frac;
+    bpIndices_17[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
+      &frac);
+    fractions_16[1U] = frac;
+    bpIndices_17[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_16[2U] = frac;
+    rtb_Product2_nk = intrp3d_l_pw(bpIndices_17, fractions_16,
+      SkySurfer_Core_P.Cntot, SkySurfer_Core_P.Cntot_dimSizes);
+
+    /* Lookup_n-D: '<S95>/Cnp' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_18[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_17[0U] = frac;
+    bpIndices_18[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
+      &frac);
+    fractions_17[1U] = frac;
+    bpIndices_18[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_17[2U] = frac;
+    rtb_Product3_cq = intrp3d_l_pw(bpIndices_18, fractions_17,
+      SkySurfer_Core_P.Cnp, SkySurfer_Core_P.Cnp_dimSizes);
+
+    /* Lookup_n-D: '<S95>/Cnr' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_19[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_18[0U] = frac;
+    bpIndices_19[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
+      &frac);
+    fractions_18[1U] = frac;
+    bpIndices_19[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_18[2U] = frac;
+    rtb_Product1_ex = intrp3d_l_pw(bpIndices_19, fractions_18,
+      SkySurfer_Core_P.Cnr, SkySurfer_Core_P.Cnr_dimSizes);
+
+    /* Lookup_n-D: '<S95>/Cnq' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_1a[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+      &frac);
+    fractions_19[0U] = frac;
+    bpIndices_1a[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
+      &frac);
+    fractions_19[1U] = frac;
+    bpIndices_1a[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
+      &frac);
+    fractions_19[2U] = frac;
+    rtb_u2rhoV2 = intrp3d_l_pw(bpIndices_1a, fractions_19, SkySurfer_Core_P.Cnq,
+      SkySurfer_Core_P.Cnq_dimSizes);
+
+    /* SignalConversion generated from: '<S7>/AVL_Forces_Moments' incorporates:
+     *  Gain: '<S95>/Multiply'
+     *  Gain: '<S95>/Multiply1'
+     *  Gain: '<S95>/Multiply2'
+     *  Product: '<S95>/Product1'
+     *  Product: '<S95>/Product10'
+     *  Product: '<S95>/Product2'
+     *  Product: '<S95>/Product3'
+     *  Product: '<S95>/Product4'
+     *  Product: '<S95>/Product5'
+     *  Product: '<S95>/Product6'
+     *  Product: '<S95>/Product7'
+     *  Sum: '<S95>/Sum of Controls'
+     *  Sum: '<S95>/Sum of Datum'
+     *  Sum: '<S95>/Sum1'
+     *  Sum: '<S95>/Sum4'
+     */
+    rtb_Multiply1_m = (((SkySurfer_Core_P.b / 2.0 * (rtb_Product3_cq *
+      rtb_Product4) + SkySurfer_Core_P.cbar / 2.0 * (rtb_u2rhoV2 *
+      rtb_UnitConversion_n)) + SkySurfer_Core_P.b / 2.0 * (rtb_Product1_ex *
+      rtb_Product5)) / rtb_sigma_ugsigma_vg + rtb_Product2_nk) +
+      (((rtb_Product2_nj * rtb_Product_op + rtb_Product2_bq * rtb_q1dot) +
+        rtb_Product2_g5 * rtb_Product1_p4) + rtb_Product2_n * rtb_Product2_h);
+
+    /* Lookup_n-D: '<S98>/CD_base' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_1b[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
+      &frac);
+    fractions_1a[0U] = frac;
+    bpIndices_1b[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
+    fractions_1a[1U] = frac;
+    bpIndices_1b[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
+    fractions_1a[2U] = frac;
+    rtb_Product5 = intrp3d_l_pw(bpIndices_1b, fractions_1a,
+      SkySurfer_Core_P.CD_base_tableData, SkySurfer_Core_P.CD_base_dimSizes);
+
+    /* Lookup_n-D: '<S98>/CD_dp' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_1c[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
+      &frac);
+    fractions_1b[0U] = frac;
+    bpIndices_1c[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
+    fractions_1b[1U] = frac;
+    bpIndices_1c[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
+    fractions_1b[2U] = frac;
+    rtb_Product4 = intrp3d_l_pw(bpIndices_1c, fractions_1b,
+      SkySurfer_Core_P.CD_dp_tableData, SkySurfer_Core_P.CD_dp_dimSizes);
+
+    /* Lookup_n-D: '<S98>/CD_dq' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_1d[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
+      &frac);
+    fractions_1c[0U] = frac;
+    bpIndices_1d[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
+    fractions_1c[1U] = frac;
+    bpIndices_1d[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
+    fractions_1c[2U] = frac;
+    rtb_Product1_ex = intrp3d_l_pw(bpIndices_1d, fractions_1c,
+      SkySurfer_Core_P.CD_dq_tableData, SkySurfer_Core_P.CD_dq_dimSizes);
+
+    /* Lookup_n-D: '<S98>/CD_dr' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_1e[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
+      &frac);
+    fractions_1d[0U] = frac;
+    bpIndices_1e[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
+    fractions_1d[1U] = frac;
+    bpIndices_1e[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
+    fractions_1d[2U] = frac;
+    rtb_Product1_pw = intrp3d_l_pw(bpIndices_1e, fractions_1d,
+      SkySurfer_Core_P.CD_dr_tableData, SkySurfer_Core_P.CD_dr_dimSizes);
+
     /* Sum: '<S98>/Sum of Datum' incorporates:
+     *  Gain: '<S98>/Multiply'
      *  Gain: '<S98>/Multiply1'
+     *  Gain: '<S98>/Multiply2'
+     *  Product: '<S98>/Product1'
      *  Product: '<S98>/Product10'
+     *  Product: '<S98>/Product2'
      *  Product: '<S98>/Product3'
      *  Sum: '<S98>/Sum1'
      */
-    rtb_SumofDatum_k = (SkySurfer_Core_P.b / 2.0 * (rtb_Product3_cq *
-      rtb_u2rhoV2) + (rtb_Multiply5_o + rtb_Product14_hm)) /
-      rtb_sigma_ugsigma_vg + rtb_Product2_nj;
+    rtb_SumofDatum_a = ((SkySurfer_Core_P.b / 2.0 * (rtb_Product4 *
+      rtb_UnitConversion_d) + SkySurfer_Core_P.cbar / 2.0 * (rtb_Product1_ex *
+      rtb_UnitConversion_n)) + SkySurfer_Core_P.b / 2.0 * (rtb_Product1_pw *
+      rtb_MediumHighAltitudeIntensity)) / rtb_sigma_ugsigma_vg + rtb_Product5;
 
-    /* Lookup_n-D: '<S98>/CYd01' incorporates:
+    /* Lookup_n-D: '<S98>/CD_dailR' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_1n[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_1f[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
-    fractions_1m[0U] = frac;
-    bpIndices_1n[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
-    fractions_1m[1U] = frac;
-    bpIndices_1n[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
-    fractions_1m[2U] = frac;
-    rtb_Product2_nj = intrp3d_l_pw(bpIndices_1n, fractions_1m,
-      SkySurfer_Core_P.CYd01, SkySurfer_Core_P.CYd01_dimSizes);
+    fractions_1e[0U] = frac;
+    bpIndices_1f[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
+    fractions_1e[1U] = frac;
+    bpIndices_1f[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
+    fractions_1e[2U] = frac;
+    rtb_Product5 = intrp3d_l_pw(bpIndices_1f, fractions_1e,
+      SkySurfer_Core_P.CD_dailR_tableData, SkySurfer_Core_P.CD_dailR_dimSizes);
 
-    /* Lookup_n-D: '<S98>/CYd02' incorporates:
+    /* Lookup_n-D: '<S98>/CD_dailL' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_1o[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_1g[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
-    fractions_1n[0U] = frac;
-    bpIndices_1o[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
-    fractions_1n[1U] = frac;
-    bpIndices_1o[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
-    fractions_1n[2U] = frac;
-    rtb_Product2_g5 = intrp3d_l_pw(bpIndices_1o, fractions_1n,
-      SkySurfer_Core_P.CYd02, SkySurfer_Core_P.CYd02_dimSizes);
+    fractions_1f[0U] = frac;
+    bpIndices_1g[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
+    fractions_1f[1U] = frac;
+    bpIndices_1g[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
+    fractions_1f[2U] = frac;
+    rtb_u2rhoV2 = intrp3d_l_pw(bpIndices_1g, fractions_1f,
+      SkySurfer_Core_P.CD_dailL_tableData, SkySurfer_Core_P.CD_dailL_dimSizes);
 
-    /* Lookup_n-D: '<S98>/CYd03' incorporates:
+    /* Lookup_n-D: '<S98>/CD_dele' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_1p[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_1h[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
-    fractions_1o[0U] = frac;
-    bpIndices_1p[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
-    fractions_1o[1U] = frac;
-    bpIndices_1p[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
-    fractions_1o[2U] = frac;
-    rtb_Product2_n = intrp3d_l_pw(bpIndices_1p, fractions_1o,
-      SkySurfer_Core_P.CYd03, SkySurfer_Core_P.CYd03_dimSizes);
+    fractions_1g[0U] = frac;
+    bpIndices_1h[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
+    fractions_1g[1U] = frac;
+    bpIndices_1h[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
+    fractions_1g[2U] = frac;
+    rtb_u2rhoV2_n = intrp3d_l_pw(bpIndices_1h, fractions_1g,
+      SkySurfer_Core_P.CD_dele_tableData, SkySurfer_Core_P.CD_dele_dimSizes);
 
-    /* Lookup_n-D: '<S98>/CYd04' incorporates:
+    /* Lookup_n-D: '<S98>/CD_drud' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_1q[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_1i[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
-    fractions_1p[0U] = frac;
-    bpIndices_1q[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
-    fractions_1p[1U] = frac;
-    bpIndices_1q[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
-    fractions_1p[2U] = frac;
-    rtb_Product2_bq = intrp3d_l_pw(bpIndices_1q, fractions_1p,
-      SkySurfer_Core_P.CYd04, SkySurfer_Core_P.CYd04_dimSizes);
+    fractions_1h[0U] = frac;
+    bpIndices_1i[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
+    fractions_1h[1U] = frac;
+    bpIndices_1i[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
+    fractions_1h[2U] = frac;
+    rtb_u2rhoV2_e = intrp3d_l_pw(bpIndices_1i, fractions_1h,
+      SkySurfer_Core_P.CD_drud_tableData, SkySurfer_Core_P.CD_drud_dimSizes);
 
     /* Sum: '<S98>/Sum of Controls' incorporates:
+     *  Gain: '<S105>/Gain1'
+     *  Gain: '<S106>/Gain1'
+     *  Gain: '<S107>/Gain1'
+     *  Gain: '<S108>/Gain1'
+     *  Gain: '<S7>/Gain15'
      *  Product: '<S98>/Product4'
      *  Product: '<S98>/Product5'
      *  Product: '<S98>/Product6'
      *  Product: '<S98>/Product7'
      */
-    rtb_SumofControls_g = ((rtb_Product2_nj * rtb_Product_op + rtb_Product2_g5 *
-      rtb_Product1_p4) + rtb_Product2_n * rtb_Product2_h) + rtb_Product2_bq *
-      rtb_q1dot;
+    rtb_SumofControls_or = ((SkySurfer_Core_P.Gain1_Gain_l * rtb_Product_op *
+      rtb_Product5 + SkySurfer_Core_P.Gain1_Gain_h * rtb_q1dot * rtb_u2rhoV2) +
+      SkySurfer_Core_P.Gain1_Gain_d * rtb_Product1_p4 * rtb_u2rhoV2_n) +
+      SkySurfer_Core_P.Gain15_Gain * rtb_Product2_h *
+      SkySurfer_Core_P.Gain1_Gain_dv * rtb_u2rhoV2_e;
 
-    /* Lookup_n-D: '<S92>/CLtot' incorporates:
+    /* Lookup_n-D: '<S100>/CS_base' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_1r[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_1j[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
+      &frac);
+    fractions_1i[0U] = frac;
+    bpIndices_1j[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
+    fractions_1i[1U] = frac;
+    bpIndices_1j[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
+    fractions_1i[2U] = frac;
+    rtb_Product5 = intrp3d_l_pw(bpIndices_1j, fractions_1i,
+      SkySurfer_Core_P.CS_base_tableData, SkySurfer_Core_P.CS_base_dimSizes);
+
+    /* Lookup_n-D: '<S100>/CS_dp' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_1k[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
+      &frac);
+    fractions_1j[0U] = frac;
+    bpIndices_1k[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
+    fractions_1j[1U] = frac;
+    bpIndices_1k[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
+    fractions_1j[2U] = frac;
+    rtb_Product4 = intrp3d_l_pw(bpIndices_1k, fractions_1j,
+      SkySurfer_Core_P.CS_dp_tableData, SkySurfer_Core_P.CS_dp_dimSizes);
+
+    /* Lookup_n-D: '<S100>/CS_dq' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_1l[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
+      &frac);
+    fractions_1k[0U] = frac;
+    bpIndices_1l[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
+    fractions_1k[1U] = frac;
+    bpIndices_1l[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
+    fractions_1k[2U] = frac;
+    rtb_Product1_ex = intrp3d_l_pw(bpIndices_1l, fractions_1k,
+      SkySurfer_Core_P.CS_dq_tableData, SkySurfer_Core_P.CS_dq_dimSizes);
+
+    /* Lookup_n-D: '<S100>/CS_dr' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_1m[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
+      &frac);
+    fractions_1l[0U] = frac;
+    bpIndices_1m[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
+    fractions_1l[1U] = frac;
+    bpIndices_1m[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
+    fractions_1l[2U] = frac;
+    rtb_Product1_pw = intrp3d_l_pw(bpIndices_1m, fractions_1l,
+      SkySurfer_Core_P.CS_dr_tableData, SkySurfer_Core_P.CS_dr_dimSizes);
+
+    /* Sum: '<S100>/Sum of Datum1' incorporates:
+     *  Gain: '<S100>/Multiply3'
+     *  Gain: '<S100>/Multiply4'
+     *  Gain: '<S100>/Multiply5'
+     *  Product: '<S100>/Product11'
+     *  Product: '<S100>/Product12'
+     *  Product: '<S100>/Product8'
+     *  Product: '<S100>/Product9'
+     *  Sum: '<S100>/Sum3'
+     */
+    rtb_SumofDatum1 = ((SkySurfer_Core_P.b / 2.0 * (rtb_Product4 *
+      rtb_UnitConversion_d) + SkySurfer_Core_P.cbar / 2.0 * (rtb_Product1_ex *
+      rtb_UnitConversion_n)) + SkySurfer_Core_P.b / 2.0 * (rtb_Product1_pw *
+      rtb_MediumHighAltitudeIntensity)) / rtb_sigma_ugsigma_vg + rtb_Product5;
+
+    /* Lookup_n-D: '<S100>/CS_dailR' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_1n[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
+      &frac);
+    fractions_1m[0U] = frac;
+    bpIndices_1n[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
+    fractions_1m[1U] = frac;
+    bpIndices_1n[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
+    fractions_1m[2U] = frac;
+    rtb_Product5 = intrp3d_l_pw(bpIndices_1n, fractions_1m,
+      SkySurfer_Core_P.CS_dailR_tableData, SkySurfer_Core_P.CS_dailR_dimSizes);
+
+    /* Lookup_n-D: '<S100>/CS_dailL' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_1o[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
+      &frac);
+    fractions_1n[0U] = frac;
+    bpIndices_1o[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
+    fractions_1n[1U] = frac;
+    bpIndices_1o[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
+    fractions_1n[2U] = frac;
+    rtb_u2rhoV2 = intrp3d_l_pw(bpIndices_1o, fractions_1n,
+      SkySurfer_Core_P.CS_dailL_tableData, SkySurfer_Core_P.CS_dailL_dimSizes);
+
+    /* Lookup_n-D: '<S100>/CS_dele' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_1p[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
+      &frac);
+    fractions_1o[0U] = frac;
+    bpIndices_1p[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
+    fractions_1o[1U] = frac;
+    bpIndices_1p[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
+    fractions_1o[2U] = frac;
+    rtb_u2rhoV2_n = intrp3d_l_pw(bpIndices_1p, fractions_1o,
+      SkySurfer_Core_P.CS_dele_tableData, SkySurfer_Core_P.CS_dele_dimSizes);
+
+    /* Lookup_n-D: '<S100>/CS_drud' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_1q[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
+      &frac);
+    fractions_1p[0U] = frac;
+    bpIndices_1q[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
+    fractions_1p[1U] = frac;
+    bpIndices_1q[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
+    fractions_1p[2U] = frac;
+    rtb_u2rhoV2_e = intrp3d_l_pw(bpIndices_1q, fractions_1p,
+      SkySurfer_Core_P.CS_drud_tableData, SkySurfer_Core_P.CS_drud_dimSizes);
+
+    /* Sum: '<S100>/Sum of Controls1' incorporates:
+     *  Gain: '<S113>/Gain1'
+     *  Gain: '<S114>/Gain1'
+     *  Gain: '<S115>/Gain1'
+     *  Gain: '<S116>/Gain1'
+     *  Gain: '<S7>/Gain10'
+     *  Product: '<S100>/Product13'
+     *  Product: '<S100>/Product14'
+     *  Product: '<S100>/Product15'
+     *  Product: '<S100>/Product16'
+     */
+    rtb_SumofControls1 = ((SkySurfer_Core_P.Gain1_Gain_o * rtb_Product_op *
+      rtb_Product5 + SkySurfer_Core_P.Gain1_Gain_b * rtb_q1dot * rtb_u2rhoV2) +
+                          SkySurfer_Core_P.Gain1_Gain_j * rtb_Product1_p4 *
+                          rtb_u2rhoV2_n) + SkySurfer_Core_P.Gain10_Gain *
+      rtb_Product2_h * SkySurfer_Core_P.Gain1_Gain_ju * rtb_u2rhoV2_e;
+
+    /* Lookup_n-D: '<S99>/CL_base' incorporates:
+     *  SignalConversion generated from: '<S90>/CDd01'
+     */
+    bpIndices_1r[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_1q[0U] = frac;
-    bpIndices_1r[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_1r[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_1q[1U] = frac;
-    bpIndices_1r[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_1r[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_1q[2U] = frac;
-    rtb_Product2_nj = intrp3d_l_pw(bpIndices_1r, fractions_1q,
-      SkySurfer_Core_P.CLtot, SkySurfer_Core_P.CLtot_dimSizes);
+    rtb_Product5 = intrp3d_l_pw(bpIndices_1r, fractions_1q,
+      SkySurfer_Core_P.CL_base_tableData, SkySurfer_Core_P.CL_base_dimSizes);
 
-    /* Lookup_n-D: '<S92>/CLp' incorporates:
+    /* Lookup_n-D: '<S99>/CL_dp' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_1s[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_1s[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_1r[0U] = frac;
-    bpIndices_1s[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_1s[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_1r[1U] = frac;
-    bpIndices_1s[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_1s[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_1r[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_1s, fractions_1r,
-      SkySurfer_Core_P.CLp, SkySurfer_Core_P.CLp_dimSizes);
+    rtb_Product4 = intrp3d_l_pw(bpIndices_1s, fractions_1r,
+      SkySurfer_Core_P.CL_dp_tableData, SkySurfer_Core_P.CL_dp_dimSizes);
 
-    /* Gain: '<S92>/Multiply' incorporates:
-     *  Product: '<S92>/Product1'
-     */
-    rtb_Multiply5_o = SkySurfer_Core_P.b / 2.0 * (rtb_Product3_cq *
-      rtb_Product1_ex);
-
-    /* Lookup_n-D: '<S92>/CLq' incorporates:
+    /* Lookup_n-D: '<S99>/CL_dq' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_1t[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_1t[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_1s[0U] = frac;
-    bpIndices_1t[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_1t[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_1s[1U] = frac;
-    bpIndices_1t[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_1t[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_1s[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_1t, fractions_1s,
-      SkySurfer_Core_P.CLq, SkySurfer_Core_P.CLq_dimSizes);
+    rtb_Product1_ex = intrp3d_l_pw(bpIndices_1t, fractions_1s,
+      SkySurfer_Core_P.CL_dq_tableData, SkySurfer_Core_P.CL_dq_dimSizes);
 
-    /* Gain: '<S92>/Multiply2' incorporates:
-     *  Product: '<S92>/Product2'
-     */
-    rtb_Product14_hm = SkySurfer_Core_P.cbar / 2.0 * (rtb_Product3_cq *
-      rtb_UnitConversion_n);
-
-    /* Lookup_n-D: '<S92>/CLr' incorporates:
+    /* Lookup_n-D: '<S99>/CL_dr' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_1u[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_1u[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_1t[0U] = frac;
-    bpIndices_1u[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_1u[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_1t[1U] = frac;
-    bpIndices_1u[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_1u[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_1t[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_1u, fractions_1t,
-      SkySurfer_Core_P.CLr, SkySurfer_Core_P.CLr_dimSizes);
+    rtb_Product1_pw = intrp3d_l_pw(bpIndices_1u, fractions_1t,
+      SkySurfer_Core_P.CL_dr_tableData, SkySurfer_Core_P.CL_dr_dimSizes);
 
-    /* Sum: '<S92>/Sum of Datum' incorporates:
-     *  Gain: '<S92>/Multiply1'
-     *  Product: '<S92>/Product10'
-     *  Product: '<S92>/Product3'
-     *  Sum: '<S92>/Sum1'
+    /* Sum: '<S99>/Sum of Datum1' incorporates:
+     *  Gain: '<S99>/Multiply3'
+     *  Gain: '<S99>/Multiply4'
+     *  Gain: '<S99>/Multiply5'
+     *  Product: '<S99>/Product11'
+     *  Product: '<S99>/Product12'
+     *  Product: '<S99>/Product8'
+     *  Product: '<S99>/Product9'
+     *  Sum: '<S99>/Sum3'
      */
-    rtb_SumofDatum_ax = (SkySurfer_Core_P.b / 2.0 * (rtb_Product3_cq *
-      rtb_u2rhoV2) + (rtb_Multiply5_o + rtb_Product14_hm)) /
-      rtb_sigma_ugsigma_vg + rtb_Product2_nj;
+    rtb_SumofDatum1_j = ((SkySurfer_Core_P.b / 2.0 * (rtb_Product4 *
+      rtb_UnitConversion_d) + SkySurfer_Core_P.cbar / 2.0 * (rtb_Product1_ex *
+      rtb_UnitConversion_n)) + SkySurfer_Core_P.b / 2.0 * (rtb_Product1_pw *
+      rtb_MediumHighAltitudeIntensity)) / rtb_sigma_ugsigma_vg + rtb_Product5;
 
-    /* Lookup_n-D: '<S92>/CLd01' incorporates:
+    /* Lookup_n-D: '<S99>/CL_dailR' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_1v[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_1v[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_1u[0U] = frac;
-    bpIndices_1v[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_1v[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_1u[1U] = frac;
-    bpIndices_1v[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_1v[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_1u[2U] = frac;
-    rtb_Product2_nj = intrp3d_l_pw(bpIndices_1v, fractions_1u,
-      SkySurfer_Core_P.CLd01, SkySurfer_Core_P.CLd01_dimSizes);
+    rtb_Product5 = intrp3d_l_pw(bpIndices_1v, fractions_1u,
+      SkySurfer_Core_P.CL_dailR_tableData, SkySurfer_Core_P.CL_dailR_dimSizes);
 
-    /* Lookup_n-D: '<S92>/CLd02' incorporates:
+    /* Lookup_n-D: '<S99>/CL_dailL' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_1w[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_1w[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_1v[0U] = frac;
-    bpIndices_1w[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_1w[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_1v[1U] = frac;
-    bpIndices_1w[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_1w[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_1v[2U] = frac;
-    rtb_Product2_g5 = intrp3d_l_pw(bpIndices_1w, fractions_1v,
-      SkySurfer_Core_P.CLd02, SkySurfer_Core_P.CLd02_dimSizes);
+    rtb_u2rhoV2 = intrp3d_l_pw(bpIndices_1w, fractions_1v,
+      SkySurfer_Core_P.CL_dailL_tableData, SkySurfer_Core_P.CL_dailL_dimSizes);
 
-    /* Lookup_n-D: '<S92>/CLd03' incorporates:
+    /* Lookup_n-D: '<S99>/CL_dele' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_1x[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_1x[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_1w[0U] = frac;
-    bpIndices_1x[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_1x[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_1w[1U] = frac;
-    bpIndices_1x[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_1x[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_1w[2U] = frac;
-    rtb_Product2_n = intrp3d_l_pw(bpIndices_1x, fractions_1w,
-      SkySurfer_Core_P.CLd03, SkySurfer_Core_P.CLd03_dimSizes);
+    rtb_u2rhoV2_n = intrp3d_l_pw(bpIndices_1x, fractions_1w,
+      SkySurfer_Core_P.CL_dele_tableData, SkySurfer_Core_P.CL_dele_dimSizes);
 
-    /* Lookup_n-D: '<S92>/CLd04' incorporates:
+    /* Lookup_n-D: '<S99>/CL_drud' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_1y[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_1y[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_1x[0U] = frac;
-    bpIndices_1y[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_1y[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_1x[1U] = frac;
-    bpIndices_1y[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_1y[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_1x[2U] = frac;
-    rtb_Product2_bq = intrp3d_l_pw(bpIndices_1y, fractions_1x,
-      SkySurfer_Core_P.CLd04, SkySurfer_Core_P.CLd04_dimSizes);
+    rtb_u2rhoV2_e = intrp3d_l_pw(bpIndices_1y, fractions_1x,
+      SkySurfer_Core_P.CL_drud_tableData, SkySurfer_Core_P.CL_drud_dimSizes);
 
-    /* Sum: '<S92>/Sum of Controls' incorporates:
-     *  Product: '<S92>/Product4'
-     *  Product: '<S92>/Product5'
-     *  Product: '<S92>/Product6'
-     *  Product: '<S92>/Product7'
+    /* Sum: '<S99>/Sum of Controls1' incorporates:
+     *  Gain: '<S109>/Gain1'
+     *  Gain: '<S110>/Gain1'
+     *  Gain: '<S111>/Gain1'
+     *  Gain: '<S112>/Gain1'
+     *  Gain: '<S7>/Gain11'
+     *  Product: '<S99>/Product13'
+     *  Product: '<S99>/Product14'
+     *  Product: '<S99>/Product15'
+     *  Product: '<S99>/Product16'
      */
-    rtb_SumofControls_o = ((rtb_Product2_nj * rtb_Product_op + rtb_Product2_g5 *
-      rtb_Product1_p4) + rtb_Product2_n * rtb_Product2_h) + rtb_Product2_bq *
-      rtb_q1dot;
+    rtb_SumofControls1_d = ((SkySurfer_Core_P.Gain1_Gain_bf * rtb_Product_op *
+      rtb_Product5 + SkySurfer_Core_P.Gain1_Gain_g * rtb_q1dot * rtb_u2rhoV2) +
+      SkySurfer_Core_P.Gain1_Gain_n * rtb_Product1_p4 * rtb_u2rhoV2_n) +
+      SkySurfer_Core_P.Gain11_Gain * rtb_Product2_h *
+      SkySurfer_Core_P.Gain1_Gain_p * rtb_u2rhoV2_e;
 
-    /* Lookup_n-D: '<S99>/Cltot' incorporates:
+    /* Lookup_n-D: '<S101>/CMl_base' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_1z[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_1z[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_1y[0U] = frac;
-    bpIndices_1z[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_1z[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_1y[1U] = frac;
-    bpIndices_1z[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_1z[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_1y[2U] = frac;
-    rtb_Product2_nj = intrp3d_l_pw(bpIndices_1z, fractions_1y,
-      SkySurfer_Core_P.Cltot, SkySurfer_Core_P.Cltot_dimSizes);
+    rtb_Product5 = intrp3d_l_pw(bpIndices_1z, fractions_1y,
+      SkySurfer_Core_P.CMl_base_tableData, SkySurfer_Core_P.CMl_base_dimSizes);
 
-    /* Lookup_n-D: '<S99>/Clp' incorporates:
+    /* Lookup_n-D: '<S101>/CMl_dp' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_20[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_20[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_1z[0U] = frac;
-    bpIndices_20[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_20[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_1z[1U] = frac;
-    bpIndices_20[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_20[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_1z[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_20, fractions_1z,
-      SkySurfer_Core_P.Clp, SkySurfer_Core_P.Clp_dimSizes);
+    rtb_Product4 = intrp3d_l_pw(bpIndices_20, fractions_1z,
+      SkySurfer_Core_P.CMl_dp_tableData, SkySurfer_Core_P.CMl_dp_dimSizes);
 
-    /* Gain: '<S99>/Multiply' incorporates:
-     *  Product: '<S99>/Product1'
-     */
-    rtb_Multiply5_o = SkySurfer_Core_P.b / 2.0 * (rtb_Product3_cq *
-      rtb_Product1_ex);
-
-    /* Lookup_n-D: '<S99>/Clq' incorporates:
+    /* Lookup_n-D: '<S101>/CMl_dq' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_21[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_21[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_20[0U] = frac;
-    bpIndices_21[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_21[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_20[1U] = frac;
-    bpIndices_21[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_21[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_20[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_21, fractions_20,
-      SkySurfer_Core_P.Clq, SkySurfer_Core_P.Clq_dimSizes);
+    rtb_Product1_ex = intrp3d_l_pw(bpIndices_21, fractions_20,
+      SkySurfer_Core_P.CMl_dq_tableData, SkySurfer_Core_P.CMl_dq_dimSizes);
 
-    /* Gain: '<S99>/Multiply2' incorporates:
-     *  Product: '<S99>/Product2'
-     */
-    rtb_Product14_hm = SkySurfer_Core_P.cbar / 2.0 * (rtb_Product3_cq *
-      rtb_UnitConversion_n);
-
-    /* Lookup_n-D: '<S99>/Clr' incorporates:
+    /* Lookup_n-D: '<S101>/CMl_dr' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_22[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_22[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_21[0U] = frac;
-    bpIndices_22[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_22[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_21[1U] = frac;
-    bpIndices_22[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_22[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_21[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_22, fractions_21,
-      SkySurfer_Core_P.Clr, SkySurfer_Core_P.Clr_dimSizes);
+    rtb_Product1_pw = intrp3d_l_pw(bpIndices_22, fractions_21,
+      SkySurfer_Core_P.CMl_dr_tableData, SkySurfer_Core_P.CMl_dr_dimSizes);
 
-    /* Lookup_n-D: '<S99>/Cld01' incorporates:
+    /* Sum: '<S101>/Sum of Datum1' incorporates:
+     *  Gain: '<S101>/Multiply3'
+     *  Gain: '<S101>/Multiply4'
+     *  Gain: '<S101>/Multiply5'
+     *  Product: '<S101>/Product11'
+     *  Product: '<S101>/Product12'
+     *  Product: '<S101>/Product8'
+     *  Product: '<S101>/Product9'
+     *  Sum: '<S101>/Sum3'
+     */
+    rtb_SumofDatum1_b = ((SkySurfer_Core_P.b / 2.0 * (rtb_Product4 *
+      rtb_UnitConversion_d) + SkySurfer_Core_P.cbar / 2.0 * (rtb_Product1_ex *
+      rtb_UnitConversion_n)) + SkySurfer_Core_P.b / 2.0 * (rtb_Product1_pw *
+      rtb_MediumHighAltitudeIntensity)) / rtb_sigma_ugsigma_vg + rtb_Product5;
+
+    /* Lookup_n-D: '<S101>/CMl_dailR' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_23[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_23[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_22[0U] = frac;
-    bpIndices_23[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_23[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_22[1U] = frac;
-    bpIndices_23[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_23[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_22[2U] = frac;
-    rtb_Product2_g5 = intrp3d_l_pw(bpIndices_23, fractions_22,
-      SkySurfer_Core_P.Cld01, SkySurfer_Core_P.Cld01_dimSizes);
+    rtb_Product5 = intrp3d_l_pw(bpIndices_23, fractions_22,
+      SkySurfer_Core_P.CMl_dailR_tableData, SkySurfer_Core_P.CMl_dailR_dimSizes);
 
-    /* Lookup_n-D: '<S99>/Cld02' incorporates:
+    /* Lookup_n-D: '<S101>/CMl_dailL' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_24[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_24[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_23[0U] = frac;
-    bpIndices_24[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_24[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_23[1U] = frac;
-    bpIndices_24[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_24[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_23[2U] = frac;
-    rtb_Product2_n = intrp3d_l_pw(bpIndices_24, fractions_23,
-      SkySurfer_Core_P.Cld02, SkySurfer_Core_P.Cld02_dimSizes);
+    rtb_u2rhoV2 = intrp3d_l_pw(bpIndices_24, fractions_23,
+      SkySurfer_Core_P.CMl_dailL_tableData, SkySurfer_Core_P.CMl_dailL_dimSizes);
 
-    /* Lookup_n-D: '<S99>/Cld03' incorporates:
+    /* Lookup_n-D: '<S101>/CMl_dele' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_25[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_25[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_24[0U] = frac;
-    bpIndices_25[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_25[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_24[1U] = frac;
-    bpIndices_25[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_25[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_24[2U] = frac;
-    rtb_Product2_bq = intrp3d_l_pw(bpIndices_25, fractions_24,
-      SkySurfer_Core_P.Cld03, SkySurfer_Core_P.Cld03_dimSizes);
+    rtb_u2rhoV2_n = intrp3d_l_pw(bpIndices_25, fractions_24,
+      SkySurfer_Core_P.CMl_dele_tableData, SkySurfer_Core_P.CMl_dele_dimSizes);
 
-    /* Lookup_n-D: '<S99>/Cld04' incorporates:
+    /* Lookup_n-D: '<S101>/CMl_drud' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_26[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_26[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_25[0U] = frac;
-    bpIndices_26[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_26[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_25[1U] = frac;
-    bpIndices_26[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_26[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_25[2U] = frac;
-    rtb_Product2_nk = intrp3d_l_pw(bpIndices_26, fractions_25,
-      SkySurfer_Core_P.Cld04, SkySurfer_Core_P.Cld04_dimSizes);
+    rtb_u2rhoV2_e = intrp3d_l_pw(bpIndices_26, fractions_25,
+      SkySurfer_Core_P.CMl_drud_tableData, SkySurfer_Core_P.CMl_drud_dimSizes);
 
-    /* Sum: '<S99>/Sum4' incorporates:
-     *  Gain: '<S99>/Gain'
-     *  Gain: '<S99>/Multiply1'
-     *  Product: '<S99>/Product10'
-     *  Product: '<S99>/Product3'
-     *  Product: '<S99>/Product4'
-     *  Product: '<S99>/Product5'
-     *  Product: '<S99>/Product6'
-     *  Product: '<S99>/Product7'
-     *  Sum: '<S99>/Sum of Controls'
-     *  Sum: '<S99>/Sum of Datum'
-     *  Sum: '<S99>/Sum1'
+    /* Sum: '<S101>/Sum of Controls1' incorporates:
+     *  Gain: '<S117>/Gain1'
+     *  Gain: '<S118>/Gain1'
+     *  Gain: '<S119>/Gain1'
+     *  Gain: '<S120>/Gain1'
+     *  Gain: '<S7>/Gain4'
+     *  Product: '<S101>/Product13'
+     *  Product: '<S101>/Product14'
+     *  Product: '<S101>/Product15'
+     *  Product: '<S101>/Product16'
      */
-    rtb_Sum4_h1 = ((SkySurfer_Core_P.b / 2.0 * (rtb_Product3_cq * rtb_u2rhoV2) +
-                    (rtb_Multiply5_o + rtb_Product14_hm)) / rtb_sigma_ugsigma_vg
-                   + rtb_Product2_nj) + (((rtb_Product2_g5 * rtb_Product_op +
-      rtb_Product2_n * rtb_Product1_p4) + rtb_Product2_bq * rtb_Product2_h) +
-      rtb_Product2_nk * rtb_q1dot) * SkySurfer_Core_P.Gain_Gain;
+    rtb_SumofControls1_oz = ((SkySurfer_Core_P.Gain1_Gain_ox * rtb_Product_op *
+      rtb_Product5 + SkySurfer_Core_P.Gain1_Gain_lw * rtb_q1dot * rtb_u2rhoV2) +
+      SkySurfer_Core_P.Gain1_Gain_pp * rtb_Product1_p4 * rtb_u2rhoV2_n) +
+      SkySurfer_Core_P.Gain4_Gain * rtb_Product2_h *
+      SkySurfer_Core_P.Gain1_Gain_dh * rtb_u2rhoV2_e;
 
-    /* Lookup_n-D: '<S100>/Cmtot' incorporates:
+    /* Lookup_n-D: '<S102>/CMm_base' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_27[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_27[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_26[0U] = frac;
-    bpIndices_27[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_27[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_26[1U] = frac;
-    bpIndices_27[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_27[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_26[2U] = frac;
-    rtb_Product2_nj = intrp3d_l_pw(bpIndices_27, fractions_26,
-      SkySurfer_Core_P.Cmtot, SkySurfer_Core_P.Cmtot_dimSizes);
+    rtb_Product5 = intrp3d_l_pw(bpIndices_27, fractions_26,
+      SkySurfer_Core_P.CMm_base_tableData, SkySurfer_Core_P.CMm_base_dimSizes);
 
-    /* Lookup_n-D: '<S100>/Cmp' incorporates:
+    /* Lookup_n-D: '<S102>/CMm_dp' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_28[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_28[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_27[0U] = frac;
-    bpIndices_28[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_28[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_27[1U] = frac;
-    bpIndices_28[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_28[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_27[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_28, fractions_27,
-      SkySurfer_Core_P.Cmp, SkySurfer_Core_P.Cmp_dimSizes);
+    rtb_Product4 = intrp3d_l_pw(bpIndices_28, fractions_27,
+      SkySurfer_Core_P.CMm_dp_tableData, SkySurfer_Core_P.CMm_dp_dimSizes);
 
-    /* Gain: '<S100>/Multiply' incorporates:
-     *  Product: '<S100>/Product1'
-     */
-    rtb_Multiply5_o = SkySurfer_Core_P.b / 2.0 * (rtb_Product3_cq *
-      rtb_Product1_ex);
-
-    /* Lookup_n-D: '<S100>/Cmq' incorporates:
+    /* Lookup_n-D: '<S102>/CMm_dq' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_29[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_29[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_28[0U] = frac;
-    bpIndices_29[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_29[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_28[1U] = frac;
-    bpIndices_29[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_29[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_28[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_29, fractions_28,
-      SkySurfer_Core_P.Cmq, SkySurfer_Core_P.Cmq_dimSizes);
+    rtb_Product1_ex = intrp3d_l_pw(bpIndices_29, fractions_28,
+      SkySurfer_Core_P.CMm_dq_tableData, SkySurfer_Core_P.CMm_dq_dimSizes);
 
-    /* Gain: '<S100>/Multiply2' incorporates:
-     *  Product: '<S100>/Product2'
-     */
-    rtb_Product14_hm = SkySurfer_Core_P.cbar / 2.0 * (rtb_Product3_cq *
-      rtb_UnitConversion_n);
-
-    /* Lookup_n-D: '<S100>/Cmr' incorporates:
+    /* Lookup_n-D: '<S102>/CMm_dr' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_2a[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_2a[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_29[0U] = frac;
-    bpIndices_2a[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_2a[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_29[1U] = frac;
-    bpIndices_2a[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_2a[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_29[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_2a, fractions_29,
-      SkySurfer_Core_P.Cmr, SkySurfer_Core_P.Cmr_dimSizes);
+    rtb_Product1_pw = intrp3d_l_pw(bpIndices_2a, fractions_29,
+      SkySurfer_Core_P.CMm_dr_tableData, SkySurfer_Core_P.CMm_dr_dimSizes);
 
-    /* Sum: '<S100>/Sum of Datum' incorporates:
-     *  Gain: '<S100>/Multiply1'
-     *  Product: '<S100>/Product10'
-     *  Product: '<S100>/Product3'
-     *  Sum: '<S100>/Sum1'
+    /* Sum: '<S102>/Sum of Datum1' incorporates:
+     *  Gain: '<S102>/Multiply3'
+     *  Gain: '<S102>/Multiply4'
+     *  Gain: '<S102>/Multiply5'
+     *  Product: '<S102>/Product11'
+     *  Product: '<S102>/Product12'
+     *  Product: '<S102>/Product8'
+     *  Product: '<S102>/Product9'
+     *  Sum: '<S102>/Sum3'
      */
-    rtb_SumofDatum_g = (SkySurfer_Core_P.b / 2.0 * (rtb_Product3_cq *
-      rtb_u2rhoV2) + (rtb_Multiply5_o + rtb_Product14_hm)) /
-      rtb_sigma_ugsigma_vg + rtb_Product2_nj;
+    rtb_SumofDatum1_m = ((SkySurfer_Core_P.b / 2.0 * (rtb_Product4 *
+      rtb_UnitConversion_d) + SkySurfer_Core_P.cbar / 2.0 * (rtb_Product1_ex *
+      rtb_UnitConversion_n)) + SkySurfer_Core_P.b / 2.0 * (rtb_Product1_pw *
+      rtb_MediumHighAltitudeIntensity)) / rtb_sigma_ugsigma_vg + rtb_Product5;
 
-    /* Lookup_n-D: '<S100>/Cmd01' incorporates:
+    /* Lookup_n-D: '<S102>/CMm_dailR' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_2b[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_2b[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_2a[0U] = frac;
-    bpIndices_2b[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_2b[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_2a[1U] = frac;
-    bpIndices_2b[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_2b[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_2a[2U] = frac;
-    rtb_Product2_nj = intrp3d_l_pw(bpIndices_2b, fractions_2a,
-      SkySurfer_Core_P.Cmd01, SkySurfer_Core_P.Cmd01_dimSizes);
+    rtb_Product5 = intrp3d_l_pw(bpIndices_2b, fractions_2a,
+      SkySurfer_Core_P.CMm_dailR_tableData, SkySurfer_Core_P.CMm_dailR_dimSizes);
 
-    /* Lookup_n-D: '<S100>/Cmd02' incorporates:
+    /* Lookup_n-D: '<S102>/CMm_dailL' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_2c[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_2c[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_2b[0U] = frac;
-    bpIndices_2c[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_2c[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_2b[1U] = frac;
-    bpIndices_2c[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_2c[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_2b[2U] = frac;
-    rtb_Product2_g5 = intrp3d_l_pw(bpIndices_2c, fractions_2b,
-      SkySurfer_Core_P.Cmd02, SkySurfer_Core_P.Cmd02_dimSizes);
+    rtb_u2rhoV2 = intrp3d_l_pw(bpIndices_2c, fractions_2b,
+      SkySurfer_Core_P.CMm_dailL_tableData, SkySurfer_Core_P.CMm_dailL_dimSizes);
 
-    /* Lookup_n-D: '<S100>/Cmd03' incorporates:
+    /* Lookup_n-D: '<S102>/CMm_dele' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_2d[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_2d[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_2c[0U] = frac;
-    bpIndices_2d[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_2d[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_2c[1U] = frac;
-    bpIndices_2d[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_2d[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_2c[2U] = frac;
-    rtb_Product2_n = intrp3d_l_pw(bpIndices_2d, fractions_2c,
-      SkySurfer_Core_P.Cmd03, SkySurfer_Core_P.Cmd03_dimSizes);
+    rtb_u2rhoV2_n = intrp3d_l_pw(bpIndices_2d, fractions_2c,
+      SkySurfer_Core_P.CMm_dele_tableData, SkySurfer_Core_P.CMm_dele_dimSizes);
 
-    /* Lookup_n-D: '<S100>/Cmd04' incorporates:
+    /* Lookup_n-D: '<S102>/CMm_drud' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_2e[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_2e[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_2d[0U] = frac;
-    bpIndices_2e[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_2e[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_2d[1U] = frac;
-    bpIndices_2e[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_2e[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_2d[2U] = frac;
-    rtb_Product2_bq = intrp3d_l_pw(bpIndices_2e, fractions_2d,
-      SkySurfer_Core_P.Cmd04, SkySurfer_Core_P.Cmd04_dimSizes);
+    rtb_u2rhoV2_e = intrp3d_l_pw(bpIndices_2e, fractions_2d,
+      SkySurfer_Core_P.CMm_drud_tableData, SkySurfer_Core_P.CMm_drud_dimSizes);
 
-    /* Lookup_n-D: '<S101>/Cntot' incorporates:
+    /* Lookup_n-D: '<S103>/CMn_base' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_2f[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_2f[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_2e[0U] = frac;
-    bpIndices_2f[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_2f[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_2e[1U] = frac;
-    bpIndices_2f[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_2f[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_2e[2U] = frac;
-    rtb_Product2_nk = intrp3d_l_pw(bpIndices_2f, fractions_2e,
-      SkySurfer_Core_P.Cntot, SkySurfer_Core_P.Cntot_dimSizes);
+    rtb_u2rhoV2_k3 = intrp3d_l_pw(bpIndices_2f, fractions_2e,
+      SkySurfer_Core_P.CMn_base_tableData, SkySurfer_Core_P.CMn_base_dimSizes);
 
-    /* Lookup_n-D: '<S101>/Cnp' incorporates:
+    /* Lookup_n-D: '<S103>/CMn_dp' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_2g[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_2g[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_2f[0U] = frac;
-    bpIndices_2g[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_2g[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_2f[1U] = frac;
-    bpIndices_2g[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_2g[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_2f[2U] = frac;
-    rtb_Product3_cq = intrp3d_l_pw(bpIndices_2g, fractions_2f,
-      SkySurfer_Core_P.Cnp, SkySurfer_Core_P.Cnp_dimSizes);
+    rtb_Product4 = intrp3d_l_pw(bpIndices_2g, fractions_2f,
+      SkySurfer_Core_P.CMn_dp_tableData, SkySurfer_Core_P.CMn_dp_dimSizes);
 
-    /* Lookup_n-D: '<S101>/Cnq' incorporates:
+    /* Lookup_n-D: '<S103>/CMn_dq' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_2h[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_2h[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_2g[0U] = frac;
-    bpIndices_2h[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_2h[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_2g[1U] = frac;
-    bpIndices_2h[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_2h[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_2g[2U] = frac;
-    rtb_Product1_jf = intrp3d_l_pw(bpIndices_2h, fractions_2g,
-      SkySurfer_Core_P.Cnq, SkySurfer_Core_P.Cnq_dimSizes);
+    rtb_Product1_ex = intrp3d_l_pw(bpIndices_2h, fractions_2g,
+      SkySurfer_Core_P.CMn_dq_tableData, SkySurfer_Core_P.CMn_dq_dimSizes);
 
-    /* Lookup_n-D: '<S101>/Cnr' incorporates:
+    /* Lookup_n-D: '<S103>/CMn_dr' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_2i[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_2i[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_2h[0U] = frac;
-    bpIndices_2i[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_2i[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_2h[1U] = frac;
-    bpIndices_2i[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_2i[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_2h[2U] = frac;
     rtb_Product1_pw = intrp3d_l_pw(bpIndices_2i, fractions_2h,
-      SkySurfer_Core_P.Cnr, SkySurfer_Core_P.Cnr_dimSizes);
+      SkySurfer_Core_P.CMn_dr_tableData, SkySurfer_Core_P.CMn_dr_dimSizes);
 
-    /* Lookup_n-D: '<S101>/Cnd01' incorporates:
+    /* Lookup_n-D: '<S103>/CMn_dailR' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_2j[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_2j[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_2i[0U] = frac;
-    bpIndices_2j[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_2j[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_2i[1U] = frac;
-    bpIndices_2j[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_2j[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_2i[2U] = frac;
-    rtb_u2rhoV2_i = intrp3d_l_pw(bpIndices_2j, fractions_2i,
-      SkySurfer_Core_P.Cnd01, SkySurfer_Core_P.Cnd01_dimSizes);
+    rtb_u2rhoV2_og = intrp3d_l_pw(bpIndices_2j, fractions_2i,
+      SkySurfer_Core_P.CMn_dailR_tableData, SkySurfer_Core_P.CMn_dailR_dimSizes);
 
-    /* Lookup_n-D: '<S101>/Cnd02' incorporates:
+    /* Lookup_n-D: '<S103>/CMn_dailL' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_2k[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_2k[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_2j[0U] = frac;
-    bpIndices_2k[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_2k[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_2j[1U] = frac;
-    bpIndices_2k[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_2k[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_2j[2U] = frac;
-    rtb_u2rhoV2_n = intrp3d_l_pw(bpIndices_2k, fractions_2j,
-      SkySurfer_Core_P.Cnd02, SkySurfer_Core_P.Cnd02_dimSizes);
+    rtb_u2rhoV2_b = intrp3d_l_pw(bpIndices_2k, fractions_2j,
+      SkySurfer_Core_P.CMn_dailL_tableData, SkySurfer_Core_P.CMn_dailL_dimSizes);
 
-    /* Lookup_n-D: '<S101>/Cnd03' incorporates:
+    /* Lookup_n-D: '<S103>/CMn_dele' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_2l[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_2l[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_2k[0U] = frac;
-    bpIndices_2l[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_2l[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_2k[1U] = frac;
-    bpIndices_2l[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_2l[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_2k[2U] = frac;
-    rtb_u2rhoV2_m = intrp3d_l_pw(bpIndices_2l, fractions_2k,
-      SkySurfer_Core_P.Cnd03, SkySurfer_Core_P.Cnd03_dimSizes);
+    rtb_u2rhoV2_i = intrp3d_l_pw(bpIndices_2l, fractions_2k,
+      SkySurfer_Core_P.CMn_dele_tableData, SkySurfer_Core_P.CMn_dele_dimSizes);
 
-    /* Lookup_n-D: '<S101>/Cnd04' incorporates:
+    /* Lookup_n-D: '<S103>/CMn_drud' incorporates:
      *  SignalConversion generated from: '<S90>/CDd01'
      */
-    bpIndices_2m[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.mach_avl, 1U,
+    bpIndices_2m[0U] = plook_binx(rtb_Product1_ow, SkySurfer_Core_P.Mach, 1U,
       &frac);
     fractions_2l[0U] = frac;
-    bpIndices_2m[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.alpha_avl, 5U,
-      &frac);
+    bpIndices_2m[1U] = plook_binx(rtb_Gain, SkySurfer_Core_P.AoA, 5U, &frac);
     fractions_2l[1U] = frac;
-    bpIndices_2m[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.beta_avl, 4U,
-      &frac);
+    bpIndices_2m[2U] = plook_binx(rtb_Gain_h, SkySurfer_Core_P.AoS, 4U, &frac);
     fractions_2l[2U] = frac;
-    rtb_u2rhoV2_e = intrp3d_l_pw(bpIndices_2m, fractions_2l,
-      SkySurfer_Core_P.Cnd04, SkySurfer_Core_P.Cnd04_dimSizes);
+    rtb_u2rhoV2_m = intrp3d_l_pw(bpIndices_2m, fractions_2l,
+      SkySurfer_Core_P.CMn_drud_tableData, SkySurfer_Core_P.CMn_drud_dimSizes);
 
-    /* Gain: '<S103>/1//2rhoV^2' incorporates:
-     *  Product: '<S103>/Product2'
+    /* Gain: '<S97>/1//2rhoV^2' incorporates:
+     *  Product: '<S97>/Product2'
      */
-    rtb_Multiply5_o = rtb_Switch1_idx_2 * rtb_DensityConversion *
+    rtb_u2rhoV2_gi = rtb_Switch1_idx_2 * rtb_DensityConversion *
       SkySurfer_Core_P.u2rhoV2_Gain;
 
-    /* AerodynamicForcesAndMoments: '<S7>/Aerodynamic Forces and Moments 1' incorporates:
-     *  Constant: '<S7>/b3'
-     *  Constant: '<S7>/b4'
-     *  Gain: '<S101>/Multiply'
-     *  Gain: '<S101>/Multiply1'
-     *  Gain: '<S101>/Multiply2'
-     *  Product: '<S100>/Product4'
-     *  Product: '<S100>/Product5'
-     *  Product: '<S100>/Product6'
-     *  Product: '<S100>/Product7'
-     *  Product: '<S101>/Product1'
-     *  Product: '<S101>/Product10'
-     *  Product: '<S101>/Product2'
-     *  Product: '<S101>/Product3'
-     *  Product: '<S101>/Product4'
-     *  Product: '<S101>/Product5'
-     *  Product: '<S101>/Product6'
-     *  Product: '<S101>/Product7'
-     *  SignalConversion generated from: '<S7>/Aerodynamic Forces and Moments 1'
-     *  Sum: '<S100>/Sum of Controls'
-     *  Sum: '<S100>/Sum4'
-     *  Sum: '<S101>/Sum of Controls'
-     *  Sum: '<S101>/Sum of Datum'
-     *  Sum: '<S101>/Sum1'
-     *  Sum: '<S101>/Sum4'
-     *  Sum: '<S92>/Sum4'
-     *  Sum: '<S98>/Sum4'
-     */
-    rtb_Switch1_idx_2 = rt_atan2d_snf(rtb_sincos_o1_idx_2, rtb_sincos_o1_idx_0);
-    frac = rt_atan2d_snf(rtb_sincos_o1_idx_2, rtb_sincos_o1_idx_0);
-    rtb_Product14_hm = rt_atan2d_snf(rtb_sincos_o1_idx_2, rtb_sincos_o1_idx_0);
-    rtb_jxi = -rtb_jxi * rtb_Multiply5_o * SkySurfer_Core_P.S;
-    rtb_SumofDatum_k = (rtb_SumofDatum_k + rtb_SumofControls_g) *
-      rtb_Multiply5_o * SkySurfer_Core_P.S;
-    rtb_SumofControls_g = -(rtb_SumofDatum_ax + rtb_SumofControls_o) *
-      rtb_Multiply5_o * SkySurfer_Core_P.S;
-    rtb_SumofDatum_ax = -SkySurfer_Core_P.CG_m[0] - (-SkySurfer_Core_P.XREF_m[0]);
-    rtb_SumofControls_o = -SkySurfer_Core_P.CG_m[1] - (-SkySurfer_Core_P.XREF_m
-      [1]);
-    pData_idx_2 = -SkySurfer_Core_P.CG_m[2] - (-SkySurfer_Core_P.XREF_m[2]);
-    pData_tmp = sin(frac);
-    pData_tmp_0 = cos(frac);
-    pData_idx_0_tmp = 0.0 * rtb_SumofControls_o;
-    frac = (pData_tmp_0 * rtb_SumofDatum_ax + pData_idx_0_tmp) + pData_tmp *
-      pData_idx_2;
-    rtb_SumofControls_o = (0.0 * rtb_SumofDatum_ax + rtb_SumofControls_o) + 0.0 *
-      pData_idx_2;
-    pData_idx_2 = (-pData_tmp * rtb_SumofDatum_ax + pData_idx_0_tmp) +
-      pData_tmp_0 * pData_idx_2;
-    rtb_SumofDatum_ax = rtb_Sum4_h1 * SkySurfer_Core_P.b * SkySurfer_Core_P.S *
-      rtb_Multiply5_o + (rtb_SumofDatum_k * pData_idx_2 - rtb_SumofControls_o *
-                         rtb_SumofControls_g);
-    rtb_Product2_nj = ((((rtb_Product2_nj * rtb_Product_op + rtb_Product2_g5 *
-                          rtb_Product1_p4) + rtb_Product2_n * rtb_Product2_h) +
-                        rtb_Product2_bq * rtb_q1dot) + rtb_SumofDatum_g) *
-      SkySurfer_Core_P.cbar * SkySurfer_Core_P.S * rtb_Multiply5_o + (frac *
-      rtb_SumofControls_g - rtb_jxi * pData_idx_2);
-    pData_idx_2 = ((((SkySurfer_Core_P.b / 2.0 * (rtb_Product3_cq *
-      rtb_Product1_ex) + SkySurfer_Core_P.cbar / 2.0 * (rtb_Product1_jf *
-      rtb_UnitConversion_n)) + SkySurfer_Core_P.b / 2.0 * (rtb_Product1_pw *
-      rtb_u2rhoV2)) / rtb_sigma_ugsigma_vg + rtb_Product2_nk) + (((rtb_u2rhoV2_i
-      * rtb_Product_op + rtb_u2rhoV2_n * rtb_Product1_p4) + rtb_u2rhoV2_m *
-      rtb_Product2_h) + rtb_u2rhoV2_e * rtb_q1dot)) * SkySurfer_Core_P.b *
-      SkySurfer_Core_P.S * rtb_Multiply5_o + (rtb_jxi * rtb_SumofControls_o -
-      frac * rtb_SumofDatum_k);
-    rtb_Product3_cq = sin(rtb_Switch1_idx_2);
-    rtb_q1dot = cos(rtb_Switch1_idx_2);
-    rtb_Product_op = sin(rtb_Product14_hm);
-    rtb_Product1_p4 = cos(rtb_Product14_hm);
-
-    /* AerodynamicForcesAndMoments: '<S7>/Aerodynamic Forces and Moments ' incorporates:
+    /* AerodynamicForcesAndMoments: '<S7>/VSP_Forces_Moments' incorporates:
      *  Constant: '<S7>/b1'
      *  Constant: '<S7>/b2'
-     *  Constant: '<S91>/Constant'
-     *  Sum: '<S91>/Sum2'
-     *  Sum: '<S93>/Sum4'
-     *  Sum: '<S94>/Sum4'
-     *  Sum: '<S95>/Sum4'
-     *  Sum: '<S97>/Sum4'
+     *  Constant: '<S98>/Constant'
+     *  Gain: '<S103>/Multiply3'
+     *  Gain: '<S103>/Multiply4'
+     *  Gain: '<S103>/Multiply5'
+     *  Gain: '<S121>/Gain1'
+     *  Gain: '<S122>/Gain1'
+     *  Gain: '<S123>/Gain1'
+     *  Gain: '<S124>/Gain1'
+     *  Gain: '<S125>/Gain1'
+     *  Gain: '<S126>/Gain1'
+     *  Gain: '<S127>/Gain1'
+     *  Gain: '<S128>/Gain1'
+     *  Gain: '<S7>/Gain12'
+     *  Gain: '<S7>/Gain9'
+     *  Product: '<S102>/Product13'
+     *  Product: '<S102>/Product14'
+     *  Product: '<S102>/Product15'
+     *  Product: '<S102>/Product16'
+     *  Product: '<S103>/Product11'
+     *  Product: '<S103>/Product12'
+     *  Product: '<S103>/Product13'
+     *  Product: '<S103>/Product14'
+     *  Product: '<S103>/Product15'
+     *  Product: '<S103>/Product16'
+     *  Product: '<S103>/Product8'
+     *  Product: '<S103>/Product9'
+     *  Sum: '<S100>/Sum4'
+     *  Sum: '<S101>/Sum4'
+     *  Sum: '<S102>/Sum of Controls1'
+     *  Sum: '<S102>/Sum4'
+     *  Sum: '<S103>/Sum of Controls1'
+     *  Sum: '<S103>/Sum of Datum1'
+     *  Sum: '<S103>/Sum3'
+     *  Sum: '<S103>/Sum4'
+     *  Sum: '<S98>/Sum2'
+     *  Sum: '<S99>/Sum4'
      */
     rtb_Switch1_idx_2 = rt_atan2d_snf(rtb_sincos_o1_idx_2, rtb_sincos_o1_idx_0);
-    pData_tmp = sqrt(rtb_Switch1_idx_0 + rtb_Switch1_idx_1);
-    rtb_SumofControls_o = rt_atan2d_snf(rtb_sincos_o1_idx_1, pData_tmp);
+    rtb_Switch1_idx_0 = sqrt(rtb_Switch1_idx_0 + rtb_Switch1_idx_1);
+    rtb_Switch1_idx_1 = rt_atan2d_snf(rtb_sincos_o1_idx_1, rtb_Switch1_idx_0);
+    frac = cos(rtb_Switch1_idx_2);
+    rtb_Product3_cq = sin(rtb_Switch1_idx_2);
+    rtb_Product2_nj = cos(rtb_Switch1_idx_1);
+    rtb_Product2_g5 = sin(rtb_Switch1_idx_1);
+    rtb_Switch1_idx_2 = rt_atan2d_snf(rtb_sincos_o1_idx_2, rtb_sincos_o1_idx_0);
+    rtb_Switch1_idx_1 = rt_atan2d_snf(rtb_sincos_o1_idx_1, rtb_Switch1_idx_0);
     pData_tmp_0 = cos(rtb_Switch1_idx_2);
-    rtb_Switch1_idx_0 = sin(rtb_Switch1_idx_2);
-    rtb_Switch1_idx_1 = cos(rtb_SumofControls_o);
-    rtb_Product2_h = sin(rtb_SumofControls_o);
+    pData_tmp = sin(rtb_Switch1_idx_2);
+    pData_tmp_2 = cos(rtb_Switch1_idx_1);
+    pData_tmp_1 = sin(rtb_Switch1_idx_1);
     rtb_Switch1_idx_2 = rt_atan2d_snf(rtb_sincos_o1_idx_2, rtb_sincos_o1_idx_0);
-    rtb_SumofControls_o = rt_atan2d_snf(rtb_sincos_o1_idx_1, pData_tmp);
-    rtb_Product2_n = cos(rtb_Switch1_idx_2);
-    rtb_Product2_bq = sin(rtb_Switch1_idx_2);
-    rtb_Product2_nk = cos(rtb_SumofControls_o);
-    rtb_Sum4_h1 = sin(rtb_SumofControls_o);
-    rtb_Switch1_idx_2 = rt_atan2d_snf(rtb_sincos_o1_idx_2, rtb_sincos_o1_idx_0);
-    rtb_SumofControls_o = rt_atan2d_snf(rtb_sincos_o1_idx_1, pData_tmp);
-    pData_tmp = cos(rtb_Switch1_idx_2);
-    rtb_Product1_ex = sin(rtb_Switch1_idx_2);
-    rtb_u2rhoV2 = cos(rtb_SumofControls_o);
-    rtb_Product2_g5 = sin(rtb_SumofControls_o);
-    rtb_Switch1_idx_2 = -((rtb_Multiply + SkySurfer_Core_P.CD_fix_VSP) +
-                          rtb_Multiply2) * rtb_Multiply5_o * SkySurfer_Core_P.S;
-    rtb_SumofControls_o = -(rtb_Product7 + rtb_Product5) * rtb_Multiply5_o *
+    rtb_Switch1_idx_1 = rt_atan2d_snf(rtb_sincos_o1_idx_1, rtb_Switch1_idx_0);
+    rtb_Switch1_idx_0 = cos(rtb_Switch1_idx_2);
+    rtb_Product2_n = sin(rtb_Switch1_idx_2);
+    rtb_Product2_bq = cos(rtb_Switch1_idx_1);
+    rtb_Product2_nk = sin(rtb_Switch1_idx_1);
+    rtb_Switch1_idx_2 = -((rtb_SumofDatum_a + SkySurfer_Core_P.CD_fix_VSP) +
+                          rtb_SumofControls_or) * rtb_u2rhoV2_gi *
       SkySurfer_Core_P.S;
-    rtb_Multiply = -(rtb_Product14 + rtb_Product14_d) * rtb_Multiply5_o *
-      SkySurfer_Core_P.S;
-    frac = -SkySurfer_Core_P.CG_m[0] - (-SkySurfer_Core_P.XREF_m[0]);
-    rtb_Multiply2 = -SkySurfer_Core_P.CG_m[1] - (-SkySurfer_Core_P.XREF_m[1]);
-    rtb_Product7 = -SkySurfer_Core_P.CG_m[2] - (-SkySurfer_Core_P.XREF_m[2]);
-    pData_idx_0_tmp = rtb_Sum4_h1 * 0.0;
-    rtb_Product14 = rtb_Product2_nk * 0.0;
-    rtb_Product14_d = 0.0 * -rtb_Product2_bq;
-    rtb_Product5 = 0.0 * rtb_Product2_n;
-    rtb_Product14_hm = (((rtb_Product2_nk * rtb_Product2_n + pData_idx_0_tmp) +
-                         rtb_Product14_d) * frac + (rtb_Product14 + rtb_Sum4_h1)
-                        * rtb_Multiply2) + ((rtb_Product2_nk * rtb_Product2_bq +
-      pData_idx_0_tmp) + rtb_Product5) * rtb_Product7;
-    rtb_Product14 = (((rtb_Product2_n * -rtb_Sum4_h1 + rtb_Product14) +
-                      rtb_Product14_d) * frac + (-rtb_Sum4_h1 * 0.0 +
-      rtb_Product2_nk) * rtb_Multiply2) + ((rtb_Product2_bq * -rtb_Sum4_h1 +
-      rtb_Product14) + rtb_Product5) * rtb_Product7;
-    rtb_Product7 = ((rtb_Product5 - rtb_Product2_bq) * frac + rtb_Multiply2 *
-                    0.0) + (0.0 * rtb_Product2_bq + rtb_Product2_n) *
-      rtb_Product7;
-    frac = (rtb_Product16 + rtb_Product16_j) * SkySurfer_Core_P.b *
-      SkySurfer_Core_P.S * rtb_Multiply5_o + (rtb_SumofControls_o * rtb_Product7
-      - rtb_Product14 * rtb_Multiply);
-    rtb_Multiply2 = (rtb_Product16_a + rtb_Product14_k) * SkySurfer_Core_P.cbar *
-      SkySurfer_Core_P.S * rtb_Multiply5_o + (rtb_Product14_hm * rtb_Multiply -
-      rtb_Switch1_idx_2 * rtb_Product7);
-    rtb_Product7 = rtb_Product16_on * SkySurfer_Core_P.b * SkySurfer_Core_P.S *
-      rtb_Multiply5_o + (rtb_Switch1_idx_2 * rtb_Product14 - rtb_Product14_hm *
-                         rtb_SumofControls_o);
+    rtb_Switch1_idx_1 = -(rtb_SumofDatum1 + rtb_SumofControls1) * rtb_u2rhoV2_gi
+      * SkySurfer_Core_P.S;
+    rtb_SumofDatum_a = -(rtb_SumofDatum1_j + rtb_SumofControls1_d) *
+      rtb_u2rhoV2_gi * SkySurfer_Core_P.S;
+    rtb_SumofControls_or = -SkySurfer_Core_P.CG_m[0] -
+      (-SkySurfer_Core_P.XREF_m[0]);
+    rtb_SumofDatum1 = -SkySurfer_Core_P.CG_m[1] - (-SkySurfer_Core_P.XREF_m[1]);
+    rtb_SumofControls1 = -SkySurfer_Core_P.CG_m[2] - (-SkySurfer_Core_P.XREF_m[2]);
+    rtb_SumofControls1_d = pData_tmp_1 * 0.0;
+    pData_idx_0_tmp = pData_tmp_2 * 0.0;
+    pData_idx_0_tmp_0 = 0.0 * -pData_tmp;
+    pData_idx_0_tmp_1 = 0.0 * pData_tmp_0;
+    rtb_SumofDatum1_j = (((pData_tmp_2 * pData_tmp_0 + rtb_SumofControls1_d) +
+                          pData_idx_0_tmp_0) * rtb_SumofControls_or +
+                         (pData_idx_0_tmp + pData_tmp_1) * rtb_SumofDatum1) +
+      ((pData_tmp_2 * pData_tmp + rtb_SumofControls1_d) + pData_idx_0_tmp_1) *
+      rtb_SumofControls1;
+    pData_tmp_2 = (((pData_tmp_0 * -pData_tmp_1 + pData_idx_0_tmp) +
+                    pData_idx_0_tmp_0) * rtb_SumofControls_or + (-pData_tmp_1 *
+      0.0 + pData_tmp_2) * rtb_SumofDatum1) + ((pData_tmp * -pData_tmp_1 +
+      pData_idx_0_tmp) + pData_idx_0_tmp_1) * rtb_SumofControls1;
+    rtb_SumofControls1 = ((pData_idx_0_tmp_1 - pData_tmp) * rtb_SumofControls_or
+                          + rtb_SumofDatum1 * 0.0) + (0.0 * pData_tmp +
+      pData_tmp_0) * rtb_SumofControls1;
+    rtb_SumofControls_or = (rtb_SumofDatum1_b + rtb_SumofControls1_oz) *
+      SkySurfer_Core_P.b * SkySurfer_Core_P.S * rtb_u2rhoV2_gi +
+      (rtb_Switch1_idx_1 * rtb_SumofControls1 - pData_tmp_2 * rtb_SumofDatum_a);
+    rtb_SumofDatum1 = ((((SkySurfer_Core_P.Gain1_Gain_db * rtb_Product_op *
+                          rtb_Product5 + SkySurfer_Core_P.Gain1_Gain_ba *
+                          rtb_q1dot * rtb_u2rhoV2) +
+                         SkySurfer_Core_P.Gain1_Gain_c * rtb_Product1_p4 *
+                         rtb_u2rhoV2_n) + SkySurfer_Core_P.Gain9_Gain *
+                        rtb_Product2_h * SkySurfer_Core_P.Gain1_Gain_f *
+                        rtb_u2rhoV2_e) + rtb_SumofDatum1_m) *
+      SkySurfer_Core_P.cbar * SkySurfer_Core_P.S * rtb_u2rhoV2_gi +
+      (rtb_SumofDatum1_j * rtb_SumofDatum_a - rtb_Switch1_idx_2 *
+       rtb_SumofControls1);
+    rtb_SumofControls1 = ((((SkySurfer_Core_P.b / 2.0 * (rtb_Product4 *
+      rtb_UnitConversion_d) + SkySurfer_Core_P.cbar / 2.0 * (rtb_Product1_ex *
+      rtb_UnitConversion_n)) + SkySurfer_Core_P.b / 2.0 * (rtb_Product1_pw *
+      rtb_MediumHighAltitudeIntensity)) / rtb_sigma_ugsigma_vg + rtb_u2rhoV2_k3)
+                          + (((SkySurfer_Core_P.Gain1_Gain_e * rtb_Product_op *
+      rtb_u2rhoV2_og + SkySurfer_Core_P.Gain1_Gain_ps * rtb_q1dot *
+      rtb_u2rhoV2_b) + SkySurfer_Core_P.Gain1_Gain_os * rtb_Product1_p4 *
+      rtb_u2rhoV2_i) + SkySurfer_Core_P.Gain12_Gain * rtb_Product2_h *
+      SkySurfer_Core_P.Gain1_Gain_dq * rtb_u2rhoV2_m)) * SkySurfer_Core_P.b *
+      SkySurfer_Core_P.S * rtb_u2rhoV2_gi + (rtb_Switch1_idx_2 * pData_tmp_2 -
+      rtb_SumofDatum1_j * rtb_Switch1_idx_1);
 
-    /* Switch: '<S7>/Switch' incorporates:
+    /* AerodynamicForcesAndMoments: '<S7>/AVL_Forces_Moments' incorporates:
+     *  Constant: '<S7>/b3'
+     *  Constant: '<S7>/b4'
+     *  SignalConversion generated from: '<S7>/AVL_Forces_Moments'
+     */
+    rtb_SumofDatum1_j = rt_atan2d_snf(rtb_sincos_o1_idx_2, rtb_sincos_o1_idx_0);
+    rtb_Product5 = rt_atan2d_snf(rtb_sincos_o1_idx_2, rtb_sincos_o1_idx_0);
+    rtb_Product_op = rt_atan2d_snf(rtb_sincos_o1_idx_2, rtb_sincos_o1_idx_0);
+    rtb_q1dot = -rtb_jxi * rtb_u2rhoV2_gi * SkySurfer_Core_P.S;
+    pData_tmp_2 = rtb_Multiply1_b * rtb_u2rhoV2_gi * SkySurfer_Core_P.S;
+    rtb_Product1_p4 = -rtb_SumofControls * rtb_u2rhoV2_gi * SkySurfer_Core_P.S;
+    rtb_Product2_h = -SkySurfer_Core_P.CG_m[0] - (-SkySurfer_Core_P.XREF_m[0]);
+    rtb_SumofControls = -SkySurfer_Core_P.CG_m[1] - (-SkySurfer_Core_P.XREF_m[1]);
+    rtb_Product4 = -SkySurfer_Core_P.CG_m[2] - (-SkySurfer_Core_P.XREF_m[2]);
+    pData_tmp_0 = sin(rtb_Product5);
+    pData_tmp = cos(rtb_Product5);
+    rtb_SumofControls1_d = 0.0 * rtb_SumofControls;
+    rtb_Product5 = (pData_tmp * rtb_Product2_h + rtb_SumofControls1_d) +
+      pData_tmp_0 * rtb_Product4;
+    rtb_SumofControls = (0.0 * rtb_Product2_h + rtb_SumofControls) + 0.0 *
+      rtb_Product4;
+    rtb_Product4 = (-pData_tmp_0 * rtb_Product2_h + rtb_SumofControls1_d) +
+      pData_tmp * rtb_Product4;
+    rtb_Product2_h = rtb_Multiply * SkySurfer_Core_P.b * SkySurfer_Core_P.S *
+      rtb_u2rhoV2_gi + (pData_tmp_2 * rtb_Product4 - rtb_SumofControls *
+                        rtb_Product1_p4);
+    rtb_jxi = rtb_Multiply1_fo * SkySurfer_Core_P.cbar * SkySurfer_Core_P.S *
+      rtb_u2rhoV2_gi + (rtb_Product5 * rtb_Product1_p4 - rtb_q1dot *
+                        rtb_Product4);
+    rtb_Product4 = rtb_Multiply1_m * SkySurfer_Core_P.b * SkySurfer_Core_P.S *
+      rtb_u2rhoV2_gi + (rtb_q1dot * rtb_SumofControls - rtb_Product5 *
+                        pData_tmp_2);
+    rtb_Product5 = sin(rtb_SumofDatum1_j);
+    rtb_SumofControls = cos(rtb_SumofDatum1_j);
+    rtb_Multiply = sin(rtb_Product_op);
+    rtb_Product_op = cos(rtb_Product_op);
+
+    /* Switch: '<S7>/Select_AVL_VSP_Force' incorporates:
      *  Constant: '<S7>/b7'
      */
-    if (SkySurfer_Core_P.useAVL_VSP > SkySurfer_Core_P.Switch_Threshold) {
-      /* AerodynamicForcesAndMoments: '<S7>/Aerodynamic Forces and Moments ' */
-      rtb_Product5 = 0.0 * -rtb_Switch1_idx_0;
+    if (SkySurfer_Core_P.useAVL_VSP >
+        SkySurfer_Core_P.Select_AVL_VSP_Force_Threshold) {
+      /* AerodynamicForcesAndMoments: '<S7>/VSP_Forces_Moments' */
+      rtb_Multiply1_b = 0.0 * -rtb_Product3_cq;
 
-      /* Switch: '<S7>/Switch' incorporates:
-       *  AerodynamicForcesAndMoments: '<S7>/Aerodynamic Forces and Moments '
+      /* Switch: '<S7>/Select_AVL_VSP_Force' incorporates:
+       *  AerodynamicForcesAndMoments: '<S7>/VSP_Forces_Moments'
        */
-      SkySurfer_Core_DW->Switch[0] = (((rtb_Switch1_idx_1 * pData_tmp_0 +
-        rtb_Product2_h * 0.0) + rtb_Product5) * rtb_Switch1_idx_2 +
-        ((pData_tmp_0 * -rtb_Product2_h + rtb_Switch1_idx_1 * 0.0) +
-         rtb_Product5) * rtb_SumofControls_o) + (0.0 * pData_tmp_0 -
-        rtb_Switch1_idx_0) * rtb_Multiply;
+      SkySurfer_Core_DW->Select_AVL_VSP_Force[0] = (((rtb_Product2_nj * frac +
+        rtb_Product2_g5 * 0.0) + rtb_Multiply1_b) * rtb_Switch1_idx_2 + ((frac *
+        -rtb_Product2_g5 + rtb_Product2_nj * 0.0) + rtb_Multiply1_b) *
+        rtb_Switch1_idx_1) + (0.0 * frac - rtb_Product3_cq) * rtb_SumofDatum_a;
     } else {
-      /* Switch: '<S7>/Switch' incorporates:
-       *  AerodynamicForcesAndMoments: '<S7>/Aerodynamic Forces and Moments 1'
+      /* Switch: '<S7>/Select_AVL_VSP_Force' incorporates:
+       *  AerodynamicForcesAndMoments: '<S7>/AVL_Forces_Moments'
        */
-      SkySurfer_Core_DW->Switch[0] = (rtb_q1dot * rtb_jxi + 0.0 *
-        rtb_SumofDatum_k) + -rtb_Product3_cq * rtb_SumofControls_g;
+      SkySurfer_Core_DW->Select_AVL_VSP_Force[0] = (rtb_SumofControls *
+        rtb_q1dot + 0.0 * pData_tmp_2) + -rtb_Product5 * rtb_Product1_p4;
     }
 
-    /* Switch: '<S7>/Switch1' incorporates:
+    /* Switch: '<S7>/Select_AVL_VSP_Moment' incorporates:
      *  Constant: '<S7>/b8'
      */
-    if (SkySurfer_Core_P.useAVL_VSP > SkySurfer_Core_P.Switch1_Threshold) {
-      /* AerodynamicForcesAndMoments: '<S7>/Aerodynamic Forces and Moments ' */
-      rtb_Product5 = 0.0 * -rtb_Product1_ex;
+    if (SkySurfer_Core_P.useAVL_VSP >
+        SkySurfer_Core_P.Select_AVL_VSP_Moment_Threshold) {
+      /* AerodynamicForcesAndMoments: '<S7>/VSP_Forces_Moments' */
+      rtb_Multiply1_b = 0.0 * -rtb_Product2_n;
 
-      /* Switch: '<S7>/Switch1' incorporates:
-       *  AerodynamicForcesAndMoments: '<S7>/Aerodynamic Forces and Moments '
+      /* Switch: '<S7>/Select_AVL_VSP_Moment' incorporates:
+       *  AerodynamicForcesAndMoments: '<S7>/VSP_Forces_Moments'
        */
-      SkySurfer_Core_DW->Switch1[0] = (((rtb_u2rhoV2 * pData_tmp +
-        rtb_Product2_g5 * 0.0) + rtb_Product5) * frac + ((pData_tmp *
-        -rtb_Product2_g5 + rtb_u2rhoV2 * 0.0) + rtb_Product5) * rtb_Multiply2) +
-        (0.0 * pData_tmp - rtb_Product1_ex) * rtb_Product7;
+      SkySurfer_Core_DW->Select_AVL_VSP_Moment[0] = (((rtb_Product2_bq *
+        rtb_Switch1_idx_0 + rtb_Product2_nk * 0.0) + rtb_Multiply1_b) *
+        rtb_SumofControls_or + ((rtb_Switch1_idx_0 * -rtb_Product2_nk +
+        rtb_Product2_bq * 0.0) + rtb_Multiply1_b) * rtb_SumofDatum1) + (0.0 *
+        rtb_Switch1_idx_0 - rtb_Product2_n) * rtb_SumofControls1;
     } else {
-      /* Switch: '<S7>/Switch1' incorporates:
-       *  AerodynamicForcesAndMoments: '<S7>/Aerodynamic Forces and Moments 1'
+      /* Switch: '<S7>/Select_AVL_VSP_Moment' incorporates:
+       *  AerodynamicForcesAndMoments: '<S7>/AVL_Forces_Moments'
        */
-      SkySurfer_Core_DW->Switch1[0] = (rtb_Product1_p4 * rtb_SumofDatum_ax + 0.0
-        * rtb_Product2_nj) + -rtb_Product_op * pData_idx_2;
+      SkySurfer_Core_DW->Select_AVL_VSP_Moment[0] = (rtb_Product_op *
+        rtb_Product2_h + 0.0 * rtb_jxi) + -rtb_Multiply * rtb_Product4;
     }
 
-    /* Switch: '<S7>/Switch' incorporates:
+    /* Switch: '<S7>/Select_AVL_VSP_Force' incorporates:
      *  Constant: '<S7>/b7'
      */
-    if (SkySurfer_Core_P.useAVL_VSP > SkySurfer_Core_P.Switch_Threshold) {
-      /* Switch: '<S7>/Switch' incorporates:
-       *  AerodynamicForcesAndMoments: '<S7>/Aerodynamic Forces and Moments '
+    if (SkySurfer_Core_P.useAVL_VSP >
+        SkySurfer_Core_P.Select_AVL_VSP_Force_Threshold) {
+      /* Switch: '<S7>/Select_AVL_VSP_Force' incorporates:
+       *  AerodynamicForcesAndMoments: '<S7>/VSP_Forces_Moments'
        */
-      SkySurfer_Core_DW->Switch[1] = ((rtb_Switch1_idx_1 * 0.0 + rtb_Product2_h)
-        * rtb_Switch1_idx_2 + (-rtb_Product2_h * 0.0 + rtb_Switch1_idx_1) *
-        rtb_SumofControls_o) + rtb_Multiply * 0.0;
+      SkySurfer_Core_DW->Select_AVL_VSP_Force[1] = ((rtb_Product2_nj * 0.0 +
+        rtb_Product2_g5) * rtb_Switch1_idx_2 + (-rtb_Product2_g5 * 0.0 +
+        rtb_Product2_nj) * rtb_Switch1_idx_1) + rtb_SumofDatum_a * 0.0;
     } else {
-      /* Switch: '<S7>/Switch' incorporates:
-       *  AerodynamicForcesAndMoments: '<S7>/Aerodynamic Forces and Moments 1'
+      /* Switch: '<S7>/Select_AVL_VSP_Force' incorporates:
+       *  AerodynamicForcesAndMoments: '<S7>/AVL_Forces_Moments'
        */
-      SkySurfer_Core_DW->Switch[1] = (0.0 * rtb_jxi + rtb_SumofDatum_k) + 0.0 *
-        rtb_SumofControls_g;
+      SkySurfer_Core_DW->Select_AVL_VSP_Force[1] = (0.0 * rtb_q1dot +
+        pData_tmp_2) + 0.0 * rtb_Product1_p4;
     }
 
-    /* Switch: '<S7>/Switch1' incorporates:
+    /* Switch: '<S7>/Select_AVL_VSP_Moment' incorporates:
      *  Constant: '<S7>/b8'
      */
-    if (SkySurfer_Core_P.useAVL_VSP > SkySurfer_Core_P.Switch1_Threshold) {
-      /* Switch: '<S7>/Switch1' incorporates:
-       *  AerodynamicForcesAndMoments: '<S7>/Aerodynamic Forces and Moments '
+    if (SkySurfer_Core_P.useAVL_VSP >
+        SkySurfer_Core_P.Select_AVL_VSP_Moment_Threshold) {
+      /* Switch: '<S7>/Select_AVL_VSP_Moment' incorporates:
+       *  AerodynamicForcesAndMoments: '<S7>/VSP_Forces_Moments'
        */
-      SkySurfer_Core_DW->Switch1[1] = ((rtb_u2rhoV2 * 0.0 + rtb_Product2_g5) *
-        frac + (-rtb_Product2_g5 * 0.0 + rtb_u2rhoV2) * rtb_Multiply2) +
-        rtb_Product7 * 0.0;
+      SkySurfer_Core_DW->Select_AVL_VSP_Moment[1] = ((rtb_Product2_bq * 0.0 +
+        rtb_Product2_nk) * rtb_SumofControls_or + (-rtb_Product2_nk * 0.0 +
+        rtb_Product2_bq) * rtb_SumofDatum1) + rtb_SumofControls1 * 0.0;
     } else {
-      /* Switch: '<S7>/Switch1' incorporates:
-       *  AerodynamicForcesAndMoments: '<S7>/Aerodynamic Forces and Moments 1'
+      /* Switch: '<S7>/Select_AVL_VSP_Moment' incorporates:
+       *  AerodynamicForcesAndMoments: '<S7>/AVL_Forces_Moments'
        */
-      SkySurfer_Core_DW->Switch1[1] = (0.0 * rtb_SumofDatum_ax + rtb_Product2_nj)
-        + 0.0 * pData_idx_2;
+      SkySurfer_Core_DW->Select_AVL_VSP_Moment[1] = (0.0 * rtb_Product2_h +
+        rtb_jxi) + 0.0 * rtb_Product4;
     }
 
-    /* Switch: '<S7>/Switch' incorporates:
+    /* Switch: '<S7>/Select_AVL_VSP_Force' incorporates:
      *  Constant: '<S7>/b7'
      */
-    if (SkySurfer_Core_P.useAVL_VSP > SkySurfer_Core_P.Switch_Threshold) {
-      /* AerodynamicForcesAndMoments: '<S7>/Aerodynamic Forces and Moments ' */
-      rtb_Product5 = 0.0 * pData_tmp_0;
+    if (SkySurfer_Core_P.useAVL_VSP >
+        SkySurfer_Core_P.Select_AVL_VSP_Force_Threshold) {
+      /* AerodynamicForcesAndMoments: '<S7>/VSP_Forces_Moments' */
+      rtb_Multiply1_b = 0.0 * frac;
 
-      /* Switch: '<S7>/Switch' incorporates:
-       *  AerodynamicForcesAndMoments: '<S7>/Aerodynamic Forces and Moments '
+      /* Switch: '<S7>/Select_AVL_VSP_Force' incorporates:
+       *  AerodynamicForcesAndMoments: '<S7>/VSP_Forces_Moments'
        */
-      SkySurfer_Core_DW->Switch[2] = (((rtb_Switch1_idx_1 * rtb_Switch1_idx_0 +
-        rtb_Product2_h * 0.0) + rtb_Product5) * rtb_Switch1_idx_2 +
-        ((rtb_Switch1_idx_0 * -rtb_Product2_h + rtb_Switch1_idx_1 * 0.0) +
-         rtb_Product5) * rtb_SumofControls_o) + (0.0 * rtb_Switch1_idx_0 +
-        pData_tmp_0) * rtb_Multiply;
+      SkySurfer_Core_DW->Select_AVL_VSP_Force[2] = (((rtb_Product2_nj *
+        rtb_Product3_cq + rtb_Product2_g5 * 0.0) + rtb_Multiply1_b) *
+        rtb_Switch1_idx_2 + ((rtb_Product3_cq * -rtb_Product2_g5 +
+        rtb_Product2_nj * 0.0) + rtb_Multiply1_b) * rtb_Switch1_idx_1) + (0.0 *
+        rtb_Product3_cq + frac) * rtb_SumofDatum_a;
     } else {
-      /* Switch: '<S7>/Switch' incorporates:
-       *  AerodynamicForcesAndMoments: '<S7>/Aerodynamic Forces and Moments 1'
+      /* Switch: '<S7>/Select_AVL_VSP_Force' incorporates:
+       *  AerodynamicForcesAndMoments: '<S7>/AVL_Forces_Moments'
        */
-      SkySurfer_Core_DW->Switch[2] = (rtb_Product3_cq * rtb_jxi + 0.0 *
-        rtb_SumofDatum_k) + rtb_q1dot * rtb_SumofControls_g;
+      SkySurfer_Core_DW->Select_AVL_VSP_Force[2] = (rtb_Product5 * rtb_q1dot +
+        0.0 * pData_tmp_2) + rtb_SumofControls * rtb_Product1_p4;
     }
 
-    /* Switch: '<S7>/Switch1' incorporates:
+    /* Switch: '<S7>/Select_AVL_VSP_Moment' incorporates:
      *  Constant: '<S7>/b8'
      */
-    if (SkySurfer_Core_P.useAVL_VSP > SkySurfer_Core_P.Switch1_Threshold) {
-      /* AerodynamicForcesAndMoments: '<S7>/Aerodynamic Forces and Moments ' */
-      rtb_Product5 = 0.0 * pData_tmp;
+    if (SkySurfer_Core_P.useAVL_VSP >
+        SkySurfer_Core_P.Select_AVL_VSP_Moment_Threshold) {
+      /* AerodynamicForcesAndMoments: '<S7>/VSP_Forces_Moments' */
+      rtb_Multiply1_b = 0.0 * rtb_Switch1_idx_0;
 
-      /* Switch: '<S7>/Switch1' incorporates:
-       *  AerodynamicForcesAndMoments: '<S7>/Aerodynamic Forces and Moments '
+      /* Switch: '<S7>/Select_AVL_VSP_Moment' incorporates:
+       *  AerodynamicForcesAndMoments: '<S7>/VSP_Forces_Moments'
        */
-      SkySurfer_Core_DW->Switch1[2] = (((rtb_u2rhoV2 * rtb_Product1_ex +
-        rtb_Product2_g5 * 0.0) + rtb_Product5) * frac + ((rtb_Product1_ex *
-        -rtb_Product2_g5 + rtb_u2rhoV2 * 0.0) + rtb_Product5) * rtb_Multiply2) +
-        (0.0 * rtb_Product1_ex + pData_tmp) * rtb_Product7;
+      SkySurfer_Core_DW->Select_AVL_VSP_Moment[2] = (((rtb_Product2_bq *
+        rtb_Product2_n + rtb_Product2_nk * 0.0) + rtb_Multiply1_b) *
+        rtb_SumofControls_or + ((rtb_Product2_n * -rtb_Product2_nk +
+        rtb_Product2_bq * 0.0) + rtb_Multiply1_b) * rtb_SumofDatum1) + (0.0 *
+        rtb_Product2_n + rtb_Switch1_idx_0) * rtb_SumofControls1;
     } else {
-      /* Switch: '<S7>/Switch1' incorporates:
-       *  AerodynamicForcesAndMoments: '<S7>/Aerodynamic Forces and Moments 1'
+      /* Switch: '<S7>/Select_AVL_VSP_Moment' incorporates:
+       *  AerodynamicForcesAndMoments: '<S7>/AVL_Forces_Moments'
        */
-      SkySurfer_Core_DW->Switch1[2] = (rtb_Product_op * rtb_SumofDatum_ax + 0.0 *
-        rtb_Product2_nj) + rtb_Product1_p4 * pData_idx_2;
+      SkySurfer_Core_DW->Select_AVL_VSP_Moment[2] = (rtb_Multiply *
+        rtb_Product2_h + 0.0 * rtb_jxi) + rtb_Product_op * rtb_Product4;
     }
   }
 
-  /* End of Outputs for SubSystem: '<S5>/Aerodynamic' */
+  /* End of Outputs for SubSystem: '<S4>/Aerodynamic' */
 
-  /* Switch: '<S5>/Switch2' incorporates:
-   *  Constant: '<S5>/Constant6'
+  /* Switch: '<S4>/Switch2' incorporates:
+   *  Constant: '<S4>/Constant6'
    */
   if (rtb_sigma_ugsigma_vg > SkySurfer_Core_P.Switch2_Threshold) {
-    rtb_Reshape1_g[0] = SkySurfer_Core_DW->Switch1[0];
-    rtb_Reshape1_g[1] = SkySurfer_Core_DW->Switch1[1];
-    rtb_Reshape1_g[2] = SkySurfer_Core_DW->Switch1[2];
+    rtb_Reshape1_g[0] = SkySurfer_Core_DW->Select_AVL_VSP_Moment[0];
+    rtb_Reshape1_g[1] = SkySurfer_Core_DW->Select_AVL_VSP_Moment[1];
+    rtb_Reshape1_g[2] = SkySurfer_Core_DW->Select_AVL_VSP_Moment[2];
   } else {
     rtb_Reshape1_g[0] = SkySurfer_Core_P.Constant6_Value[0];
     rtb_Reshape1_g[1] = SkySurfer_Core_P.Constant6_Value[1];
     rtb_Reshape1_g[2] = SkySurfer_Core_P.Constant6_Value[2];
   }
 
-  /* End of Switch: '<S5>/Switch2' */
+  /* End of Switch: '<S4>/Switch2' */
 
-  /* Sum: '<S5>/Add1' incorporates:
-   *  Constant: '<S12>/Constant'
-   *  Constant: '<S12>/Constant4'
+  /* Sum: '<S4>/Add1' incorporates:
+   *  Constant: '<S13>/Constant'
+   *  Constant: '<S13>/Constant4'
    */
   rtb_Merge_a[0] = SkySurfer_Core_P.Constant4_Value + rtb_Reshape1_g[0];
   rtb_Merge_a[1] = rtb_LowAltitudeScaleLength + rtb_Reshape1_g[1];
   rtb_Merge_a[2] = SkySurfer_Core_P.Constant_Value_k5 + rtb_Reshape1_g[2];
   if (tmp) {
     for (i = 0; i < 3; i++) {
-      /* Selector: '<S16>/Selector1' incorporates:
-       *  Concatenate: '<S15>/Matrix Concatenation'
+      /* Selector: '<S14>/Selector1' incorporates:
+       *  Concatenate: '<S16>/Matrix Concatenation'
        */
       SkySurfer_Core_DW->Selector1[3 * i] = rtb_MatrixConcatenation[6 * i + 3];
 
-      /* Selector: '<S16>/Selector' incorporates:
-       *  Concatenate: '<S15>/Matrix Concatenation'
+      /* Selector: '<S14>/Selector' incorporates:
+       *  Concatenate: '<S16>/Matrix Concatenation'
        */
       SkySurfer_Core_DW->Selector[3 * i] = rtb_MatrixConcatenation[6 * i];
 
-      /* Selector: '<S16>/Selector1' incorporates:
-       *  Selector: '<S16>/Selector'
+      /* Selector: '<S14>/Selector1' incorporates:
+       *  Selector: '<S14>/Selector'
        */
       rtb_MatrixConcatenation_tmp = 3 * i + 1;
 
-      /* Selector: '<S16>/Selector1' incorporates:
-       *  Concatenate: '<S15>/Matrix Concatenation'
+      /* Selector: '<S14>/Selector1' incorporates:
+       *  Concatenate: '<S16>/Matrix Concatenation'
        */
       SkySurfer_Core_DW->Selector1[rtb_MatrixConcatenation_tmp] =
         rtb_MatrixConcatenation[6 * i + 4];
 
-      /* Selector: '<S16>/Selector' incorporates:
-       *  Concatenate: '<S15>/Matrix Concatenation'
+      /* Selector: '<S14>/Selector' incorporates:
+       *  Concatenate: '<S16>/Matrix Concatenation'
        */
       SkySurfer_Core_DW->Selector[rtb_MatrixConcatenation_tmp] =
         rtb_MatrixConcatenation[6 * i + 1];
 
-      /* Selector: '<S16>/Selector1' incorporates:
-       *  Selector: '<S16>/Selector'
+      /* Selector: '<S14>/Selector1' incorporates:
+       *  Selector: '<S14>/Selector'
        */
       rtb_MatrixConcatenation_tmp = 3 * i + 2;
 
-      /* Selector: '<S16>/Selector1' incorporates:
-       *  Concatenate: '<S15>/Matrix Concatenation'
+      /* Selector: '<S14>/Selector1' incorporates:
+       *  Concatenate: '<S16>/Matrix Concatenation'
        */
       SkySurfer_Core_DW->Selector1[rtb_MatrixConcatenation_tmp] =
         rtb_MatrixConcatenation[6 * i + 5];
 
-      /* Selector: '<S16>/Selector' incorporates:
-       *  Concatenate: '<S15>/Matrix Concatenation'
+      /* Selector: '<S14>/Selector' incorporates:
+       *  Concatenate: '<S16>/Matrix Concatenation'
        */
       SkySurfer_Core_DW->Selector[rtb_MatrixConcatenation_tmp] =
         rtb_MatrixConcatenation[6 * i + 2];
     }
   }
 
-  /* Product: '<S84>/Product' incorporates:
-   *  Switch: '<S5>/Switch1'
+  /* Product: '<S20>/Product' incorporates:
+   *  Switch: '<S4>/Switch1'
    */
   rtb_Switch1_idx_0 = 0.0;
   rtb_Switch1_idx_1 = 0.0;
   rtb_Switch1_idx_2 = 0.0;
 
-  /* Product: '<S85>/Product' */
-  rtb_Multiply = 0.0;
-  rtb_Multiply2 = 0.0;
-  rtb_Product3_cq = 0.0;
+  /* Product: '<S21>/Product' */
+  rtb_q1dot = 0.0;
+  rtb_Product_op = 0.0;
+  rtb_Product1_p4 = 0.0;
   for (i = 0; i < 3; i++) {
-    /* Product: '<S84>/Product' incorporates:
-     *  Product: '<S85>/Product'
-     *  Reshape: '<S84>/Reshape1'
-     *  Selector: '<S16>/Selector'
-     *  Switch: '<S5>/Switch1'
+    /* Product: '<S20>/Product' incorporates:
+     *  Product: '<S21>/Product'
+     *  Reshape: '<S20>/Reshape1'
+     *  Selector: '<S14>/Selector'
+     *  Switch: '<S4>/Switch1'
      */
-    rtb_Product7 = rtb_u[i];
-    rtb_Switch1_idx_0 += SkySurfer_Core_DW->Selector[3 * i] * rtb_Product7;
+    rtb_Product2_h = rtb_u[i];
+    rtb_Switch1_idx_0 += SkySurfer_Core_DW->Selector[3 * i] * rtb_Product2_h;
     rtb_MatrixConcatenation_tmp = 3 * i + 1;
     rtb_Switch1_idx_1 += SkySurfer_Core_DW->Selector[rtb_MatrixConcatenation_tmp]
-      * rtb_Product7;
+      * rtb_Product2_h;
     rtb_Switch1_idx_2_tmp = 3 * i + 2;
     rtb_Switch1_idx_2 += SkySurfer_Core_DW->Selector[rtb_Switch1_idx_2_tmp] *
-      rtb_Product7;
+      rtb_Product2_h;
 
-    /* Product: '<S85>/Product' incorporates:
-     *  Reshape: '<S85>/Reshape1'
-     *  Selector: '<S16>/Selector1'
+    /* Product: '<S21>/Product' incorporates:
+     *  Reshape: '<S21>/Reshape1'
+     *  Selector: '<S14>/Selector1'
      */
-    rtb_Product7 = rtb_u[i];
-    rtb_Multiply += SkySurfer_Core_DW->Selector1[3 * i] * rtb_Product7;
-    rtb_Multiply2 += SkySurfer_Core_DW->Selector1[rtb_MatrixConcatenation_tmp] *
-      rtb_Product7;
-    rtb_Product3_cq += SkySurfer_Core_DW->Selector1[rtb_Switch1_idx_2_tmp] *
-      rtb_Product7;
+    rtb_Product2_h = rtb_u[i];
+    rtb_q1dot += SkySurfer_Core_DW->Selector1[3 * i] * rtb_Product2_h;
+    rtb_Product_op += SkySurfer_Core_DW->Selector1[rtb_MatrixConcatenation_tmp] *
+      rtb_Product2_h;
+    rtb_Product1_p4 += SkySurfer_Core_DW->Selector1[rtb_Switch1_idx_2_tmp] *
+      rtb_Product2_h;
   }
 
-  /* Product: '<S16>/Product2' incorporates:
+  /* Product: '<S14>/Product2' incorporates:
    *  Product: '<S10>/Matrix Multiply'
-   *  Product: '<S85>/Product'
-   *  Product: '<S86>/i x j'
-   *  Product: '<S86>/j x k'
-   *  Product: '<S86>/k x i'
-   *  Product: '<S87>/i x k'
-   *  Product: '<S87>/j x i'
-   *  Product: '<S87>/k x j'
-   *  Reshape: '<S16>/Reshape'
-   *  Selector: '<S16>/Selector2'
-   *  Sum: '<S16>/Sum2'
-   *  Sum: '<S83>/Sum'
+   *  Product: '<S21>/Product'
+   *  Product: '<S22>/i x j'
+   *  Product: '<S22>/j x k'
+   *  Product: '<S22>/k x i'
+   *  Product: '<S23>/i x k'
+   *  Product: '<S23>/j x i'
+   *  Product: '<S23>/k x j'
+   *  Reshape: '<S14>/Reshape'
+   *  Selector: '<S14>/Selector2'
+   *  Sum: '<S14>/Sum2'
+   *  Sum: '<S19>/Sum'
    */
-  rtb_MatrixMultiply[0] = (rtb_Merge_a[0] - rtb_Multiply) - (rtb_u[1] *
+  rtb_MatrixMultiply[0] = (rtb_Merge_a[0] - rtb_q1dot) - (rtb_u[1] *
     rtb_Switch1_idx_2 - rtb_Switch1_idx_1 * rtb_u[2]);
-  rtb_MatrixMultiply[1] = (rtb_Merge_a[1] - rtb_Multiply2) - (rtb_Switch1_idx_0 *
-    rtb_u[2] - rtb_u[0] * rtb_Switch1_idx_2);
-  rtb_MatrixMultiply[2] = (rtb_Merge_a[2] - rtb_Product3_cq) - (rtb_u[0] *
+  rtb_MatrixMultiply[1] = (rtb_Merge_a[1] - rtb_Product_op) - (rtb_Switch1_idx_0
+    * rtb_u[2] - rtb_u[0] * rtb_Switch1_idx_2);
+  rtb_MatrixMultiply[2] = (rtb_Merge_a[2] - rtb_Product1_p4) - (rtb_u[0] *
     rtb_Switch1_idx_1 - rtb_Switch1_idx_0 * rtb_u[1]);
   rt_mrdivide_U1d1x3_U2d3x3_Yd1x3_snf(rtb_MatrixMultiply,
     SkySurfer_Core_DW->Selector2, SkySurfer_Core_DW->Reshape);
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[19] = SkySurfer_Core_DW->Reshape[0];
 
-  /* Switch: '<S5>/Switch1' incorporates:
-   *  Constant: '<S5>/Constant5'
+  /* Switch: '<S4>/Switch1' incorporates:
+   *  Constant: '<S4>/Constant5'
    */
-  if (rtb_sigma_ugsigma_vg > SkySurfer_Core_P.Switch1_Threshold_n) {
-    rtb_Switch1_idx_0 = SkySurfer_Core_DW->Switch[0];
-    rtb_Switch1_idx_1 = SkySurfer_Core_DW->Switch[1];
-    rtb_Switch1_idx_2 = SkySurfer_Core_DW->Switch[2];
+  if (rtb_sigma_ugsigma_vg > SkySurfer_Core_P.Switch1_Threshold) {
+    rtb_Switch1_idx_0 = SkySurfer_Core_DW->Select_AVL_VSP_Force[0];
+    rtb_Switch1_idx_1 = SkySurfer_Core_DW->Select_AVL_VSP_Force[1];
+    rtb_Switch1_idx_2 = SkySurfer_Core_DW->Select_AVL_VSP_Force[2];
   } else {
     rtb_Switch1_idx_0 = SkySurfer_Core_P.Constant5_Value_d[0];
     rtb_Switch1_idx_1 = SkySurfer_Core_P.Constant5_Value_d[1];
     rtb_Switch1_idx_2 = SkySurfer_Core_P.Constant5_Value_d[2];
   }
 
-  /* End of Switch: '<S5>/Switch1' */
+  /* End of Switch: '<S4>/Switch1' */
 
   /* Product: '<S129>/Product' */
-  rtb_Multiply2 = 0.0;
+  rtb_Product_op = 0.0;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[20] = SkySurfer_Core_DW->Reshape[1];
 
   /* Product: '<S129>/Product' */
-  rtb_Product7 = 0.0;
+  rtb_Product1_p4 = 0.0;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[21] = SkySurfer_Core_DW->Reshape[2];
 
   /* Product: '<S129>/Product' incorporates:
    *  Constant: '<S129>/Constant'
-   *  Reshape: '<S32>/Reshape (9) to [3x3] column-major'
+   *  Reshape: '<S37>/Reshape (9) to [3x3] column-major'
    */
-  rtb_Product3_cq = 0.0;
+  rtb_Product2_h = 0.0;
   for (i = 0; i < 3; i++) {
-    rtb_Multiply = SkySurfer_Core_P.Constant_Value_f0[i];
-    rtb_Multiply2 += rtb_Reshape9to3x3columnmajor[3 * i] * rtb_Multiply;
-    rtb_Product7 += rtb_Reshape9to3x3columnmajor[3 * i + 1] * rtb_Multiply;
-    rtb_Product3_cq += rtb_Reshape9to3x3columnmajor[3 * i + 2] * rtb_Multiply;
+    rtb_q1dot = SkySurfer_Core_P.Constant_Value_f0[i];
+    rtb_Product_op += rtb_Reshape9to3x3columnmajor[3 * i] * rtb_q1dot;
+    rtb_Product1_p4 += rtb_Reshape9to3x3columnmajor[3 * i + 1] * rtb_q1dot;
+    rtb_Product2_h += rtb_Reshape9to3x3columnmajor[3 * i + 2] * rtb_q1dot;
   }
 
   /* Product: '<S129>/Product3' incorporates:
-   *  Constant: '<S4>/const1'
+   *  Constant: '<S5>/const1'
    */
-  rtb_Multiply2 *= SkySurfer_Core_P.Mass0;
-  rtb_Product7 *= SkySurfer_Core_P.Mass0;
-  rtb_Product5 = SkySurfer_Core_P.Mass0 * rtb_Product3_cq;
+  rtb_Product_op *= SkySurfer_Core_P.Mass0;
+  rtb_Product1_p4 *= SkySurfer_Core_P.Mass0;
+  rtb_Product2_h *= SkySurfer_Core_P.Mass0;
 
   /* Switch: '<S192>/Switch' incorporates:
    *  Constant: '<S192>/Constant'
@@ -5932,7 +5801,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
   /* End of Saturate: '<S192>/Saturation' */
 
   /* Gain: '<S193>/vd' */
-  rtb_Multiply = 1.0 / SkySurfer_Core_P.uavData.contact.vd;
+  rtb_q1dot = 1.0 / SkySurfer_Core_P.uavData.contact.vd;
 
   /* SignalConversion generated from: '<S10>/Matrix Multiply' incorporates:
    *  Gain: '<S193>/friction coefficient'
@@ -5942,44 +5811,44 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
    *  UnaryMinus: '<S10>/Unary Minus1'
    *  UnaryMinus: '<S191>/Unary Minus'
    */
-  rtb_MatrixMultiply[0] = -(tanh(rtb_Multiply * SkySurfer_Core_DW->Reshape2[0]) *
+  rtb_MatrixMultiply[0] = -(tanh(rtb_q1dot * SkySurfer_Core_DW->Reshape2[0]) *
     SkySurfer_Core_P.uavData.contact.rollingFriction * rtb_Product3_cq);
-  rtb_MatrixMultiply[1] = -(tanh(rtb_Multiply * SkySurfer_Core_DW->Reshape2[1]) *
+  rtb_MatrixMultiply[1] = -(tanh(rtb_q1dot * SkySurfer_Core_DW->Reshape2[1]) *
     SkySurfer_Core_P.uavData.contact.rollingFriction * rtb_Product3_cq);
   rtb_MatrixMultiply[2] = -rtb_Product3_cq;
 
   /* Product: '<S10>/Matrix Multiply' incorporates:
-   *  Reshape: '<S32>/Reshape (9) to [3x3] column-major'
+   *  Reshape: '<S37>/Reshape (9) to [3x3] column-major'
    */
-  rtb_Product3_cq = 0.0;
-  rtb_Product16 = 0.0;
-  rtb_Product14 = 0.0;
+  rtb_Product4 = 0.0;
+  rtb_Product5 = 0.0;
+  rtb_jxi = 0.0;
   for (i = 0; i < 3; i++) {
-    rtb_Multiply = rtb_MatrixMultiply[i];
-    rtb_Product3_cq += rtb_Reshape9to3x3columnmajor[3 * i] * rtb_Multiply;
-    rtb_Product16 += rtb_Reshape9to3x3columnmajor[3 * i + 1] * rtb_Multiply;
-    rtb_Product14 += rtb_Reshape9to3x3columnmajor[3 * i + 2] * rtb_Multiply;
+    rtb_q1dot = rtb_MatrixMultiply[i];
+    rtb_Product4 += rtb_Reshape9to3x3columnmajor[3 * i] * rtb_q1dot;
+    rtb_Product5 += rtb_Reshape9to3x3columnmajor[3 * i + 1] * rtb_q1dot;
+    rtb_jxi += rtb_Reshape9to3x3columnmajor[3 * i + 2] * rtb_q1dot;
   }
 
-  /* Sum: '<S5>/Add' incorporates:
-   *  Constant: '<S12>/Constant5'
-   *  Constant: '<S12>/Constant6'
+  /* Sum: '<S4>/Add' incorporates:
+   *  Constant: '<S13>/Constant5'
+   *  Constant: '<S13>/Constant6'
    *  Product: '<S10>/Matrix Multiply'
    *  Product: '<S129>/Product3'
    */
-  rtb_Multiply = ((rtb_Switch1_idx_0 + rtb_Thrust_NonNeg) + rtb_Multiply2) +
-    rtb_Product3_cq;
-  rtb_q1dot = ((rtb_Switch1_idx_1 + SkySurfer_Core_P.Constant5_Value) +
-               rtb_Product7) + rtb_Product16;
+  rtb_q1dot = ((rtb_Switch1_idx_0 + rtb_Thrust_NonNeg) + rtb_Product_op) +
+    rtb_Product4;
+  rtb_SumofControls = ((rtb_Switch1_idx_1 + SkySurfer_Core_P.Constant5_Value) +
+                       rtb_Product1_p4) + rtb_Product5;
   rtb_Add_h_idx_2 = ((rtb_Switch1_idx_2 + SkySurfer_Core_P.Constant6_Value_o) +
-                     rtb_Product5) + rtb_Product14;
+                     rtb_Product2_h) + rtb_jxi;
 
   /* Product: '<S6>/Product' incorporates:
-   *  Constant: '<S4>/const1'
+   *  Constant: '<S5>/const1'
    */
-  rtb_Product16_j = rtb_Multiply / SkySurfer_Core_P.Mass0;
-  rtb_Product_op = rtb_q1dot / SkySurfer_Core_P.Mass0;
-  rtb_Product14_d = rtb_Add_h_idx_2 / SkySurfer_Core_P.Mass0;
+  rtb_Multiply = rtb_q1dot / SkySurfer_Core_P.Mass0;
+  rtb_Multiply1_b = rtb_SumofControls / SkySurfer_Core_P.Mass0;
+  rtb_Multiply1_fo = rtb_Add_h_idx_2 / SkySurfer_Core_P.Mass0;
 
   /* Sum: '<S6>/Sum' incorporates:
    *  Product: '<S88>/i x j'
@@ -5991,226 +5860,226 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
    *  Sum: '<S17>/Sum'
    */
   SkySurfer_Core_DW->Sum[0] = (rtb_Sum_mi_idx_1 * rtb_u[2] - rtb_u[1] *
-    rtb_Sum_mi_idx_2) + rtb_Product16_j;
+    rtb_Sum_mi_idx_2) + rtb_Multiply;
   SkySurfer_Core_DW->Sum[1] = (rtb_u[0] * rtb_Sum_mi_idx_2 - rtb_Sum_mi_idx_0 *
-    rtb_u[2]) + rtb_Product_op;
+    rtb_u[2]) + rtb_Multiply1_b;
   SkySurfer_Core_DW->Sum[2] = (rtb_Sum_mi_idx_0 * rtb_u[1] - rtb_u[0] *
-    rtb_Sum_mi_idx_1) + rtb_Product14_d;
+    rtb_Sum_mi_idx_1) + rtb_Multiply1_fo;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
-   *  Constant: '<S12>/Constant5'
-   *  Constant: '<S12>/Constant6'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
+   *  Constant: '<S13>/Constant5'
+   *  Constant: '<S13>/Constant6'
    */
   CoreSnapshot_Concat[34] = rtb_Thrust_NonNeg;
   CoreSnapshot_Concat[35] = SkySurfer_Core_P.Constant5_Value;
   CoreSnapshot_Concat[36] = SkySurfer_Core_P.Constant6_Value_o;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
-   *  Constant: '<S12>/Constant'
-   *  Constant: '<S12>/Constant4'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
+   *  Constant: '<S13>/Constant'
+   *  Constant: '<S13>/Constant4'
    */
   CoreSnapshot_Concat[37] = SkySurfer_Core_P.Constant4_Value;
   CoreSnapshot_Concat[38] = rtb_LowAltitudeScaleLength;
   CoreSnapshot_Concat[39] = SkySurfer_Core_P.Constant_Value_k5;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[52] = rtb_sigma_ugsigma_vg;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[53] = rtb_Gain;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[54] = rtb_Gain_h;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[55] = rtb_Product1_ow;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[22] = SkySurfer_Core_DW->Sum[0];
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
-  CoreSnapshot_Concat[25] = rtb_Product16_j;
+  CoreSnapshot_Concat[25] = rtb_Multiply;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[28] = rtb_Switch1_idx_0;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[31] = rtb_Reshape1_g[0];
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    *  Product: '<S10>/Matrix Multiply'
    */
-  CoreSnapshot_Concat[40] = rtb_Product3_cq;
+  CoreSnapshot_Concat[40] = rtb_Product4;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    *  Product: '<S129>/Product3'
    */
-  CoreSnapshot_Concat[43] = rtb_Multiply2;
+  CoreSnapshot_Concat[43] = rtb_Product_op;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
-   *  Sum: '<S5>/Add'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
+   *  Sum: '<S4>/Add'
    */
-  CoreSnapshot_Concat[46] = rtb_Multiply;
+  CoreSnapshot_Concat[46] = rtb_q1dot;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[49] = rtb_Merge_a[0];
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[56] = rtb_sincos_o1_idx_0;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
-   *  Sum: '<S11>/Add4'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
+   *  Sum: '<S12>/Add4'
    */
   CoreSnapshot_Concat[59] = rtb_UnitConversion_d;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[23] = SkySurfer_Core_DW->Sum[1];
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
-  CoreSnapshot_Concat[26] = rtb_Product_op;
+  CoreSnapshot_Concat[26] = rtb_Multiply1_b;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[29] = rtb_Switch1_idx_1;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[32] = rtb_Reshape1_g[1];
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    *  Product: '<S10>/Matrix Multiply'
    */
-  CoreSnapshot_Concat[41] = rtb_Product16;
+  CoreSnapshot_Concat[41] = rtb_Product5;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    *  Product: '<S129>/Product3'
    */
-  CoreSnapshot_Concat[44] = rtb_Product7;
+  CoreSnapshot_Concat[44] = rtb_Product1_p4;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
-   *  Sum: '<S5>/Add'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
+   *  Sum: '<S4>/Add'
    */
-  CoreSnapshot_Concat[47] = rtb_q1dot;
+  CoreSnapshot_Concat[47] = rtb_SumofControls;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[50] = rtb_Merge_a[1];
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[57] = rtb_sincos_o1_idx_1;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
-   *  Sum: '<S11>/Add4'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
+   *  Sum: '<S12>/Add4'
    */
   CoreSnapshot_Concat[60] = rtb_UnitConversion_n;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[24] = SkySurfer_Core_DW->Sum[2];
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
-  CoreSnapshot_Concat[27] = rtb_Product14_d;
+  CoreSnapshot_Concat[27] = rtb_Multiply1_fo;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[30] = rtb_Switch1_idx_2;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[33] = rtb_Reshape1_g[2];
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    *  Product: '<S10>/Matrix Multiply'
    */
-  CoreSnapshot_Concat[42] = rtb_Product14;
+  CoreSnapshot_Concat[42] = rtb_jxi;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    *  Product: '<S129>/Product3'
    */
-  CoreSnapshot_Concat[45] = rtb_Product5;
+  CoreSnapshot_Concat[45] = rtb_Product2_h;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
-   *  Sum: '<S5>/Add'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
+   *  Sum: '<S4>/Add'
    */
   CoreSnapshot_Concat[48] = rtb_Add_h_idx_2;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[51] = rtb_Merge_a[2];
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[58] = rtb_sincos_o1_idx_2;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
-   *  Sum: '<S11>/Add4'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
+   *  Sum: '<S12>/Add4'
    */
   CoreSnapshot_Concat[61] = rtb_MediumHighAltitudeIntensity;
 
   /* UnitConversion: '<S139>/Temperature Conversion' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   /* Unit Conversion - from: K to: K
      Expression: output = (1*input) + (0) */
   CoreSnapshot_Concat[62] = rtb_VectorConcatenate_idx_6;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[63] = rtb_q0dot;
 
   /* UnitConversion: '<S137>/Pressure Conversion' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    *  Gain: '<S136>/P0'
    *  Product: '<S136>/Product2'
    */
@@ -6219,50 +6088,50 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
   CoreSnapshot_Concat[64] = SkySurfer_Core_P.P0_Gain * rtb_Lv_idx_0 *
     rtb_Product2_p2;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[65] = rtb_DensityConversion;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[66] = rtb_Gain3;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[67] = rtb_w3;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[68] = rtb_Gain4;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[69] = rtb_Gain8;
 
-  /* SignalConversion generated from: '<S5>/CoreSnapshot_Concat' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* SignalConversion generated from: '<S4>/CoreSnapshot_Concat' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[70] = rtb_Thr;
 
-  /* DataTypeConversion: '<S5>/Core_33_aero_active' incorporates:
-   *  Concatenate: '<S5>/CoreSnapshot_Concat'
+  /* DataTypeConversion: '<S4>/Core_33_aero_active' incorporates:
+   *  Concatenate: '<S4>/CoreSnapshot_Concat'
    */
   CoreSnapshot_Concat[71] = Compare;
   if (tmp) {
     /* Outport: '<Root>/CoreSnapshot' incorporates:
-     *  Concatenate: '<S5>/CoreSnapshot_Concat'
+     *  Concatenate: '<S4>/CoreSnapshot_Concat'
      *  ZeroOrderHold: '<Root>/SampleCoreSnapshot'
      */
     memcpy(&SkySurfer_Core_Y->CoreSnapshot[0], &CoreSnapshot_Concat[0], 72U *
            sizeof(double));
 
-    /* If: '<S41>/If1' incorporates:
-     *  Constant: '<S41>/Constant'
+    /* If: '<S46>/If1' incorporates:
+     *  Constant: '<S46>/Constant'
      */
     rtAction = -1;
     if (rtsiIsModeUpdateTimeStep(&SkySurfer_Core_M->solverInfo)) {
@@ -6276,13 +6145,13 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     }
 
     if (rtAction == 0) {
-      /* Outputs for IfAction SubSystem: '<S41>/If Warning//Error' incorporates:
-       *  ActionPort: '<S50>/if'
+      /* Outputs for IfAction SubSystem: '<S46>/If Warning//Error' incorporates:
+       *  ActionPort: '<S55>/if'
        */
-      /* Bias: '<S54>/Bias1' incorporates:
-       *  Math: '<S54>/Math Function'
-       *  Product: '<S54>/Product'
-       *  Reshape: '<S74>/Reshape (9) to [3x3] column-major'
+      /* Bias: '<S59>/Bias1' incorporates:
+       *  Math: '<S59>/Math Function'
+       *  Product: '<S59>/Product'
+       *  Reshape: '<S79>/Reshape (9) to [3x3] column-major'
        */
       for (i = 0; i < 3; i++) {
         for (rtb_MatrixConcatenation_tmp = 0; rtb_MatrixConcatenation_tmp < 3;
@@ -6298,42 +6167,42 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
         }
       }
 
-      /* End of Bias: '<S54>/Bias1' */
+      /* End of Bias: '<S59>/Bias1' */
 
-      /* RelationalOperator: '<S62>/Compare' incorporates:
-       *  Abs: '<S54>/Abs2'
-       *  Constant: '<S62>/Constant'
-       *  Reshape: '<S54>/Reshape'
+      /* RelationalOperator: '<S67>/Compare' incorporates:
+       *  Abs: '<S59>/Abs2'
+       *  Constant: '<S67>/Constant'
+       *  Reshape: '<S59>/Reshape'
        */
       for (i = 0; i < 9; i++) {
         rtb_Reshape_b[i] = (fabs(rtb_Reshape9to3x3columnmajor[i]) >
                             SkySurfer_Core_P.DCM2Ang_tolerance);
       }
 
-      /* End of RelationalOperator: '<S62>/Compare' */
+      /* End of RelationalOperator: '<S67>/Compare' */
 
-      /* Logic: '<S54>/Logical Operator1' incorporates:
-       *  Reshape: '<S54>/Reshape'
+      /* Logic: '<S59>/Logical Operator1' incorporates:
+       *  Reshape: '<S59>/Reshape'
        */
       Compare = rtb_Reshape_b[0];
       for (i = 0; i < 8; i++) {
         Compare = (Compare || rtb_Reshape_b[i + 1]);
       }
 
-      /* If: '<S50>/If' incorporates:
-       *  Abs: '<S55>/Abs1'
-       *  Bias: '<S55>/Bias'
-       *  Constant: '<S64>/Constant'
-       *  Logic: '<S54>/Logical Operator1'
-       *  Product: '<S63>/Product'
-       *  Product: '<S63>/Product1'
-       *  Product: '<S63>/Product2'
-       *  Product: '<S63>/Product3'
-       *  Product: '<S63>/Product4'
-       *  Product: '<S63>/Product5'
-       *  RelationalOperator: '<S64>/Compare'
-       *  Reshape: '<S74>/Reshape (9) to [3x3] column-major'
-       *  Sum: '<S63>/Sum'
+      /* If: '<S55>/If' incorporates:
+       *  Abs: '<S60>/Abs1'
+       *  Bias: '<S60>/Bias'
+       *  Constant: '<S69>/Constant'
+       *  Logic: '<S59>/Logical Operator1'
+       *  Product: '<S68>/Product'
+       *  Product: '<S68>/Product1'
+       *  Product: '<S68>/Product2'
+       *  Product: '<S68>/Product3'
+       *  Product: '<S68>/Product4'
+       *  Product: '<S68>/Product5'
+       *  RelationalOperator: '<S69>/Compare'
+       *  Reshape: '<S79>/Reshape (9) to [3x3] column-major'
+       *  Sum: '<S68>/Sum'
        */
       if (fabs((((((rtb_VectorConcatenate_et[0] * rtb_VectorConcatenate_et[4] *
                     rtb_VectorConcatenate_et[8] - rtb_VectorConcatenate_et[0] *
@@ -6346,104 +6215,104 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
                 rtb_VectorConcatenate_et[4] * rtb_VectorConcatenate_et[6]) +
                SkySurfer_Core_P.Bias_Bias) > SkySurfer_Core_P.DCM2Ang_tolerance)
       {
-        /* Outputs for IfAction SubSystem: '<S50>/If Not Proper' incorporates:
-         *  ActionPort: '<S53>/Action Port'
+        /* Outputs for IfAction SubSystem: '<S55>/If Not Proper' incorporates:
+         *  ActionPort: '<S58>/Action Port'
          */
-        /* If: '<S53>/If' incorporates:
-         *  Constant: '<S53>/Constant'
+        /* If: '<S58>/If' incorporates:
+         *  Constant: '<S58>/Constant'
          */
         if (SkySurfer_Core_P.DCM2Ang_action == 2) {
-          /* Outputs for IfAction SubSystem: '<S53>/Warning' incorporates:
+          /* Outputs for IfAction SubSystem: '<S58>/Warning' incorporates:
+           *  ActionPort: '<S66>/Action Port'
+           */
+          /* Assertion: '<S66>/Assertion' incorporates:
+           *  Constant: '<S58>/Constant1'
+           */
+          utAssert(SkySurfer_Core_P.Constant1_Value != 0.0);
+
+          /* End of Outputs for SubSystem: '<S58>/Warning' */
+        } else if (SkySurfer_Core_P.DCM2Ang_action == 3) {
+          /* Outputs for IfAction SubSystem: '<S58>/Error' incorporates:
+           *  ActionPort: '<S64>/Action Port'
+           */
+          /* Assertion: '<S64>/Assertion' incorporates:
+           *  Constant: '<S58>/Constant1'
+           */
+          utAssert(SkySurfer_Core_P.Constant1_Value != 0.0);
+
+          /* End of Outputs for SubSystem: '<S58>/Error' */
+        }
+
+        /* End of If: '<S58>/If' */
+        /* End of Outputs for SubSystem: '<S55>/If Not Proper' */
+      } else if (Compare) {
+        /* Outputs for IfAction SubSystem: '<S55>/Else If Not Orthogonal' incorporates:
+         *  ActionPort: '<S56>/Action Port'
+         */
+        /* If: '<S56>/If' incorporates:
+         *  Constant: '<S56>/Constant'
+         */
+        if (SkySurfer_Core_P.DCM2Ang_action == 2) {
+          /* Outputs for IfAction SubSystem: '<S56>/Warning' incorporates:
+           *  ActionPort: '<S63>/Action Port'
+           */
+          /* Assertion: '<S63>/Assertion' incorporates:
+           *  Constant: '<S56>/Constant1'
+           */
+          utAssert(SkySurfer_Core_P.Constant1_Value_a != 0.0);
+
+          /* End of Outputs for SubSystem: '<S56>/Warning' */
+        } else if (SkySurfer_Core_P.DCM2Ang_action == 3) {
+          /* Outputs for IfAction SubSystem: '<S56>/Error' incorporates:
            *  ActionPort: '<S61>/Action Port'
            */
           /* Assertion: '<S61>/Assertion' incorporates:
-           *  Constant: '<S53>/Constant1'
-           */
-          utAssert(SkySurfer_Core_P.Constant1_Value != 0.0);
-
-          /* End of Outputs for SubSystem: '<S53>/Warning' */
-        } else if (SkySurfer_Core_P.DCM2Ang_action == 3) {
-          /* Outputs for IfAction SubSystem: '<S53>/Error' incorporates:
-           *  ActionPort: '<S59>/Action Port'
-           */
-          /* Assertion: '<S59>/Assertion' incorporates:
-           *  Constant: '<S53>/Constant1'
-           */
-          utAssert(SkySurfer_Core_P.Constant1_Value != 0.0);
-
-          /* End of Outputs for SubSystem: '<S53>/Error' */
-        }
-
-        /* End of If: '<S53>/If' */
-        /* End of Outputs for SubSystem: '<S50>/If Not Proper' */
-      } else if (Compare) {
-        /* Outputs for IfAction SubSystem: '<S50>/Else If Not Orthogonal' incorporates:
-         *  ActionPort: '<S51>/Action Port'
-         */
-        /* If: '<S51>/If' incorporates:
-         *  Constant: '<S51>/Constant'
-         */
-        if (SkySurfer_Core_P.DCM2Ang_action == 2) {
-          /* Outputs for IfAction SubSystem: '<S51>/Warning' incorporates:
-           *  ActionPort: '<S58>/Action Port'
-           */
-          /* Assertion: '<S58>/Assertion' incorporates:
-           *  Constant: '<S51>/Constant1'
+           *  Constant: '<S56>/Constant1'
            */
           utAssert(SkySurfer_Core_P.Constant1_Value_a != 0.0);
 
-          /* End of Outputs for SubSystem: '<S51>/Warning' */
-        } else if (SkySurfer_Core_P.DCM2Ang_action == 3) {
-          /* Outputs for IfAction SubSystem: '<S51>/Error' incorporates:
-           *  ActionPort: '<S56>/Action Port'
-           */
-          /* Assertion: '<S56>/Assertion' incorporates:
-           *  Constant: '<S51>/Constant1'
-           */
-          utAssert(SkySurfer_Core_P.Constant1_Value_a != 0.0);
-
-          /* End of Outputs for SubSystem: '<S51>/Error' */
+          /* End of Outputs for SubSystem: '<S56>/Error' */
         }
 
-        /* End of If: '<S51>/If' */
-        /* End of Outputs for SubSystem: '<S50>/Else If Not Orthogonal' */
+        /* End of If: '<S56>/If' */
+        /* End of Outputs for SubSystem: '<S55>/Else If Not Orthogonal' */
       }
 
-      /* End of If: '<S50>/If' */
-      /* End of Outputs for SubSystem: '<S41>/If Warning//Error' */
+      /* End of If: '<S55>/If' */
+      /* End of Outputs for SubSystem: '<S46>/If Warning//Error' */
     }
 
-    /* End of If: '<S41>/If1' */
+    /* End of If: '<S46>/If1' */
   }
 
-  /* Sqrt: '<S79>/sqrt' incorporates:
-   *  Product: '<S80>/Product'
-   *  Product: '<S80>/Product1'
-   *  Product: '<S80>/Product2'
-   *  Product: '<S80>/Product3'
-   *  Sum: '<S80>/Sum'
+  /* Sqrt: '<S84>/sqrt' incorporates:
+   *  Product: '<S85>/Product'
+   *  Product: '<S85>/Product1'
+   *  Product: '<S85>/Product2'
+   *  Product: '<S85>/Product3'
+   *  Sum: '<S85>/Sum'
    */
   rtb_Product3_cq = sqrt(((rtb_Q0123_idx_0 * rtb_Q0123_idx_0 + rtb_Q0123_idx_1 *
     rtb_Q0123_idx_1) + rtb_Q0123_idx_2 * rtb_Q0123_idx_2) + rtb_Q0123_idx_3 *
     rtb_Q0123_idx_3);
 
-  /* Product: '<S78>/Product' */
+  /* Product: '<S83>/Product' */
   rtb_Product_op = rtb_Q0123_idx_0 / rtb_Product3_cq;
 
-  /* Product: '<S78>/Product1' */
+  /* Product: '<S83>/Product1' */
   rtb_Product1_p4 = rtb_Q0123_idx_1 / rtb_Product3_cq;
 
-  /* Product: '<S78>/Product2' */
+  /* Product: '<S83>/Product2' */
   rtb_Product2_h = rtb_Q0123_idx_2 / rtb_Product3_cq;
 
-  /* Product: '<S78>/Product3' */
+  /* Product: '<S83>/Product3' */
   rtb_Product3_cq = rtb_Q0123_idx_3 / rtb_Product3_cq;
 
-  /* SignalConversion generated from: '<S14>/Q0123' incorporates:
-   *  Fcn: '<S22>/q0dot'
-   *  Fcn: '<S22>/q1dot'
-   *  Fcn: '<S22>/q2dot'
-   *  Fcn: '<S22>/q3dot'
+  /* SignalConversion generated from: '<S15>/Q0123' incorporates:
+   *  Fcn: '<S27>/q0dot'
+   *  Fcn: '<S27>/q1dot'
+   *  Fcn: '<S27>/q2dot'
+   *  Fcn: '<S27>/q3dot'
    */
   SkySurfer_Core_DW->TmpSignalConversionAtQ0123Inport1[0] = ((rtb_Product1_p4 *
     rtb_u[0] + rtb_Product2_h * rtb_u[1]) + rtb_Product3_cq * rtb_u[2]) * -0.5;
@@ -6458,69 +6327,69 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
      *  Inport: '<Root>/Controls'
      */
     if (SkySurfer_Core_U->Controls[2] > SkySurfer_Core_P.Limit_ELE_UpperSat) {
-      rtb_Multiply = SkySurfer_Core_P.Limit_ELE_UpperSat;
+      rtb_q1dot = SkySurfer_Core_P.Limit_ELE_UpperSat;
     } else if (SkySurfer_Core_U->Controls[2] <
                SkySurfer_Core_P.Limit_ELE_LowerSat) {
-      rtb_Multiply = SkySurfer_Core_P.Limit_ELE_LowerSat;
+      rtb_q1dot = SkySurfer_Core_P.Limit_ELE_LowerSat;
     } else {
-      rtb_Multiply = SkySurfer_Core_U->Controls[2];
+      rtb_q1dot = SkySurfer_Core_U->Controls[2];
     }
 
     /* Gain: '<S3>/Gain' incorporates:
      *  Saturate: '<S3>/Limit_ELE'
      */
-    SkySurfer_Core_DW->Gain_g = SkySurfer_Core_P.Gain_Gain_h * rtb_Multiply;
+    SkySurfer_Core_DW->Gain_g = SkySurfer_Core_P.Gain_Gain_h * rtb_q1dot;
 
     /* Saturate: '<S3>/Limit_RUD' incorporates:
      *  Inport: '<Root>/Controls'
      */
     if (SkySurfer_Core_U->Controls[3] > SkySurfer_Core_P.Limit_RUD_UpperSat) {
-      rtb_Multiply = SkySurfer_Core_P.Limit_RUD_UpperSat;
+      rtb_q1dot = SkySurfer_Core_P.Limit_RUD_UpperSat;
     } else if (SkySurfer_Core_U->Controls[3] <
                SkySurfer_Core_P.Limit_RUD_LowerSat) {
-      rtb_Multiply = SkySurfer_Core_P.Limit_RUD_LowerSat;
+      rtb_q1dot = SkySurfer_Core_P.Limit_RUD_LowerSat;
     } else {
-      rtb_Multiply = SkySurfer_Core_U->Controls[3];
+      rtb_q1dot = SkySurfer_Core_U->Controls[3];
     }
 
     /* Gain: '<S3>/Gain1' incorporates:
      *  Saturate: '<S3>/Limit_RUD'
      */
-    SkySurfer_Core_DW->Gain1 = SkySurfer_Core_P.Gain1_Gain_fv * rtb_Multiply;
+    SkySurfer_Core_DW->Gain1 = SkySurfer_Core_P.Gain1_Gain_fv * rtb_q1dot;
 
     /* Saturate: '<S3>/Limit_AIL_L' incorporates:
      *  Inport: '<Root>/Controls'
      */
     if (SkySurfer_Core_U->Controls[0] > SkySurfer_Core_P.Limit_AIL_L_UpperSat) {
-      rtb_Multiply = SkySurfer_Core_P.Limit_AIL_L_UpperSat;
+      rtb_q1dot = SkySurfer_Core_P.Limit_AIL_L_UpperSat;
     } else if (SkySurfer_Core_U->Controls[0] <
                SkySurfer_Core_P.Limit_AIL_L_LowerSat) {
-      rtb_Multiply = SkySurfer_Core_P.Limit_AIL_L_LowerSat;
+      rtb_q1dot = SkySurfer_Core_P.Limit_AIL_L_LowerSat;
     } else {
-      rtb_Multiply = SkySurfer_Core_U->Controls[0];
+      rtb_q1dot = SkySurfer_Core_U->Controls[0];
     }
 
     /* Gain: '<S3>/Gain2' incorporates:
      *  Saturate: '<S3>/Limit_AIL_L'
      */
-    SkySurfer_Core_DW->Gain2 = SkySurfer_Core_P.Gain2_Gain_f * rtb_Multiply;
+    SkySurfer_Core_DW->Gain2 = SkySurfer_Core_P.Gain2_Gain_f * rtb_q1dot;
 
     /* Saturate: '<S3>/Limit_AIL_R' incorporates:
      *  Inport: '<Root>/Controls'
      */
     if (SkySurfer_Core_U->Controls[1] > SkySurfer_Core_P.Limit_AIL_R_UpperSat) {
-      rtb_Multiply = SkySurfer_Core_P.Limit_AIL_R_UpperSat;
+      rtb_q1dot = SkySurfer_Core_P.Limit_AIL_R_UpperSat;
     } else if (SkySurfer_Core_U->Controls[1] <
                SkySurfer_Core_P.Limit_AIL_R_LowerSat) {
-      rtb_Multiply = SkySurfer_Core_P.Limit_AIL_R_LowerSat;
+      rtb_q1dot = SkySurfer_Core_P.Limit_AIL_R_LowerSat;
     } else {
-      rtb_Multiply = SkySurfer_Core_U->Controls[1];
+      rtb_q1dot = SkySurfer_Core_U->Controls[1];
     }
 
     /* Gain: '<S3>/Gain6' incorporates:
      *  Saturate: '<S3>/Limit_AIL_R'
      */
-    SkySurfer_Core_DW->Gain6 = SkySurfer_Core_P.Gain6_Gain * rtb_Multiply;
+    SkySurfer_Core_DW->Gain6 = SkySurfer_Core_P.Gain6_Gain * rtb_q1dot;
 
     /* Saturate: '<S3>/Limit_THR' incorporates:
      *  Inport: '<Root>/Controls'
@@ -6547,7 +6416,7 @@ void SkySurfer_Core_step(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M,
     /* Update for Integrator: '<S6>/UVWb' */
     SkySurfer_Core_DW->UVWb_DWORK1 = false;
 
-    /* Update for Integrator: '<S14>/Q0123' */
+    /* Update for Integrator: '<S15>/Q0123' */
     SkySurfer_Core_DW->Q0123_DWORK1 = false;
     if (rtmIsMajorTimeStep(SkySurfer_Core_M) &&
         SkySurfer_Core_M->Timing.TaskCounters.TID[1] == 0) {
@@ -6642,7 +6511,7 @@ void SkySurfer_Core_derivatives(RT_MODEL_SkySurfer_Core_T *const
   /* Derivatives for Integrator: '<S6>/UVWb' */
   _rtXdot->UVWb_CSTATE[2] = SkySurfer_Core_DW->Sum[2];
 
-  /* Derivatives for Integrator: '<S14>/Q0123' */
+  /* Derivatives for Integrator: '<S15>/Q0123' */
   _rtXdot->Q0123_CSTATE[0] =
     SkySurfer_Core_DW->TmpSignalConversionAtQ0123Inport1[0];
   _rtXdot->Q0123_CSTATE[1] =
@@ -6963,7 +6832,7 @@ void SkySurfer_Core_initialize(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M
     uint32_t t;
     uint32_t tseed;
 
-    /* Start for If: '<S36>/If' */
+    /* Start for If: '<S41>/If' */
     SkySurfer_Core_DW->If_ActiveSubsystem = -1;
 
     /* Start for If: '<S156>/if Height < Max low altitude  elseif Height > Min isotropic altitude ' */
@@ -6974,11 +6843,11 @@ void SkySurfer_Core_initialize(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M
     SkySurfer_Core_DW->ifHeightMaxlowaltitudeelseifHeightMinisotropicaltitude_ActiveSubsystem_l
       = -1;
 
-    /* Start for If: '<S41>/If1' */
+    /* Start for If: '<S46>/If1' */
     SkySurfer_Core_DW->If1_ActiveSubsystem = -1;
 
     /* InitializeConditions for Integrator: '<S6>/XYZe' incorporates:
-     *  Integrator: '<S14>/Q0123'
+     *  Integrator: '<S15>/Q0123'
      *  Integrator: '<S6>/UVWb'
      */
     if (rtmIsFirstInitCond(SkySurfer_Core_M)) {
@@ -7001,7 +6870,7 @@ void SkySurfer_Core_initialize(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M
     /* InitializeConditions for Integrator: '<S6>/UVWb' */
     SkySurfer_Core_DW->UVWb_DWORK1 = true;
 
-    /* InitializeConditions for Integrator: '<S14>/Q0123' */
+    /* InitializeConditions for Integrator: '<S15>/Q0123' */
     SkySurfer_Core_DW->Q0123_DWORK1 = true;
 
     /* InitializeConditions for Integrator: '<S6>/PQR' */
@@ -7124,17 +6993,17 @@ void SkySurfer_Core_initialize(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M
     /* InitializeConditions for RateLimiter: '<S3>/Rate Limiter2' */
     SkySurfer_Core_DW->LastMajorTime_d = (rtMinusInf);
 
-    /* SystemInitialize for IfAction SubSystem: '<S36>/AxisRotZeroR3' */
-    /* Start for If: '<S46>/If' */
+    /* SystemInitialize for IfAction SubSystem: '<S41>/AxisRotZeroR3' */
+    /* Start for If: '<S51>/If' */
     SkySurfer_Core_DW->If_ActiveSubsystem_a = -1;
 
-    /* End of SystemInitialize for SubSystem: '<S36>/AxisRotZeroR3' */
+    /* End of SystemInitialize for SubSystem: '<S41>/AxisRotZeroR3' */
 
-    /* SystemInitialize for IfAction SubSystem: '<S36>/AxisRotDefault' */
-    /* Start for If: '<S42>/If' */
+    /* SystemInitialize for IfAction SubSystem: '<S41>/AxisRotDefault' */
+    /* Start for If: '<S47>/If' */
     SkySurfer_Core_DW->If_ActiveSubsystem_i = -1;
 
-    /* End of SystemInitialize for SubSystem: '<S36>/AxisRotDefault' */
+    /* End of SystemInitialize for SubSystem: '<S41>/AxisRotDefault' */
 
     /* SystemInitialize for Enabled SubSystem: '<S140>/Distance into gust (x)' */
     /* InitializeConditions for Integrator: '<S145>/Distance into Gust (x) (Limited to gust length d)' */
@@ -7307,38 +7176,38 @@ void SkySurfer_Core_initialize(RT_MODEL_SkySurfer_Core_T *const SkySurfer_Core_M
 
     /* End of SystemInitialize for SubSystem: '<S150>/Hrgw' */
 
-    /* SystemInitialize for Enabled SubSystem: '<S5>/Aerodynamic' */
-    /* SystemInitialize for Switch: '<S7>/Switch' incorporates:
+    /* SystemInitialize for Enabled SubSystem: '<S4>/Aerodynamic' */
+    /* SystemInitialize for Switch: '<S7>/Select_AVL_VSP_Force' incorporates:
      *  Outport: '<S7>/F_aero'
      */
-    SkySurfer_Core_DW->Switch[0] = SkySurfer_Core_P.F_aero_Y0;
+    SkySurfer_Core_DW->Select_AVL_VSP_Force[0] = SkySurfer_Core_P.F_aero_Y0;
 
-    /* SystemInitialize for Switch: '<S7>/Switch1' incorporates:
+    /* SystemInitialize for Switch: '<S7>/Select_AVL_VSP_Moment' incorporates:
      *  Outport: '<S7>/M_aero'
      */
-    SkySurfer_Core_DW->Switch1[0] = SkySurfer_Core_P.M_aero_Y0;
+    SkySurfer_Core_DW->Select_AVL_VSP_Moment[0] = SkySurfer_Core_P.M_aero_Y0;
 
-    /* SystemInitialize for Switch: '<S7>/Switch' incorporates:
+    /* SystemInitialize for Switch: '<S7>/Select_AVL_VSP_Force' incorporates:
      *  Outport: '<S7>/F_aero'
      */
-    SkySurfer_Core_DW->Switch[1] = SkySurfer_Core_P.F_aero_Y0;
+    SkySurfer_Core_DW->Select_AVL_VSP_Force[1] = SkySurfer_Core_P.F_aero_Y0;
 
-    /* SystemInitialize for Switch: '<S7>/Switch1' incorporates:
+    /* SystemInitialize for Switch: '<S7>/Select_AVL_VSP_Moment' incorporates:
      *  Outport: '<S7>/M_aero'
      */
-    SkySurfer_Core_DW->Switch1[1] = SkySurfer_Core_P.M_aero_Y0;
+    SkySurfer_Core_DW->Select_AVL_VSP_Moment[1] = SkySurfer_Core_P.M_aero_Y0;
 
-    /* SystemInitialize for Switch: '<S7>/Switch' incorporates:
+    /* SystemInitialize for Switch: '<S7>/Select_AVL_VSP_Force' incorporates:
      *  Outport: '<S7>/F_aero'
      */
-    SkySurfer_Core_DW->Switch[2] = SkySurfer_Core_P.F_aero_Y0;
+    SkySurfer_Core_DW->Select_AVL_VSP_Force[2] = SkySurfer_Core_P.F_aero_Y0;
 
-    /* SystemInitialize for Switch: '<S7>/Switch1' incorporates:
+    /* SystemInitialize for Switch: '<S7>/Select_AVL_VSP_Moment' incorporates:
      *  Outport: '<S7>/M_aero'
      */
-    SkySurfer_Core_DW->Switch1[2] = SkySurfer_Core_P.M_aero_Y0;
+    SkySurfer_Core_DW->Select_AVL_VSP_Moment[2] = SkySurfer_Core_P.M_aero_Y0;
 
-    /* End of SystemInitialize for SubSystem: '<S5>/Aerodynamic' */
+    /* End of SystemInitialize for SubSystem: '<S4>/Aerodynamic' */
   }
 
   /* set "at time zero" to false */

@@ -30,7 +30,7 @@
 
 ## 核心
 
-- **來源邊界**：SLX 根層是 `Controls[16]` → `Actuator_Mapping` → `UAV` → `CoreSnapshot[72]`。CoreSnapshot 在 `UAV/UAV` 內以 Vector Concatenate 組成，欄位與單位見 `plant_core.h`。
+- **來源邊界**：SLX 根層是 `Controls[16]` → `Actuator_Mapping` → `UAV` → `CoreSnapshot[72]`。CoreSnapshot 在 `UAV/Airframe` 內以 Vector Concatenate 組成，欄位與單位見 `plant_core.h`。
 - **builder 只改 cache 副本**：加 Thil 的 ZOH（輸出取 t_k）；把 SETTING1 的 7 個初值常數改由根層 `InitialConditions[7]` 輸入，風速、風向與風的模式改由根層 `Wind[4]` 輸入，因為 Reusable 生成碼的模型參數是共用的全域結構，放在輸入裡才會每架各一份；亂流以參考強度 W20 = 1 m/s 產碼，輸出乘上 `Wind[3]`（見下面「風」）。其餘氣動表、質量等參數各架共用（同一架飛機）。
 - **連續狀態與 f(x, u)**（API 1.1）：37 個連續狀態（位置、機體速度、四元數、角速度、5 個致動器、16 個 Dryden 亂流濾波器、3 個陣風距離；順序與致動器對應見 `plant_core.h`）。`plant_core_get_state()` 讀出；`plant_core_eval()` 寫入狀態 x、套用命令、跑一個正常步，回傳該步 ode4 第一階的 f(t_k, x) 與 x 的 snapshot，和模擬是同一段程式。注意：(1) 新初始化的核心第一步會從初值輸入重新載入積分器，所以先步進一次再寫狀態；(2) 舵面在伺服之後有 rate limiter（記住前一次輸出），單次求值舵面最多動 2°，求平衡時同一狀態要寫入並步進數十次讓 limiter 到位（`sitl/trim.py`）。eval 之後核心已前進一步，所以在副本上做。
 - **呼叫規則**：每架配置 `plant_core_size()` 位元組；`plant_core_step()` 先回報 t_k，再積分一步。同一程序可交錯跑多架，但一次一個呼叫，不在多執行緒同時呼叫。複製狀態一律用 `plant_core_copy()`（內部指標要重新指向新位置）。
@@ -104,7 +104,7 @@ IMU 的 noise density 換成每筆標準差：σ = density·√(1/(2·dt))。沒
 
 ## 地面
 
-模型的地面是很簡化的一塊（`UAV/UAV/Ground Model`，參數在 `model/FW_SkySurfer_InitialFunction.m` 的 `uavData.contact`）。看起飛、落地的結果或換飛機前要知道：
+模型的地面是很簡化的一塊（`UAV/Airframe/Ground Model`，參數在 `model/FW_SkySurfer_InitialFunction.m` 的 `uavData.contact`）。看起飛、落地的結果或換飛機前要知道：
 
 - **只有一個接觸點，就在重心**：沒有輪子、起落架、機腹的位置。地面是一整片平地，就在模型位置的高度 0（場景的離地高度 `height_agl_m` 從這裡量），沒有地形。
 - **往上推的力**：重心低於地面時才有，像很硬的彈簧加阻尼（自然頻率 20 Hz、臨界阻尼），只推不拉。靜止時約陷下 0.6 mm。
@@ -155,7 +155,7 @@ SkySurfer 的數字（AVL 座標原點在翼根前緣，往機尾為正；模型
 
 ## 風
 
-**模型裡的風**（`model/FW_SkySurfer_HIL.slx` 的 `UAV/UAV/Environment/Wind`，Aerospace Blockset 方塊）有兩種模式，二選一，不疊加：
+**模型裡的風**（`model/FW_SkySurfer_HIL.slx` 的 `UAV/Airframe/Environment/Wind`，Aerospace Blockset 方塊）有兩種模式，二選一，不疊加：
 
 | 模式 | 內容 | 平均風從哪來 |
 |---|---|---|
