@@ -124,7 +124,7 @@
 - **硬體錯誤當機**：
   - hard fault 會在記憶卡留下 `fault_*.log`，PX4 開機檢查到就不准解鎖（`COM_ARM_HFLT_CHK`）；刪掉以後要重開才會解除。
   - 這次是 USB 那條 MAVLink（`mavlink_if2`）在 QGC 直接連 USB 時當掉，類型是 bus fault。
-  - 框架 owner 的記憶卡寫入有兩道限制：只在 `SYS_HITL=1` 時寫，而且只能改開機檔 `extras.txt`（`hitl/host/sd_files.py`）。衍生專案在實飛設定下，自己用 MAVLink FTP 經 owner 的 agent 埠刪除（刪之前先存一份）。
+  - 框架 owner 的記憶卡寫入有兩道限制：只在 `SYS_HITL=1` 時寫，而且只能改開機檔 `extras.txt`（`hitl/host/sd_files.py`；2026-11-21 起還有記錄清單 `etc/logging/logger_topics.txt`）。衍生專案在實飛設定下，自己用 MAVLink FTP 經 owner 的 agent 埠刪除（刪之前先存一份）。
   - **這條路繞過了 owner 的兩道限制**：agent 埠收到的訊息，owner 不檢查就轉給 FC。它不是框架認可的做法：要用時每一次都先問人（[AGENTS](../AGENTS.md) 第 2 節：刪檔每次等回答），也不要寫進自動流程；框架有正式的工具（見下面的建議）之後就不再用。
   - 要分析當機，需要那一版韌體含除錯符號的 ELF。**清理建置資料夾時要保留**，這次就是因為刪掉了而查不出原因。
 - **EKF 切換**：手擲那幾秒，EKF 的實例 0 和 2 出現速度融合的數值錯誤，自動換到沒出錯的實例 1。這類事件要列在紀錄裡。
