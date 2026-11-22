@@ -1,6 +1,6 @@
 # 流程與工具：衍生專案的經驗與給框架的建議
 
-更新：2026-10-26（第 6 點後來的做法與實飛之後的想法見 [sim_to_flight.md](sim_to_flight.md)）。來源是一個衍生專案：SkySurfer 的 attitude doublet 跑道任務，Cube Orange+，PX4 v1.17.0。內容是它在 2026-10-24～26 的實作，以及 Cube HITL 與電腦版 PX4 的飛行。**第 1、2、3、6 點框架目前沒有程式**：是之後移植或自己做時的參考，不是現有功能的說明。第 4、5、7、8 點的工具已經搬進框架（各點的「框架現在有」）。電腦版 PX4 當飛控與 lockstep 的經驗另外寫在 [sitl/sitl_fc_lockstep.md](../sitl/sitl_fc_lockstep.md)。
+更新：2026-10-26（第 6 點後來的做法與實飛之後的想法見 [sim_to_flight.md](sim_to_flight.md)）。來源是一個衍生專案：SkySurfer 的 attitude doublet 跑道任務，Cube Orange+，PX4 v1.17.0。內容是它在 2026-10-24～26 的實作，以及 Cube HITL 與電腦版 PX4 的飛行。**第 1、2、3 點框架目前沒有程式**：是之後移植或自己做時的參考，不是現有功能的說明。第 4、5、6、7、8 點的工具已經搬進框架（各點的「框架現在有」；第 6 點 2026-11-22 照 sim_to_flight 第 1 點的做法加上）。電腦版 PX4 當飛控與 lockstep 的經驗另外寫在 [sitl/sitl_fc_lockstep.md](../sitl/sitl_fc_lockstep.md)。
 
 ## 1. 每一趟都留任務紀錄
 
@@ -68,7 +68,8 @@
   - 切回 HITL 用同一個工具，並把實飛配方裡的安裝值（例如 `PWM_MAIN_DIS*`、`BAT1_N_CELLS`）恢復成預設，否則 `hitl-run` 會拒飛。
 - **經驗**：從模型帶來的配平值不一定適合實機。例如俯仰配平讓升降舵在地面的 Manual 模式就打滿，實飛配方要人逐項看過。
 - **給框架的建議**：加這個切換工具和一個「實飛配方」範例（輸出對應、反向、`SYS_HITL=0`）。
-- **框架現在的規則**：README 的 3.2 出場檢查做完之前，自動流程不關 HITL（`SYS_HITL`）、不測實體致動器（[AGENTS](../AGENTS.md) 第 3 節）。這個工具要等 3.2 做完、由人決定才加；上面的做法可以當 3.2 的參考。
+- **框架現在有**（2026-11-22，使用者決定加進框架）：只改參數的切換工具 [deploy/flight_switch.py](../deploy/flight_switch.py)，和一個視窗的控制台 [hitl/console](console/README.md)；做法是 [sim_to_flight.md](sim_to_flight.md) 第 1 點（同一份韌體），不是上面另外燒實飛韌體的做法。還沒有：實飛配方的範例。
+- **框架現在的規則**：自動流程照樣不關 HITL（`SYS_HITL`）、不測實體致動器（[AGENTS](../AGENTS.md) 第 3 節）；切換工具只在人按「確定寫入」時寫。
 
 ## 7. NuttX 開機檔一行的上限：15 個字、127 bytes
 

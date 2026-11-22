@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__TITLE__</title>
+<style>
+  :root { --bg:#f6f6f4; --card:#ffffff; --ink:#1b1b1a; --muted:#5e5d59; --line:#dcdbd6; --accent:#2a78d6;
+          --ok:#1b8a5a; --warn:#b26b00; --bad:#c0392b; --btn:#eef2f8; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#161615; --card:#1f1f1d; --ink:#ecebe7; --muted:#a3a29d;
+          --line:#3a3a37; --accent:#5b9be6; --ok:#3fb67f; --warn:#e0a03a; --bad:#e2685a; --btn:#2a2f37; } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font:15px/1.5 "Noto Sans CJK TC","Noto Sans TC",system-ui,sans-serif; }
+  main { max-width:760px; margin:24px auto; padding:0 16px; }
+  h1 { font-size:20px; margin:0 0 12px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:16px; margin-bottom:14px; }
+  .row { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+  .muted { color:var(--muted); }
+  .big { font-size:18px; font-weight:600; }
+  .pill { display:inline-block; padding:1px 10px; border-radius:99px; border:1px solid var(--line); font-size:14px; }
+  .ok { color:var(--ok); } .warn { color:var(--warn); } .bad { color:var(--bad); }
+  button { font:inherit; padding:8px 18px; border-radius:8px; border:1px solid var(--line); background:var(--btn);
+           color:var(--ink); cursor:pointer; }
+  button.primary { background:var(--accent); color:#fff; border-color:var(--accent); }
+  button:disabled { opacity:.45; cursor:not-allowed; }
+  .switch button { min-width:150px; font-size:16px; padding:12px 18px; }
+  .current { outline:2px solid var(--ok); }
+  ul { margin:6px 0; padding-left:20px; }
+  code { font-size:13px; overflow-wrap:anywhere; }
+  pre { background:var(--bg); border:1px solid var(--line); border-radius:8px; padding:10px; max-height:220px;
+        overflow:auto; white-space:pre-wrap; margin:0; font-size:13px; }
+  .live { display:grid; grid-template-columns:repeat(4, minmax(0,1fr)); gap:8px; margin-top:10px; }
+  .live div { background:var(--bg); border-radius:8px; padding:8px; text-align:center; }
+  .live b { display:block; font-size:18px; }
+  dialog { border:1px solid var(--line); border-radius:12px; background:var(--card); color:var(--ink); max-width:620px; width:92%; }
+  dialog::backdrop { background:rgba(0,0,0,.4); }
+  .note { font-size:14px; }
+  @media (max-width:520px) { .live { grid-template-columns:repeat(2, minmax(0,1fr)); } .switch button { min-width:0; flex:1; } }
+</style>
+</head>
+<body>
+<main>
+  <div class="row" style="justify-content:space-between">
+    <h1 id="title">__TITLE__</h1>
+    <button id="quit" title="停模擬、關 QGC、打開 QGC 的自動連線、關 HITL 主程式">關閉控制台</button>
+  </div>
+  <p class="muted note" id="closenote">要結束請按「關閉控制台」（或關掉它的終端機視窗）；只關瀏覽器不會結束。</p>
+
+  <section class="card" id="setup" hidden>
+    <div class="big bad">還不能用：飛控清單（units 檔）</div>
+    <ul id="setup-problems" class="note"></ul>
+    <p class="note">做法：把 <code>hitl/console/units.example.json</code> 複製成 <code>deploy/units.json</code>，
+      改成自己的飛控（uid、名稱、角色、HITL 與實飛配方），存檔後按「重新核對」。
+      uid 是 <code>./runbridge param-readback</code> 結果裡 <code>autopilot_version</code> 的 <code>uid</code>；
+      清單裡已經有一塊時，沒列的飛控核對後會顯示完整 uid。只有角色 <code>aircraft</code> 會切到實飛。
+      說明在 <code>hitl/console/README.md</code>。</p>
+  </section>
+
+  <section class="card">
+    <div class="row"><span class="big" id="unit">連線中…</span><span class="pill" id="armed"></span></div>
+    <div class="row" style="margin-top:6px">
+      <span>模式：<b id="mode">—</b></span>
+      <span>設定核對：<b id="verdict">—</b></span>
+      <button id="recheck">重新核對</button>
+    </div>
+    <ul id="problems" class="note"></ul>
+    <div class="row switch" style="margin-top:8px">
+      <button id="to-hitl">切到 HITL</button>
+      <button id="to-flight">切到實飛</button>
+      <span id="switch-note" class="muted note"></span>
+    </div>
+  </section>
+
+  <section class="card" id="sim">
+    <div class="big">模擬</div>
+    <div id="sim-lock" class="muted note"></div>
+    <p class="note" id="outputs"></p>
+    <p class="warn note">⚠ HITL 時不要在 QGC 校空速（會用模擬的差壓蓋掉實飛的零點）；空速只在實飛模式校。</p>
+    <div class="row">
+      <button id="sim-start" class="primary">開始模擬</button>
+      <label><input type="radio" name="takeoff" value="auto"> 自動起飛<span id="takeoff-m"></span></label>
+      <label><input type="radio" name="takeoff" value="manual" checked> 自己飛（QGC 搖桿或遙控器）</label>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button id="sim-restart">從地面重來</button>
+      <button id="sim-end">結束並存記錄</button>
+    </div>
+    <div class="live">
+      <div>高度<b id="h">—</b></div><div>空速<b id="v">—</b></div><div>PX4 模式<b id="fm">—</b></div><div>模型<b id="model">—</b></div>
+    </div>
+    <p class="muted note">地圖、姿態、警告看 QGC（開始模擬時自動打開）。</p>
+  </section>
+
+  <section class="card">
+    <div class="row"><b id="op-name">動作</b><span id="op-state" class="pill"></span></div>
+    <pre id="op-log"></pre>
+  </section>
+</main>
+
+<dialog id="confirm">
+  <h3 id="c-title">確認</h3>
+  <ul id="c-rows"></ul>
+  <p class="note" id="c-note"></p>
+  <p class="warn note">確認螺旋槳已拆（或電調沒供電）。寫完會重開飛控，再核對一次。</p>
+  <div class="row" style="justify-content:flex-end">
+    <button id="c-cancel">取消</button><button id="c-ok" class="primary">確定寫入</button>
+  </div>
+</dialog>
+
+<dialog id="quitdlg">
+  <h3>關閉控制台？</h3>
+  <ul>
+    <li>停模擬（有在跑的話），存記錄</li>
+    <li>關掉 QGC（開著的話會強制關掉）</li>
+    <li>把 QGC 的 USB／數傳自動連線打開</li>
+    <li>關 HITL 主程式</li>
+  </ul>
+  <div class="row" style="justify-content:flex-end">
+    <button id="q-cancel">取消</button><button id="q-ok" class="primary">關閉</button>
+  </div>
+</dialog>
+
+<script>
+const TOKEN = '__TOKEN__';
+const $ = id => document.getElementById(id);
+let shownPlan = null;
+
+async function post(path, body) {
+  const r = await fetch(path, {method: 'POST', headers: {'Content-Type': 'application/json', 'X-Console-Token': TOKEN},
+                               body: JSON.stringify(body || {})});
+  if (!r.ok) { const e = await r.json().catch(() => ({})); alert(e.error || ('錯誤 ' + r.status)); }
+}
+
+function fmt(x, d) { return (typeof x === 'number') ? x.toFixed(d) : '—'; }
+
+function list(el, items, cls) {
+  el.innerHTML = '';
+  for (const t of items) { const li = document.createElement('li'); li.textContent = t; if (cls) li.className = cls; el.appendChild(li); }
+}
+
+function render(s) {
+  const info = s.info, fc = s.fc, busy = s.busy, setup = s.setup;
+  const hitl = fc.SYS_HITL === 1, flight = fc.SYS_HITL === 0;
+  if (setup.title && document.title !== setup.title) { document.title = setup.title; $('title').textContent = setup.title; }
+  $('setup').hidden = !setup.problems.length;
+  list($('setup-problems'), setup.problems);
+  $('takeoff-m').textContent = `（到 ${setup.takeoff_m} m 後盤旋）`;
+  const role = info && info.unit.role;
+  $('unit').textContent = setup.problems.length && !info ? '還沒有可用的飛控清單' : !s.owner ? 'HITL 主程式沒有在跑' :
+    !info ? '飛控：核對中…' : role === 'unknown' ? `不認得的飛控（uid ${info.uid}）` :
+    `飛控：${info.unit.name}（uid …${info.uid.slice(-4)}）`;
+  $('armed').textContent = fc.armed === false ? '未解鎖' : fc.armed ? '已解鎖' : '—';
+  $('mode').textContent = hitl ? 'HITL' : flight ? '實飛' : '—';
+  const c = info && info.checks[hitl ? 'hitl' : 'flight'];
+  const stale = info && info.SYS_HITL !== fc.SYS_HITL;
+  const good = x => x && x.verdict === 'PASS' && x.sd_ok;
+  $('verdict').textContent = !c ? '—' : stale ? '要重新核對' : (good(c) ? 'PASS' : '不符');
+  $('verdict').className = !c || stale ? '' : (good(c) ? 'ok' : 'bad');
+  if (c && !stale && flight && good(c)) {
+    list($('problems'), [`✓ 參數、開機檔、記錄清單都是 ${c.recipe} 的`, '✓ HITL 已關（SYS_HITL 0）',
+                         '實飛前的人工檢查照自己的檢查表做（工具只保證參數與記憶卡）'], 'ok');
+  } else if (c && !stale) {
+    list($('problems'), c.problems.slice(0, 8));
+  } else {
+    list($('problems'), []);
+  }
+  const pairBad = !!(info && info.pair && info.pair.problems.length);
+  const pass = t => info && good(info.checks[t]) && !stale;
+  $('to-hitl').disabled = busy || !info || !!s.sim || role === 'unknown' || (hitl && pass('hitl'));
+  $('to-flight').disabled = busy || !info || !!s.sim || role !== 'aircraft' || !info.unit.flight || pairBad ||
+    (flight && pass('flight'));
+  $('to-hitl').classList.toggle('current', hitl && pass('hitl'));
+  $('to-flight').classList.toggle('current', flight && pass('flight'));
+  $('switch-note').textContent = !info ? '' : role === 'hitl_only' ? '這塊只做 HITL' :
+    role === 'unknown' ? `把這個 uid 加進 ${setup.path} 才能用` :
+    pairBad ? 'HITL 和實飛配方對不上，不能切到實飛（切回 HITL 可以）：' + info.pair.problems.join('；') :
+    !info.unit.flight ? '這塊沒有實飛配方' : '';
+  $('recheck').disabled = busy || !!s.sim;
+
+  const out = info && info.outputs;
+  const servos = out && out.servos.length ? `舵面有輸出（${out.servos.join('、')}）` : '舵面沒有輸出';
+  $('outputs').textContent = !out || stale ? '' : !out.motors.length ? `${servos}，馬達沒有輸出（不送 PWM）。` :
+    hitl ? `⚠ 馬達有輸出（${out.motors.join('、')}）：模擬時馬達會轉，要拆槳。${servos}。` :
+    `馬達有輸出（${out.motors.join('、')}）。${servos}。`;
+  $('outputs').className = 'note ' + (out && out.motors.length && hitl && !stale ? 'warn' : '');
+  const simOk = hitl && pass('hitl');
+  $('sim-lock').textContent = flight ? '實飛模式下不能用模擬。' : (!simOk ? '要在 HITL、設定核對 PASS 時才能開始。' : '');
+  $('sim-start').disabled = busy || !simOk || !!s.sim;
+  $('sim-restart').disabled = busy || !s.sim;
+  $('sim-end').disabled = busy || !s.sim;
+  $('h').textContent = s.model === 'running' ? fmt(s.height, 1) + ' m' : '—';
+  $('v').textContent = s.model === 'running' ? fmt(s.airspeed, 1) + ' m/s' : '—';
+  $('fm').textContent = fc.mode || '—';
+  $('model').textContent = s.model === 'running' ? '在跑' : '停';
+
+  const op = s.op;
+  $('op-name').textContent = op ? op.name : '動作';
+  $('op-state').textContent = !op ? '' : !op.done ? '進行中' : op.error ? '停下' : '完成';
+  $('op-state').className = 'pill ' + (!op ? '' : !op.done ? 'warn' : op.error ? 'bad' : 'ok');
+  $('op-log').textContent = op ? op.log.join('\n') + (op.error ? '\n停下：' + op.error : '') : '';
+
+  if (s.plan && !busy) {
+    const key = JSON.stringify(s.plan);
+    if (shownPlan !== key) {
+      shownPlan = key;
+      $('c-title').textContent = (s.plan.target === 'flight' ? '切到實飛' : '切到 HITL') + '：' +
+        (s.plan.kind === 'deploy' ? '先寫 HITL 設定與記憶卡' : `要寫這 ${s.plan.rows.length} 個值`);
+      list($('c-rows'), s.plan.rows);
+      $('c-note').textContent = s.plan.then || '';
+      if (!$('confirm').open) $('confirm').showModal();
+    }
+  } else if (!s.plan) {
+    shownPlan = null;
+    if ($('confirm').open) $('confirm').close();
+  }
+}
+
+let closed = false;
+async function tick() {
+  if (closed) return;
+  try {
+    const s = await (await fetch('/api/status', {cache: 'no-store'})).json();
+    render(s);
+    if (s.closing) { $('closenote').textContent = '關閉中：停模擬、關 QGC、打開 QGC 的自動連線、關 HITL 主程式…'; }
+  } catch (e) {
+    closed = true;
+    document.querySelector('main').innerHTML = '<h1>控制台已關閉</h1><p>QGC 的 USB／數傳自動連線已打開，可以直接開 QGC 連飛控或數傳。這個分頁可以關掉了。</p><p class="muted note">如果終端機視窗還開著，代表收尾有狀況，看裡面的訊息。</p>';
+  }
+}
+
+$('recheck').onclick = () => post('/api/check');
+// an in-page dialog, not confirm(): some built-in browsers do not show confirm()
+$('quit').onclick = () => $('quitdlg').showModal();
+$('q-cancel').onclick = () => $('quitdlg').close();
+$('q-ok').onclick = () => { $('quitdlg').close(); post('/api/quit'); };
+$('to-hitl').onclick = () => post('/api/plan', {target: 'hitl'});
+$('to-flight').onclick = () => post('/api/plan', {target: 'flight'});
+$('c-ok').onclick = () => { $('confirm').close(); post('/api/confirm'); };
+$('c-cancel').onclick = () => { $('confirm').close(); post('/api/cancel'); };
+$('sim-start').onclick = () => post('/api/sim/start', {takeoff: document.querySelector('input[name=takeoff]:checked').value});
+$('sim-restart').onclick = () => post('/api/sim/restart');
+$('sim-end').onclick = () => post('/api/sim/end');
+tick(); setInterval(tick, 1000);
+</script>
+</body>
+</html>

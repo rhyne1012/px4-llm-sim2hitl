@@ -11,7 +11,7 @@
 
 - 除了標「框架現在有」的地方，下面都是建議，不是現有功能。
 - 數字只代表那架飛機、那個配方、那幾天。
-- 和 [workflow_lessons.md](workflow_lessons.md) 的關係：那裡第 6 點的切換做法（另外燒實飛韌體），被這裡第 1 點取代；那裡的「框架現在的規則」（3.2 做完之前不加切換工具）照舊。
+- 和 [workflow_lessons.md](workflow_lessons.md) 的關係：那裡第 6 點的切換做法（另外燒實飛韌體），被這裡第 1 點取代；那裡的切換工具 2026-11-22 照這裡第 1 點加進框架（使用者決定）。
 - 文中的重心都是從翼根前緣往後量，和 [plant README](../plant/README.md)「重心與氣動作用點」的 AVL x 相同：50 mm 就是模型的 `CG_m` 0.330，65 mm 是 0.345。
 
 ## 0. 整圈，以及三個想法
@@ -55,8 +55,12 @@
 - **給框架的建議**：
   - 把 `hil` 變體當成「HITL＋實飛」共用的標準韌體，配方成對（HITL 和實飛用同一份 `firmware.json`）。
   - 加一個通用的只改參數切換工具，給人用的桌面捷徑也一起做。
-- **框架現在有**：`deploy/check_params.py`、Cube 的 `hil` 變體 patch。沒有切換工具，workflow_lessons 第 6 點只寫了做法。
-- **框架現在的規則**：3.2 出場檢查做完之前，自動流程不關 HITL（`SYS_HITL`）、不測實體致動器（[AGENTS](../AGENTS.md) 第 3 節）；切換工具要等 3.2 做完、由人決定才加（workflow_lessons 第 6 點）。所以第 8 點把 3.2 排在切換工具前面。
+- **框架現在有**：`deploy/check_params.py`、Cube 的 `hil` 變體 patch；2026-11-22 起還有（使用者決定加進框架，從衍生專案搬來）：
+  - [deploy/flight_switch.py](../deploy/flight_switch.py)：上面的步驟 1、3、5，`--pair` 檢查兩份配方能不能切換（韌體、記憶卡檔案相同，`SYS_HITL` 一個 1 一個 0），並列出要改的值；
+  - [hitl/console](console/README.md)：一個視窗的控制台，認出飛控（uid，專案的 `deploy/units.json`）、核對配方、列計畫、人按確定才寫、重開後再核對，HITL 時也能開模擬；桌面捷徑一個就好。
+  - PX4 寫完輸出功能後會自己改中立點與馬達範圍（[fc/cubeorangeplus.md](../fc/cubeorangeplus.md)「PX4 會自己改輸出的值」），切換工具和 `param-deploy` 都會等它、再寫回配方的值。
+  - 還沒有：實飛配方的範例（各專案自己建配方對）。
+- **框架現在的規則**：自動流程照樣不關 HITL（`SYS_HITL`）、不測實體致動器（[AGENTS](../AGENTS.md) 第 3 節）；切換工具只在人按「確定寫入」時寫。3.2 出場檢查仍然建議在第一次實飛前做（第 2 點）。
 
 ## 2. 3.2 出場檢查：HITL 時讓實體舵面和馬達跟著動
 
@@ -216,7 +220,7 @@
 ## 8. 建議的順序
 
 1. 3.2 出場檢查：HITL 時讓實體舵面跟著動，並量出舵面行程（第 2 點）。照框架現在的規則（第 1 點），切換工具要等這一步做完。
-2. 3.2 做完、由人決定之後：一份韌體的 HITL／實飛配方對，加上只改參數的切換工具（第 1 點），第 5 點的維護工具一起做。
+2. 3.2 做完、由人決定之後：一份韌體的 HITL／實飛配方對，加上只改參數的切換工具（第 1 點），第 5 點的維護工具一起做。（2026-11-22：切換工具與控制台已加進框架；配方對由各專案建。）
 3. 實飛的任務紀錄，飛控紀錄放 Release、能取回（第 4 點）。
 4. 實飛前的人工檢查表（第 3 點）。
 5. 以 HITL 為尺的「實飛 vs 模型」分析，doublet 加偏航（第 6 點）。
@@ -224,9 +228,8 @@
 
 衍生專案裡可以參考或移植的實作：
 
-- `hitl/switch_session.py`（一鍵切換）、`deploy/flight_switch.py`；
 - `hitl/host/records.py` 的 `publish_log`、`fetch_logs`；
 - 配方 `04_doublet_cubeorangeplus_flight`（實飛）、`05_doublet_cubeorangeplus_hitl_surfaces`（HITL 帶實體舵面）；
 - `analysis/aero_id.py`（第 6 點「氣動檢討」的方法；依賴衍生專案的 doublet 模組與任務紀錄）。
 
-已經搬進框架的：新模型（第 6、7 點）、改過的發散保護測試、`./runbridge model-cycle`、`aircraft/avl/run_table.py`、`sitl/trim.py --linearize`，以及重算的 VSP 表與 `aircraft/vsp/run_table.py`。
+已經搬進框架的：切換工具 `deploy/flight_switch.py` 與控制台 `hitl/console/`（第 1 點，2026-11-22，取代衍生專案的 `hitl/switch_session.py`）、新模型（第 6、7 點）、改過的發散保護測試、`./runbridge model-cycle`、`aircraft/avl/run_table.py`、`sitl/trim.py --linearize`，以及重算的 VSP 表與 `aircraft/vsp/run_table.py`。
