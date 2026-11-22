@@ -124,6 +124,9 @@ class FakeFC:
         self.param_table = None  # name -> [value, MAVLink type]; built on first use by _params()
         self.param_list_pos = None  # next used index of a PARAM_REQUEST_LIST stream, or None
         self.other_writer_done = False  # param_change_on_set applied once
+        # px4io_servo_disarmed: PX4's px4io (_px4io_check): the servo channels it has seen (None: its first cycle
+        # after boot), when it looks next, whether a parameter changed since it last looked
+        self.px4io_seen, self.px4io_next, self.px4io_dirty = None, 0.0, False
         self.sd = None  # SD card: {'dirs': set, 'files': {path: bytes}}; built on first use by _sd()
         self.ftp_session = None  # PX4's single FTP session: {'path', 'size'} or None
         self.ftp_last_reply = None  # PX4 replays its last small reply for a repeated seq_number
@@ -241,9 +244,29 @@ class FakeFC:
 
     def _param_changed(self):
         now = time.monotonic()
+        self.px4io_dirty = True  # PX4 publishes parameter_update
         if self.param_save_at is None:
             delay = self.config.get('param_save_delay_s', 0.3)
             self.param_save_at = max(now + delay, self.param_last_save + self.config.get('param_save_rate_s', 2.0))
+
+    def _px4io_check(self):
+        """As PX4 v1.17 px4io (PX4IO::update_params): it looks at parameter changes at most once a second
+        (SubscriptionInterval parameter_update 1_s); while disarmed, a MAIN channel whose function went from unset to a
+        servo (201-208) since it last looked gets PWM_MAIN_DISn = 1500 (param_set: announced only if it changes).
+        The first cycle after boot only notes the set channels."""
+        table, used = self._params()
+        funcs = {k[len('PWM_MAIN_FUNC'):]: v[0] for k, v in self.param_table.items()
+                 if k.startswith('PWM_MAIN_FUNC') and k[len('PWM_MAIN_FUNC'):].isdigit()}
+        if self.px4io_seen is not None and not self.armed:
+            for channel, function in sorted(funcs.items()):
+                dis = 'PWM_MAIN_DIS' + channel
+                if channel not in self.px4io_seen and 201 <= function <= 208 and dis in self.param_table \
+                        and self.param_table[dis][0] != 1500:
+                    self.param_table[dis][0] = 1500
+                    self._param_changed()
+                    table, used = self._params()
+                    self.output.extend(self._param_value(table, used, dis))
+        self.px4io_seen = {c for c, f in funcs.items() if f != 0}
 
     def _param_value(self, table, used, name, bits=None):
         value, kind = table[name]
@@ -433,6 +456,9 @@ class FakeFC:
             self.cas = min(16.0, self.cas + 40 * dt)
             if self.cas >= 12 and self.sticks[0] < -20:
                 self.height = min(100.0, self.height + 100 * dt)
+        if self.config.get('px4io_servo_disarmed') and now >= self.px4io_next and (self.px4io_dirty or self.px4io_seen is None):
+            self._px4io_check()
+            self.px4io_next, self.px4io_dirty = now + self.config.get('px4io_check_s', 1.0), False
         if self.held_log and now >= self.heartbeat_pause_until:
             self.output.extend(self.held_log)
             self.held_log.clear()
@@ -666,6 +692,7 @@ class FakeFC:
                             entry[0] = self.param_saved.get(name, entry[0])
                         self.param_save_at = None
                     self.reboot_until = time.monotonic() + 2.3
+                    self.px4io_seen, self.px4io_next = None, self.reboot_until  # px4io starts again
                     self.next_heartbeat = 0
                     self.armed = False
                     self.height = self.cas = 0

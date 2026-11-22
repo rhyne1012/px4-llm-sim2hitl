@@ -1,4 +1,4 @@
-import ctypes as C, hashlib, json, lzma, math, os, queue, socket, struct, subprocess, sys, threading, time, uuid
+import ctypes as C, hashlib, json, lzma, math, os, queue, re, socket, struct, subprocess, sys, threading, time, uuid
 from collections import Counter, deque
 from pathlib import Path
 from pymavlink.dialects.v20 import common as mav
@@ -38,6 +38,11 @@ PARAM_BATCH = 20  # PARAM_REQUEST_READ in flight at once; PX4 drops a reply sile
 PARAM_ROUNDS = 5  # re-request rounds for parameters that did not answer
 PARAM_QUIET_S = 0.5  # a batch (or the list stream) is over after this long without a new PARAM_VALUE
 PARAM_NO_PROGRESS_S = 15.0  # param_readback gives up after the initial list wait this long without a PARAM_VALUE
+PX4IO_WAIT_S = 3.0  # param_deploy: how long PX4 may take to set a new servo channel's disarmed value (px4io)
+# px4io reads parameter changes at most once a second (px4io.cpp: SubscriptionInterval parameter_update 1_s):
+# a function write is acted on up to about 1 s later. The deploy waits this long after the last such write
+# before writing the disarmed values, and again after them before checking that PX4 left them alone.
+PX4IO_SETTLE_S = 2.5
 PARAM_RELEASE = Path('deploy/00_native')  # param_plan / param_deploy: the release whose params.json is applied
 PARAM_SET_TRIES = 3  # PARAM_SET attempts per parameter; each waits PARAM_SET_WAIT_S for the matching PARAM_VALUE
 PARAM_SET_WAIT_S = 2.0
@@ -1332,6 +1337,7 @@ class Core(SdFiles):
             writes.append({'name': name, 'type': kind, 'old': values[name]['value'], 'old_bits': values[name]['bits'],
                            'new': item['expected'], 'new_bits': encode_param(kind, item['expected']).hex(),
                            'reboot': bool(firmware[name].get('rebootRequired', False))})
+        self._px4io_side_effects(config, firmware, values, writes)
         plan = {
             'schema_version': 2,
             'transaction': out.name,
@@ -1355,6 +1361,42 @@ class Core(SdFiles):
         temp.write_text(json.dumps(plan, indent=1, allow_nan=False) + '\n')
         os.replace(temp, path)
         return plan, path
+
+    @staticmethod
+    def _px4io_side_effects(config, firmware, values, writes):
+        """PX4 itself (v1.17 src/drivers/px4io/px4io.cpp PX4IO::update_params): when a MAIN channel's function goes
+        from unset (0) to a servo (201-208) while disarmed, px4io sets the channel's PWM_MAIN_DISn to 1500. Seen
+        2026-11-22 on the aircraft Cube (_flightcheck -> _hitl_surfaces): the recipe's disarmed values 1425/1450/1350
+        became 1500, the verification saw them as another writer's and the deploy rolled back. So such function writes
+        go first, and the channel's disarmed value, when the release sets it, gets an entry that is (re)written to the
+        release's value after PX4's 1500: 'px4io_bits' is PX4's value, expected in between (and undone by a
+        rollback). The entry's old value is the one before the deploy (old == new when only PX4 changes it).
+        px4io acts up to about 1 s after the function write and one parameter update at a time, so its 1500 can
+        come after the disarmed write (2026-11-22, second try: DIS4 already 1500, nothing to wait for on the FC,
+        written 1350, set to 1500 by px4io afterwards): the function write is marked 'px4io_trigger' and the
+        deploy waits PX4IO_SETTLE_S after it, whatever the FC shows (_param_deploy)."""
+        expected = config.get('set', {})
+        for w in list(writes):
+            m = re.fullmatch(r'PWM_MAIN_FUNC(\d+)', w['name'])
+            if not m or round(w['old']) != 0 or not 201 <= round(w['new']) <= 208:
+                continue
+            name = 'PWM_MAIN_DIS' + m.group(1)
+            if name not in expected or name not in values:
+                continue
+            kind = values[name]['type']
+            entry = next((x for x in writes if x['name'] == name), None)
+            if entry is None:
+                target = expected[name]['value']
+                if round(target) == 1500:
+                    continue  # PX4's value is the release's: nothing to write
+                entry = {'name': name, 'type': kind, 'old': values[name]['value'], 'old_bits': values[name]['bits'],
+                         'new': target, 'new_bits': encode_param(kind, target).hex(),
+                         'reboot': bool(firmware[name].get('rebootRequired', False))}
+                writes.append(entry)
+            entry['px4io_bits'] = encode_param(kind, 1500).hex()
+            entry['px4io_reason'] = f"{w['name']} {w['old']:g} -> {w['new']:g}: PX4 (px4io) sets {name} to 1500"
+            w['px4io_trigger'] = name
+        writes.sort(key=lambda w: 0 if w['name'].startswith('PWM_MAIN_FUNC') else 1)
 
     def _param_plan_ready(self, plan, path):
         """The plan is final; the writes start right after this. Nothing to do: consent is given in the
@@ -1500,7 +1542,8 @@ class Core(SdFiles):
     def _param_watch_conflicts(self, plan, before):
         """Values announced during the transaction that nobody planned: another writer (e.g. QGC), even when it
         changed a value back again before the final readback (A -> B -> A)."""
-        planned = {w['name']: {w['old_bits'], w['new_bits']} for w in plan['writes']}
+        planned = {w['name']: {w['old_bits'], w['new_bits']} | ({w['px4io_bits']} if w.get('px4io_bits') else set())
+                   for w in plan['writes']}
         with self.fc_lock:
             seen = list(self.param_watch or [])
         conflicts = set()
@@ -1683,9 +1726,21 @@ class Core(SdFiles):
         journal['state'] = 'writing'
         save()
         try:
+            trigger_at = last_write = None  # monotonic times: the last function write px4io acts on, the last write
             for entry in entries:
+                if entry.get('px4io_bits') and trigger_at is not None:
+                    # after the function writes: give px4io time to see them (also when the value is already 1500
+                    # and the FC shows nothing), then wait for PX4's own value (_px4io_side_effects)
+                    time.sleep(max(0.0, trigger_at + PX4IO_SETTLE_S - time.monotonic()))
                 current = self._param_read(txn, entry['name'])
-                if current != (entry['type'], entry['old_bits']):
+                allowed = {(entry['type'], entry['old_bits'])}
+                if entry.get('px4io_bits'):
+                    allowed.add((entry['type'], entry['px4io_bits']))
+                    end = time.monotonic() + PX4IO_WAIT_S
+                    while current[1] != entry['px4io_bits'] and time.monotonic() < end:
+                        time.sleep(0.1)
+                        current = self._param_read(txn, entry['name'])
+                if current not in allowed:
                     raise OperationError(f"{entry['name']} changed since the plan ({current[1]}, planned "
                                          f"{entry['old_bits']}): another writer?")
                 entry['status'] = 'attempted'  # the FC may apply it even if the answer is lost
@@ -1694,7 +1749,23 @@ class Core(SdFiles):
                 self._param_set(txn, entry['name'], entry['type'], bytes.fromhex(entry['new_bits']),
                                 entry['answers'])
                 entry['status'] = 'written'
+                last_write = time.monotonic()
+                if entry.get('px4io_trigger'):
+                    trigger_at = last_write
                 save()
+            late = [e for e in entries if e.get('px4io_bits') and e['px4io_bits'] != e['new_bits']]
+            for _ in range(3 if late else 0):  # px4io may still act on a later update: wait, check, write again
+                time.sleep(max(0.0, last_write + PX4IO_SETTLE_S - time.monotonic()))
+                again = False
+                for entry in late:
+                    if self._param_read(txn, entry['name']) == (entry['type'], entry['px4io_bits']):
+                        self._param_set(txn, entry['name'], entry['type'], bytes.fromhex(entry['new_bits']),
+                                        entry['answers'])
+                        entry['rewritten_after_px4io'] = True
+                        last_write, again = time.monotonic(), True
+                        save()
+                if not again:
+                    break
             journal['state'] = 'saving_and_rebooting'
             save()
             self._param_save_and_reboot(txn)
@@ -1766,13 +1837,18 @@ class Core(SdFiles):
                 raise ParamTxnStop('Parameter deploy stopped: the FC reconnected without this deploy rebooting it')
             self._param_txn_identify(txn)  # the failure came during the transaction's own reboot
             txn['rebooting'] = False
-        touched = [e for e in entries if e['status'] in ['attempted', 'written']]
+        # A disarmed value PX4 set because of this deploy's function write (_px4io_side_effects) is undone too, even
+        # when its own entry was not reached.
+        touched = [e for e in entries if e['status'] in ['attempted', 'written'] or e.get('px4io_bits')]
         foreign = []
         for entry in touched:
             current = self._param_read(txn, entry['name'])
+            ours = {(entry['type'], entry['new_bits'])}
+            if entry.get('px4io_bits'):
+                ours.add((entry['type'], entry['px4io_bits']))
             if current == (entry['type'], entry['old_bits']):
                 entry['rollback'] = 'unchanged'
-            elif current == (entry['type'], entry['new_bits']):
+            elif current in ours:
                 self._param_set(txn, entry['name'], entry['type'], bytes.fromhex(entry['old_bits']))
                 entry['rollback'] = 'written'
             else:

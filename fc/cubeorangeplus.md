@@ -51,6 +51,13 @@
 - 有 px4io（`cubepilot_io-v2`，韌體在 PX4 的 ROMFS，開機時核對 CRC，必要時更新；這次 CRC `0x0458fffe` 沒變）。HITL 時 px4io 照樣啟動；`PWM_MAIN_FUNC*` 都是 0，IO 的輸出停在 disarmed 值。
 - px4io 一啟動就宣告安全開關存在；`CBRK_IO_SAFETY` 預設 22027，不用按。
 - 確認動力隔離：`px4io status` 的 `voltage_v` 是伺服軌電壓，這次 0.033 V（沒供電）。HITL 沒有 `battery_status`，不能拿它判斷有沒有接電池。
+- **px4io 會自己改中立點**（2026-11-22，飛機 Cube 從 `_flightcheck` 換回 `_hitl_surfaces`）：
+  - 未解鎖時，某個 MAIN 通道的功能從 0 改成舵機（201–208），px4io 會把該通道的 `PWM_MAIN_DISn` 設成 1500（`PX4IO::update_params`）。
+  - px4io 最多每 1 s 看一次參數變更（`parameter_update` 的 `SubscriptionInterval` 1 s）。連續寫好幾個功能時，第一個馬上處理，後面的要等約 1 s。
+  - 第一次換回：配方的 1425/1450/1350 被改成 1500，工具當成別人在改參數而退回，三個中立點留在 1500。
+  - 第二次換回（工具已改成等 px4io 的 1500 再寫）：中立點本來就是 1500，飛控上看不出 px4io 處理了沒有，工具立刻寫 1350；約 1 s 後 px4io 才處理 `FUNC4`，又把 `DIS4` 改回 1500，於是退回。
+  - 現在 `param-deploy`：先寫功能，最後一個功能寫完後等 2.5 s（`PX4IO_SETTLE_S`）才寫中立點；寫完再等 2.5 s 回讀，被改回 1500 的再寫一次（最多 3 輪）。重開機後 px4io 第一輪只記下已設的通道，不會再改。
+  - 模擬飛控（`FakeFC` 的 `px4io_servo_disarmed`）照這個時序做；兩個通道、中立點原本 1500、不等待時，會出現和飛機 Cube 一樣的失敗。
 
 ### 開機腳本與參數
 
