@@ -20,7 +20,7 @@ from .errors import PreconditionError, OperationError
 from .release import read_release
 from .activity import MacActivity
 from .param_wire import param_bits, with_bits, encode as encode_param
-from . import mavftp
+from . import mavftp, pwm_defaults
 from .sd_files import SdFiles
 
 RECONNECT_TIMEOUT_S = 45.0
@@ -38,11 +38,11 @@ PARAM_BATCH = 20  # PARAM_REQUEST_READ in flight at once; PX4 drops a reply sile
 PARAM_ROUNDS = 5  # re-request rounds for parameters that did not answer
 PARAM_QUIET_S = 0.5  # a batch (or the list stream) is over after this long without a new PARAM_VALUE
 PARAM_NO_PROGRESS_S = 15.0  # param_readback gives up after the initial list wait this long without a PARAM_VALUE
-PX4IO_WAIT_S = 3.0  # param_deploy: how long PX4 may take to set a new servo channel's disarmed value (px4io)
-# px4io reads parameter changes at most once a second (px4io.cpp: SubscriptionInterval parameter_update 1_s):
-# a function write is acted on up to about 1 s later. The deploy waits this long after the last such write
-# before writing the disarmed values, and again after them before checking that PX4 left them alone.
-PX4IO_SETTLE_S = 2.5
+# param_deploy and PX4's own output values (host/pwm_defaults.py: a new servo's disarmed value 1500, a new motor's
+# 1100-1900, written by px4io / pwm_out up to about 1 s after the function write): how long PX4 may take, and how
+# long the deploy waits after the last such function write before writing the release's values, and again after.
+PX4IO_WAIT_S = pwm_defaults.WAIT_S
+PX4IO_SETTLE_S = pwm_defaults.SETTLE_S
 PARAM_RELEASE = Path('deploy/00_native')  # param_plan / param_deploy: the release whose params.json is applied
 PARAM_SET_TRIES = 3  # PARAM_SET attempts per parameter; each waits PARAM_SET_WAIT_S for the matching PARAM_VALUE
 PARAM_SET_WAIT_S = 2.0
@@ -1364,39 +1364,41 @@ class Core(SdFiles):
 
     @staticmethod
     def _px4io_side_effects(config, firmware, values, writes):
-        """PX4 itself (v1.17 src/drivers/px4io/px4io.cpp PX4IO::update_params): when a MAIN channel's function goes
-        from unset (0) to a servo (201-208) while disarmed, px4io sets the channel's PWM_MAIN_DISn to 1500. Seen
-        2026-11-22 on the aircraft Cube (_flightcheck -> _hitl_surfaces): the recipe's disarmed values 1425/1450/1350
-        became 1500, the verification saw them as another writer's and the deploy rolled back. So such function writes
-        go first, and the channel's disarmed value, when the release sets it, gets an entry that is (re)written to the
-        release's value after PX4's 1500: 'px4io_bits' is PX4's value, expected in between (and undone by a
-        rollback). The entry's old value is the one before the deploy (old == new when only PX4 changes it).
-        px4io acts up to about 1 s after the function write and one parameter update at a time, so its 1500 can
-        come after the disarmed write (2026-11-22, second try: DIS4 already 1500, nothing to wait for on the FC,
-        written 1350, set to 1500 by px4io afterwards): the function write is marked 'px4io_trigger' and the
-        deploy waits PX4IO_SETTLE_S after it, whatever the FC shows (_param_deploy)."""
+        """PX4 itself writes output values when a channel's function goes from unset to a servo or a motor
+        (host/pwm_defaults.py: px4io for the IO board's PWM_MAIN, pwm_out for the FMU outputs; a servo's disarmed
+        value 1500, a motor's minimum 1100 and maximum 1900). Seen 2026-11-22 in a derived project: the release's
+        disarmed values 1425/1450/1350 became 1500, the verification saw them as another writer's and the deploy
+        rolled back. So function writes go first, and each value PX4 sets, when the release sets it to something
+        else, gets an entry that is (re)written to the release's value after PX4's: 'px4io_bits' is PX4's value,
+        expected in between (and undone by a rollback). The entry's old value is the one before the deploy
+        (old == new when only PX4 changes it).
+        PX4 acts up to about 1 s after the function write and on one parameter update at a time, so its value can
+        come after the release's (second try in that project: DIS4 already 1500, nothing to wait for on the FC,
+        written 1350, set to 1500 afterwards): the function write is marked 'px4io_trigger' and the deploy waits
+        PX4IO_SETTLE_S after it, whatever the FC shows, and checks again after the last write (_param_deploy)."""
         expected = config.get('set', {})
         for w in list(writes):
-            m = re.fullmatch(r'PWM_MAIN_FUNC(\d+)', w['name'])
-            if not m or round(w['old']) != 0 or not 201 <= round(w['new']) <= 208:
-                continue
-            name = 'PWM_MAIN_DIS' + m.group(1)
-            if name not in expected or name not in values:
-                continue
-            kind = values[name]['type']
-            entry = next((x for x in writes if x['name'] == name), None)
-            if entry is None:
-                target = expected[name]['value']
-                if round(target) == 1500:
-                    continue  # PX4's value is the release's: nothing to write
-                entry = {'name': name, 'type': kind, 'old': values[name]['value'], 'old_bits': values[name]['bits'],
-                         'new': target, 'new_bits': encode_param(kind, target).hex(),
-                         'reboot': bool(firmware[name].get('rebootRequired', False))}
-                writes.append(entry)
-            entry['px4io_bits'] = encode_param(kind, 1500).hex()
-            entry['px4io_reason'] = f"{w['name']} {w['old']:g} -> {w['new']:g}: PX4 (px4io) sets {name} to 1500"
-            w['px4io_trigger'] = name
-        writes.sort(key=lambda w: 0 if w['name'].startswith('PWM_MAIN_FUNC') else 1)
+            marked = []
+            for name, px4_value in pwm_defaults.automatic_values(w['name'], w['old'], w['new']):
+                if name not in expected or name not in values:
+                    continue
+                kind = values[name]['type']
+                entry = next((x for x in writes if x['name'] == name), None)
+                if entry is None:
+                    target = expected[name]['value']
+                    if round(target) == px4_value:
+                        continue  # PX4's value is the release's: nothing to write
+                    entry = {'name': name, 'type': kind, 'old': values[name]['value'],
+                             'old_bits': values[name]['bits'], 'new': target,
+                             'new_bits': encode_param(kind, target).hex(),
+                             'reboot': bool(firmware[name].get('rebootRequired', False))}
+                    writes.append(entry)
+                entry['px4io_bits'] = encode_param(kind, px4_value).hex()
+                entry['px4io_reason'] = f"{w['name']} {w['old']:g} -> {w['new']:g}: PX4 (px4io / pwm_out) sets {name} to {px4_value}"
+                marked.append(name)
+            if marked:
+                w['px4io_trigger'] = ', '.join(marked)
+        writes.sort(key=lambda w: 0 if pwm_defaults.is_function(w['name']) else 1)
 
     def _param_plan_ready(self, plan, path):
         """The plan is final; the writes start right after this. Nothing to do: consent is given in the
