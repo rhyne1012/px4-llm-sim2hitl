@@ -35,14 +35,17 @@
 #include "skysurfer_plant.h"
 #include "plant_sensors.h"
 
-class PlantSim : public ModuleBase<PlantSim>
+class PlantSim : public ModuleBase
 {
 public:
+	static Descriptor desc;
+
 	PlantSim(float duration_s, const char *output_dir, const char *scenario_path);
 	~PlantSim() override;
 
 	static int task_spawn(int argc, char *argv[]);
 	static PlantSim *instantiate(int argc, char *argv[]);
+	static int run_trampoline(int argc, char *argv[]);
 	static int custom_command(int argc, char *argv[]);
 	static int print_usage(const char *reason = nullptr);
 

@@ -29,9 +29,11 @@
 
 using namespace time_literals;
 
-class GuidanceTemplate : public ModuleBase<GuidanceTemplate>, public px4::ScheduledWorkItem
+class GuidanceTemplate : public ModuleBase, public px4::ScheduledWorkItem
 {
 public:
+	static Descriptor desc;
+
 	static constexpr hrt_abstime PERIOD = 40_ms;              // 25 Hz
 	static constexpr hrt_abstime POSITION_TIMEOUT = 500_ms;
 	static constexpr float COURSE_GAIN = 0.2f;                // [1/s] lateral acceleration = V * gain * course error

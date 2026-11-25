@@ -51,7 +51,7 @@
 
 1. **PX4 第一筆 IMU 的取樣間隔**
    - 現象：起飛前 EKF 的姿態就錯了（例：俯仰約 −67°、高度約 −40 m，但模型真值是靜止在地上），PX4 報 `High Gyro Bias`、`Attitude failure`。模擬時間較小時，EKF 甚至一直不初始化。
-   - 原因：`VehicleIMU` 記「上一筆時間」的變數初值是 0（v1.17 `src/modules/sensors/vehicle_imu/VehicleIMU.cpp`）。感測值晚於開機才出現時，第一筆的間隔就是「開機到那時」，積分量與校正偏差都乘上這段時間。EKF 只把降頻後的間隔限制在兩倍 `EKF2_PREDICT_US`，沒有等比例縮小積分量，於是得到一個大小像重力、方向卻錯的向量，剛好通過傾角初始化的檢查（0.8–1.2 g、角速度小於 15°/s）。
+   - 原因：`VehicleIMU` 記「上一筆時間」的變數初值是 0（v1.17 `src/modules/sensors/vehicle_imu/VehicleIMU.cpp`；v1.18.0 的寫法沒變，衍生專案 2026-11-25 在 v1.18 上照樣套同一個 patch，lockstep SITL FC PASS）。感測值晚於開機才出現時，第一筆的間隔就是「開機到那時」，積分量與校正偏差都乘上這段時間。EKF 只把降頻後的間隔限制在兩倍 `EKF2_PREDICT_US`，沒有等比例縮小積分量，於是得到一個大小像重力、方向卻錯的向量，剛好通過傾角初始化的檢查（0.8–1.2 g、角速度小於 15°/s）。
    - 處置：PX4 補丁，第一筆的間隔改成 0，既有的 integrator 只記住起點，第二筆才開始積分；只套在電腦版 PX4 的建置。只把 PX4 時鐘重設到 1 s 不夠，還是會留下幾秒的錯誤間隔。
    - 依據：拿同一份失敗的感測錄製做單一變數重播，只改第一筆：俯仰從 −68.6° 變成 +0.4°。單獨清掉陀螺儀校正值或改校正的優先權都沒用。
    - **可能也影響 Cube HITL**：HIL 感測值也是模型開始時才出現，未查證（見 [hitl README](../hitl/README.md)）。
@@ -87,5 +87,5 @@
 ## 8. 依據與範圍
 
 - **依據**：衍生專案 2026-10-25 的任務紀錄。包含真實時間版單趟、同時 2／8／16 趟，以及 lockstep 單趟與多批同時 8 趟；最後兩批 6/8，失敗都在判讀，不在飛行。首筆 IMU 的結論另有外部審查的隔離重播。
-- **範圍**：PX4 v1.17.0、Ubuntu x86-64、沒有即時排程權限、Cube Orange+ 配方、SkySurfer 模型。換 PX4 版本、平台（例如 macOS）、模型，或時鐘與 worker 的設計，都要重查。
+- **範圍**：PX4 v1.17.0（2026-11-25 衍生專案在 v1.18.0 上重跑 lockstep SITL FC 與 Cube HITL PASS；v1.18 的記錄器 255 格放不下 `SDLOG_PROFILE` 49，要用記錄清單，見 [px4/logging](../px4/logging/README.md)）、Ubuntu x86-64、沒有即時排程權限、Cube Orange+ 配方、SkySurfer 模型。換 PX4 版本、平台（例如 macOS）、模型，或時鐘與 worker 的設計，都要重查。
 - **沒驗**：Cube HITL 是否也有首筆 IMU 問題；加了 `commander start -h` 之後重跑真實時間版 SITL FC；300 s 即時負載。

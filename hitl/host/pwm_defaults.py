@@ -1,9 +1,9 @@
-"""Values PX4 v1.17 writes on its own when an output channel gets a function.
+"""Values PX4 v1.18 writes on its own when an output channel gets a function.
 
 Two output drivers do it, the same way (PX4IO::update_params in src/drivers/px4io/px4io.cpp: the IO board's
 PWM_MAIN on boards with one, only while disarmed; PWMOut::update_params in src/drivers/pwm_out/PWMOut.cpp: the FMU
 outputs, PWM_MAIN on boards without an IO board and PWM_AUX on boards with one):
-  - a channel whose function goes from unset (0) to a servo (201-208) gets its disarmed value set to 1500; when none
+  - a channel whose function goes from unset (0) to a servo (201-215; 201-208 until v1.17) gets its disarmed value set to 1500; when none
     of the channels of its timer group was set, a timer rate of 400 Hz is also set to 50 Hz;
   - a channel whose function goes from unset to a motor (101-112) gets its minimum set to 1100 and maximum to 1900.
 Both look at parameter changes at most once a second (uORB::SubscriptionInterval parameter_update 1_s): the first
@@ -23,7 +23,7 @@ import re
 
 WAIT_S = 3.0    # how long PX4 may take to write its own value after a function write
 SETTLE_S = 2.5  # after the last function write PX4 acts on: before writing the release's values, and before checking
-SERVO = range(201, 209)
+SERVO = range(201, 216)  # Servo 1..15 (PX4 v1.18 output_functions.yaml; 8 in v1.17)
 MOTOR = range(101, 113)
 FUNCTION = re.compile(r'(PWM_(?:MAIN|AUX))_FUNC(\d+)')
 

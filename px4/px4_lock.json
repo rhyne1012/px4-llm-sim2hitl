@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
   "repository": "https://github.com/PX4/PX4-Autopilot.git",
-  "tag": "v1.17.0",
-  "commit": "d6f12ad1c4f70ad3230afd7d86e971421e02fef4",
+  "tag": "v1.18.0",
+  "commit": "935addf1d6bec6e955b155494a52e7eb4b750eb3",
   "submodules": "recursive, pinned by the tag commit",
   "hitl_firmware": {
     "board": "Pixhawk 6C (px4_fmu-v6c_default); CubePilot Cube Orange+ (cubepilot_cubeorangeplus_hil, see fc/cubeorangeplus.md)",
-    "version": "v1.17.0",
+    "version": "v1.18.0",
     "note": "The FC firmware is built from this lock per deploy recipe (px4/build_firmware.py); deploy/00_native keeps a prebuilt native image. Each recipe's deploy/<recipe>/firmware/firmware.json records the identity the FC reports (embedded) and the last flash (flashed). At handover the FC runs deploy/01_sdfix, flashed 2026-10-18 07:22 UTC by ./runbridge deploy-test --flash. Cube Orange+ (2026-10-20): its recipes are deploy/*_cubeorangeplus; at handover that FC runs deploy/01_sdfix_cubeorangeplus, flashed 2026-10-20 09:10 UTC by ./runbridge deploy-test --flash."
   },
   "local_path": {

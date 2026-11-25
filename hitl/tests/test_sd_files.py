@@ -1,5 +1,5 @@
 """FC SD card files (sd-list, sd-get, sd-put, sd-rm; host/sd_files.py) against the native library and a memory
-FakeFC whose MAVLink FTP server follows PX4 v1.17 mavlink_ftp.cpp. No hardware serial port."""
+FakeFC whose MAVLink FTP server follows PX4 v1.18 mavlink_ftp.cpp. No hardware serial port."""
 import hashlib
 import json
 from pathlib import Path

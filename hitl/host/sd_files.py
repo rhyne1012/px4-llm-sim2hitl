@@ -6,8 +6,9 @@ FC operations through the single owner.
 
 PX4 runs /fs/microsd/etc/extras.txt at the end of its boot (ROMFS init.d/rcS, FEXTRAS): that is how a custom
 module outside the PX4 tree starts without changing the tree. Its logger reads /fs/microsd/etc/logging/
-logger_topics.txt at start: a list there replaces SDLOG_PROFILE (src/modules/logger/logged_topics.cpp; added
-2026-11-21 in a derived project, for a model-identification list). sd-put / sd-rm change only the files named in
+logger_topics.txt at start (src/modules/logger/logged_topics.cpp; added 2026-11-21 in a derived project, for a
+model-identification list). PX4 v1.18: the list is added to the topics of SDLOG_PROFILE (v1.17: it replaced them),
+sharing the logger's slots; only with SDLOG_PROFILE=0 does the logger log the list alone. sd-put / sd-rm change only the files named in
 SD_WRITABLE, each checked as its reader takes it; listing and reading work anywhere under /fs/microsd.
 """
 
@@ -33,17 +34,19 @@ FTP_WAIT_S = 1.5  # one request: the reply (seq + 1, same req_opcode) within thi
 FTP_TRIES = 3
 SD_SESSION_TRIES = 3  # PX4 has one FTP session for every client of the link: busy or taken away -> start again
 SD_SESSION_WAIT_S = 1.0
-# A boot file line as the NuttX of PX4 v1.17 runs it (apps/nshlib nsh_parse.c, nsh_script.c; the 6C and Cube Orange+
+# A boot file line as the NuttX of PX4 v1.18 runs it (unchanged from v1.17: same apps commit) (apps/nshlib nsh_parse.c, nsh_script.c; the 6C and Cube Orange+
 # nsh defconfigs: NSH_MAXARGUMENTS 15, NSH_LINELEN 128). Above 15 words, the command counted, nsh prints "too many
 # arguments" on the console only and still runs the whole line; words after the 19th it drops without a word, and a
 # module then sees an option without its value (2026-10-25 in a derived project: "Task start failed (-1)"). It reads
 # a line 127 bytes at a time: the rest of a longer line, a comment's too, runs as a line of its own.
 NSH_MAX_WORDS = 15
 NSH_MAX_LINE_BYTES = 127
-# The logger topic list as PX4 v1.17 reads it (src/modules/logger/logged_topics.cpp add_topics_from_file): fgets into
+# The logger topic list as PX4 v1.18 reads it (src/modules/logger/logged_topics.cpp add_topics_from_file): fgets into
 # 80 bytes, so a line (comments too) longer than 78 characters plus its newline goes on as another line; each line
 # '<topic>[ <interval ms>[ <instance>]]', a line without an instance adds every instance (ORB_MULTI_MAX_INSTANCES,
-# 10 on this board); the logger has MAX_TOPICS_NUM 255 slots and uint16 intervals.
+# 10 on this board); the logger has MAX_TOPICS_NUM 255 slots and uint16 intervals, shared since v1.18 with the
+# topics of SDLOG_PROFILE (the list is added after them; set SDLOG_PROFILE=0 for the list alone), so the slot count
+# below is a lower bound when SDLOG_PROFILE is not 0.
 LOGGER_MAX_LINE_BYTES = 78
 LOGGER_MAX_SLOTS = 255
 LOGGER_MULTI_INSTANCES = 10

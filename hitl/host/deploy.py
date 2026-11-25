@@ -11,7 +11,7 @@ flown), flash only (no parameters, boot file or flight), or the plan (nothing wr
 Without --flash or --reuse nothing is changed: the plan says what the FC runs now and what would happen, so the
 person decides (refresh or reuse). A failed step stops the later steps; restoring and the report still happen
 (parameter deploy and boot-file changes restore themselves on failure). Flashing runs PX4's own
-Tools/px_uploader.py of the checked PX4 tree with the owner shut down (the uploader needs the serial port): the
+uploader of the checked PX4 tree (Tools/px4_uploader.py since v1.18, Tools/px_uploader.py before) with the owner shut down (the uploader needs the serial port): the
 board must be the same FC, unarmed, HITL on and with no recovery pending; the old boot file is removed first
 when it is not this recipe's (the new firmware runs it on its first boot); a board left in its bootloader is
 retried once; anything else stops. The owner is restarted afterwards and the FC's identity (board, PX4 and NuttX
@@ -201,7 +201,11 @@ def flash_firmware(owner, project, release, out, report):
     image = release / 'firmware' / info['outputs']['firmware']['file']
     if sha256(image) != info['outputs']['firmware']['sha256']:
         raise RuntimeError(f'{image} differs from firmware.json')
-    uploader = px4_root() / 'Tools' / 'px_uploader.py'
+    # PX4 v1.18 replaced Tools/px_uploader.py by Tools/px4_uploader.py (its make upload uses it); --noninteractive is
+    # its mode for tools: plain progress lines and 'Uploaded in <n>s' after the verify, exit 0. The old one prints
+    # 'Verify' and 'Rebooting'.
+    new = px4_root() / 'Tools' / 'px4_uploader.py'
+    uploader, options = (new, ['--noninteractive']) if new.is_file() else (px4_root() / 'Tools' / 'px_uploader.py', [])
     devices = serial_helpers.devices()
     port = next((d.path for d in devices if d.priority == 0), devices[0].path if devices else None)
     if not port:
@@ -211,13 +215,13 @@ def flash_firmware(owner, project, release, out, report):
     for attempt in (1, 2):
         log = out / f'flash_{attempt}.log'
         try:
-            result = subprocess.run([sys.executable, str(uploader), '--port', port, str(image)], capture_output=True,
+            result = subprocess.run([sys.executable, str(uploader), *options, '--port', port, str(image)], capture_output=True,
                                     text=True, timeout=300)
             text, code = result.stdout + result.stderr, result.returncode
         except subprocess.TimeoutExpired as exc:
             text, code = (exc.stdout or '') + (exc.stderr or '') if isinstance(exc.stdout, str) else '', 'timeout'
         log.write_text(text)
-        ok = code == 0 and 'Verify' in text and 'Rebooting' in text
+        ok = code == 0 and (('Uploaded in' in text) if options else ('Verify' in text and 'Rebooting' in text))
         attempts.append({'attempt': attempt, 'exit': code, 'verified_and_rebooting': ok, 'log': str(log)})
         if ok:
             break
@@ -235,7 +239,7 @@ def flash_firmware(owner, project, release, out, report):
     identity = [p for p in check['identity'] if p.get('kind') in ('fail', 'incomplete')]
     if identity:
         raise RuntimeError(f'after flashing the FC does not report this firmware: {identity}')
-    record = {'status': 'PASS', 'at_utc': utc(), 'port': port, 'tool': f'<PX4 tree>/Tools/px_uploader.py --port {port} {image.name}',
+    record = {'status': 'PASS', 'at_utc': utc(), 'port': port, 'tool': f'<PX4 tree>/Tools/{uploader.name} {" ".join(options + ["--port", port, image.name])}',
               'attempts': len(attempts), 'after': {k: state['autopilot_version'].get(k) for k in
                                                    ['flight_sw_version', 'git_hash_prefix', 'os_hash_prefix', 'board_version']},
               'evidence': str(out).replace(str(Path.home()), '~')}

@@ -96,7 +96,7 @@ def main():
     root, source = locate(args.path)
     if root is None:
         print(json.dumps({'status': 'UNKNOWN_LOCATION', 'message': 'PX4 tree location is not set on this machine. '
-                          'Ask the user where the PX4 v1.17.0 tree is, then run with --path PATH --remember.',
+                          f'Ask the user where the PX4 {lock["tag"]} tree is, then run with --path PATH --remember.',
                           'config_file': str(config_file())}, indent=2, ensure_ascii=False))
         return 2
     if not root.is_dir():

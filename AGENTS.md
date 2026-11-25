@@ -56,7 +56,7 @@ AI 先查好現況、提出建議，只跟人確認**目標、選擇與成功條
 
 **建議使用者用 ULog 看結果**：SITL、HITL、實機都產生 ULog，AI 用 Python 自動判定，人用 MATLAB 畫圖檢查；好處與工具見 [analysis README](analysis/README.md) 的「ULog 工具包」，向使用者說明後由他決定。
 
-**PX4 v1.17.0 的記憶卡讀取問題（要告訴使用者）**：在 Pixhawk 6C（STM32H7）上，v1.17.0 用的 NuttX 在 SD 卡 DMA 讀取完成後沒有清除快取，曾讓自建韌體下載的飛控記錄出現 32 bytes 一段的錯誤（MAVLink 檢查碼正確，看起來像好的）。NuttX 官方修正 82d1285 不在 v1.17.0 裡，專案保存在 `px4/patches/`。自建韌體的配方都要套它（`deploy/01_sdfix` 是範例）；Cube Orange+（STM32H747，SDMMC1）是同一個驅動，它的配方也套（`01_sdfix_cubeorangeplus` 起）；`hitl-run` 會把同一份記錄下載兩次比對、再做嚴格解析，用來抓這類錯誤。原生 `00_native` 至今沒有出現過，但沒有證明不受影響。升級 PX4 版本時，先查新版是否已經包含這個修正。
+**PX4 v1.17.0 的記憶卡讀取問題（v1.17 才有；要告訴還在用 v1.17 的使用者）**：在 Pixhawk 6C（STM32H7）上，v1.17.0 用的 NuttX 在 SD 卡 DMA 讀取完成後沒有清除快取，曾讓自建韌體下載的飛控記錄出現 32 bytes 一段的錯誤（MAVLink 檢查碼正確，看起來像好的）。NuttX 官方修正 82d1285 不在 v1.17.0 裡，專案保存在 `px4/patches/`。自建韌體的配方都要套它（`deploy/01_sdfix` 是範例）；Cube Orange+（STM32H747，SDMMC1）是同一個驅動，它的配方也套（`01_sdfix_cubeorangeplus` 起）；`hitl-run` 會把同一份記錄下載兩次比對、再做嚴格解析，用來抓這類錯誤。原生 `00_native` 至今沒有出現過，但沒有證明不受影響。升級 PX4 版本時，先查新版是否已經包含這個修正。**v1.18.0 已經包含**（它的 NuttX `3cc0c496` 有同一段修正），2026-11-25 升級後配方不再套這個 patch；`hitl-run` 的兩次下載比對照舊。
 
 ## 2. 接手時先查平台
 
@@ -132,7 +132,7 @@ for f in hitl/tests/test_*.py deploy/test_*.py analysis/test_*.py sitl/test_*.py
 | `sitl/` | 精簡 PX4 的 plant 模組 `plant_sim`、情境、配平、ULog 重播；`sitl_fc_lockstep.md` 是衍生專案用電腦版 PX4 當飛控與 lockstep 的經驗與建議（框架還沒有這些程式） |
 | `modules/` | 自己的 PX4 模組（同一份原始碼編進 SITL 與韌體；`guidance_template` 是範例，見它的 README「照著做一個自己的模組」）。韌體只編配方 `recipe.modules` 列的模組；SITL 要在 `sitl/px4_external/src/` 加包裝並列進那裡的 `CMakeLists.txt` |
 | `hitl/` | runtime（owner、worker、`hitl-run`）、起飛與起飛後動作腳本、`flight_test.json`（預設飛行與判定）、模型 release；`workflow_lessons.md` 是衍生專案的流程與工具經驗與建議（任務紀錄、模擬遙控器、機上模組分層、HITL／實飛切換等，框架還沒有這些程式；航線工具、航線分析、檢視圖與開機檔檢查已經搬進框架）；`sim_to_flight.md` 是衍生專案從 HITL 走到實飛、再用飛行資料改回模型的經驗與建議（README 流程第 4 段，框架還沒有） |
-| `deploy/` | 部署配方，每塊飛控一組：Pixhawk 6C 是 `00_native`（原生韌體＋參數，可隨時刷回）、`01_sdfix`（原生＋記憶卡修正 patch）、`02_template`（01＋範例模組 `guidance_template`＋開機檔＋`hitl.json` 指定的起飛後動作與判定）；Cube Orange+ 是同樣三層的 `*_cubeorangeplus`（`hil` 板子變體，見 `fc/`）；自建配方的 `firmware/firmware.json` 的 `recipe` 寫要套的 patch 與 `modules/` 的模組，`px4/build_firmware.py` 在 PX4 原始碼樹旁的建置樹編譯（原樹不動），patch 以固定作者與日期 commit，FC 回報的 NuttX hash 因此可預期、可核對 |
+| `deploy/` | 部署配方，每塊飛控一組：Pixhawk 6C 是 `00_native`（原生韌體＋參數，可隨時刷回）、`01_sdfix`（v1.17：原生＋記憶卡修正 patch；v1.18 已內建修正，等於從原始碼自建的原生）、`02_template`（01＋範例模組 `guidance_template`＋開機檔＋`hitl.json` 指定的起飛後動作與判定）；Cube Orange+ 是同樣三層的 `*_cubeorangeplus`（`hil` 板子變體，見 `fc/`）；自建配方的 `firmware/firmware.json` 的 `recipe` 寫要套的 patch 與 `modules/` 的模組，`px4/build_firmware.py` 在 PX4 原始碼樹旁的建置樹編譯（原樹不動），patch 以固定作者與日期 commit，FC 回報的 NuttX hash 因此可預期、可核對 |
 | `px4/` | PX4 版本鎖、原始碼樹核對、修正 patch |
 | `analysis/` | 響應指標、ULog 讀檔與嚴格解析、重播比對、繞圈任務的航線追蹤、飛行檢視圖（衛星底圖與 setpoint） |
 | `hitl/missions/` | 繞圈任務（航線）的定義與工具 `mission.py`：一份定義產生 QGC `.plan` 和 MAVLink 上傳項目，QGC 改過的 plan 也能匯入回來；範例 `example_loop.json` |

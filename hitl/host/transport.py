@@ -250,9 +250,9 @@ class FakeFC:
             self.param_save_at = max(now + delay, self.param_last_save + self.config.get('param_save_rate_s', 2.0))
 
     def _px4io_check(self):
-        """As PX4 v1.17 px4io (PX4IO::update_params; pwm_out does the same for the FMU outputs): it looks at
+        """As PX4 v1.18 px4io (PX4IO::update_params; pwm_out does the same for the FMU outputs): it looks at
         parameter changes at most once a second (SubscriptionInterval parameter_update 1_s); while disarmed, a MAIN
-        channel whose function went from unset to a servo (201-208) since it last looked gets PWM_MAIN_DISn = 1500,
+        channel whose function went from unset to a servo (201-215) since it last looked gets PWM_MAIN_DISn = 1500,
         to a motor (101-112) PWM_MAIN_MINn = 1100 and PWM_MAIN_MAXn = 1900 (param_set: announced only if it
         changes). The first cycle after boot only notes the set channels. Modelled from the PX4 source, not from
         host/pwm_defaults.py, so the tests check the tools against PX4 rather than against themselves."""
@@ -263,7 +263,7 @@ class FakeFC:
             for channel, function in sorted(funcs.items()):
                 if channel in self.px4io_seen:
                     continue
-                values = ({'PWM_MAIN_DIS' + channel: 1500} if 201 <= function <= 208 else
+                values = ({'PWM_MAIN_DIS' + channel: 1500} if 201 <= function <= 215 else
                           {'PWM_MAIN_MIN' + channel: 1100, 'PWM_MAIN_MAX' + channel: 1900} if 101 <= function <= 112
                           else {})
                 for name, value in values.items():
@@ -294,9 +294,10 @@ class FakeFC:
         return self.sd
 
     def _ftp(self, m):
-        """As PX4 v1.17 mavlink_ftp.cpp, for what the owner uses: one session for every client (opened read-only
-        or for writing), a repeated seq_number gets the last small reply again (to the client it was for), writes
-        only below /fs/microsd/, rename replaces an existing file (NuttX fs/vfs/fs_rename.c unlinks it first).
+        """As PX4 v1.18 mavlink_ftp.cpp, for what the owner uses: one session for every client (opened read-only
+        or for writing), a repeated seq_number gets the last small reply again only from the client it was for
+        (another client's request with that seq_number is a new request), writes only below /fs/microsd/ (CREATE and
+        OPEN_WO are refused at the open, after the session check: FILE_PROTECTED), rename replaces an existing file (NuttX fs/vfs/fs_rename.c unlinks it first).
         ftp_other_client_after_create ({'path', 'mode': 'ro'|'wo'}, once): right after a CREATE, another client
         closes that session and opens its own file (GPT review 16 R16-1). Faults: ftp_mute, ftp_drop_every (every Nth reply lost), ftp_corrupt_write (path: the stored bytes
         differ), ftp_close_after_writes (another client closes the session after N writes, once), ftp_busy (N
@@ -306,7 +307,7 @@ class FakeFC:
         if self.config.get('ftp_mute'):
             return
         last = self.ftp_last_reply
-        if last is not None and (req['seq'] + 1) & 0xFFFF == last[0]:
+        if last is not None and (req['seq'] + 1) & 0xFFFF == last[0] and last[2] == (m.get_srcSystem(), m.get_srcComponent()):
             self._ftp_send(m, last[1], last[2])
             return
         sd, op, error, errno, data = self._sd(), req['opcode'], 0, 0, b''
@@ -347,6 +348,8 @@ class FakeFC:
         elif op in [mavftp.OPEN_RO, mavftp.CREATE, mavftp.OPEN_WO]:
             if session is not None:
                 error = mavftp.NO_SESSIONS
+            elif op != mavftp.OPEN_RO and not writable:
+                error = 9  # v1.18: CREATE / OPEN_WO create or truncate at the open, so the open is checked
             elif parent not in sd['dirs']:
                 # ENOTDIR, not converted by PX4: seen on the real FC for OPEN_RO (2026-10-17); CREATE/OPEN_WO: NuttX FAT open
                 error, errno = 2, 20
@@ -371,8 +374,6 @@ class FakeFC:
                     error = mavftp.EOF
                 else:
                     data = content[offset:offset + req['size']]
-            elif not session['path'].startswith('/fs/microsd/'):
-                error = 9
             elif not session['writable']:
                 error, errno = 2, 9  # EBADF: a read-only fd
             else:
@@ -668,7 +669,8 @@ class FakeFC:
                     continue
                 self.output.extend(self.pack(mav.MAVLink_command_ack_message(m.command, 0)))
                 if m.command == 512 and int(m.param1) == 148 and not self.config.get('no_autopilot_version'):
-                    # As PX4 v1.17.0 (release type 0xFF): git hash & 0xFFFFFFFFFF000000, little-endian.
+                    # The FC of deploy/00_native (its prebuilt PX4 v1.17.0 image, release type 0xFF): git hash &
+                    # 0xFFFFFFFFFF000000, little-endian; the encoding is the same in v1.18.
                     custom = list(struct.pack('<Q', 0xD6F12AD1C4F70AD3 & 0xFFFFFFFFFF000000))
                     # os_custom_version: the first 16 hex digits of the NuttX commit (v1.17.0: fb2fadf6...).
                     os_custom = list(struct.pack('<Q', int(self.config.get('nuttx_hash16', 'fb2fadf6f599c140'), 16)))

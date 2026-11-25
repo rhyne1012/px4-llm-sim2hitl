@@ -385,7 +385,8 @@ class CheckAndPlanTests(Synthetic):
             with self.assertRaises(console.Stop) as stop:  # a used index not received: not a list mismatch
                 c.check()
             self.assertIn('板號 4184', str(stop.exception))
-            self.assertIn('韌體 git c45268d056', str(stop.exception))
+            git = json.loads((BASE / 'firmware' / 'firmware.json').read_text())['embedded']['git_hash'][:10]
+            self.assertIn(f'韌體 git {git}', str(stop.exception))  # the base recipe's firmware, whichever PX4 it is
             self.assertEqual(releases(), ['myplane_hitl'])  # no second readback
 
 
