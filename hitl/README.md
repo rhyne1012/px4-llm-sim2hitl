@@ -25,6 +25,7 @@
 | `aircraft/skysurfer/` | 模型 ABI 實作 `adapter.c`、`profile.json`、場景檢查 `scenario.py` |
 | `autotakeoff/` | 自動飛手（起飛、爬升、平飛），見 [autotakeoff README](autotakeoff/README.md)；數字在 `aircraft/<飛機>/profile.json` 的 `automation` |
 | `commands/` | 起飛後動作腳本，見 [commands README](commands/README.md) |
+| `console/` | HITL／實飛控制台：一個視窗認飛控、核對配方、切換 HITL 與實飛、HITL 時開模擬，見 [console README](console/README.md) |
 | `scenarios/ground.json` | 預設場景（地面靜止） |
 | `flight_test.json` | `test-takeoff-hold`／`hitl-run` 的預設飛行與判定 |
 | `update.py`、`matlab/mcp_build.py` | 模型 release 的兩段都由 `update.py` 做；第一段經 MATLAB MCP 產碼時用 `mcp_build.py`：伺服器用 `SIM2HITL_MATLAB_MCP` 指定，沒指定時找 macOS 與 Linux 的預設安裝位置；先接已經開著、執行過 `shareMATLABSession` 的 MATLAB，沒有就自己開一個（約 14 s） |

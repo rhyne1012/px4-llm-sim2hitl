@@ -5,8 +5,10 @@ _param_txn_identify), reboot (recover) and App Nap guard (_transfer).
 FC operations through the single owner.
 
 PX4 runs /fs/microsd/etc/extras.txt at the end of its boot (ROMFS init.d/rcS, FEXTRAS): that is how a custom
-module outside the PX4 tree starts without changing the tree. sd-put / sd-rm change only the boot files named in
-SD_WRITABLE; listing and reading work anywhere under /fs/microsd.
+module outside the PX4 tree starts without changing the tree. Its logger reads /fs/microsd/etc/logging/
+logger_topics.txt at start: a list there replaces SDLOG_PROFILE (src/modules/logger/logged_topics.cpp; added
+2026-11-21 in a derived project, for a model-identification list). sd-put / sd-rm change only the files named in
+SD_WRITABLE, each checked as its reader takes it; listing and reading work anywhere under /fs/microsd.
 """
 
 import hashlib, json, os, secrets, shlex, time, uuid
@@ -17,8 +19,13 @@ from .errors import PreconditionError, OperationError
 
 SD_ROOT = '/fs/microsd'
 SD_BOOT_DIR = '/fs/microsd/etc'
-SD_WRITABLE = ['extras.txt']  # boot files sd-put / sd-rm may change (rcS FEXTRAS); config.txt, rc.txt are not
-SD_TEMP = '/fs/microsd/etc/sim2hitl.tmp'  # an 8.3 name: written and checked here first, then renamed
+BOOT_FILE = SD_BOOT_DIR + '/extras.txt'
+LOGGER_TOPICS = SD_BOOT_DIR + '/logging/logger_topics.txt'
+# The files sd-put / sd-rm may change, with the reader whose rules their content is checked against: the boot file
+# (rcS FEXTRAS, nsh) and the logger topic list. config.txt and rc.txt are not.
+SD_WRITABLE = {BOOT_FILE: 'boot', LOGGER_TOPICS: 'logger_topics'}
+SD_TEMP_NAME = 'sim2hitl.tmp'  # an 8.3 name, in the target's own directory: written and checked there, then renamed
+SD_TEMP = SD_BOOT_DIR + '/' + SD_TEMP_NAME  # the boot file's
 SD_PUT_MAX = 16 * 1024
 SD_GET_MAX = 256 * 1024
 SD_LIST_MAX = 500  # entries of one directory
@@ -33,6 +40,46 @@ SD_SESSION_WAIT_S = 1.0
 # a line 127 bytes at a time: the rest of a longer line, a comment's too, runs as a line of its own.
 NSH_MAX_WORDS = 15
 NSH_MAX_LINE_BYTES = 127
+# The logger topic list as PX4 v1.17 reads it (src/modules/logger/logged_topics.cpp add_topics_from_file): fgets into
+# 80 bytes, so a line (comments too) longer than 78 characters plus its newline goes on as another line; each line
+# '<topic>[ <interval ms>[ <instance>]]', a line without an instance adds every instance (ORB_MULTI_MAX_INSTANCES,
+# 10 on this board); the logger has MAX_TOPICS_NUM 255 slots and uint16 intervals.
+LOGGER_MAX_LINE_BYTES = 78
+LOGGER_MAX_SLOTS = 255
+LOGGER_MULTI_INSTANCES = 10
+
+
+def sd_temp(path):
+    """The temporary file of a change of path: SD_TEMP_NAME in the same directory (a rename stays in its directory)."""
+    return str(PurePosixPath(path).parent / SD_TEMP_NAME)
+
+
+def logger_topics_problems(data):
+    """Lines of a logger topic list that PX4's logger would not read as written, and too many topic slots."""
+    problems, slots = [], 0
+    for number, raw in enumerate(data.split(b'\n'), 1):
+        if len(raw) > LOGGER_MAX_LINE_BYTES:
+            problems.append(f'line {number}: {len(raw)} bytes, the logger reads {LOGGER_MAX_LINE_BYTES} and the rest '
+                            'as another line')
+            continue
+        line = raw.decode('ascii', errors='replace')
+        if len(line) < 2 or line.startswith('#'):
+            continue
+        words = line.split()
+        if (not 1 <= len(words) <= 3 or not all(c.islower() or c.isdigit() or c == '_' for c in words[0].rstrip(','))
+                or not all(w.isdigit() for w in words[1:])):
+            problems.append(f'line {number}: not "<topic>[ <interval ms>[ <instance>]]" ({line[:40]})')
+            continue
+        if len(words) > 1 and int(words[1]) > 65535:
+            problems.append(f'line {number}: interval {words[1]} ms above 65535')
+        if len(words) > 2 and int(words[2]) >= LOGGER_MULTI_INSTANCES:
+            problems.append(f'line {number}: instance {words[2]}, at most {LOGGER_MULTI_INSTANCES - 1}')
+        slots += 1 if len(words) == 3 else LOGGER_MULTI_INSTANCES
+    if slots > LOGGER_MAX_SLOTS:
+        problems.append(f'{slots} topic slots (a line without an instance counts {LOGGER_MULTI_INSTANCES}), the logger '
+                        f'has {LOGGER_MAX_SLOTS}')
+    return problems
+
 
 
 def boot_file_problems(data):
@@ -53,6 +100,9 @@ def boot_file_problems(data):
             problems.append(f'line {number}: {len(words)} words, more than the {NSH_MAX_WORDS} nsh takes (the command '
                             'counts): it warns on the console only and drops the words after the 19th')
     return problems
+
+
+CONTENT_CHECKS = {'boot': boot_file_problems, 'logger_topics': logger_topics_problems}
 
 
 class SdBusy(OperationError):
@@ -208,35 +258,43 @@ class SdFiles:
         return next((e for e in listing or [] if e['name'] == name), None)
 
     def _sd_replace(self, txn, path, data, log):
-        """Make path hold data (None: no file). The new content goes to SD_TEMP first and is read back; only then
-        is the old file removed and the temporary one renamed (NuttX's VFS rename would remove an existing regular
-        file itself, fs/vfs/fs_rename.c; removing it here keeps that step in our own log). Between the two, the
-        boot file is missing: PX4 then boots without it, i.e. as native PX4. The result is read back and the
+        """Make path hold data (None: no file). The new content goes to the temporary file next to it (sd_temp)
+        first and is read back; only then is the old file removed and the temporary one renamed (NuttX's VFS rename
+        would remove an existing regular file itself, fs/vfs/fs_rename.c; removing it here keeps that step in our own
+        log). Between the two, the file is missing: PX4 then boots without it, i.e. as native PX4 (no boot file;
+        no topic list: the logger follows SDLOG_PROFILE). The result is read back and the
         listing checked (the file, its size, no temporary file left). log: a list of step names."""
+        temp = sd_temp(path)
         if data is None:
             txn['final_touched'] = True
             log.append('remove ' + path)
             self._sd_remove(txn, path)
         else:
-            if self._sd_list(txn, SD_BOOT_DIR) is None:
-                log.append('mkdir ' + SD_BOOT_DIR)
-                self._ftp(txn, mavftp.MKDIR, SD_BOOT_DIR, allow=(8,))  # 8: FILE_EXISTS
-            log.append('write ' + SD_TEMP)
-            self._sd_write(txn, SD_TEMP, data)
-            if self._sd_read(txn, SD_TEMP, SD_PUT_MAX) != data:
-                raise OperationError(f'{SD_TEMP} read back differs from what was written')
+            folders = [SD_BOOT_DIR]  # etc/, then the target's own directory below it (etc/logging/)
+            parent = str(PurePosixPath(path).parent)
+            while parent != SD_BOOT_DIR and parent not in folders:
+                folders.insert(1, parent)
+                parent = str(PurePosixPath(parent).parent)
+            for folder in folders:
+                if self._sd_list(txn, folder) is None:
+                    log.append('mkdir ' + folder)
+                    self._ftp(txn, mavftp.MKDIR, folder, allow=(8,))  # 8: FILE_EXISTS
+            log.append('write ' + temp)
+            self._sd_write(txn, temp, data)
+            if self._sd_read(txn, temp, SD_PUT_MAX) != data:
+                raise OperationError(f'{temp} read back differs from what was written')
             txn['final_touched'] = True
             log.append('remove ' + path)
             self._sd_remove(txn, path)
-            log.append('rename ' + SD_TEMP + ' -> ' + path)
-            self._ftp(txn, mavftp.RENAME, (SD_TEMP, path))
+            log.append('rename ' + temp + ' -> ' + path)
+            self._ftp(txn, mavftp.RENAME, (temp, path))
         self._sd_verify(txn, path, data)
 
     def _sd_verify(self, txn, path, data):
         """path holds exactly data (None: absent), and no temporary file is left."""
         now = self._sd_read(txn, path, SD_PUT_MAX)
         entry = self._sd_entry(txn, path)
-        temp = self._sd_entry(txn, SD_TEMP)
+        temp = self._sd_entry(txn, sd_temp(path))
         problems = []
         if now != data:
             problems.append(f'{path}: ' + ('absent' if now is None else f'{len(now)} bytes sha256 '
@@ -246,7 +304,7 @@ class SdFiles:
         if (entry is None) != (data is None) or (entry and entry.get('size') != len(data)):
             problems.append(f'{path}: listing {entry}')
         if temp is not None:
-            problems.append(f'{SD_TEMP} is left on the card')
+            problems.append(f'{sd_temp(path)} is left on the card')
         if problems:
             raise OperationError('verification: ' + '; '.join(problems))
         return now
@@ -255,17 +313,16 @@ class SdFiles:
 
     @staticmethod
     def _sd_path(path, writable=False):
-        """An absolute path under /fs/microsd without '..' (PX4 refuses those too); writable: one of the boot
-        files in SD_WRITABLE."""
+        """An absolute path under /fs/microsd without '..' (PX4 refuses those too); writable: one of the files in
+        SD_WRITABLE."""
         if not isinstance(path, str) or not path or len(path) > 200 or not path.isascii() or not path.isprintable():
             raise ValueError('SD path must be a printable ASCII string of at most 200 characters')
         parts = path.split('/')  # as sent to PX4: PurePosixPath would drop '.' before the check
         if '..' in parts or '.' in parts or (path != SD_ROOT and not path.startswith(SD_ROOT + '/')) \
                 or '\t' in path or '//' in path:
             raise ValueError(f'SD path must be {SD_ROOT} or below it, without . or .. ({path})')
-        if writable and (str(PurePosixPath(path).parent) != SD_BOOT_DIR
-                         or PurePosixPath(path).name not in SD_WRITABLE):
-            raise ValueError(f'sd-put / sd-rm change only {[SD_BOOT_DIR + "/" + n for n in SD_WRITABLE]} ({path})')
+        if writable and path not in SD_WRITABLE:
+            raise ValueError(f'sd-put / sd-rm change only {list(SD_WRITABLE)} ({path})')
         return path.rstrip('/') if path != '/' else path
 
     def _sd_read_txn(self):
@@ -305,19 +362,19 @@ class SdFiles:
             return self._transfer(run)
 
     def sd_put(self, local, path, out):
-        """Make the SD boot file path hold the bytes of the local file. See _sd_change."""
+        """Make the SD file path (SD_WRITABLE) hold the bytes of the local file. See _sd_change."""
         path = self._sd_path(path, writable=True)
         data = Path(local).read_bytes()
         if len(data) > SD_PUT_MAX:
             raise ValueError(f'{local} is {len(data)} bytes, more than {SD_PUT_MAX}')
-        problems = boot_file_problems(data)
+        problems = CONTENT_CHECKS[SD_WRITABLE[path]](data)
         if problems:
             raise ValueError(f'{local}: ' + '; '.join(problems))
         with self.operation_lock:
             return self._transfer(self._sd_change, path, data, out, 'sdput', str(Path(local).resolve()))
 
     def sd_remove(self, path, out):
-        """Remove the SD boot file path. See _sd_change."""
+        """Remove the SD file path (SD_WRITABLE). See _sd_change."""
         path = self._sd_path(path, writable=True)
         with self.operation_lock:
             return self._transfer(self._sd_change, path, None, out, 'sdrm', None)
@@ -374,8 +431,9 @@ class SdFiles:
         save()
         if data is not None:
             (out / ('new_' + name)).write_bytes(data)
+        folder = str(PurePosixPath(path).parent)
         try:
-            listing = self._sd_list(txn, SD_BOOT_DIR)
+            listing = self._sd_list(txn, folder)
             old = self._sd_read(txn, path, SD_PUT_MAX) if listing is not None else None
         except OperationError as exc:
             journal.update(state='read_failed', error=str(exc))
@@ -409,7 +467,7 @@ class SdFiles:
             journal['state'] = 'verifying'
             save()
             self._sd_verify(txn, path, data)
-            keep('after', data, self._sd_list(txn, SD_BOOT_DIR))
+            keep('after', data, self._sd_list(txn, folder))
             journal['state'] = 'complete'
             save()
             return dict(result, verdict='PASS', changed=True, steps=journal['steps'],
@@ -430,16 +488,16 @@ class SdFiles:
                         txn['rebooting'] = False
                     self._sd_replace(txn, path, old, journal['rollback_steps'])
                     self._sd_reboot(txn)
-                else:  # the boot file was never touched: only the temporary file may be left
-                    journal['rollback_steps'].append('remove ' + SD_TEMP)
-                    self._sd_remove(txn, SD_TEMP)
+                else:  # the file was never touched: only the temporary file may be left
+                    journal['rollback_steps'].append('remove ' + sd_temp(path))
+                    self._sd_remove(txn, sd_temp(path))
                 self._sd_verify(txn, path, old)
             except Exception as rollback_exc:
                 journal.update(state='rollback_failed', rollback_error=str(rollback_exc))
                 save()
                 raise OperationError(f'{what} failed ({exc}) and putting the old file back did not finish '
                                      f'({rollback_exc}); see {journal_path}')
-            keep('rollback', old, self._sd_list(txn, SD_BOOT_DIR))
+            keep('rollback', old, self._sd_list(txn, folder))
             journal['state'] = 'rolled_back'
             save()
             return dict(result, verdict='FAIL', changed=False, error=str(exc), steps=journal['steps'],

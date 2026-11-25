@@ -102,13 +102,57 @@ class SdFileTests(unittest.TestCase):
     def test_only_the_boot_files_and_only_below_the_card(self):
         for path in ['/fs/microsd/etc/rc.txt','/fs/microsd/etc/config.txt','/fs/microsd/params','/fs/microsd/.format',
                      '/fs/microsd/etc/../etc/extras.txt','/fs/microsd/etc/./extras.txt','/fs/microsd/./etc/extras.txt',
-                     '/fs/microsd/etc//extras.txt','/fs/microsd/etc/sub/extras.txt']:
+                     '/fs/microsd/etc//extras.txt','/fs/microsd/etc/sub/extras.txt','/fs/microsd/etc/logging/other.txt',
+                     '/fs/microsd/etc/logger_topics.txt','/fs/microsd/logging/logger_topics.txt',
+                     '/fs/microsd/etc/logging/../logging/logger_topics.txt']:
             with self.assertRaisesRegex(ValueError,'only|without'):self.core.sd_put(self.local(HELLO),path,self.root/'out')
             with self.assertRaisesRegex(ValueError,'only|without'):self.core.sd_remove(path,self.root/'out')
         for path in ['/etc','/fs/microsdx','/fs/microsd/../','relative',' /fs/microsd','/fs/microsd/日誌']:
             with self.assertRaises(ValueError):self.core.sd_list(path)
         with self.assertRaisesRegex(ValueError,'more than'):self.core.sd_put(self.local(bytes(sd_files.SD_PUT_MAX+1)),EXTRAS,self.root/'o')
         self.assertNotIn('FILE_TRANSFER_PROTOCOL',self.fc.counts)
+    def test_logger_topic_list_gets_its_directory_and_a_temporary_file_next_to_it(self):
+        # added 2026-11-21: the logger topic list, in etc/logging/ below etc/; the temporary file goes
+        # in the same directory, so the rename stays in it; the boot file is not touched
+        self.seed(HELLO);sd=self.fc._sd();sd['dirs'].discard('/fs/microsd/etc/logging')
+        topics=b'# list\nsensor_combined 0 0\nvehicle_attitude 20 0\n'
+        r=self.core.sd_put(self.local(topics,'logger_topics.txt'),sd_files.LOGGER_TOPICS,self.root/'out')
+        self.assertEqual((r['verdict'],r['changed']),('PASS',True),r)
+        self.assertEqual(self.card(sd_files.LOGGER_TOPICS),topics);self.assertEqual(self.card(),HELLO)
+        temp='/fs/microsd/etc/logging/sim2hitl.tmp'
+        self.assertEqual(sd_files.sd_temp(sd_files.LOGGER_TOPICS),temp);self.assertIsNone(self.card(temp))
+        self.assertIn('mkdir /fs/microsd/etc/logging',r['steps']);self.assertNotIn('mkdir /fs/microsd/etc',r['steps'])
+        self.assertIn('rename '+temp+' -> '+sd_files.LOGGER_TOPICS,r['steps']);self.assertEqual(self.reboots(),1)
+        folder=Path(r['transaction'])
+        self.assertEqual((folder/'after/logger_topics.txt').read_bytes(),topics)
+        self.assertIn({'type':'file','name':'logger_topics.txt','size':len(topics)},
+                      json.loads((folder/'after/listing.json').read_text()))
+        r=self.core.sd_remove(sd_files.LOGGER_TOPICS,self.root/'out')
+        self.assertEqual((r['verdict'],r['changed']),('PASS',True),r);self.assertIsNone(self.card(sd_files.LOGGER_TOPICS))
+        self.assertEqual(self.card(),HELLO);self.assertEqual(self.reboots(),2)
+    def test_logger_topic_list_on_a_fresh_card(self):
+        r=self.core.sd_put(self.local(b'vehicle_status 0 0\n','logger_topics.txt'),sd_files.LOGGER_TOPICS,self.root/'out')
+        self.assertEqual(r['verdict'],'PASS',r)
+        self.assertEqual([s for s in r['steps'] if s.startswith('mkdir')],
+                         ['mkdir /fs/microsd/etc','mkdir /fs/microsd/etc/logging'])
+    def test_a_logger_topic_list_the_logger_would_misread_is_not_written(self):
+        check=sd_files.logger_topics_problems
+        self.assertEqual(check(b'# '+b'c'*76+b'\na_b2 10 1\nc_d 0\ne\n\n'),[])
+        self.assertRegex(check(b'# '+b'c'*77+b'\n')[0],'79 bytes')       # fgets(80): the rest is another line
+        self.assertRegex(check(b'Vehicle_status 0 0\n')[0],'not "<topic>')
+        self.assertRegex(check(b'a 1 2 3\n')[0],'not "<topic>')
+        self.assertRegex(check(b'a 65536 0\n')[0],'above 65535')
+        self.assertRegex(check(b'a 0 10\n')[0],'at most 9')
+        self.assertRegex(check(b''.join(b'a%d 0\n'%i for i in range(26)))[0],'260 topic slots')
+        self.assertEqual(check(b''.join(b'a%d 0 0\n'%i for i in range(255))),[])
+        with self.assertRaisesRegex(ValueError,'not "<topic>'):
+            self.core.sd_put(self.local(b'echo hi\n','logger_topics.txt'),sd_files.LOGGER_TOPICS,self.root/'o')
+        # each file by its own reader: a list line is a fine boot line, and a long boot line is no list problem
+        self.assertEqual(sd_files.boot_file_problems(b'a 0 0\n'),[])
+        self.assertNotIn('FILE_TRANSFER_PROTOCOL',self.fc.counts)
+        for recipe in sorted((RUNTIME.parent/'deploy').glob('*/sd/etc/logging/logger_topics.txt')):
+            self.assertEqual(check(recipe.read_bytes()),[],recipe)
+        self.assertEqual(check(b'# a list as the logger reads it\nsensor_combined 0 0\nvehicle_attitude 20 0\nairspeed 0\n'),[])
     def test_a_line_nsh_would_cut_is_not_written(self):
         # nsh warns above NSH_MAX_WORDS words a line (the command counted) and drops the words after the 19th; it reads
         # NSH_MAX_LINE_BYTES bytes of a line at a time and runs the rest as a line of its own

@@ -70,7 +70,7 @@ def main(argv=None):
                         'folder (default deploy/00_native)')
     p.add_argument('--flash', action='store_true', help='deploy-test: build if needed and flash this recipe')
     p.add_argument('--reuse', action='store_true', help='deploy-test: the FC already runs this recipe; no flashing')
-    p.add_argument('--no-hitl', action='store_true', help='deploy-test: stop after parameters and boot file')
+    p.add_argument('--no-hitl', action='store_true', help='deploy-test: stop after parameters, boot file and logger topic list')
     p.add_argument('--log-id', type=int, help='fetch-log: FC log id (default: the newest)')
     p.add_argument('--list', action='store_true', help='fetch-log: only list the FC logs')
     p.add_argument('--sd-path', help='sd-*: path on the FC SD card (sd-list default /fs/microsd/etc)')

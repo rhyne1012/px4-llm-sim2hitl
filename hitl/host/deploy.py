@@ -30,6 +30,9 @@ from pathlib import Path
 from .ipc import cache_root, request
 
 BOOT = '/fs/microsd/etc/extras.txt'
+# The logger topic list (host/sd_files.py LOGGER_TOPICS): a recipe's sd/etc/logging/logger_topics.txt is put on the
+# card; a recipe without one gets the card's removed (the logger then follows SDLOG_PROFILE). Added 2026-11-21.
+LOGGER_TOPICS = '/fs/microsd/etc/logging/logger_topics.txt'
 
 
 def sha256(path):
@@ -159,7 +162,8 @@ def checker(project):
 
 
 def fc_state(owner, project, release, out):
-    """What the FC runs now: readback identity (with this recipe's parameter list) and its SD boot file."""
+    """What the FC runs now: readback identity (with this recipe's parameter list), its SD boot file and logger
+    topic list."""
     readback = owner.call('param-readback', {'out': str(out), 'release': str(release)}, timeout_s=600)
     version = json.loads(Path(readback['path']).read_text()).get('autopilot_version') or {}
     listing = owner.call('sd-list', {'sd_path': '/fs/microsd/etc'}, timeout_s=120)
@@ -167,8 +171,13 @@ def fc_state(owner, project, release, out):
     if any(e.get('name') == 'extras.txt' for e in listing.get('entries', [])):
         got = owner.call('sd-get', {'sd_path': BOOT, 'out': str(out / 'sd')}, timeout_s=120)
         boot = got.get('sha256')
+    topics = None
+    listing = owner.call('sd-list', {'sd_path': '/fs/microsd/etc/logging'}, timeout_s=120)
+    if any(e.get('name') == 'logger_topics.txt' for e in listing.get('entries', [])):
+        got = owner.call('sd-get', {'sd_path': LOGGER_TOPICS, 'out': str(out / 'sd')}, timeout_s=120)
+        topics = got.get('sha256')
     return {'readback': readback['path'], 'autopilot_version': version, 'matches': recipe_matches(project, version),
-            'boot_file_sha256': boot}
+            'boot_file_sha256': boot, 'logger_topics_sha256': topics}
 
 
 def bootloader_present():
@@ -260,6 +269,7 @@ def run_deploy(runtime, args):
         path.write_text(json.dumps(report, indent=2, default=str))
 
     boot_local = release / 'sd' / 'etc' / 'extras.txt'
+    topics_local = release / 'sd' / 'etc' / 'logging' / 'logger_topics.txt'
     try:
         if not owner.running():
             owner.start(run)
@@ -269,6 +279,8 @@ def run_deploy(runtime, args):
         step('plan', 'PASS', fc_runs=before['matches'] or ['unknown firmware'], fc_version=before['autopilot_version'],
              fc_boot_file_sha256=before['boot_file_sha256'], recipe=release.name,
              recipe_boot_file_sha256=sha256(boot_local) if boot_local.is_file() else None,
+             fc_logger_topics_sha256=before['logger_topics_sha256'],
+             recipe_logger_topics_sha256=sha256(topics_local) if topics_local.is_file() else None,
              build=('needed: ' + why) if wanted else why, owner_conditions=ready_to_write(status) or 'ready')
         if mode == 'plan':
             report['verdict'] = 'PLAN'
@@ -311,6 +323,17 @@ def run_deploy(runtime, args):
             if removed.get('verdict') != 'PASS':
                 raise RuntimeError(f'removing the boot file {removed.get("verdict")}')
             step('boot_file_removed', 'PASS', result=removed)
+        if topics_local.is_file():
+            put = owner.call('sd-put', {'sd_path': LOGGER_TOPICS, 'file': str(topics_local), 'out': str(run / 'sd')},
+                             timeout_s=1800)
+            if put.get('verdict') != 'PASS':
+                raise RuntimeError(f'logger topic list {put.get("verdict")}')
+            step('logger_topics', 'PASS', result=put)
+        elif before['logger_topics_sha256']:
+            removed = owner.call('sd-rm', {'sd_path': LOGGER_TOPICS, 'out': str(run / 'sd')}, timeout_s=1800)
+            if removed.get('verdict') != 'PASS':
+                raise RuntimeError(f'removing the logger topic list {removed.get("verdict")}')
+            step('logger_topics_removed', 'PASS', result=removed)
         if args.no_hitl:
             report['verdict'] = 'PASS'
             return report, path

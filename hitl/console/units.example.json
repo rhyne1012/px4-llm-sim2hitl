@@ -1,0 +1,9 @@
+{
+  "note": "Example for hitl/console: copy to deploy/units.json and make it yours. units: the FCs this project uses, by their AUTOPILOT_VERSION uid (the console's check shows the full uid of an FC that is not listed; ./runbridge param-readback prints it in autopilot_version). role 'aircraft': the FC in the airplane, switches between its hitl and flight recipe (a pair: same firmware and SD files, deploy/flight_switch.py --pair). role 'hitl_only': a bench FC, never switched to flight (flight null). hitl / flight: recipe folders in deploy/. title: the page's title; takeoff_m: the automatic takeoff's height in the simulation. The uids and recipe names below are placeholders.",
+  "title": "HITL／實飛控制台",
+  "takeoff_m": 40,
+  "units": {
+    "1111": {"name": "飛機", "role": "aircraft", "hitl": "myplane_hitl", "flight": "myplane_flight"},
+    "2222": {"name": "HITL 專用", "role": "hitl_only", "hitl": "myplane_hitl", "flight": null}
+  }
+}

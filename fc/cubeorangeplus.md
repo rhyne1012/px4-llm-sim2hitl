@@ -51,6 +51,15 @@
 - 有 px4io（`cubepilot_io-v2`，韌體在 PX4 的 ROMFS，開機時核對 CRC，必要時更新；這次 CRC `0x0458fffe` 沒變）。HITL 時 px4io 照樣啟動；`PWM_MAIN_FUNC*` 都是 0，IO 的輸出停在 disarmed 值。
 - px4io 一啟動就宣告安全開關存在；`CBRK_IO_SAFETY` 預設 22027，不用按。
 - 確認動力隔離：`px4io status` 的 `voltage_v` 是伺服軌電壓，這次 0.033 V（沒供電）。HITL 沒有 `battery_status`，不能拿它判斷有沒有接電池。
+- **PX4 會自己改輸出的值**（2026-11-22，衍生專案的 Cube 換配方時發生；整理在 `hitl/host/pwm_defaults.py`）：
+  - 某個輸出通道的功能從 0 改成舵機（201–208），PX4 把它的 `PWM_MAIN_DISn` 設成 1500；改成馬達（101–112），把 `PWM_MAIN_MINn`／`MAXn` 設成 1100／1900。整組計時器原本都沒用時，400 Hz 也會改成 50 Hz。
+  - 做這件事的是輸出驅動：IO 板的 `PWM_MAIN` 是 px4io（`PX4IO::update_params`），FMU 的輸出（這塊的 `PWM_AUX`、沒有 IO 板的飛控的 `PWM_MAIN`）是 pwm_out（`PWMOut::update_params`），做法一樣（px4io 只在未解鎖時做）。
+  - 它們最多每 1 s 看一次參數變更（`parameter_update` 的 `SubscriptionInterval` 1 s）。連續寫好幾個功能時，第一個馬上處理，後面的要等約 1 s。
+  - 第一次換配方：配方的中立點 1425／1450／1350 被改成 1500，工具當成別人在改參數而退回，三個中立點留在 1500。
+  - 第二次（工具已改成等 PX4 的 1500 再寫）：中立點本來就是 1500，飛控上看不出 PX4 處理了沒有，工具立刻寫 1350；約 1 s 後 PX4 才處理第四個功能，又把它改回 1500，於是退回。
+  - 現在的 `param-deploy` 和 `deploy/flight_switch.py`：先寫功能，最後一個功能寫完後等 2.5 s（`pwm_defaults.SETTLE_S`）才寫這些值；寫完再等 2.5 s 回讀，被 PX4 改掉的再寫一次（最多 3 輪）。重開機後第一輪只記下已設的通道，不會再改。
+  - 計時器頻率沒有處理（要看板子的計時器分組）；配方把沒用過的整組設成 400 Hz 時，重開後的核對會看到被改成 50 Hz。
+  - 模擬飛控（`FakeFC` 的 `px4io_outputs`）照 PX4 的原始碼做這個時序（舵機和馬達）；兩個通道、中立點原本 1500、不等待時，會出現和那塊 Cube 一樣的失敗。
 
 ### 開機腳本與參數
 

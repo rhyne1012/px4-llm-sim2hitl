@@ -163,6 +163,7 @@ class ManagementFaultTests(unittest.TestCase):
     def drift(self,**values):
         """Values on the fake FC (in RAM and saved) that differ from the release's set."""
         for name,value in values.items():self.fc.set_persistent(name,value)
+        self.fc.px4io_seen=None  # as if PX4 booted with them (px4io_outputs: px4io's first cycle)
     def journal(self,result):return json.loads(Path(result['journal']).read_text())
     def deploy_failure(self,out):
         """param_deploy that raises: the journal of the newest transaction under out."""
@@ -214,6 +215,75 @@ class ManagementFaultTests(unittest.TestCase):
                 self.assertEqual(self.core.param_deploy_pending['state'],'rolled_back')
         self.fc.config={};self.drift(FW_R_TC=0.4)
         self.assert_pending_blocks_and_clears()
+    def servo_release(self,disarmed={1:1425}):
+        """A copy of the default release that also sets MAIN channels to servos (202, 203, ...) with their own
+        disarmed values ({channel: value})."""
+        import shutil
+        release=Path(self.temp.name)/('servo_release_%d'%len(disarmed))
+        shutil.copytree(RUNTIME.parent/'deploy/00_native',release,symlinks=True)
+        config=json.loads((release/'params.json').read_text())
+        for k,(channel,value) in enumerate(sorted(disarmed.items())):
+            config['set']['PWM_MAIN_FUNC%d'%channel]={'value':202+k,'reason':'test'}
+            config['set']['PWM_MAIN_DIS%d'%channel]={'value':value,'reason':'test'}
+        (release/'params.json').write_text(json.dumps(config,indent=1))
+        return release
+    def test_param_deploy_px4io_sets_the_disarmed_value_of_a_new_servo(self):
+        # 2026-11-22 (a derived project's Cube Orange+, a deploy that set servo functions): PX4's px4io sets PWM_MAIN_DISn to 1500 when
+        # the channel's function goes from 0 to a servo; the deploy writes the function first, then the release's
+        # disarmed value again after PX4's 1500, and PX4's announcement is not another writer.
+        release=self.servo_release();self.fc.config={'px4io_outputs':True}
+        self.drift(PWM_MAIN_FUNC1=0,PWM_MAIN_DIS1=1425)
+        plan=self.core.param_plan(Path(self.temp.name)/'px4io_plan',release)
+        names=[w['name'] for w in plan['writes']]
+        self.assertEqual(names,['PWM_MAIN_FUNC1','PWM_MAIN_DIS1'])
+        dis=plan['writes'][1];self.assertEqual((dis['old'],dis['new']),(1425,1425));self.assertIn('px4io',dis['px4io_reason'])
+        r=self.core.param_deploy(Path(self.temp.name)/'px4io',release)
+        self.assertEqual(r['verdict'],'PASS',r);self.assertEqual(r['written'],['PWM_MAIN_FUNC1','PWM_MAIN_DIS1'])
+        self.assertEqual((self.fc.param_saved['PWM_MAIN_FUNC1'],self.fc.param_saved['PWM_MAIN_DIS1']),(202,1425))
+        self.assertIsNone(self.core.param_deploy_pending)
+        # a failure after the function write: the rollback also undoes PX4's 1500
+        self.fc.config={'px4io_outputs':True,'param_save_fail':True};self.drift(PWM_MAIN_FUNC1=0,PWM_MAIN_DIS1=1425)
+        r=self.core.param_deploy(Path(self.temp.name)/'px4io_fail',release)
+        self.assertEqual(r['verdict'],'FAIL',r)
+        self.assertEqual((self.fc.param_table['PWM_MAIN_FUNC1'][0],self.fc.param_table['PWM_MAIN_DIS1'][0]),(0,1425))
+        self.fc.config={}
+    def test_param_deploy_waits_for_px4io_when_the_disarmed_value_is_already_1500(self):
+        # 2026-11-22, second try on that Cube: DIS already 1500 (left by the first try), so the FC shows
+        # nothing to wait for; px4io looks at parameter changes once a second and set 1500 after the deploy had
+        # written the release's value. The deploy waits for px4io after the function write and checks again after.
+        # Two channels: px4io acts on the first function write at once and on the second about 1 s later.
+        release=self.servo_release({1:1425,2:1450});self.fc.config={'px4io_outputs':True}
+        self.drift(PWM_MAIN_FUNC1=0,PWM_MAIN_FUNC2=0,PWM_MAIN_DIS1=1500,PWM_MAIN_DIS2=1500)
+        r=self.core.param_deploy(Path(self.temp.name)/'px4io_1500',release)
+        self.assertEqual(r['verdict'],'PASS',r)
+        self.assertEqual(r['written'],['PWM_MAIN_FUNC1','PWM_MAIN_FUNC2','PWM_MAIN_DIS1','PWM_MAIN_DIS2'])
+        self.assertEqual([self.fc.param_saved[n] for n in ('PWM_MAIN_FUNC1','PWM_MAIN_FUNC2','PWM_MAIN_DIS1','PWM_MAIN_DIS2')],
+                         [202,203,1425,1450])
+        entries={e['name']:e for e in self.journal(r)['entries']}
+        self.assertEqual(entries['PWM_MAIN_FUNC2']['px4io_trigger'],'PWM_MAIN_DIS2')
+        for name in ('PWM_MAIN_DIS1','PWM_MAIN_DIS2'):
+            self.assertNotIn('rewritten_after_px4io',entries[name])  # written after px4io, not before
+        self.assertIsNone(self.core.param_deploy_pending)
+        self.fc.config={}
+    def test_param_deploy_px4io_sets_a_new_motors_range(self):
+        # PX4 (px4io, pwm_out) sets a channel's minimum 1100 and maximum 1900 when its function goes from 0 to a motor
+        # (host/pwm_defaults.py): a release with another range gets it written after PX4's values.
+        import shutil
+        release=Path(self.temp.name)/'motor_release'
+        shutil.copytree(RUNTIME.parent/'deploy/00_native',release,symlinks=True)
+        config=json.loads((release/'params.json').read_text())
+        config['set'].update({'PWM_MAIN_FUNC3':{'value':101,'reason':'test'},'PWM_MAIN_MIN3':{'value':1000,'reason':'test'},
+                              'PWM_MAIN_MAX3':{'value':2000,'reason':'test'}})
+        (release/'params.json').write_text(json.dumps(config,indent=1))
+        self.fc.config={'px4io_outputs':True};self.drift(PWM_MAIN_FUNC3=0,PWM_MAIN_MIN3=1000,PWM_MAIN_MAX3=2000)
+        r=self.core.param_deploy(Path(self.temp.name)/'px4io_motor',release)
+        self.assertEqual(r['verdict'],'PASS',r)
+        self.assertEqual(r['written'],['PWM_MAIN_FUNC3','PWM_MAIN_MIN3','PWM_MAIN_MAX3'])
+        self.assertEqual([self.fc.param_saved[n] for n in ('PWM_MAIN_FUNC3','PWM_MAIN_MIN3','PWM_MAIN_MAX3')],[101,1000,2000])
+        entries={e['name']:e for e in self.journal(r)['entries']}
+        self.assertEqual(entries['PWM_MAIN_FUNC3']['px4io_trigger'],'PWM_MAIN_MIN3, PWM_MAIN_MAX3')
+        self.assertIsNone(self.core.param_deploy_pending)
+        self.fc.config={}
     def test_param_deploy_never_restores_a_value_it_did_not_write(self):
         # Review 10 E2: a PARAM_VALUE has no transaction id. The FC stored another value (5) for this deploy's
         # write, or another writer's announcement (3) arrived while this deploy's write was lost: neither is

@@ -37,7 +37,7 @@ FC 只有一個序列埠可接：`deploy-test` 的計畫會列出 FC 現在符�
 
 PX4 自己會改回去的值要先查清楚：`RC_MAP_ARM_SW > 0`（遙控器設了解鎖開關）時，PX4 的 `manual_control` 每次開機把 `MAN_ARM_GESTURE` 設成 0，寫 1 會在重開後被改回去、部署因此 FAIL 並自動回復。這種跟著操作者遙控器走的值放進 `fc_owned`（Cube 的配方已經加了 `^MAN_ARM_GESTURE$`）。
 
-SD 卡也要看：別處用過的卡可能帶著自己的記錄清單 `etc/logging/logger_topics.txt`，它會取代 `SDLOG_PROFILE`（記錄的主題與大小都不同）。runtime 的 `sd-put`／`sd-rm` 只動 `etc/extras.txt`，其他檔案要由人決定、在 QGC 的 MAVLink Console 處理。
+SD 卡也要看：別處用過的卡可能帶著自己的記錄清單 `etc/logging/logger_topics.txt`，它會取代 `SDLOG_PROFILE`（記錄的主題與大小都不同）。runtime 的 `sd-put`／`sd-rm` 只動 `etc/extras.txt` 與 `etc/logging/logger_topics.txt`（後者 2026-11-21 由衍生專案加上：配方的 `sd/etc/logging/logger_topics.txt`，`deploy-test` 照配方放上或拿掉；內容照記錄器的讀法檢查：每行最多 78 字、`<項目>[ <間隔 ms>[ <實例>]]`、最多 255 格），其他檔案要由人決定、在 QGC 的 MAVLink Console 處理。
 
 ## 從 ArduPilot 換過來的飛控
 
