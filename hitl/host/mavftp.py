@@ -1,4 +1,4 @@
-"""MAVLink FTP payloads (FILE_TRANSFER_PROTOCOL), as PX4 v1.17 src/modules/mavlink/mavlink_ftp.{h,cpp}.
+"""MAVLink FTP payloads (FILE_TRANSFER_PROTOCOL), as PX4 v1.18 src/modules/mavlink/mavlink_ftp.{h,cpp} (unchanged from v1.17 for what is used here).
 
 The 251-byte payload is a 12-byte header (seq_number u16, session u8, opcode u8, size u8, req_opcode u8,
 burst_complete u8, padding u8, offset u32, little-endian) and up to 239 data bytes. PX4 answers a request

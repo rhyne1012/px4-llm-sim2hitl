@@ -8,10 +8,6 @@
       {
         "file": "px4/patches/px4_cubeorangeplus_hil_variant_pwm_out_sim.patch",
         "repo": "."
-      },
-      {
-        "file": "px4/patches/nuttx_82d12852_stm32h7_sdmmc_rx_invalidate.patch",
-        "repo": "platforms/nuttx/NuttX/nuttx"
       }
     ],
     "modules": []
@@ -24,30 +20,30 @@
   "outputs": {
     "firmware": {
       "file": "cubepilot_cubeorangeplus_hil.px4",
-      "sha256": "f8775da4d2a43d4965bae76278a330fcb4018fb4f6c25534463f36c04bae1a60",
-      "size": 1819667
+      "sha256": "e18a40d7956221f49cd377f7c5d6eb265993cdf7f0a8b4b58de9fab976e9cb2d",
+      "size": 1832271
     },
     "image_bin": {
       "file": "not kept (inside the .px4 image field)",
-      "sha256": "e7d45e8d445d110a14c494f2e48e4f7b0d2fa226c733cc49236b112b930eb020",
-      "size": 1935720
+      "sha256": "2f4815f53f0dfd9e31acb6d30be72befa3bbbf2b8389244041d18f5bda119e63",
+      "size": 1920992
     },
     "parameters": {
       "file": "parameters.json.xz",
-      "sha256": "5e5c81c8159b1501938945fc7c183b96e986b774f7b211b7f041d6191157da3b",
-      "count": 1979,
+      "sha256": "6f982d6740711e898ca43304934908a660b9611a8cf1b522eac5bdc68c20d693",
+      "count": 1898,
       "origin": "PX4 build output, unmodified"
     }
   },
   "embedded": {
     "board_id": 1063,
     "board_version": 4184,
-    "git_identity": "v1.17.0-1-gc45268d",
-    "git_hash": "c45268d05609345371f7ed9a005dcebeeb4aacd3",
-    "nuttx_git_hash": "8d3ed2a2177267cb0ad5a1cadbee9ccdb6aab70d",
-    "image_size": 1935720,
+    "git_identity": "v1.18.0-1-g51daf13fca",
+    "git_hash": "51daf13fca33476d476ceab590293b44cbf12ed1",
+    "nuttx_git_hash": "3cc0c49601597d4a0c4df43b134b0dbc633dd04c",
+    "image_size": 1920992,
     "image_maxsize": 1966080,
-    "flash_used_percent": 98.46
+    "flash_used_percent": 97.71
   },
   "build": {
     "command": "make cubepilot_cubeorangeplus_hil BUILD_DIR_SUFFIX=_01_sdfix_cubeorangeplus",
@@ -58,33 +54,14 @@
         "file": "px4/patches/px4_cubeorangeplus_hil_variant_pwm_out_sim.patch",
         "sha256": "ee05f333fec96f3de2a53189097872dd38b3e89ffb1560e2f07442113f32505b",
         "repo": ".",
-        "commit": "c45268d05609345371f7ed9a005dcebeeb4aacd3"
-      },
-      {
-        "file": "px4/patches/nuttx_82d12852_stm32h7_sdmmc_rx_invalidate.patch",
-        "sha256": "ebdecae0b43ade65f7cb156ff04648ff4169b833eafde5c4761d291da3a8f75a",
-        "repo": "platforms/nuttx/NuttX/nuttx",
-        "commit": "8d3ed2a2177267cb0ad5a1cadbee9ccdb6aab70d"
+        "commit": "51daf13fca33476d476ceab590293b44cbf12ed1"
       }
     ],
     "modules": {},
     "toolchain": "arm-none-eabi-gcc (15:13.2.rel1-2) 13.2.1 20231009",
-    "built_at_utc": "2026-10-20T08:30:01Z",
-    "seconds": 103.1,
-    "log": "~/.cache/px4-llm-sim2hitl/firmware/01_sdfix_cubeorangeplus/build_20261020_162817.log"
+    "built_at_utc": "2026-11-25T08:49:37Z",
+    "seconds": 9.1,
+    "log": "~/.cache/px4-llm-sim2hitl/firmware/01_sdfix_cubeorangeplus/build_20261125_164928.log"
   },
-  "flashed": {
-    "status": "PASS",
-    "at_utc": "2026-10-20T09:10:32Z",
-    "port": "/dev/ttyACM0",
-    "tool": "<PX4 tree>/Tools/px_uploader.py --port /dev/ttyACM0 cubepilot_cubeorangeplus_hil.px4",
-    "attempts": 1,
-    "after": {
-      "flight_sw_version": 17891328,
-      "git_hash_prefix": "c45268d056",
-      "os_hash_prefix": "8d3ed2a2177267cb",
-      "board_version": 4184
-    },
-    "evidence": "~/.cache/px4-llm-sim2hitl/deploy_runs/run_20261020_090940Z_1b7fb4ea/flash"
-  }
+  "flashed": null
 }

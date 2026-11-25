@@ -25,7 +25,7 @@ KIND = {'Int32': 6, 'Float': 9}
 
 
 class FakeFC:
-    """PX4's output driver as px4io / pwm_out behave (PX4 v1.17 update_params): it looks at parameter changes at
+    """PX4's output driver as px4io / pwm_out behave (PX4 v1.18 update_params): it looks at parameter changes at
     most once a second; the first change after a quiet second is seen at once. A channel whose function went from 0
     to a servo gets DIS 1500, to a motor MIN 1100 / MAX 1900. Time is simulated (clock, sleep)."""
 
@@ -52,7 +52,7 @@ class FakeFC:
             if not name.startswith('PWM_MAIN_FUNC') or not function or name in self.seen:
                 continue
             channel = name[len('PWM_MAIN_FUNC'):]
-            own = ({'DIS': 1500} if 201 <= function <= 208 else {'MIN': 1100, 'MAX': 1900} if 101 <= function <= 112
+            own = ({'DIS': 1500} if 201 <= function <= 215 else {'MIN': 1100, 'MAX': 1900} if 101 <= function <= 112
                    else {})
             for what, value in own.items():
                 self.values[f'PWM_MAIN_{what}{channel}'] = value

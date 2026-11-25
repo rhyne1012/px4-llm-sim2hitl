@@ -1,9 +1,9 @@
 # 01_sdfix：原生 PX4 加記憶卡修正
 
-- **是什麼**：PX4 v1.17.0（[px4_lock.json](../../px4/px4_lock.json)）原樣，只套一個 NuttX 修正 [nuttx_82d12852_stm32h7_sdmmc_rx_invalidate.patch](../../px4/patches/)（NuttX 官方 82d1285：STM32H7 的 SD 卡 DMA 讀取後清快取，原因見 [AGENTS](../../AGENTS.md) 第 1 段）。不加模組、沒有開機檔；參數和 `00_native` 相同。
+- **是什麼**：PX4 v1.18.0 起（[px4_lock.json](../../px4/px4_lock.json)，2026-11-25）是 PX4 原樣、不套 patch：v1.18 的 NuttX 已經內建下面這個修正，名字照舊。v1.17.0 時是 PX4 原樣，只套一個 NuttX 修正 [nuttx_82d12852_stm32h7_sdmmc_rx_invalidate.patch](../../px4/patches/)（NuttX 官方 82d1285：STM32H7 的 SD 卡 DMA 讀取後清快取，原因見 [AGENTS](../../AGENTS.md) 第 1 段）。不加模組、沒有開機檔；參數和 `00_native` 相同。
 - **用途**：「原生＋修正」的基準，隨時可刷回；也是自建配方的起點：複製這個資料夾，在 `firmware/firmware.json` 的 `recipe.modules` 加模組（`02_template` 就是這樣做的）。
 - **重現**：PX4 原始碼照版本鎖下載（README「環境準備」）→ `./runbridge build-firmware --release deploy/01_sdfix`（編好的 `.px4` 不放 git）→ `./runbridge deploy-test --release deploy/01_sdfix` 先看計畫 → `--flash`。
-- **怎麼知道 FC 上是它**：FC 回報 PX4 `d6f12ad1c4`、NuttX `8d3ed2a2177267cb`（`firmware.json` 的 `embedded` 與 `flashed`）。patch 以固定作者與日期 commit，所以重編後這兩個編號不變；`.px4` 檔頭有建置時間，檔案 SHA-256 每次重編都不同。`02_template` 的兩個編號和這裡相同（只多一個模組），要靠刷機紀錄與開機檔區分。
+- **怎麼知道 FC 上是它**：v1.18.0：FC 回報 PX4 `935addf1d6`、NuttX `3cc0c49601597d4a`（v1.17.0 時是 `d6f12ad1c4`、`8d3ed2a2177267cb`）（`firmware.json` 的 `embedded` 與 `flashed`）。patch 以固定作者與日期 commit，所以重編後這兩個編號不變；`.px4` 檔頭有建置時間，檔案 SHA-256 每次重編都不同。`02_template` 的兩個編號和這裡相同（只多一個模組），要靠刷機紀錄與開機檔區分。
 
 ## 紀錄
 

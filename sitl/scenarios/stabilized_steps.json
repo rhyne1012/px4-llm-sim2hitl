@@ -30,23 +30,23 @@
     }
   ],
   "reference": {
-    "recorded": "sitl/README.md: Ubuntu 24.04 x86-64, 2026-11-03, release skysurfer-7fb22f72 (the 2026-11 model)",
+    "recorded": "sitl/README.md: Ubuntu 24.04 x86-64, 2026-11-25, PX4 v1.18.0, release skysurfer-7fb22f72 (the 2026-11 model); PX4 v1.17.0 on the same release (2026-11-03): roll 22.41 / 0.432 / 0.58, pitch -6.14 / 0.832, yaw 6.98 at 0.212",
     "steps": [
       {
         "axis": "roll",
-        "tail_mean": 22.41,
-        "rise_time_s": 0.432,
-        "settling_time_s": 0.58
+        "tail_mean": 23.04,
+        "rise_time_s": 0.512,
+        "settling_time_s": 0.656
       },
       {
         "axis": "pitch",
-        "tail_mean": -6.14,
-        "rise_time_s": 0.832,
+        "tail_mean": -5.72,
+        "rise_time_s": 0.672,
         "settled": true
       },
       {
         "axis": "yaw",
-        "peak_change": 6.98,
+        "peak_change": 6.83,
         "peak_time_s": 0.212
       }
     ]

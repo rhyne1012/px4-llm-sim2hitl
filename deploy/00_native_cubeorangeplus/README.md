@@ -4,15 +4,15 @@ CubePilot Cube Orange+ 的三個配方之一（和 6C 的 `00_native`、`01_sdfi
 
 | 配方 | 韌體 | 和 6C 的對應 |
 |---|---|---|
-| `00_native_cubeorangeplus`（本資料夾） | PX4 v1.17.0 的 `hil` 板子變體：預設板子設定只多編 `pwm_out_sim`（[patch](../../px4/patches/px4_cubeorangeplus_hil_variant_pwm_out_sim.patch)），PX4 的控制程式不改 | `00_native` |
-| [`01_sdfix_cubeorangeplus`](../01_sdfix_cubeorangeplus/README.md) | 上一列＋NuttX 記憶卡修正 | `01_sdfix` |
+| `00_native_cubeorangeplus`（本資料夾） | PX4 v1.18.0（2026-11-25 起；之前 v1.17.0）的 `hil` 板子變體：預設板子設定只多編 `pwm_out_sim`（[patch](../../px4/patches/px4_cubeorangeplus_hil_variant_pwm_out_sim.patch)），PX4 的控制程式不改 | `00_native` |
+| [`01_sdfix_cubeorangeplus`](../01_sdfix_cubeorangeplus/README.md) | v1.18：和上一列相同（記憶卡修正已內建於 v1.18 的 NuttX）；v1.17：上一列＋NuttX 記憶卡修正 | `01_sdfix` |
 | `02_template_cubeorangeplus` | 上一列＋範例模組 `guidance_template`＋開機檔＋`hitl.json`（起飛後動作與判定和 `02_template` 相同） | `02_template` |
 
 交接時（2026-10-20 09:10 UTC）FC 上是 `01_sdfix_cubeorangeplus`，沒有開機檔。
 
 - **為什麼原生也要 patch**：Cube Orange+ 的預設韌體沒有 `pwm_out_sim`，`SYS_HITL=1` 時沒有 HIL 輸出、不能做 HITL。6C 的原生韌體是官方原樣；Cube 的「原生」是「PX4 程式不改＋HITL 需要的模組」。
 - **韌體**：有 `recipe`，`./runbridge build-firmware --release deploy/<配方>` 從鎖定的原始碼樹重建（編好的 `.px4` 不進 git）；make 目標 `cubepilot_cubeorangeplus_hil`。
-- **怎麼知道 FC 上是它**：FC 回報 board_version 4184（USB 產品碼 0x1058；韌體的 board id 是 1063）、PX4 `c45268d056`、NuttX `fb2fadf6f599c140`（`01`／`02` 是 `8d3ed2a2177267cb`；`01` 與 `02` 相同，要靠刷機紀錄與開機檔區分）。PX4 hash 是板子變體 patch 的 commit，不是 v1.17.0 本身，所以 FC 回報的版本類型是 dev。
+- **怎麼知道 FC 上是它**：FC 回報 board_version 4184（USB 產品碼 0x1058；韌體的 board id 是 1063）。v1.18.0：PX4 `51daf13fca`、NuttX `3cc0c49601597d4a`，`00`、`01`、`02` 三個都一樣，要靠刷機紀錄與開機檔區分。v1.17.0 時是 PX4 `c45268d056`、NuttX `fb2fadf6f599c140`（`01`／`02` 是 `8d3ed2a2177267cb`）。PX4 hash 是板子變體 patch 的 commit，不是 v1.17.0 本身，所以 FC 回報的版本類型是 dev。
 
 ## 參數
 

@@ -4,12 +4,7 @@
   "board": "px4_fmu-v6c",
   "recipe": {
     "make_target": "px4_fmu-v6c_default",
-    "patches": [
-      {
-        "file": "px4/patches/nuttx_82d12852_stm32h7_sdmmc_rx_invalidate.patch",
-        "repo": "platforms/nuttx/NuttX/nuttx"
-      }
-    ],
+    "patches": [],
     "modules": []
   },
   "px4": {
@@ -20,61 +15,41 @@
   "outputs": {
     "firmware": {
       "file": "px4_fmu-v6c_default.px4",
-      "sha256": "501d0776ab591618c0bc9115141b51a2cd75774c18579b098aaccac42cb8bc84",
-      "size": 1804260
+      "sha256": "abb6fd696986e72d037812552ebfba485b01e612acc3643d476d767aafe8fe78",
+      "size": 1821473
     },
     "image_bin": {
       "file": "not kept (inside the .px4 image field)",
-      "sha256": "eb3b48f60ffe28383244a7200da46d476dd34b467a97e08570c3778343f4fa7b",
-      "size": 1926280
+      "sha256": "0cc9d35f47a722b2215481cd60c78aa2ba51c4a59993d681b45c65a758e51e00",
+      "size": 1920400
     },
     "parameters": {
       "file": "parameters.json.xz",
-      "sha256": "4d582c4265d511181fd8998b7bdf4982d19c1ab89a178fa1d3df5e5b4ad9375e",
-      "count": 2038,
+      "sha256": "9808b494ac41b0df985b9f3becbf6dac1aa4856ae89f2fd34ab62609e2dd3dc8",
+      "count": 1953,
       "origin": "PX4 build output, unmodified"
     }
   },
   "embedded": {
     "board_id": 56,
     "board_version": 56,
-    "git_identity": "v1.17.0",
-    "git_hash": "d6f12ad1c4f70ad3230afd7d86e971421e02fef4",
-    "nuttx_git_hash": "8d3ed2a2177267cb0ad5a1cadbee9ccdb6aab70d",
-    "image_size": 1926280,
+    "git_identity": "v1.18.0",
+    "git_hash": "935addf1d6bec6e955b155494a52e7eb4b750eb3",
+    "nuttx_git_hash": "3cc0c49601597d4a0c4df43b134b0dbc633dd04c",
+    "image_size": 1920400,
     "image_maxsize": 1966080,
-    "flash_used_percent": 97.98
+    "flash_used_percent": 97.68
   },
   "build": {
     "command": "make px4_fmu-v6c_default BUILD_DIR_SUFFIX=_01_sdfix",
     "build_tree": "<PX4 build tree>",
     "output_dir": "<PX4 build tree>/build/px4_fmu-v6c_default_01_sdfix",
-    "patches": [
-      {
-        "file": "px4/patches/nuttx_82d12852_stm32h7_sdmmc_rx_invalidate.patch",
-        "sha256": "ebdecae0b43ade65f7cb156ff04648ff4169b833eafde5c4761d291da3a8f75a",
-        "repo": "platforms/nuttx/NuttX/nuttx",
-        "commit": "8d3ed2a2177267cb0ad5a1cadbee9ccdb6aab70d"
-      }
-    ],
+    "patches": [],
     "modules": {},
     "toolchain": "arm-none-eabi-gcc (15:13.2.rel1-2) 13.2.1 20231009",
-    "built_at_utc": "2026-10-17T19:21:36Z",
-    "seconds": 12.4,
-    "log": "~/.cache/px4-llm-sim2hitl/firmware/01_sdfix/build_20261018_032124.log"
+    "built_at_utc": "2026-11-25T08:50:00Z",
+    "seconds": 8.4,
+    "log": "~/.cache/px4-llm-sim2hitl/firmware/01_sdfix/build_20261125_164951.log"
   },
-  "flashed": {
-    "status": "PASS",
-    "at_utc": "2026-10-18T07:22:01Z",
-    "port": "/dev/ttyACM0",
-    "tool": "<PX4 tree>/Tools/px_uploader.py --port /dev/ttyACM0 px4_fmu-v6c_default.px4",
-    "attempts": 1,
-    "after": {
-      "flight_sw_version": 17891583,
-      "git_hash_prefix": "d6f12ad1c4",
-      "os_hash_prefix": "8d3ed2a2177267cb",
-      "board_version": 56
-    },
-    "evidence": "~/.cache/px4-llm-sim2hitl/deploy_runs/run_20261018_072113Z_0fe09c8e/flash"
-  }
+  "flashed": null
 }

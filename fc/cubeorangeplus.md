@@ -28,7 +28,7 @@
 
 ### 預設韌體不能做 HITL
 
-- v1.17.0 的 `boards/cubepilot/cubeorangeplus/default.px4board` 沒有任何模擬模組：`pwm_out_sim` 沒編進去。6C 的 board 開了 `SIMULATOR_SIH`，順帶選了 `pwm_out_sim`。
+- v1.17.0 的 `boards/cubepilot/cubeorangeplus/default.px4board` 沒有任何模擬模組（v1.18.0 也一樣，同一個 patch 照用）：`pwm_out_sim` 沒編進去。6C 的 board 開了 `SIMULATOR_SIH`，順帶選了 `pwm_out_sim`。
 - 影響：`SYS_HITL=1` 開機時 rcS 的 `pwm_out_sim start -m hil` 失敗，沒有 HIL 輸出，參數名單也沒有 `HIL_ACT_*`。
 - 做法：[px4/patches/px4_cubeorangeplus_hil_variant_pwm_out_sim.patch](../px4/patches/px4_cubeorangeplus_hil_variant_pwm_out_sim.patch) 加一個 `hil.px4board`（只有 `CONFIG_MODULES_SIMULATION_PWM_OUT_SIM=y`），make 目標 `cubepilot_cubeorangeplus_hil`。PX4 的控制程式不變；多 7 KB。
 - 確認：建置目錄的 `boardconfig` 有 `CONFIG_MODULES_SIMULATION_PWM_OUT_SIM=y`；FC 上 `pwm_out_sim status` 有 `Param prefix: HIL_ACT`；`ver all` 是 `Build variant: hil`。
@@ -77,7 +77,7 @@
 
 ### 版本類型
 
-- 板子變體的 patch commit 在 PX4 主 repo，FC 回報的版本從 1.17.0 release（`17891583`）變成 1.17.0 dev（`17891328`）。身分核對比 hash，不受影響。
+- 板子變體的 patch commit 在 PX4 主 repo，FC 回報的版本從 1.17.0 release（`17891583`）變成 1.17.0 dev（`17891328`）；v1.18.0 是 dev `17956864`。身分核對比 hash，不受影響。
 
 ## 怎麼確認
 

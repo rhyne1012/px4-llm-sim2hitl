@@ -24,7 +24,7 @@ FC 只有一個序列埠可接：`deploy-test` 的計畫會列出 FC 現在符�
 6. **IO 處理器與安全開關**：有 px4io 的板子（Cube）不論是否 HITL 都會啟動 px4io，它一啟動就宣告安全開關存在。v1.17 的 `CBRK_IO_SAFETY` 預設 22027（不用按），所以照預設沒事；有人把它改成 0 時，只接 USB、沒接安全開關的 HITL 會因「Press safety button first」解鎖不了。
 7. **記憶卡**：STM32H7 的板子要套 NuttX 的 SD 卡讀取修正（[AGENTS](../AGENTS.md) 第 1 段）；看 defconfig 有沒有 `CONFIG_STM32H7_SDMMC1`／`SDMMC2` 與 `CONFIG_ARMV7M_DCACHE`。修正後 FC 回報的 NuttX hash 跟板子無關（6C 與 Cube 都是 `8d3ed2a2…`）。
 8. **參數存放**：nsh 的 `mtd status` 要有 `/fs/mtd_params`。例外的例子：fmu-v3 的副廠板用 16 KiB 的 FRAM，PX4 1.15 起切不出 32 KiB 的參數區，參數存不住。
-9. **PX4 主 repo 的 patch 會讓版本變成 dev**：patch commit 在 PX4 主 repo（不是子模組）時，`git describe` 變成 `v1.17.0-1-g…`，FC 回報的版本類型從 release 變成 dev（`flight_sw_version` 最低位元組 255 → 0）。身分核對比的是 hash，不受影響；QGC 會顯示 dev 版。
+9. **PX4 主 repo 的 patch 會讓版本變成 dev**：patch commit 在 PX4 主 repo（不是子模組）時，`git describe` 變成 `<tag>-1-g…`（例 `v1.18.0-1-g…`），FC 回報的版本類型從 release 變成 dev（`flight_sw_version` 最低位元組 255 → 0）。身分核對比的是 hash，不受影響；QGC 會顯示 dev 版。
 
 ## 接手一塊用過的飛控
 
@@ -54,3 +54,4 @@ CubePilot 的板子出廠多半是 ArduPilot（韌體與 bootloader）。這次�
 |---|---|---|---|---|
 | Pixhawk 6C（`px4_fmu-v6c_default`） | `00_native`、`01_sdfix`、`02_template` | PASS（2026-10-18） | PASS（2026-10-18；02 的範本判定 FAIL：高度衝過頭，見根目錄 README） | [deploy/00_native](../deploy/00_native/README.md) |
 | Cube Orange+（`cubepilot_cubeorangeplus_hil`） | `00_native_cubeorangeplus`、`01_sdfix_cubeorangeplus`、`02_template_cubeorangeplus` | PASS（2026-10-20） | PASS（2026-10-20，三個配方；02 的範本判定 PASS，但高度基準和 6C 不同，見細節） | [cubeorangeplus.md](cubeorangeplus.md) |
+| Cube Orange+，PX4 v1.18.0 | `00`–`02_*_cubeorangeplus` 編譯；`02_template_cubeorangeplus` 一條龍 | PASS（2026-11-25） | 流程 PASS、範本判定 FAIL（2026-11-25，uid `…018352`：高度步階最後高約 1 m、沒進 5 % 帶；v1.17 同模型也一樣，不是 v1.18 造成的，見根目錄 README「已知問題」）；燒錄改用 v1.18 的 `Tools/px4_uploader.py`；那顆 FC 上別的專案留下的值先改回 02 的值。`00`、`01` 的 HITL 沒測 | [px4/README](../px4/README.md)「換 PX4 版本」 |

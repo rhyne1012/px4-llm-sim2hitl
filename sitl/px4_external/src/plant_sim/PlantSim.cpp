@@ -11,6 +11,8 @@
 #include <sys/time.h>
 #include <unistd.h>
 
+ModuleBase::Descriptor PlantSim::desc{task_spawn, custom_command, print_usage};
+
 static uint64_t wall_us()
 {
 	struct timeval t;
@@ -206,6 +208,8 @@ void PlantSim::publish_stub(hrt_abstime now, const Sticks &sticks, bool armed)
 	const uint8_t nav_state = _acro ? vehicle_status_s::NAVIGATION_STATE_ACRO
 				  : _offboard ? vehicle_status_s::NAVIGATION_STATE_OFFBOARD : vehicle_status_s::NAVIGATION_STATE_STAB;
 	status.nav_state = nav_state;
+	status.nav_state_display = nav_state;        // PX4 v1.18: HEARTBEAT/CURRENT_MODE report this field
+	status.accepts_offboard_setpoints = _offboard; // as commander's ModeManagement for NAVIGATION_STATE_OFFBOARD
 	status.arming_state = armed ? vehicle_status_s::ARMING_STATE_ARMED : vehicle_status_s::ARMING_STATE_DISARMED;
 	status.vehicle_type = vehicle_status_s::VEHICLE_TYPE_FIXED_WING;
 	_status_pub.publish(status);
@@ -220,11 +224,9 @@ void PlantSim::publish_stub(hrt_abstime now, const Sticks &sticks, bool armed)
 	mode.flag_control_velocity_enabled = _offboard;
 	mode.flag_control_altitude_enabled = _offboard;
 	mode.flag_control_climb_rate_enabled = _offboard;
-	mode.flag_control_acceleration_enabled = _offboard;
 	mode.flag_control_attitude_enabled = !_acro;
 	mode.flag_control_rates_enabled = true;
 	mode.flag_control_allocation_enabled = true;
-	mode.source_id = nav_state;
 	_control_mode_pub.publish(mode);
 
 	actuator_armed_s actuator_armed{};
@@ -482,13 +484,20 @@ int PlantSim::print_status()
 	return 0;
 }
 
+int PlantSim::run_trampoline(int argc, char *argv[])
+{
+	return ModuleBase::run_trampoline_impl(desc, [](int ac, char *av[]) -> ModuleBase * {
+		return PlantSim::instantiate(ac, av);
+	}, argc, argv);
+}
+
 int PlantSim::task_spawn(int argc, char *argv[])
 {
-	_task_id = px4_task_spawn_cmd("plant_sim", SCHED_DEFAULT, SCHED_PRIORITY_MAX, 4096, (px4_main_t)&run_trampoline,
+	desc.task_id = px4_task_spawn_cmd("plant_sim", SCHED_DEFAULT, SCHED_PRIORITY_MAX, 4096, (px4_main_t)&run_trampoline,
 				      (char *const *)argv);
 
-	if (_task_id < 0) {
-		_task_id = -1;
+	if (desc.task_id < 0) {
+		desc.task_id = -1;
 		return -errno;
 	}
 
@@ -543,5 +552,5 @@ int PlantSim::print_usage(const char *reason)
 
 extern "C" __EXPORT int plant_sim_main(int argc, char *argv[])
 {
-	return PlantSim::main(argc, argv);
+	return ModuleBase::main(PlantSim::desc, argc, argv);
 }

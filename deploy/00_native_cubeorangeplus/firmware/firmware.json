@@ -20,30 +20,30 @@
   "outputs": {
     "firmware": {
       "file": "cubepilot_cubeorangeplus_hil.px4",
-      "sha256": "dd07d0c978bfe1e8e6f1cfdb70b956cbaa95f40309c8925b8f4f547ba830b309",
-      "size": 1819727
+      "sha256": "5a102f2fcd10695e276937a887db2324c65a38d33a148f287162c5f03cfac0bf",
+      "size": 1832271
     },
     "image_bin": {
       "file": "not kept (inside the .px4 image field)",
-      "sha256": "3ced18ef10f471ec675f24d1337cadfc1e94e70c7df0f935049d3c3ea606c36a",
-      "size": 1935712
+      "sha256": "a508cfc1fb814e7020007928dc9119ce682bac9ba3e9aaafeb076e7665b09e8c",
+      "size": 1920992
     },
     "parameters": {
       "file": "parameters.json.xz",
-      "sha256": "5e5c81c8159b1501938945fc7c183b96e986b774f7b211b7f041d6191157da3b",
-      "count": 1979,
+      "sha256": "6f982d6740711e898ca43304934908a660b9611a8cf1b522eac5bdc68c20d693",
+      "count": 1898,
       "origin": "PX4 build output, unmodified"
     }
   },
   "embedded": {
     "board_id": 1063,
     "board_version": 4184,
-    "git_identity": "v1.17.0-1-gc45268d",
-    "git_hash": "c45268d05609345371f7ed9a005dcebeeb4aacd3",
-    "nuttx_git_hash": "fb2fadf6f599c1406f052db013efd00a2518e72c",
-    "image_size": 1935712,
+    "git_identity": "v1.18.0-1-g51daf13fca",
+    "git_hash": "51daf13fca33476d476ceab590293b44cbf12ed1",
+    "nuttx_git_hash": "3cc0c49601597d4a0c4df43b134b0dbc633dd04c",
+    "image_size": 1920992,
     "image_maxsize": 1966080,
-    "flash_used_percent": 98.46
+    "flash_used_percent": 97.71
   },
   "build": {
     "command": "make cubepilot_cubeorangeplus_hil BUILD_DIR_SUFFIX=_00_native_cubeorangeplus",
@@ -54,27 +54,14 @@
         "file": "px4/patches/px4_cubeorangeplus_hil_variant_pwm_out_sim.patch",
         "sha256": "ee05f333fec96f3de2a53189097872dd38b3e89ffb1560e2f07442113f32505b",
         "repo": ".",
-        "commit": "c45268d05609345371f7ed9a005dcebeeb4aacd3"
+        "commit": "51daf13fca33476d476ceab590293b44cbf12ed1"
       }
     ],
     "modules": {},
     "toolchain": "arm-none-eabi-gcc (15:13.2.rel1-2) 13.2.1 20231009",
-    "built_at_utc": "2026-10-20T08:28:15Z",
-    "seconds": 180.2,
-    "log": "~/.cache/px4-llm-sim2hitl/firmware/00_native_cubeorangeplus/build_20261020_162514.log"
+    "built_at_utc": "2026-11-25T08:49:26Z",
+    "seconds": 9.0,
+    "log": "~/.cache/px4-llm-sim2hitl/firmware/00_native_cubeorangeplus/build_20261125_164917.log"
   },
-  "flashed": {
-    "status": "PASS",
-    "at_utc": "2026-10-20T08:42:36Z",
-    "port": "/dev/ttyACM0",
-    "tool": "<PX4 tree>/Tools/px_uploader.py --port /dev/ttyACM0 cubepilot_cubeorangeplus_hil.px4",
-    "attempts": 1,
-    "after": {
-      "flight_sw_version": 17891328,
-      "git_hash_prefix": "c45268d056",
-      "os_hash_prefix": "fb2fadf6f599c140",
-      "board_version": 4184
-    },
-    "evidence": "~/.cache/px4-llm-sim2hitl/deploy_runs/run_20261020_084153Z_870d9582/flash"
-  }
+  "flashed": null
 }
