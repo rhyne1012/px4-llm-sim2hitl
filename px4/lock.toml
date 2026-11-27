@@ -1,5 +1,7 @@
 # The PX4 this toolkit version is tested with. Builds use a tree at exactly this commit; patches are a last resort,
 # each one adds or changes as little as possible, and each is listed here with why.
+# The git commit is the fingerprint (it fixes every submodule too); no backup copy of the tree is kept (decided
+# 2026-11-28: PX4 is unlikely to disappear; a copy in the cloud may come later).
 [px4]
 tag = "v1.18.0"
 commit = "935addf1d6bec6e955b155494a52e7eb4b750eb3"
