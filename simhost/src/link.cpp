@@ -130,4 +130,83 @@ bool Link::receive(mavlink_message_t *msg, double timeout_s) {
   }
 }
 
+void Link::serve(double timeout_s, int extra_fd, const std::function<void(const mavlink_message_t &)> &on_message,
+                 const std::function<void()> &on_extra) {
+  const auto deadline = std::chrono::steady_clock::now() + std::chrono::duration<double>(timeout_s);
+  mavlink_message_t msg;
+  for (;;) {
+    while (read_pos_ < buffered_) {
+      if (mavlink_parse_char(MAVLINK_COMM_0, buffer_[read_pos_++], &msg, &status_)) on_message(msg);
+    }
+    const auto left = std::chrono::duration_cast<std::chrono::microseconds>(deadline - std::chrono::steady_clock::now()).count();
+    if (left <= 0) return;
+    pollfd p[2] = {{fd_, POLLIN, 0}, {extra_fd, POLLIN, 0}};
+    timespec ts{static_cast<time_t>(left / 1000000), static_cast<long>(left % 1000000) * 1000};
+    const int r = ::ppoll(p, extra_fd >= 0 ? 2 : 1, &ts, nullptr);
+    if (r < 0) {
+      if (errno == EINTR) continue;
+      throw sys_error("poll " + description_);
+    }
+    if (r == 0) return;
+    if (extra_fd >= 0 && (p[1].revents & POLLIN)) on_extra();
+    if (p[0].revents & POLLIN) {
+      const ssize_t n = ::read(fd_, buffer_, sizeof buffer_);
+      if (n == 0) throw std::runtime_error(description_ + " closed by the peer");
+      if (n < 0) {
+        if (errno == EINTR || errno == EAGAIN) continue;
+        throw sys_error("read " + description_);
+      }
+      buffered_ = static_cast<int>(n);
+      read_pos_ = 0;
+    } else if (p[0].revents & (POLLERR | POLLHUP)) {
+      throw std::runtime_error(description_ + " lost");
+    }
+  }
+}
+
+void Link::send_raw(const uint8_t *data, size_t n) {
+  size_t done = 0;
+  while (done < n) {
+    const ssize_t w = ::write(fd_, data + done, n - done);
+    if (w < 0) {
+      if (errno == EINTR) continue;
+      throw sys_error("write " + description_);
+    }
+    done += static_cast<size_t>(w);
+  }
+}
+
+static_assert(sizeof(sockaddr_in) <= 16, "peer address storage");
+
+Relay::Relay(int port) {
+  fd_ = ::socket(AF_INET, SOCK_DGRAM | SOCK_NONBLOCK, 0);
+  if (fd_ < 0) throw sys_error("relay socket");
+  sockaddr_in addr{};
+  addr.sin_family = AF_INET;
+  addr.sin_port = htons(static_cast<uint16_t>(port));
+  addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+  if (::bind(fd_, reinterpret_cast<sockaddr *>(&addr), sizeof addr) < 0) throw sys_error("bind relay UDP port " + std::to_string(port));
+}
+
+Relay::~Relay() {
+  if (fd_ >= 0) ::close(fd_);
+}
+
+void Relay::to_peer(const mavlink_message_t &msg) {
+  if (!has_peer_) return;
+  uint8_t buf[MAVLINK_MAX_PACKET_LEN];
+  const uint16_t n = mavlink_msg_to_send_buffer(buf, &msg);
+  ::sendto(fd_, buf, n, 0, reinterpret_cast<const sockaddr *>(peer_), sizeof(sockaddr_in));
+}
+
+size_t Relay::from_peer(uint8_t *buf, size_t cap) {
+  sockaddr_in from{};
+  socklen_t len = sizeof from;
+  const ssize_t n = ::recvfrom(fd_, buf, cap, 0, reinterpret_cast<sockaddr *>(&from), &len);
+  if (n <= 0) return 0;
+  std::memcpy(peer_, &from, sizeof from);
+  has_peer_ = true;
+  return static_cast<size_t>(n);
+}
+
 }  // namespace simhost

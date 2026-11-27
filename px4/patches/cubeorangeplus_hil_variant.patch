@@ -1,0 +1,12 @@
+boards/cubepilot/cubeorangeplus: hil variant with pwm_out_sim
+
+The default build of the Cube Orange+ has no simulation modules, so with SYS_HITL=1 the rcS line
+`pwm_out_sim start -m hil` fails: no HIL_ACT_* parameters, no HIL_ACTUATOR_CONTROLS, no HITL. This label variant
+(make cubepilot_cubeorangeplus_hil) is the default board plus pwm_out_sim only; PX4's code is unchanged.
+
+diff --git a/boards/cubepilot/cubeorangeplus/hil.px4board b/boards/cubepilot/cubeorangeplus/hil.px4board
+new file mode 100644
+--- /dev/null
++++ b/boards/cubepilot/cubeorangeplus/hil.px4board
+@@ -0,0 +1 @@
++CONFIG_MODULES_SIMULATION_PWM_OUT_SIM=y

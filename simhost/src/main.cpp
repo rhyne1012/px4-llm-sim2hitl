@@ -17,6 +17,7 @@
 #include <iomanip>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <thread>
@@ -40,7 +41,7 @@ struct Mapping {
 
 struct Options {
   std::string vehicle, serial, record, extra;
-  int sitl_port = 0, baud = 2000000;
+  int sitl_port = 0, baud = 2000000, relay_port = 0;
   bool lockstep = false;
   double lat = 22.9100, lon = 120.3110, agl = 0.19, heading = 0.0, duration = 0.0, physics_dt = 0.001, hil_dt = 0.004;
   unsigned seed = 1;
@@ -52,7 +53,7 @@ struct Options {
   std::fprintf(stderr,
                "%s\nusage: simhost --vehicle DIR (--sitl-port N [--lockstep] | --serial DEV [--baud B])\n"
                "               [--actuator CH:PROP:GAIN[:OFFSET]]... [--set PROP=VALUE]... [--lat D --lon D --agl M --heading D]\n"
-               "               [--duration S] [--record FILE.csv] [--seed N]\n",
+               "               [--duration S] [--record FILE.csv] [--seed N] [--relay-port N (HITL: UDP for other MAVLink users)]\n",
                why);
   std::exit(2);
 }
@@ -70,6 +71,7 @@ Options parse(int argc, char **argv) {
     else if (a == "--lockstep") o.lockstep = true;
     else if (a == "--serial") o.serial = next();
     else if (a == "--baud") o.baud = std::stoi(next());
+    else if (a == "--relay-port") o.relay_port = std::stoi(next());
     else if (a == "--lat") o.lat = std::stod(next());
     else if (a == "--lon") o.lon = std::stod(next());
     else if (a == "--agl") o.agl = std::stod(next());
@@ -126,6 +128,11 @@ int main(int argc, char **argv) {
     Link link = o.sitl_port > 0 ? Link::tcp_server(o.sitl_port, 120.0) : Link::serial(o.serial, o.baud);
     std::cerr << "simhost: connected on " << link.description() << '\n';
 
+    std::unique_ptr<Relay> relay;
+    if (o.relay_port > 0) {
+      relay = std::make_unique<Relay>(o.relay_port);
+      std::cerr << "simhost: MAVLink relay on UDP 127.0.0.1:" << o.relay_port << '\n';
+    }
     std::ofstream rec;
     if (!o.record.empty()) {
       rec.open(o.record);
@@ -138,12 +145,14 @@ int main(int argc, char **argv) {
     float controls[16] = {};
     bool armed = false, answered = false;
     uint64_t t_us = 0, last_answer_us = 0;
-    long steps = 0, waits_timed_out = 0;
+    long steps = 0, waits_timed_out = 0, late_steps = 0;
+    double max_late_ms = 0.0;
     const int gps_every = static_cast<int>(std::lround(profile.gps_period_s / o.hil_dt));
     auto wall_next = std::chrono::steady_clock::now();
     mavlink_message_t msg;
 
     const auto handle = [&](const mavlink_message_t &m) {
+      if (relay) relay->to_peer(m);
       if (m.msgid != MAVLINK_MSG_ID_HIL_ACTUATOR_CONTROLS) return;
       mavlink_hil_actuator_controls_t a;
       mavlink_msg_hil_actuator_controls_decode(&m, &a);
@@ -189,7 +198,8 @@ int main(int argc, char **argv) {
       }
       if (steps % static_cast<long>(std::lround(5.0 / o.hil_dt)) == 0)
         std::cerr << "simhost: t " << t.time_s << " s, agl " << t.alt_agl_m << " m, airspeed " << t.airspeed_m_s
-                  << " m/s, armed " << armed << ", waits timed out " << waits_timed_out << '\n';
+                  << " m/s, armed " << armed << ", waits timed out " << waits_timed_out << ", late steps " << late_steps
+                  << " (max " << max_late_ms << " ms)" << '\n';
 
       if (o.lockstep && answered) {
         // Lockstep: wait for PX4's answer to this step (its time follows the HIL_SENSOR time).
@@ -203,18 +213,26 @@ int main(int argc, char **argv) {
           got = last_answer_us >= t_us;
         }
       } else {
-        // Real time (HITL, or SITL before PX4 first answers): keep the HIL period on the wall clock, read what came.
-        wall_next += std::chrono::microseconds(static_cast<long>(std::lround(o.hil_dt * 1e6)));
-        while (!g_stop) {
-          const double left = std::chrono::duration<double>(wall_next - std::chrono::steady_clock::now()).count();
-          if (left <= 0) break;
-          if (link.receive(&msg, left)) handle(msg);
+        // Real time (HITL, or SITL before PX4 first answers): keep the HIL period on the wall clock, serve what comes.
+        // A step is late when its sensor message leaves more than one HIL period after its slot.
+        const auto now = std::chrono::steady_clock::now();
+        if (steps > 1) {
+          const double late_ms = std::chrono::duration<double, std::milli>(now - wall_next).count();
+          if (late_ms > max_late_ms) max_late_ms = late_ms;
+          if (late_ms > o.hil_dt * 1e3) ++late_steps;
         }
+        wall_next += std::chrono::microseconds(static_cast<long>(std::lround(o.hil_dt * 1e6)));
+        const double left = std::chrono::duration<double>(wall_next - std::chrono::steady_clock::now()).count();
+        uint8_t dgram[2048];
+        link.serve(left > 0 ? left : 0.0, relay ? relay->fd() : -1, handle, [&]() {
+          const size_t n = relay->from_peer(dgram, sizeof dgram);
+          if (n) link.send_raw(dgram, n);
+        });
       }
       if (o.duration > 0 && t.time_s >= o.duration) break;
     }
     std::cerr << "simhost: stopped at " << steps * o.hil_dt << " s simulated, " << waits_timed_out
-              << " lockstep waits timed out\n";
+              << " lockstep waits timed out, " << late_steps << " late steps (max lateness " << max_late_ms << " ms)\n";
     return 0;
   } catch (const std::exception &e) {
     std::cerr << "simhost: " << e.what() << '\n';

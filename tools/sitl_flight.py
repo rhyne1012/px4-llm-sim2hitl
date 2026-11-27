@@ -134,7 +134,36 @@ class Flight:
                 return msg.result
         return None
 
+    def wait_position(self, timeout=180.0):
+        """Arm only with a usable global position: the estimator reports an absolute horizontal position and PX4 has a
+        home position. (PX4 may accept arming earlier; COM_ARM_WO_GPS 1 allows it. A takeoff without GPS then fails
+        over when it switches to a mode that needs a global position.)"""
+        end = time.monotonic() + timeout
+        have_home, have_pos, since = False, False, None
+        while time.monotonic() < end:
+            if not have_home:
+                self.m.mav.command_long_send(self.m.target_system, self.m.target_component, mavutil.mavlink.MAV_CMD_REQUEST_MESSAGE, 0,
+                                             mavutil.mavlink.MAVLINK_MSG_ID_HOME_POSITION, 0, 0, 0, 0, 0, 0)
+            msg = self.m.recv_match(type=['HOME_POSITION', 'EKF_STATUS_REPORT', 'ESTIMATOR_STATUS', 'STATUSTEXT'], blocking=True, timeout=1.0)
+            if msg is None:
+                continue
+            t = msg.get_type()
+            if t == 'STATUSTEXT':
+                self.event('px4', text=msg.text)
+            elif t == 'HOME_POSITION':
+                have_home = True
+            elif t in ('EKF_STATUS_REPORT', 'ESTIMATOR_STATUS'):
+                ok = bool(msg.flags & mavutil.mavlink.EKF_POS_HORIZ_ABS)
+                if ok and not have_pos:
+                    since = time.monotonic()
+                have_pos = ok
+            if have_home and have_pos and since is not None and time.monotonic() - since > 2.0:
+                self.event('position ready', home=True, ekf_pos_horiz_abs=True)
+                return
+        raise RuntimeError('no global position and home before the timeout')
+
     def fly(self):
+        self.wait_position()
         # Wait for the estimator: try to switch to takeoff and arm until PX4 accepts (pre-arm checks pass).
         end = time.monotonic() + 180
         while True:
@@ -193,6 +222,8 @@ class Flight:
 
 def summarize(out, flight):
     rows = []
+    if not (out / 'simhost.csv').exists():
+        return {'samples': 0, 'flight': flight, 'ulog': []}
     with open(out / 'simhost.csv') as f:
         head = f.readline().strip().split(',')
         for line in f:

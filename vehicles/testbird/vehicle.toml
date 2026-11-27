@@ -42,3 +42,7 @@ gain = 1.0
 [start]
 agl_m = 0.19                 # CG height at rest on the gear
 heading_deg = 0.0
+
+[px4.hitl]
+airframe = 2100              # PX4's Standard Plane; the control allocation is set to match 1033 in the params file
+params = "px4/hitl.params"
