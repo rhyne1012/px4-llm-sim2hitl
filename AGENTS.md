@@ -76,6 +76,7 @@ After that every change goes through the automation (`tools/fly.py`), without re
 ## 3. Safety (not negotiable)
 
 - **Writes go to a known target with known content.** Flight-controller identity, disarmed state, parameter read-back and recovery are mandatory and cannot be bypassed; `tools/deploy.py` and `tools/fc.py` enforce them, so do not write to a flight controller by other means. If a write's success is unsure, stop; never continue to arming. Other non-default settings run as given and are recorded; report anything that looks wrong.
+- **Roles keep bench and aircraft apart.** Every recipe states its role (hitl, bench, flight) and every flight controller has one a person gave it (hitl or aircraft); `tools/deploy.py` refuses a mismatch before it writes anything, and a flight recipe needs the person's `--flight` ([docs/recipes.md](docs/recipes.md), Roles). An agent never sets a board's role or passes `--flight` on its own.
 - **HITL only with the physical power isolated**: propellers removed or ESCs unpowered, confirmed by a person before each session. Automation does not switch HITL off (`SYS_HITL`) and does not test physical actuators until the vehicle's physical outputs are checked out.
 - **A hardware test written by hand** does what `tools/fly.py` does, and its report keeps these apart from the flight result: the flight's log is newer than the newest before the flight (otherwise it is not this flight, even if it reads twice identically and parses); any parameter changed for the test is restored and read back; the standard recover completes (disarmed, `SYS_HITL` as expected after the reboot).
 - **SITL first, then HITL.** SITL does not replace HITL: it cannot test the flight controller's timing, serial links, NuttX, flashing, SD card or HIL outputs.
@@ -102,8 +103,8 @@ The table is the upper bound, not a list to run every time: say which behaviours
 | the fast core (`fastcore/`) | `fastcore/check.py` and `fastcore/bench.py` for Testbird, and for each vehicle repository that uses a core (through the local link) |
 | a vehicle definition (`vehicles/`) | `tools/vehicle_check.py`, `tools/linear.py` (its check), then its SITL flight |
 | trims and linear models (`tools/linear.py`, `tools/linear_model.m`) | `tests/test_linear.py`; `linear_model.m` in MATLAB on its output |
-| deploy and the flight-controller link (`tools/deploy.py`, `fc.py`, `mavftp.py`, `recipe.py`, `px4build.py`) | a deploy plan on a flight controller; `--reuse` when writes changed; a firmware build that reproduces a recorded identity when the build changed |
-| the SITL FC, pilot, flight runner (`tools/sitl_fc.py`, `pilot.py`, `sequence.py`, `fly.py`) | a vehicle repository's SITL health check through the local link; its HITL when the HITL path changed |
+| deploy and the flight-controller link (`tools/deploy.py`, `fc.py`, `mavftp.py`, `recipe.py`, `px4build.py`) | `tests/test_fc_reboot.py`, `tests/test_roles.py`; a deploy plan on a flight controller; `--reuse` when writes changed; a firmware build that reproduces a recorded identity when the build changed |
+| the SITL FC, pilot, flight runner (`tools/sitl_fc.py`, `pilot.py`, `sequence.py`, `fly.py`) | `tests/test_fly_runner.py`; a vehicle repository's SITL health check through the local link; its HITL when the HITL path changed |
 | the PX4 or JSBSim version | everything above, a new minor release (section 7), and every vehicle repository's health checks before it moves |
 | `README.md` | `README.zh-TW.md` in the same commit |
 
