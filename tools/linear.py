@@ -317,14 +317,18 @@ def tf_value(rec, w, delay=True):
     return v * np.exp(-s * rec.get('delay_s', 0.0)) if delay else v
 
 
-def classify(eigenvalues, complex_names, real_names):
-    """Name the modes of one block: complex pairs and real roots, each slowest first."""
+def classify(eigenvalues, complex_names, real_names, block):
+    """Name the modes of one block: complex pairs and real roots, each slowest first. When their count differs from
+    the usual one (an unstable vehicle's short period can split into real roots), they are named by the block and their
+    place: longitudinal_real_1 is the slowest real root."""
     pairs = sorted((s for s in eigenvalues if s.imag > 1e-6), key=abs)
     reals = sorted((s for s in eigenvalues if abs(s.imag) <= 1e-6), key=abs)
-    named = zip(complex_names, pairs) if len(pairs) == len(complex_names) else (('mode', s) for s in pairs)
+    named = zip(complex_names, pairs) if len(pairs) == len(complex_names) else \
+        ((f'{block}_complex_{k + 1}', s) for k, s in enumerate(pairs))
     modes = [{'name': n, 'real': float(s.real), 'imag': float(s.imag), 'frequency_rad_s': float(abs(s)),
               'damping': float(-s.real / abs(s))} for n, s in named]
-    named = zip(real_names, reals) if len(reals) == len(real_names) else (('mode', s) for s in reals)
+    named = zip(real_names, reals) if len(reals) == len(real_names) else \
+        ((f'{block}_real_{k + 1}', s) for k, s in enumerate(reals))
     modes += [{'name': n, 'real': float(s.real), 'imag': 0.0, 'time_constant_s': float(-1.0 / s.real)}
               for n, s in named if abs(s.real) > 1e-9]
     return modes
@@ -465,8 +469,8 @@ def linearize(model, t):
     eig = np.linalg.eigvals(A)
     return {'trim': {k: t[k] for k in ('airspeed_m_s', 'height_m', 'alpha_deg', 'pitch_deg', 'commands')},
             'states': list(STATES), 'inputs': model.inputs, 'A': A.tolist(), 'B': B.tolist(),
-            'modes': classify(np.linalg.eigvals(A[np.ix_(LON, LON)]), ('phugoid', 'short_period'), ()) +
-            classify(np.linalg.eigvals(A[np.ix_(LAT, LAT)]), ('dutch_roll',), ('spiral', 'roll')),
+            'modes': classify(np.linalg.eigvals(A[np.ix_(LON, LON)]), ('phugoid', 'short_period'), (), 'longitudinal') +
+            classify(np.linalg.eigvals(A[np.ix_(LAT, LAT)]), ('dutch_roll',), ('spiral', 'roll'), 'lateral'),
             'servo': servos, 'transfer_functions': tfs,
             'eigenvalues_coupled': [[float(e.real), float(e.imag)] for e in sorted(eig, key=abs)],
             'blocks_vs_coupled': {'rad_s': list(CHECK_RAD_S), 'max_relative_difference': split,
