@@ -1,1 +1,1 @@
-先讀 [AGENTS.md](AGENTS.md)。
+Read [AGENTS.md](AGENTS.md) first.

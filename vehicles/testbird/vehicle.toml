@@ -1,0 +1,55 @@
+# Testbird in PX4: which airframe and parameters, and how PX4's outputs drive the JSBSim model.
+
+[vehicle]
+name = "testbird"
+jsbsim_model = "testbird"
+
+[px4.sitl]
+airframe = 1033              # PX4's "Plane SITL" (init.d-posix/airframes/1033_jsbsim_rascal): conventional plane
+params = "px4/sitl.params"   # applied after boot and read back
+
+# HIL_ACTUATOR_CONTROLS channel (0-based) -> JSBSim property; the property gets sum(gain * output + offset).
+# kind "servo" outputs go through the servo signal chain (avionics/servo_chain.h: PWM hold, then delay; off unless a
+# configuration sets avionics/servo/*); "motor" outputs do not.
+# Airframe 1033 outputs: 2 rudder (CS3), 3 left flap, 4 motor, 5 left aileron (CS0), 6 right aileron (CS1),
+# 7 elevator (CS2), 8 right flap.
+# PX4 signs: a positive deflection produces the torque in CA_SV_CSn_TRQ_* (elevator +1 pitch up, rudder +1 yaw right,
+# left aileron -0.5 roll, right aileron +0.5 roll). Testbird signs (Systems/controls.xml): elevator + nose down,
+# aileron + roll right, rudder + nose right.
+[[actuators]]
+channel = 4
+property = "fcs/throttle-cmd-norm"
+kind = "motor"
+gain = 1.0
+
+[[actuators]]
+channel = 7
+property = "fcs/elevator-cmd-norm"
+kind = "servo"
+gain = -1.0
+
+[[actuators]]
+channel = 5
+property = "fcs/aileron-cmd-norm"
+kind = "servo"
+gain = -0.5
+
+[[actuators]]
+channel = 6
+property = "fcs/aileron-cmd-norm"
+kind = "servo"
+gain = 0.5
+
+[[actuators]]
+channel = 2
+property = "fcs/rudder-cmd-norm"
+kind = "servo"
+gain = 1.0
+
+[start]
+agl_m = 0.19                 # CG height at rest on the gear
+heading_deg = 0.0
+
+[px4.hitl]
+airframe = 2100              # PX4's Standard Plane; the control allocation is set to match 1033 in the params file
+params = "px4/hitl.params"

@@ -1,14 +1,5 @@
 __pycache__/
 *.pyc
 .venv/
-# macOS Finder's folder settings
+build/
 .DS_Store
-# Built locally from the sources (model releases and their active pointers)
-hitl/releases/
-hitl/active/
-
-# Firmware built by px4/build_firmware.py (00_native keeps its prebuilt image as the restore base)
-deploy/*/firmware/*.px4
-deploy/*/firmware/parameters.json.xz
-!deploy/00_native/firmware/*.px4
-!deploy/00_native/firmware/parameters.json.xz

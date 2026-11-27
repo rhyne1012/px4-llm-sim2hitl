@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<!-- Testbird motor: an outrunner on a 6S battery, sized for the APC 18x8E propeller.
+     JSBSim FGBrushLessDCMotor: the throttle scales the voltage; torque follows from Kv, coil resistance and no-load current. -->
+<brushless_dc_motor name="testbird_motor">
+  <maxvolts units="VOLTS">         22.2 </maxvolts>
+  <velocityconstant units="RPM/V"> 340  </velocityconstant>
+  <coilresistance units="OHMS">    0.06 </coilresistance>
+  <noloadcurrent units="AMPERES">  1.2  </noloadcurrent>
+</brushless_dc_motor>
