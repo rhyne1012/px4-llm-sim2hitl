@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "note": "Testbird on a Cube Orange+ in HITL: PX4 as released plus the one board-variant file HITL needs (pwm_out_sim), no external module. Built by tools/px4build.py; the image and the parameter list are build products, not tracked.",
+  "board": "cubepilot_cubeorangeplus",
+  "recipe": {
+    "make_target": "cubepilot_cubeorangeplus_hil",
+    "patches": [
+      {
+        "file": "px4/patches/cubeorangeplus_hil_variant.patch",
+        "repo": "."
+      }
+    ],
+    "modules": []
+  },
+  "px4": {
+    "tag": "v1.18.0",
+    "commit": "935addf1d6bec6e955b155494a52e7eb4b750eb3"
+  }
+}

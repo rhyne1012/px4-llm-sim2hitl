@@ -52,6 +52,7 @@ TAKEOVER_STICK = 150                  # ground-station stick movement (of 1000) 
 BANK_FROM_M = 20                      # --climb-bank: height above which the climb banks
 HOMEWARD_DEG = 45                     # --climb-bank: level off when the course is this close to the bearing home
 HOME_NEAR_M = 150                     # --climb-bank: or when this close to the takeoff point, any course
+PREARM_WAIT_S = 60.                   # arm: how long to wait for PX4's pre-arm checks to pass before asking
 STOP = 'stop requested'
 TAKEOVER = 'ground-station sticks moved: a person has control'
 COMPLETE = 'command script complete'  # sequence.py, ON_FINISH 'release'
@@ -130,6 +131,7 @@ class Vehicle:
         self.mission_requests = []    # MISSION_REQUEST(_INT) sequence numbers, consumed by a mission upload
         self.mission_ack = None       # (arrival time, MAV_MISSION_RESULT)
         self.pilot = None             # a ground station's sticks that reached this port: (x, y, z, r)
+        self.prearm_ok = None         # SYS_STATUS: PX4's pre-arm checks pass (None: not reported)
 
     def update(self, message, now):
         kind = message.get_type()
@@ -145,6 +147,10 @@ class Vehicle:
             self.sub_mode = (message.custom_mode >> 24) & 255
             self.armed = bool(message.base_mode & mav.MAV_MODE_FLAG_SAFETY_ARMED)
             self.vehicle_type = message.type
+        elif kind == 'SYS_STATUS':
+            bit = mav.MAV_SYS_STATUS_PREARM_CHECK
+            if message.onboard_control_sensors_present & bit:
+                self.prearm_ok = bool(message.onboard_control_sensors_health & bit)
         elif kind == 'VFR_HUD':
             self.cas = message.airspeed
         elif kind == 'LOCAL_POSITION_NED':
@@ -222,6 +228,7 @@ class Takeoff:
         self.stop_reason = STOP
         self.after_sequence = args.after_sequence
         self.after_ready_since = self.after_wait_started = None
+        self.arm_asked = None         # pilot time of the first arm request
         self.climb_timed_out = False
         self.mode_command_id = mav.MAV_CMD_DO_SET_MODE
         self.rc_mode = getattr(args.after_sequence, 'input', 'manual') == 'rc'
@@ -393,13 +400,19 @@ class Takeoff:
             if elapsed > 8:
                 self.release('PX4 did not enter Stabilized')
         elif self.state == 'arm':
+            # Ask only once PX4 reports its pre-arm checks passed (SYS_STATUS PREARM_CHECK): before that the estimator
+            # may still be aligning or waiting for GPS, and a refused arm says nothing more. Without the report, ask.
+            waiting = v.prearm_ok is False and elapsed < PREARM_WAIT_S
             if v.armed:
                 self.go('roll')
-            elif now >= self.next['command']:
+            elif not waiting and now >= self.next['command']:
                 self.next['command'] = now + 1.5
                 self.command(mav.MAV_CMD_COMPONENT_ARM_DISARM, 1)
-            if elapsed > 10:
+                self.arm_asked = self.arm_asked or now
+            if self.arm_asked and now - self.arm_asked > 10:
                 self.go('abandon', 'PX4 did not arm: ' + ' | '.join(v.texts[-2:]))
+            elif elapsed > PREARM_WAIT_S + 10:
+                self.go('abandon', f'PX4 pre-arm checks did not pass within {PREARM_WAIT_S:.0f} s: ' + ' | '.join(v.texts[-2:]))
         elif self.state == 'roll':
             self.set_throttle(a.takeoff_throttle, dt, rate=1.)
             if v.cas >= a.rotate_cas:

@@ -36,7 +36,7 @@ Sensors and the servo signal chain belong to the flight controller, not to the a
 - the IMU, magnetometer, barometer, airspeed sensor and GPS, with their noise, bias, delay and rate
 - the PWM output timing, and the servo delay and hold
 
-The simulation host applies the profile between JSBSim and PX4. Effects that JSBSim cannot express belong in this layer. Each effect is written once, in plain C under `avionics/`, and used by both the simulation host and the fast core; the servo signal chain (`avionics/servo_chain.h`: PWM hold, then transport delay, on the servo channels) is the first. The sensor models are still in the simulation host (`simhost/src/avionics.cpp`).
+Today there is one sensor model for every flight controller (white noise in `simhost/src/avionics.cpp`, a fixed 250 Hz HIL rate); per-flight-controller profiles with bias and delay are planned. The simulation host applies the profile between JSBSim and PX4. Effects that JSBSim cannot express belong in this layer. Each effect is written once, in plain C under `avionics/`, and used by both the simulation host and the fast core; the servo signal chain (`avionics/servo_chain.h`: PWM hold, then transport delay, on the servo channels) is the first. The sensor models are still in the simulation host (`simhost/src/avionics.cpp`).
 
 ### Simulation host
 
@@ -72,6 +72,8 @@ The same core runs in the algorithm-level tests, in training, in SITL, in HITL a
 For training and other sim-bound work, `fastcore/gen.py` turns a vehicle's JSBSim folder into a C core with a C and Python interface: the vehicle's own parts (aerodynamic functions and tables, flight-control components, mass, propulsion constants) are translated, and the shared physics is written once. Everything a configuration may change is a per-vehicle parameter of the core, under the same property names, so a batch can mix configurations and a failure can start mid-episode. JSBSim stays the reference: `fastcore/check.py` compares every generated core with JSBSim, exactly at the level of forces and moments and within stated limits in flight. The generator lives here; a generated core is a build product of the vehicle repository that uses it. See `fastcore/README.md`.
 
 ### Test cases
+
+Status: planned as a format. Today a recipe's `hitl.json` names a command script (Python, tied to the pilot and PX4's modes) and a check over the ULog; the check is the part that already runs the same way in SITL, HITL and flight.
 
 A test case is data and has three parts:
 

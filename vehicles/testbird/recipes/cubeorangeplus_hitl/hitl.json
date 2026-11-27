@@ -1,0 +1,5 @@
+{
+  "after": "vehicles/testbird/commands/loiter.py",
+  "check": "vehicles/testbird/checks/loiter_check.py",
+  "flight_timeout": 300
+}

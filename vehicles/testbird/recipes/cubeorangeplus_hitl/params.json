@@ -1,0 +1,259 @@
+{
+  "schema_version": 1,
+  "note": "Testbird HITL recipe (SYS_HITL 1). Expected parameters = firmware defaults + airframe + boot + verify_only + set (docs/recipes.md). The airframe section is what PX4's airframe 2100 and rc.fw_defaults set (param set-default); the boot section is filled from the first readback of a flashed board (not yet).",
+  "firmware": "firmware/firmware.json",
+  "firmware_params": {
+    "file": "firmware/parameters.json.xz",
+    "sha256": null
+  },
+  "fc_owned": {
+    "patterns": [
+      "^CAL_",
+      "^TC_",
+      "^RC\\d+_",
+      "^RC_MAP_",
+      "^RC_CHAN_CNT$",
+      "^SENS_BOARD_",
+      "^SENS_TEMP_ID$",
+      "^BAT\\d_(V_DIV|A_PER_V)$",
+      "^COM_FLIGHT_UUID$",
+      "^LND_FLIGHT_T_(HI|LO)$",
+      "^EKF2_MAG_DECL$",
+      "^MAN_ARM_GESTURE$",
+      "^SENS_DPRES_OFF$",
+      "^SENS_DPRES_ANSC$",
+      "^ASPD_SCALE_\\d$"
+    ],
+    "resolved_names": []
+  },
+  "airframe": {
+    "CA_AIRFRAME": {
+      "value": 1,
+      "why": "PX4 rc.fw_defaults (param set-default), PX4 v1.18.0"
+    },
+    "CA_ROTOR0_PX": {
+      "value": 0.3,
+      "why": "PX4 2100_standard_plane (param set-default), PX4 v1.18.0"
+    },
+    "COM_DISARM_PRFLT": {
+      "value": -1.0,
+      "why": "PX4 rc.fw_defaults (param set-default), PX4 v1.18.0"
+    },
+    "COM_POS_LOW_EPH": {
+      "value": 50.0,
+      "why": "PX4 rc.fw_defaults (param set-default), PX4 v1.18.0"
+    },
+    "COM_VEL_FS_EVH": {
+      "value": 3.0,
+      "why": "PX4 rc.fw_defaults (param set-default), PX4 v1.18.0"
+    },
+    "EKF2_ARSP_THR": {
+      "value": 8.0,
+      "why": "PX4 rc.fw_defaults (param set-default), PX4 v1.18.0"
+    },
+    "EKF2_FUSE_BETA": {
+      "value": 1,
+      "why": "PX4 rc.fw_defaults (param set-default), PX4 v1.18.0"
+    },
+    "EKF2_MAG_ACCLIM": {
+      "value": 0.0,
+      "why": "PX4 rc.fw_defaults (param set-default), PX4 v1.18.0"
+    },
+    "EKF2_REQ_EPH": {
+      "value": 10.0,
+      "why": "PX4 rc.fw_defaults (param set-default), PX4 v1.18.0"
+    },
+    "EKF2_REQ_EPV": {
+      "value": 10.0,
+      "why": "PX4 rc.fw_defaults (param set-default), PX4 v1.18.0"
+    },
+    "EKF2_REQ_HDRIFT": {
+      "value": 0.5,
+      "why": "PX4 rc.fw_defaults (param set-default), PX4 v1.18.0"
+    },
+    "EKF2_REQ_PDOP": {
+      "value": 4.0,
+      "why": "PX4 rc.fw_defaults (param set-default), PX4 v1.18.0"
+    },
+    "EKF2_REQ_SACC": {
+      "value": 1.0,
+      "why": "PX4 rc.fw_defaults (param set-default), PX4 v1.18.0"
+    },
+    "EKF2_REQ_VDRIFT": {
+      "value": 1.0,
+      "why": "PX4 rc.fw_defaults (param set-default), PX4 v1.18.0"
+    },
+    "EKF2_RNG_QLTY_T": {
+      "value": 3.0,
+      "why": "PX4 rc.fw_defaults (param set-default), PX4 v1.18.0"
+    },
+    "GPS_UBX_DYNMODEL": {
+      "value": 8,
+      "why": "PX4 rc.fw_defaults (param set-default), PX4 v1.18.0"
+    },
+    "MAV_TYPE": {
+      "value": 1,
+      "why": "PX4 rc.fw_defaults (param set-default), PX4 v1.18.0"
+    },
+    "MIS_TAKEOFF_ALT": {
+      "value": 25.0,
+      "why": "PX4 rc.fw_defaults (param set-default), PX4 v1.18.0"
+    },
+    "MIS_TKO_LAND_REQ": {
+      "value": 2,
+      "why": "PX4 rc.fw_defaults (param set-default), PX4 v1.18.0"
+    },
+    "NAV_ACC_RAD": {
+      "value": 10.0,
+      "why": "PX4 rc.fw_defaults (param set-default), PX4 v1.18.0"
+    },
+    "RTL_DESCEND_ALT": {
+      "value": 100.0,
+      "why": "PX4 rc.fw_defaults (param set-default), PX4 v1.18.0"
+    },
+    "RTL_LAND_DELAY": {
+      "value": -1.0,
+      "why": "PX4 rc.fw_defaults (param set-default), PX4 v1.18.0"
+    },
+    "RTL_RETURN_ALT": {
+      "value": 100.0,
+      "why": "PX4 rc.fw_defaults (param set-default), PX4 v1.18.0"
+    },
+    "RTL_TYPE": {
+      "value": 1,
+      "why": "PX4 rc.fw_defaults (param set-default), PX4 v1.18.0"
+    },
+    "SYS_HAS_NUM_ASPD": {
+      "value": 1,
+      "why": "PX4 rc.fw_defaults (param set-default), PX4 v1.18.0"
+    }
+  },
+  "boot": {},
+  "verify_only": {},
+  "set": {
+    "SYS_AUTOSTART": {
+      "value": 2100,
+      "why": "PX4 Standard Plane airframe"
+    },
+    "SYS_HITL": {
+      "value": 1,
+      "why": "HITL"
+    },
+    "CA_ROTOR_COUNT": {
+      "value": 1,
+      "why": "control allocation and HIL outputs as in PX4's plane SITL airframe 1033, so vehicle.toml's actuator map is the same everywhere: 2 rudder, 3 left flap, 4 motor, 5 left aileron, 6 right aileron, 7 elevator, 8 right flap"
+    },
+    "CA_SV_CS_COUNT": {
+      "value": 6,
+      "why": "control allocation and HIL outputs as in PX4's plane SITL airframe 1033, so vehicle.toml's actuator map is the same everywhere: 2 rudder, 3 left flap, 4 motor, 5 left aileron, 6 right aileron, 7 elevator, 8 right flap"
+    },
+    "CA_SV_CS0_TYPE": {
+      "value": 1,
+      "why": "control allocation and HIL outputs as in PX4's plane SITL airframe 1033, so vehicle.toml's actuator map is the same everywhere: 2 rudder, 3 left flap, 4 motor, 5 left aileron, 6 right aileron, 7 elevator, 8 right flap"
+    },
+    "CA_SV_CS0_TRQ_R": {
+      "value": -0.5,
+      "why": "control allocation and HIL outputs as in PX4's plane SITL airframe 1033, so vehicle.toml's actuator map is the same everywhere: 2 rudder, 3 left flap, 4 motor, 5 left aileron, 6 right aileron, 7 elevator, 8 right flap"
+    },
+    "CA_SV_CS1_TYPE": {
+      "value": 2,
+      "why": "control allocation and HIL outputs as in PX4's plane SITL airframe 1033, so vehicle.toml's actuator map is the same everywhere: 2 rudder, 3 left flap, 4 motor, 5 left aileron, 6 right aileron, 7 elevator, 8 right flap"
+    },
+    "CA_SV_CS1_TRQ_R": {
+      "value": 0.5,
+      "why": "control allocation and HIL outputs as in PX4's plane SITL airframe 1033, so vehicle.toml's actuator map is the same everywhere: 2 rudder, 3 left flap, 4 motor, 5 left aileron, 6 right aileron, 7 elevator, 8 right flap"
+    },
+    "CA_SV_CS2_TYPE": {
+      "value": 3,
+      "why": "control allocation and HIL outputs as in PX4's plane SITL airframe 1033, so vehicle.toml's actuator map is the same everywhere: 2 rudder, 3 left flap, 4 motor, 5 left aileron, 6 right aileron, 7 elevator, 8 right flap"
+    },
+    "CA_SV_CS2_TRQ_P": {
+      "value": 1.0,
+      "why": "control allocation and HIL outputs as in PX4's plane SITL airframe 1033, so vehicle.toml's actuator map is the same everywhere: 2 rudder, 3 left flap, 4 motor, 5 left aileron, 6 right aileron, 7 elevator, 8 right flap"
+    },
+    "CA_SV_CS3_TYPE": {
+      "value": 4,
+      "why": "control allocation and HIL outputs as in PX4's plane SITL airframe 1033, so vehicle.toml's actuator map is the same everywhere: 2 rudder, 3 left flap, 4 motor, 5 left aileron, 6 right aileron, 7 elevator, 8 right flap"
+    },
+    "CA_SV_CS3_TRQ_Y": {
+      "value": 1.0,
+      "why": "control allocation and HIL outputs as in PX4's plane SITL airframe 1033, so vehicle.toml's actuator map is the same everywhere: 2 rudder, 3 left flap, 4 motor, 5 left aileron, 6 right aileron, 7 elevator, 8 right flap"
+    },
+    "CA_SV_CS4_TYPE": {
+      "value": 9,
+      "why": "control allocation and HIL outputs as in PX4's plane SITL airframe 1033, so vehicle.toml's actuator map is the same everywhere: 2 rudder, 3 left flap, 4 motor, 5 left aileron, 6 right aileron, 7 elevator, 8 right flap"
+    },
+    "CA_SV_CS5_TYPE": {
+      "value": 10,
+      "why": "control allocation and HIL outputs as in PX4's plane SITL airframe 1033, so vehicle.toml's actuator map is the same everywhere: 2 rudder, 3 left flap, 4 motor, 5 left aileron, 6 right aileron, 7 elevator, 8 right flap"
+    },
+    "HIL_ACT_FUNC1": {
+      "value": 0,
+      "why": "control allocation and HIL outputs as in PX4's plane SITL airframe 1033, so vehicle.toml's actuator map is the same everywhere: 2 rudder, 3 left flap, 4 motor, 5 left aileron, 6 right aileron, 7 elevator, 8 right flap"
+    },
+    "HIL_ACT_FUNC2": {
+      "value": 0,
+      "why": "control allocation and HIL outputs as in PX4's plane SITL airframe 1033, so vehicle.toml's actuator map is the same everywhere: 2 rudder, 3 left flap, 4 motor, 5 left aileron, 6 right aileron, 7 elevator, 8 right flap"
+    },
+    "HIL_ACT_FUNC3": {
+      "value": 204,
+      "why": "control allocation and HIL outputs as in PX4's plane SITL airframe 1033, so vehicle.toml's actuator map is the same everywhere: 2 rudder, 3 left flap, 4 motor, 5 left aileron, 6 right aileron, 7 elevator, 8 right flap"
+    },
+    "HIL_ACT_FUNC4": {
+      "value": 205,
+      "why": "control allocation and HIL outputs as in PX4's plane SITL airframe 1033, so vehicle.toml's actuator map is the same everywhere: 2 rudder, 3 left flap, 4 motor, 5 left aileron, 6 right aileron, 7 elevator, 8 right flap"
+    },
+    "HIL_ACT_FUNC5": {
+      "value": 101,
+      "why": "control allocation and HIL outputs as in PX4's plane SITL airframe 1033, so vehicle.toml's actuator map is the same everywhere: 2 rudder, 3 left flap, 4 motor, 5 left aileron, 6 right aileron, 7 elevator, 8 right flap"
+    },
+    "HIL_ACT_FUNC6": {
+      "value": 201,
+      "why": "control allocation and HIL outputs as in PX4's plane SITL airframe 1033, so vehicle.toml's actuator map is the same everywhere: 2 rudder, 3 left flap, 4 motor, 5 left aileron, 6 right aileron, 7 elevator, 8 right flap"
+    },
+    "HIL_ACT_FUNC7": {
+      "value": 202,
+      "why": "control allocation and HIL outputs as in PX4's plane SITL airframe 1033, so vehicle.toml's actuator map is the same everywhere: 2 rudder, 3 left flap, 4 motor, 5 left aileron, 6 right aileron, 7 elevator, 8 right flap"
+    },
+    "HIL_ACT_FUNC8": {
+      "value": 203,
+      "why": "control allocation and HIL outputs as in PX4's plane SITL airframe 1033, so vehicle.toml's actuator map is the same everywhere: 2 rudder, 3 left flap, 4 motor, 5 left aileron, 6 right aileron, 7 elevator, 8 right flap"
+    },
+    "HIL_ACT_FUNC9": {
+      "value": 206,
+      "why": "control allocation and HIL outputs as in PX4's plane SITL airframe 1033, so vehicle.toml's actuator map is the same everywhere: 2 rudder, 3 left flap, 4 motor, 5 left aileron, 6 right aileron, 7 elevator, 8 right flap"
+    },
+    "HIL_ACT_FUNC10": {
+      "value": 0,
+      "why": "control allocation and HIL outputs as in PX4's plane SITL airframe 1033, so vehicle.toml's actuator map is the same everywhere: 2 rudder, 3 left flap, 4 motor, 5 left aileron, 6 right aileron, 7 elevator, 8 right flap"
+    },
+    "HIL_ACT_FUNC11": {
+      "value": 0,
+      "why": "control allocation and HIL outputs as in PX4's plane SITL airframe 1033, so vehicle.toml's actuator map is the same everywhere: 2 rudder, 3 left flap, 4 motor, 5 left aileron, 6 right aileron, 7 elevator, 8 right flap"
+    },
+    "HIL_ACT_FUNC12": {
+      "value": 0,
+      "why": "control allocation and HIL outputs as in PX4's plane SITL airframe 1033, so vehicle.toml's actuator map is the same everywhere: 2 rudder, 3 left flap, 4 motor, 5 left aileron, 6 right aileron, 7 elevator, 8 right flap"
+    },
+    "FW_AIRSPD_STALL": {
+      "value": 10.5,
+      "why": "Testbird's speeds and trim (vehicles/testbird/README.md: stall about 10.1 m/s, level-flight throttle 0.64 at 17 m/s)"
+    },
+    "FW_AIRSPD_MIN": {
+      "value": 13.0,
+      "why": "Testbird's speeds and trim (vehicles/testbird/README.md: stall about 10.1 m/s, level-flight throttle 0.64 at 17 m/s)"
+    },
+    "FW_AIRSPD_TRIM": {
+      "value": 17.0,
+      "why": "Testbird's speeds and trim (vehicles/testbird/README.md: stall about 10.1 m/s, level-flight throttle 0.64 at 17 m/s)"
+    },
+    "FW_AIRSPD_MAX": {
+      "value": 23.0,
+      "why": "Testbird's speeds and trim (vehicles/testbird/README.md: stall about 10.1 m/s, level-flight throttle 0.64 at 17 m/s)"
+    },
+    "FW_THR_TRIM": {
+      "value": 0.64,
+      "why": "Testbird's speeds and trim (vehicles/testbird/README.md: stall about 10.1 m/s, level-flight throttle 0.64 at 17 m/s)"
+    }
+  }
+}

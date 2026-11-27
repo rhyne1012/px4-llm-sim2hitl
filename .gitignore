@@ -3,3 +3,7 @@ __pycache__/
 .venv/
 build/
 .DS_Store
+
+# recipe build products (tools/px4build.py): recorded in firmware.json, not tracked
+vehicles/*/recipes/*/firmware/*.px4
+vehicles/*/recipes/*/firmware/parameters.json.xz

@@ -68,6 +68,7 @@ After that every change goes through the automation (`tools/fly.py`), without re
   1. Irreversible or outward: merge, deleting files, system settings (anything that needs sudo), pushing, publishing, downloads.
   2. New or abnormal: new firmware or a new algorithm on the flight controller for the first time, a retry after a failure, a tool's safety check stopping you.
   3. The person's own decisions: acceptance criteria, when to merge.
+- **A standing grant.** A person may grant an agent broad autonomy for a repository (recorded in that repository's decisions). Then the asking rhythm above is relaxed: no question at every stage end or first action of a kind. The hard lines hold all the same: a person confirms propellers off and ESCs unpowered before each HITL session; evidence stays honest (section "Before you conclude"); pushing, merging a public main branch, releasing and anything else that cannot be undone or reaches outside the machine wait for the person's explicit word.
 - **Tool-level permissions are made permanent the first time**: give the person the permanent way at once (one paste when possible), a temporary one only to bridge until the permanent one applies. Never change your own permission settings.
 - Real-time scheduling for HITL: after the permanent setting, check what the process actually gets (`ulimit -r`, `/proc/<PID>/limits`). Without it HITL runs with less timing margin; stop other heavy work before a timing-sensitive test.
 
@@ -96,7 +97,7 @@ The table is the upper bound, not a list to run every time: say which behaviours
 
 | Changed | Run |
 |---|---|
-| simhost, avionics (`simhost/`, `avionics/`) | `tests/test_simhost_*.py`; Testbird in SITL (`tools/sitl_flight.py`); HITL on a flight controller when timing or the serial link may be affected |
+| simhost, avionics (`simhost/`, `avionics/`) | `tests/test_simhost_*.py`; Testbird's recipe in SITL (`tools/fly.py sitl vehicles/testbird/recipes/cubeorangeplus_hitl`); HITL on a flight controller when timing or the serial link may be affected |
 | the fast core (`fastcore/`) | `fastcore/check.py` and `fastcore/bench.py` for Testbird |
 | a vehicle definition (`vehicles/`) | `tools/vehicle_check.py`, then its SITL flight |
 | deploy and the flight-controller link (`tools/deploy.py`, `fc.py`, `mavftp.py`, `recipe.py`, `px4build.py`) | a deploy plan on a flight controller; `--reuse` when writes changed; a firmware build that reproduces a recorded identity when the build changed |

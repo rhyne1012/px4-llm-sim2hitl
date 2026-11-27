@@ -58,7 +58,7 @@ from pymavlink import mavutil  # noqa: E402
 from deploy import BOARDS  # noqa: E402
 from fc import FC, FORCE_DISARM  # noqa: E402
 from recipe import Recipe  # noqa: E402
-from sitl_flight import simhost_vehicle_args  # noqa: E402
+from simhost_args import simhost_vehicle_args  # noqa: E402
 
 CACHE = Path(os.environ.get('XDG_CACHE_HOME') or Path.home() / '.cache') / 'px4-llm-sim2hitl' / 'v2'
 SIMHOST = TOOLKIT / 'build' / 'simhost' / 'simhost'

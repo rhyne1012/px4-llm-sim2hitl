@@ -52,7 +52,7 @@ Each vehicle lives in its own repository and pins a version of this project. Thi
 
 ## Supported vehicles
 
-Any vehicle JSBSim can describe is in scope, for example fixed-wing aircraft, multirotors, VTOL aircraft and helicopters. Every interface is to be verified with two test vehicles, one fixed-wing and one quadrotor, so that no interface assumes a particular vehicle type; the fixed-wing (`vehicles/testbird`) exists, the quadrotor is planned. Actual support is what the verification matrix shows: an unverified combination is not supported.
+Any vehicle JSBSim can describe is in scope, for example fixed-wing aircraft, multirotors, VTOL aircraft and helicopters. Every interface is to be verified with two test vehicles, one fixed-wing and one quadrotor, so that no interface assumes a particular vehicle type; the fixed-wing (`vehicles/testbird`) exists, the quadrotor is planned. Actual support is what the verification matrix shows: an unverified combination is not supported. **Today the pipeline and its checks cover fixed-wing aircraft only**: the pilot flies a fixed-wing runway takeoff, the vehicle check trims a fixed-wing, and simhost runs at a fixed 250 Hz HIL rate. They are extended when a second vehicle type arrives, not before.
 
 ## Features
 
@@ -62,7 +62,7 @@ What is built and verified is in [docs/verification.md](docs/verification.md); i
 - **Deployment pipeline.** Build → flash → identity check → parameters → boot file → HITL → flight-controller log, in one command (`tools/fly.py`; the recipe format is [docs/recipes.md](docs/recipes.md)).
 - **Test cases** (*planned*). One format for scenarios, checks and records, used at the algorithm level, in SITL, in HITL and in flight. Today a recipe's `hitl.json` names the command script and the check, and the vehicle repository keeps the records.
 - **Anchor** (*planned*). The recorded reference behaviour of a vehicle, locked; changing it requires a person's approval.
-- **Fast core.** A C version of a vehicle's JSBSim model, generated from its definition and checked against JSBSim, for training and other work that needs many simulated hours.
+- **Fast core** (*optional*). A C version of a vehicle's JSBSim model, generated from its definition and checked against JSBSim, for training and other work that needs many simulated hours. It translates a subset of JSBSim (`fastcore/README.md`); a vehicle whose file uses more cannot use one yet.
 - **Machine resources** (*planned*). When several vehicle repositories share one computer, flight controllers, SITL instances and PX4 source trees are coordinated between them.
 - **Vehicle generator** (*planned*). Creates a new vehicle repository.
 

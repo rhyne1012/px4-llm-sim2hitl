@@ -22,7 +22,7 @@ PY=<python with pymavlink>
 | connect | waits for fresh telemetry through the relay | telemetry fresh | 15 s |
 | check | reads back `SYS_HITL`, `FW_MAN_P_MAX` (and `FW_MAN_R_MAX` with `--climb-bank`, the RC parameters with `INPUT = 'rc'`); checks fixed-wing, disarmed, on the ground (CAS ≤ 5 m/s, height within ±5 m) | all pass | refuses on any failure; 8 s (15 s for RC) to read back |
 | mode | requests Stabilized, sticks already streaming | Stabilized, after at least 1 s | 8 s |
-| arm | requests arming | armed | 10 s, then abandon |
+| arm | waits until PX4 reports its pre-arm checks passed (SYS_STATUS `PREARM_CHECK`; at most 60 s), then requests arming | armed | 10 s after the first request, then abandon |
 | roll | throttle to `takeoff_throttle` at 1/s | CAS ≥ `rotate_cas` | 40 s, then abandon |
 | climb | pitch to `climb_pitch` at 30°/s; with `--climb-bank`, bank above 20 m | height ≥ `altitude` − 2 m | 180 s: level off, the script is not started |
 | cruise | `cruise_throttle`; pitch = `altitude_gain` × height error − `climb_damping` × climb rate, within ±8° | the script starts after the steady time | readiness 60 s (`--after-timeout`) |
