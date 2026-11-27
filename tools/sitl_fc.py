@@ -48,7 +48,8 @@ from recipe import SECTIONS, Recipe, is_int32, load_firmware_params, sha256  # n
 PX4_LOCK = tomllib.loads((TOOLKIT / 'px4' / 'lock.toml').read_text())['px4']
 TARGET = 'px4_sitl_default'
 CACHE = Path(os.environ.get('XDG_CACHE_HOME') or Path.home() / '.cache') / 'px4-llm-sim2hitl' / 'v2' / 'sitl_fc'
-BUILD_TREE = Path.home() / 'px4' / f'PX4-Autopilot-{PX4_LOCK["tag"]}-build-v2sitl'
+BUILD_TREE = Path(os.environ.get('SIM2HITL_SITL_BUILD_TREE')
+                  or Path.home() / 'px4' / f'PX4-Autopilot-{PX4_LOCK["tag"]}-build-v2sitl')
 def default_copy_from():
     """The PX4 tree a new build tree is copied from: SIM2HITL_PX4_ROOT, else ~/.config/px4-llm-sim2hitl/px4_root (the
     same lookup as tools/px4build.py); the copy is then reset to the lock's commit."""
@@ -226,14 +227,7 @@ def cmd_build(a):
     if a.committer is None:   # the vehicle repository's, as tools/px4build.py takes it
         c = (lock.get('firmware_build') or {}).get('committer')
         a.committer = f'{c["name"]} <{c["email"]}>' if c else COMMITTER
-    specs = a.patch or (lock.get('sitl_build') or {}).get('patches', [])
-    # the toolkit's own SITL patches first (fixes every vehicle needs with simhost), then the vehicle repository's
-    patches = [parse_patch(str(f), TOOLKIT) | {'file': f'toolkit:{f.relative_to(TOOLKIT)}'}
-               for f in sorted((TOOLKIT / 'px4' / 'patches' / 'sitl').glob('*.patch'))]
-    patches += [parse_patch(s, recipe.repo) for s in specs]
-    names = [p['path'].name for p in patches]
-    if len(set(names)) != len(names):
-        raise SystemExit(f'a SITL patch is given twice (the toolkit applies px4/patches/sitl/ itself): {names}')
+    patches = sitl_patches(recipe, lock, a.patch)
     parse_committer(a.committer)
     probe = subprocess.run(['python3', '-c', 'import em, jinja2, yaml'], capture_output=True)
     if probe.returncode:
@@ -246,7 +240,7 @@ def cmd_build(a):
         tree = reset_tree(Path(a.build_tree).expanduser().resolve(), Path(a.copy_from).expanduser().resolve())
         applied = apply_patches(tree, patches, a.committer)
         module_hashes = {name: module_files(recipe.repo, name) for name in modules}   # before the build: what it compiles
-        suffix = '_' + recipe.name
+        suffix = f'_{recipe.repo.name}_{recipe.name}'   # per repository: two may have recipes of the same name
         cmd = ['make', TARGET, f'BUILD_DIR_SUFFIX={suffix}']
         if modules:
             cmd.append(f'EXTERNAL_MODULES_LOCATION={external_modules(out, recipe.repo, modules)}')
@@ -272,7 +266,7 @@ def cmd_build(a):
             'vehicle_repo_state': repo_state(recipe.repo), 'target': TARGET, 'lockstep': True,
             'px4': {'tag': PX4_LOCK['tag'], 'lock_commit': PX4_LOCK['commit'], 'build_tree': str(tree),
                     'git_hash': git(tree, 'rev-parse', 'HEAD'), 'git_describe': git(tree, 'describe', '--always', '--tags')},
-            'committer': a.committer, 'patches': applied,
+            'committer': a.committer, 'patches': applied, 'explicit_patches': bool(a.patch),
             'recipe_patches_not_applied': build_recipe.get('patches', []),
             'modules': module_hashes,
             'build_dir': str(outdir), 'binary': {'path': str(px4), 'sha256': sha256(px4)},
@@ -288,9 +282,28 @@ def cmd_build(a):
                       'log': str(log), **({'replaced_build_of': replaced} if replaced else {})}))
 
 
+def sitl_patches(recipe, lock, explicit=None):
+    """The patches a SITL FC build gets, in order: the toolkit's own (px4/patches/sitl/, fixes every vehicle needs with
+    simhost), then the vehicle repository's (--patch, else sim2hitl.lock sitl_build)."""
+    specs = explicit or (lock.get('sitl_build') or {}).get('patches', [])
+    patches = [parse_patch(str(f), TOOLKIT) | {'file': f'toolkit:{f.relative_to(TOOLKIT)}'}
+               for f in sorted((TOOLKIT / 'px4' / 'patches' / 'sitl').glob('*.patch'))]
+    patches += [parse_patch(s, recipe.repo) for s in specs]
+    names = [p['path'].name for p in patches]
+    if len(set(names)) != len(names):
+        raise SystemExit(f'a SITL patch is given twice (the toolkit applies px4/patches/sitl/ itself): {names}')
+    return patches
+
+
 def build_problems(recipe, build):
     """Why a build no longer matches the recipe: empty when it is current."""
     problems = []
+    lock = json.loads((recipe.repo / 'sim2hitl.lock').read_text()) if (recipe.repo / 'sim2hitl.lock').is_file() else {}
+    if not build.get('explicit_patches'):   # built with the default list: it must still be the default list
+        want = [(p['file'], p['repo']) for p in sitl_patches(recipe, lock)]
+        have = [(p['file'], p.get('repo', '.')) for p in build['patches']]
+        if want != have:
+            problems.append(f'the SITL patches are now {[w[0] for w in want]}, the build has {[h[0] for h in have]}')
     if build.get('recipe_dir') != str(recipe.dir) or build.get('vehicle_repo') != str(recipe.repo):
         problems.append(f'built from {build.get("recipe_dir")} of {build.get("vehicle_repo")}')
     if build['px4']['lock_commit'] != PX4_LOCK['commit']:

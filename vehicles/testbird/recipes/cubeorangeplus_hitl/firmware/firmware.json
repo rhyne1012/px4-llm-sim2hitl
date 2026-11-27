@@ -64,23 +64,6 @@
     "modules": {},
     "toolchain": "arm-none-eabi-gcc (15:13.2.rel1-2) 13.2.1 20231009",
     "built_at_utc": "2026-11-27T18:31:23Z",
-    "seconds": 55.9,
-    "log": "~/.cache/px4-llm-sim2hitl/v2/firmware/px4-llm-sim2hitl-prerelease/cubeorangeplus_hitl/build_20261128_023027.log"
-  },
-  "flashed": {
-    "status": "PASS",
-    "at_utc": "2026-11-27T18:35:15Z",
-    "tool": "px4-llm-sim2hitl tools/deploy.py",
-    "uploader": "<PX4 tree>/Tools/px4_uploader.py --noninteractive --port /dev/ttyACM0 cubepilot_cubeorangeplus_hil.px4",
-    "attempts": 1,
-    "after": {
-      "px4_version": "1.18.0",
-      "git_hash_prefix": "5248b44b26",
-      "os_hash_prefix": "3cc0c49601597d4a",
-      "board_version": 4184
-    },
-    "uid": 3545266500430018352,
-    "image_sha256": "57aeaa8d10a043785b404ea9ccdddc4372648cc69d9ef091af9f96dcaa2bd05d",
-    "evidence": "~/.cache/px4-llm-sim2hitl/v2/deploy/20261127-183434_cubeorangeplus_hitl"
+    "seconds": 55.9
   }
 }

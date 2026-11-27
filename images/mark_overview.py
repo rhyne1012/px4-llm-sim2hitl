@@ -2,7 +2,7 @@
 """Mark where a repository sits in the shared overview diagram.
 
     python3 images/mark_overview.py <out.svg> --layer glue                       # the toolkit's README
-    python3 <toolkit>/images/mark_overview.py images/overview.svg --layer vehicle --name SkySurfer   # a vehicle repository
+    python3 <toolkit>/images/mark_overview.py images/overview.svg --layer vehicle --name MyPlane   # a vehicle repository
 
 Every repository shows the same diagram (images/overview.svg of the toolkit, the one source); only the marker differs:
 a heavy frame around its layer and the tag "This repository" (with the repository's name, if given). A vehicle

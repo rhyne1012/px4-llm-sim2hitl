@@ -12,8 +12,8 @@ then:
    patches or modules changed). An old boot file that is not the recipe's is removed first: the new firmware runs it
    on its first boot. PX4's own uploader (<PX4 tree>/Tools/px4_uploader.py) writes the image, with one retry for a
    board left in its bootloader. Then the FC must report the recipe's identity (board, PX4 hash, NuttX hash), which
-   is recorded in firmware.json "flashed", and the board record (~/.cache/px4-llm-sim2hitl/v2/boards/<uid>.json)
-   notes which image went onto this board.
+   is recorded in the board record (~/.cache/px4-llm-sim2hitl/v2/boards/<uid>.json), which notes which image went onto
+   this board; the recipe's files are not changed.
    --reuse needs proof that the board already runs this recipe's image. The identity the FC reports is not enough:
    it names the PX4 and NuttX commits only, so two recipes with the same patches but different external modules (or
    a changed module) report the same identity. So --reuse requires the image to be current (built from the recipe's
@@ -218,15 +218,7 @@ class Deploy:
         problems = self.identity_problems(version)
         if problems:
             raise RuntimeError('after flashing the FC does not report the recipe firmware: ' + '; '.join(problems))
-        info = json.loads(r.firmware_info_path.read_text())
-        info['flashed'] = {'status': 'PASS', 'at_utc': utc(), 'tool': 'px4-llm-sim2hitl tools/deploy.py',
-                           'uploader': f'<PX4 tree>/Tools/px4_uploader.py --noninteractive --port {port} {r.image.name}',
-                           'attempts': len(attempts),
-                           'after': {k: version.get(k) for k in ('px4_version', 'git_hash_prefix', 'os_hash_prefix',
-                                                                 'board_version')},
-                           'uid': version.get('uid'), 'image_sha256': info['outputs']['firmware']['sha256'],
-                           'evidence': str(self.run).replace(str(Path.home()), '~')}
-        r.firmware_info_path.write_text(json.dumps(info, indent=2, ensure_ascii=False) + '\n')
+        info = json.loads(r.firmware_info_path.read_text())   # read only: the recipe files are not changed by a flash
         BOARDS.mkdir(parents=True, exist_ok=True)
         (BOARDS / f'{version.get("uid")}.json').write_text(json.dumps({
             'uid': version.get('uid'), 'board_version': version.get('board_version'), 'recipe': r.name,

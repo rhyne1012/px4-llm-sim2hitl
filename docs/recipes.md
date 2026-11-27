@@ -40,13 +40,13 @@ A deploy recipe is everything one flight controller runs: firmware, parameters, 
              "patches": [{"file": "px4/patches/<name>.patch", "repo": "."}],
              "modules": ["<module>"]},
   "px4": {"tag": "v1.18.0", "commit": "935addf1d6bec6e955b155494a52e7eb4b750eb3"},
-  "outputs": {...}, "embedded": {...}, "build": {...}, "flashed": {...}
+  "outputs": {...}, "embedded": {...}, "build": {...}
 }
 ```
 
-- `recipe`: `make_target` is PX4's; each patch's `file` is a path in the vehicle repository and `repo` a folder of the PX4 tree (`.` for PX4 itself, `platforms/nuttx/NuttX/nuttx` for NuttX); `modules` are folders of `modules/src`. A recipe without `recipe` holds a prebuilt image.
+- `recipe`: `make_target` is PX4's; each patch's `file` is a path in the vehicle repository, or `toolkit:px4/patches/<file>` for one of the toolkit's (the Cube Orange+ HIL board variant, for example), and `repo` a folder of the PX4 tree (`.` for PX4 itself, `platforms/nuttx/NuttX/nuttx` for NuttX); `modules` are folders of `modules/src`. A recipe without `recipe` holds a prebuilt image.
 - `px4.commit` must be the commit of the toolkit's `px4/lock.toml`.
-- `px4build.py` writes `outputs` (SHA-256 of the image, the binary inside it and the parameter list), `embedded` (what the flight controller will report: board id, `board_version`, PX4 and NuttX commit) and `build` (command, committer, patch commits, the SHA-256 of every module file, toolchain), and clears `flashed`. `deploy.py --flash` writes `flashed`.
+- `px4build.py` writes `outputs` (SHA-256 of the image, the binary inside it and the parameter list), `embedded` (what the flight controller will report: board id, `board_version`, PX4 and NuttX commit) and `build` (make target, PX4 commit, command, committer, patch commits, the SHA-256 of every module file, toolchain), and the parameter list's SHA-256 into the `params.json` of every recipe that uses this `firmware/` folder (a recipe may link its folder to another's). `--if-needed` builds again when any of these inputs changed. Nothing machine-local goes into the recipe: what a board runs is that board's record (`~/.cache/px4-llm-sim2hitl/v2/boards/<uid>.json`), written by `deploy.py --flash`.
 - `board_version` is what PX4 reports in AUTOPILOT_VERSION: the USB product id (`CONFIG_CDCACM_PRODUCTID`), which differs from the image's board id on some boards (Cube Orange+: 4184 against 1063).
 
 The image is reproducible from the recipe only as far as the identity: the same PX4 and NuttX hashes and the same parameter list. Its bytes also depend on the build tree's path, because PX4 compiles a few source paths into the binary (`__FILE__` in assertions).
