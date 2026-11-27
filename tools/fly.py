@@ -523,7 +523,7 @@ class Run:
         summary['verdict'] = verdict(summary)
         (self.out / 'summary.json').write_text(json.dumps(summary, indent=1, default=str) + '\n')
         self.event('done', verdict=summary['verdict'], out=str(self.out))
-        return 0 if ok else 1
+        return 0 if summary['verdict'] == 'PASS' else 1
 
 
 def main():
