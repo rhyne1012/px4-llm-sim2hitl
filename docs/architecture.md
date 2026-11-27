@@ -121,8 +121,8 @@ Several vehicle repositories can share one computer. A machine-wide registry and
 
 ## Versions
 
-- The toolkit is released with version tags.
-- A vehicle repository pins one tag in `sim2hitl.lock`, together with the PX4 and JSBSim versions that tag supports.
+- The toolkit is released with version tags, vMAJOR.MINOR.PATCH: MAJOR for a very large change (for example another flight stack such as ArduPilot), MINOR for a new PX4 or JSBSim version or a change vehicle repositories must act on to upgrade, PATCH for everyday changes that need nothing from them.
+- A vehicle repository pins one tag in `sim2hitl.lock`, together with the PX4 and JSBSim versions that tag supports, and stays on it while its work goes on. Its own version numbers, if any, are its own choice.
 - A toolkit change is tested against vehicle repositories through a local development link before it is released. Each vehicle repository then upgrades on its own schedule and runs its own checks.
 
 ## Known limits of the upstream projects
