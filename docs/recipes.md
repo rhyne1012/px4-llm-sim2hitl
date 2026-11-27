@@ -85,6 +85,8 @@ A `set` value equal to the firmware default is reported as `redundant` (harmless
 
 PX4 itself writes some parameters that a recipe does not state. EKF2 writes `EKF2_SENS_EN` at every disarm and sets only the GNSS 0 bit for GPS, so the default 8191 becomes 8189 after the first flight (PX4 v1.18 `EKF2::syncSensEnParam`); the check reports exactly that value as `px4_rewritten`, not as a failure (`PX4_REWRITES` in `tools/recipe.py`). An output function change sets that output's PWM limits; `deploy.py` writes `set` values again when PX4 changed them. `--reset-unmanaged` writes any other parameter that differs back to its default.
 
+**Moving a flight controller between recipes or vehicles.** PX4's airframe script sets only defaults, so a parameter an earlier recipe set keeps its value, also one of the new recipe's `airframe` values; and the earlier recipe's `set` values stay where the new one is silent. The deploy reports both and stops; `--reset-unmanaged` writes the unstated ones back to their defaults and the airframe ones to the airframe's values. The readback before the deploy is kept (`params_before.json`; `tools/fc.py params-restore --from` puts it back).
+
 ### SD files
 
 The boot file runs at the end of PX4's boot (ROMFS `rcS`, `/fs/microsd/etc/extras.txt`); it is how an external module starts without a change to PX4. The logger reads its topic list at start (`/fs/microsd/etc/logging/logger_topics.txt`); since v1.18 the list is added to the topics of `SDLOG_PROFILE`. Both are checked as their readers take them (`tools/mavftp.py`): nsh runs at most 15 words and 127 bytes per line, the logger reads 78 bytes per line and has 255 topic slots. A recipe without a file means the flight controller must not have one.
