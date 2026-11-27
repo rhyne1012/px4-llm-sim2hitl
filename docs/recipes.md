@@ -73,6 +73,8 @@ The expected value of every parameter is the firmware's default, overlaid with:
 | `verify_only` | someone else (a person, a calibration) | checks, never writes |
 | `set` | the toolkit | writes, checks |
 
+A HITL recipe states `GPS_1_CONFIG` 0 in `boot`: PX4's `rcS` sets it at every boot when `SYS_HITL` > 0 (it disables the real GPS), so otherwise the final check finds it off its default. `--reset-unmanaged` also writes the airframe values another recipe changed (see below).
+
 A name may be in one section only. Parameters matching `fc_owned.patterns` belong to the physical flight controller (calibration, counters, the operator's RC): they are read but neither compared nor written. `resolved_names` is the list the patterns gave when the recipe was reviewed; a firmware whose names give another list makes the check INCOMPLETE until the list is reviewed again.
 
 The check (`tools/recipe.py`, `Recipe.check`) compares a full readback with these values. Int32 values compare exactly, Float values as float32 bits. Its verdict:

@@ -128,7 +128,12 @@
       "why": "PX4 rc.fw_defaults (param set-default), PX4 v1.18.0"
     }
   },
-  "boot": {},
+  "boot": {
+    "GPS_1_CONFIG": {
+      "value": 0,
+      "script": "ROMFS/px4fmu_common/init.d/rcS, SYS_HITL > 0 branch (param set: HITL disables the real GPS on every boot)"
+    }
+  },
   "verify_only": {},
   "set": {
     "SYS_AUTOSTART": {
