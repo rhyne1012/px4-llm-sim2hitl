@@ -57,7 +57,14 @@ from fc import FC, FCError  # noqa: E402
 from recipe import KINDS, Recipe, load_firmware_params  # noqa: E402
 
 CACHE = Path(os.environ.get('XDG_CACHE_HOME') or Path.home() / '.cache') / 'px4-llm-sim2hitl' / 'v2' / 'deploy'
-BOARDS = CACHE.parent / 'boards'   # <uid>.json: the image the toolkit last flashed onto that board
+BOARDS = CACHE.parent / 'boards'   # <uid>.json: the image the toolkit last flashed onto that board; <uid>.role.json: its role
+# Which recipe roles a board of each role takes (tools/fc.py board-role sets a board's role, a person's decision)
+BOARD_TAKES = {'hitl': {'hitl', 'bench'}, 'aircraft': {'bench', 'flight'}}
+
+
+def board_role(uid):
+    f = BOARDS / f'{uid}.role.json'
+    return json.loads(f.read_text()).get('role') if f.is_file() else None
 SD_FILES = (mavftp.BOOT_FILE, mavftp.LOGGER_TOPICS)
 FUNCTION = re.compile(r'_FUNC\d+$')
 SETTLE_S = 1.5     # PX4 sets an output's PWM values up to about 1 s after its function changes
@@ -289,12 +296,30 @@ class Deploy:
             raise RuntimeError(f'final check {check["verdict"]}: see {self.run / "check.json"}')
         return version
 
+    def role_gate(self, version):
+        """Before any write: the recipe's role, the board's role (a person's decision, tools/fc.py board-role), and for
+        a flight recipe the person's --flight."""
+        r = self.recipe
+        problems = r.role_problems()
+        role, board = r.params.get('role'), board_role(version.get('uid'))
+        if board is None:
+            problems.append(f'board {version.get("uid")} has no role: a person sets it once, tools/fc.py --link <FC> '
+                            'board-role --role hitl|aircraft')
+        elif role not in BOARD_TAKES.get(board, set()):
+            problems.append(f'a {role} recipe does not go onto a board whose role is {board}')
+        if role == 'flight' and not self.a.flight:
+            problems.append('a flight recipe needs --flight (the person confirms the aircraft is to fly with it)')
+        self.step('roles', 'FAIL' if problems else 'PASS', recipe_role=role, board_role=board, problems=problems)
+        if problems:
+            raise RuntimeError('roles: ' + '; '.join(problems))
+
     def go(self):
         try:
             version, before, sd = self.plan()
             if self.mode == 'plan':
                 self.report['verdict'] = 'PLAN'
                 return
+            self.role_gate(version)
             self.report['sys_hitl_before'] = self.safe_to_write(version)
             if self.mode == 'flash':
                 self.flash(sd)
@@ -329,6 +354,7 @@ def main():
     g.add_argument('--flash', action='store_true')
     g.add_argument('--reuse', action='store_true')
     p.add_argument('--allow-hitl-change', action='store_true')
+    p.add_argument('--flight', action='store_true', help='a flight recipe: the person confirms the aircraft is to fly with it')
     p.add_argument('--reset-unmanaged', action='store_true',
                    help='also write back every parameter the recipe does not state that differs from its default, and '
                         'the recipe\'s airframe and boot values another recipe changed (moving an FC between recipes or vehicles)')

@@ -75,6 +75,21 @@ class Recipe:
         self.boot_file = sd / 'extras.txt' if (sd / 'extras.txt').is_file() else None
         self.logger_topics = sd / 'logging' / 'logger_topics.txt' if (sd / 'logging' / 'logger_topics.txt').is_file() else None
 
+    # -- role --------------------------------------------------------------------------------------------------------
+    ROLES = {'hitl': 'simulation on a flight controller, no physical outputs (SYS_HITL 1)',
+             'bench': 'the aircraft\'s own flight controller on the ground: physical outputs, propellers off (SYS_HITL 1)',
+             'flight': 'a real flight (SYS_HITL 0)'}
+
+    def role_problems(self):
+        """Why the recipe's role (params.json "role") is missing or does not match its SYS_HITL."""
+        role = self.params.get('role')
+        if role not in self.ROLES:
+            return [f'params.json "role" is {role!r}: one of {sorted(self.ROLES)} is required (docs/recipes.md)']
+        hitl = self.managed().get('SYS_HITL', (0,))[0]
+        if (role == 'flight') != (hitl == 0):
+            return [f'role {role} with SYS_HITL {hitl}']
+        return []
+
     # -- firmware ------------------------------------------------------------------------------------------------------
     @property
     def build_recipe(self):

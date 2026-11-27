@@ -22,6 +22,7 @@ unknown name at all).
 import argparse
 import hashlib
 import json
+import os
 import math
 import struct
 import sys
@@ -714,6 +715,8 @@ def main():
     s.add_argument('--id', type=int)
     s.add_argument('--out', required=True)
     s.add_argument('--once', action='store_true', help='read it once (no second read to compare)')
+    s = sub.add_parser('board-role')
+    s.add_argument('--role', choices=['hitl', 'aircraft'], help='set the role (a person\'s decision); without: show it')
     s = sub.add_parser('params-restore')
     s.add_argument('--from', dest='source', required=True, help='a readback file (params-read, or a deploy report\'s params_before.json)')
     s.add_argument('--other-board', action='store_true', help='the readback is of another board (a person\'s decision)')
@@ -760,6 +763,15 @@ def main():
         if not logs:
             sys.exit('no logs on the FC')
         out = fc.log_download(a.id if a.id is not None else max(logs), a.out, twice=not a.once)
+    elif a.action == 'board-role':
+        uid = fc.identity()['uid']
+        boards = Path(os.environ.get('XDG_CACHE_HOME') or Path.home() / '.cache') / 'px4-llm-sim2hitl' / 'v2' / 'boards'
+        f = boards / f'{uid}.role.json'
+        if a.role:
+            boards.mkdir(parents=True, exist_ok=True)
+            f.write_text(json.dumps({'uid': uid, 'role': a.role, 'set_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+                                     'by': 'tools/fc.py board-role'}, indent=1) + '\n')
+        out = json.loads(f.read_text()) if f.is_file() else {'uid': uid, 'role': None}
     elif a.action == 'params-restore':
         ident = fc.identity()
         if ident['armed'] is not False:

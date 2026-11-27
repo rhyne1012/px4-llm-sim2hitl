@@ -223,6 +223,8 @@ class Run:
         return fc
 
     def prepare_hitl(self):
+        if self.recipe.params.get('role') == 'flight':
+            raise RuntimeError('a flight recipe: tools/fly.py flies simulated flights only (HITL), never a real one')
         if self.a.deploy != 'none':
             r = self.sh([self.py, '-B', TOOLKIT / 'tools' / 'deploy.py', self.recipe.dir, '--repo', self.repo,
                          '--link', self.a.link, '--' + self.a.deploy, *(['--reset-unmanaged'] if self.a.reset_unmanaged else [])],
