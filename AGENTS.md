@@ -25,6 +25,7 @@ When a test fails, keep the failing run's evidence, tell the person where it is,
 ## 1. Working with the person
 
 - **Speak plainly.** Look up and handle technical details yourself; bring only decisions to the person, one at a time.
+- **The plain picture first.** The person keeps the goal and the big logic; tell them the state in a few everyday sentences: what works now, what it gives toward the goal, what they must decide. One or two numbers that carry the conclusion, no more. Engineering detail (tables, error norms, file lists) goes into PRs, records and documents, and into the conversation only when the person asks to dig deeper. What failed or is unverified is still said, plainly.
 - Work in the stages of the README's development flow. **At the end of a stage, ask "next step 1/2/3"**; within a stage, do not ask for each step.
 - **To show a workflow or tool works, use the fewest cases** (one flight, two episodes). Statistics are a separate question for the person to raise and decide.
 - When a tool's safety check stops you, a FAIL has no known cause, or a person's hands are needed (replug USB, power off, remove propellers): stop and explain. Do not work around it or retry on your own.
@@ -98,7 +99,7 @@ The table is the upper bound, not a list to run every time: say which behaviours
 | Changed | Run |
 |---|---|
 | simhost, avionics (`simhost/`, `avionics/`) | `tests/test_simhost_*.py`; Testbird's recipe in SITL (`tools/fly.py sitl vehicles/testbird/recipes/cubeorangeplus_hitl`); HITL on a flight controller when timing or the serial link may be affected |
-| the fast core (`fastcore/`) | `fastcore/check.py` and `fastcore/bench.py` for Testbird |
+| the fast core (`fastcore/`) | `fastcore/check.py` and `fastcore/bench.py` for Testbird, and for each vehicle repository that uses a core (through the local link) |
 | a vehicle definition (`vehicles/`) | `tools/vehicle_check.py`, `tools/linear.py` (its check), then its SITL flight |
 | trims and linear models (`tools/linear.py`, `tools/linear_model.m`) | `tests/test_linear.py`; `linear_model.m` in MATLAB on its output |
 | deploy and the flight-controller link (`tools/deploy.py`, `fc.py`, `mavftp.py`, `recipe.py`, `px4build.py`) | a deploy plan on a flight controller; `--reuse` when writes changed; a firmware build that reproduces a recorded identity when the build changed |
