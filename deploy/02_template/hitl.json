@@ -1,4 +1,0 @@
-{
-  "after": "template_offboard",
-  "check": "analysis/template_check.py"
-}
