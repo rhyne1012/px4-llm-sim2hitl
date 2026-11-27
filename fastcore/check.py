@@ -40,10 +40,10 @@ PSF = LBF / FT ** 2
 SLUGFT3 = (LBF / FT) / FT ** 3
 LAT0, LON0 = 22.91, 120.31
 
-# Limits. Snapshots: relative to max(|JSBSim value|, the floor of the quantity). Flights: proposed after the first
-# measurement on Testbird (2026-11-27), to be confirmed by a person; see fastcore/README.md.
+# Limits. Snapshots: relative to max(|JSBSim value|, the floor of the quantity). Flights: set by a person on 2026-11-27
+# after the first Testbird measurement (worst 0.08 m, 0.09 deg, 0.008 m/s); see fastcore/README.md.
 SNAPSHOT_LIMIT = 1e-9
-FLIGHT_LIMITS = {'dt_0.004': {'pos_m': 0.5, 'att_deg': 0.5, 'airspeed_mps': 0.05}, 'horizon_s': 10.0}
+FLIGHT_LIMITS = {'dt_0.004': {'pos_m': 0.3, 'att_deg': 0.3, 'airspeed_mps': 0.03}, 'horizon_s': 10.0}
 
 NON_ROTATING = '<?xml version="1.0"?>\n<planet name="Earth"><rotation_rate unit="RAD/SEC"> 0 </rotation_rate></planet>\n'
 
