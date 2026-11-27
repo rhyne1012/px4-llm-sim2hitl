@@ -4,9 +4,11 @@ An integration layer between PX4 and JSBSim for agent-driven flight-control deve
 
 **English** | [繁體中文](README.zh-TW.md) (translation; this English version is authoritative)
 
-> Status: v2 draft, under development. v1 (Simulink → C → HITL, example aircraft SkySurfer) is archived as tag `v1-final` and branch `legacy-v1`.
+> Status: v2 draft, under development. v1 (Simulink → C → HITL) is archived as tag `v1-final` and branch `legacy-v1`.
 
-![Overview: PX4 and JSBSim at pinned versions; the toolkit as the glue layer (simhost, deploy and fly, fast core, agent rules); SITL, HITL and flight judged by one yardstick; vehicle repositories; a person decides and the AI does the technical work; the core spirit](images/overview.svg)
+![Overview: PX4 and JSBSim at pinned versions; the toolkit as the glue layer (simhost, deploy and fly, fast core, agent rules); SITL, HITL and flight judged by one yardstick; vehicle repositories; a person decides and the AI does the technical work; the core spirit](images/overview_toolkit.svg)
+
+*Every vehicle repository shows this same diagram with its own layer marked (`images/mark_overview.py`).*
 
 ## Overview
 
@@ -45,7 +47,7 @@ Each vehicle lives in its own repository and pins a version of this project. Thi
             \                 /
         px4-llm-sim2hitl (integration layer)           this repository
                     |  pinned version
-   vehicle repositories: SkySurfer, SkyTalon, ...      vehicle definition, tasks, records
+   vehicle repositories: one per aircraft              vehicle definition, tasks, records
 ```
 
 ## Supported vehicles

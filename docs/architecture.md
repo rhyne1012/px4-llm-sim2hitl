@@ -134,7 +134,7 @@ Several vehicle repositories can share one computer. A machine-wide registry and
 | JSBSim has no RK4 integrator | Adams-Bashforth 2 with 1 kHz substeps |
 | Propeller thrust uses only the axial inflow (no rotor drag in edgewise flight) | aerodynamic functions in the vehicle definition (multirotors) |
 | `execrate` has no phase, so PWM hold timing cannot be modelled in JSBSim | avionics layer |
-| JSBSim at 1 kHz is too slow for sim-bound training (SkyTalon PPO: 7.4× as long) | the fast core (`fastcore/`), generated from the JSBSim definition |
+| JSBSim at 1 kHz is too slow for sim-bound training (a fixed-wing PPO training: 7.4× as long) | the fast core (`fastcore/`), generated from the JSBSim definition |
 
 ## Not in scope
 

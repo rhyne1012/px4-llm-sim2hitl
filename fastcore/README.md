@@ -6,7 +6,7 @@ Status: v2 draft, 2026-11-27. Verified on Testbird only (`docs/verification.md`)
 
 ## Why
 
-On sim-bound training, JSBSim at 1 kHz is too slow: measured on 2026-11-27, SkyTalon's PPO training would take 7.4× as long (14 h → 4.4 days). Most of JSBSim's time goes into its generality (the property tree, interpreted function trees, models the vehicle does not use), not into the physics of one vehicle.
+On sim-bound training, JSBSim at 1 kHz is too slow: measured on 2026-11-27, a fixed-wing PPO training would take 7.4× as long (14 h → 4.4 days). Most of JSBSim's time goes into its generality (the property tree, interpreted function trees, models the vehicle does not use), not into the physics of one vehicle.
 
 ## How
 

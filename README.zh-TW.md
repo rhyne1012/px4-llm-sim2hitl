@@ -4,9 +4,11 @@
 
 [English](README.md) | **繁體中文**（翻譯；以英文版為準）
 
-> 狀態：v2 草稿，開發中。v1（Simulink → C → HITL，範例機 SkySurfer）封存於 tag `v1-final` 與分支 `legacy-v1`。
+> 狀態：v2 草稿，開發中。v1（Simulink → C → HITL）封存於 tag `v1-final` 與分支 `legacy-v1`。
 
-![總覽：鎖定版本的 PX4 與 JSBSim；本專案作為整合層（模擬主機、部署與飛行、快速核心、AI 工作規範）；SITL、HITL 與實機飛行採統一判準；載具儲存庫；由人決策，由 AI 執行技術工作；核心精神](images/overview.svg)
+![總覽：鎖定版本的 PX4 與 JSBSim；本專案作為整合層（模擬主機、部署與飛行、快速核心、AI 工作規範）；SITL、HITL 與實機飛行採統一判準；載具儲存庫；由人決策，由 AI 執行技術工作；核心精神](images/overview_toolkit.svg)
+
+*各載具儲存庫使用同一張圖，僅標示各自所在的層級（`images/mark_overview.py`）。*
 
 ## 概述
 
@@ -45,7 +47,7 @@
            \            /
         px4-llm-sim2hitl（整合層）           本儲存庫
                  |  鎖定版本使用
-   載具儲存庫：SkySurfer、SkyTalon、…          載具定義、任務、紀錄
+   載具儲存庫：每架載具各一                    載具定義、任務、紀錄
 ```
 
 ## 支援載具
