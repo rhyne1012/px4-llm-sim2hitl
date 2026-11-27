@@ -1,83 +1,84 @@
 # px4-llm-sim2hitl
 
-以 AI agent 為主要操作者的 PX4 飛控開發整合層。飛行動力學採用 JSBSim，飛控採用 PX4，提供從 SITL 到實體飛控 HITL 的一致工作流程，適用於各類載具。
+An integration layer between PX4 and JSBSim for agent-driven flight-control development, from SITL to hardware-in-the-loop (HITL), for any vehicle type.
 
-*An integration layer between PX4 and JSBSim for agent-driven development from SITL to hardware-in-the-loop. All documentation below this README is in English.*
+**English** | [繁體中文](README.zh-TW.md) (translation; this English version is authoritative)
 
-> 狀態：v2 草稿，開發中。v1（Simulink → C → HITL，範例機 SkySurfer）封存於 tag `v1-final` 與分支 `legacy-v1`。
+> Status: v2 draft, under development. v1 (Simulink → C → HITL, example aircraft SkySurfer) is archived as tag `v1-final` and branch `legacy-v1`.
 
-## 概述
+## Overview
 
-本專案位於 PX4 與 JSBSim 之間。兩者都以鎖定的原始版本使用，不修改、不分叉；本專案只實作兩者之間缺少的部分：
+This project sits between [PX4](https://px4.io) (flight control) and [JSBSim](https://github.com/JSBSim-Team/jsbsim) (flight dynamics). Both are used unmodified, at locked versions. This project implements only what lies between them:
 
-- HITL 即時模擬
-- 部署流程
-- 跨層一致的驗證方法
-- 供 AI agent 遵循的開發規範
+- real-time HITL simulation
+- a deployment pipeline
+- a consistent verification method across SITL, HITL and flight
+- development rules for AI agents
 
-載具各自以獨立 repo 維護，並鎖定本專案的版本。本專案不含任何實際載具，只附測試載具。
+Each vehicle lives in its own repository and pins a version of this project. This project contains no real vehicles, only test vehicles.
 
-## 設計原則
+## Design principles
 
-- **建立在成熟專案之上**：PX4 與 JSBSim 已提供的功能不重新實作。既有模組可用即沿用，不足時才擴充。
-- **整合層只補缺口**：負責 HITL 即時節拍與實機安全、部署流程、SITL 與 HITL 的一致驗證，以及 agent 開發規範。
-- **載具與工具分離**：載具定義、任務與飛行紀錄屬於載具 repo；本專案只放通用工具與測試載具。
-- **交接，而非自動化**：每個新的 agent 對話都等同一位新成員到職。文件說明以下各點，讓 agent 遇到異常時能定位原因，而不是繞過檢查：
-  - 系統如何運作
-  - 已知問題
-  - 已驗證的範圍
-  - 需要人決定的事項
+- **Build on mature projects.** Do not reimplement what PX4 or JSBSim already provide. Use their existing modules where they fit, and extend only where they fall short.
+- **The integration layer fills the gaps only.** It is responsible for HITL timing and hardware safety, the deployment pipeline, consistent SITL/HITL verification, and the agent rules.
+- **Keep vehicles and tools apart.** Vehicle definitions, tasks and flight records belong to vehicle repositories. This project holds general tools and test vehicles.
+- **A handover, not an automation suite.** Every new agent session is a new team member on their first day. The documentation states:
+  - how the system works
+  - known problems
+  - what has been verified
+  - which decisions belong to people
 
-  工具是既有理解的固化：同一流程重複兩三次後，才轉成指令。
-- **結論與證據相稱**：每項結論都註明依據（哪次測試、哪份紀錄）與適用範圍（版本、配方、飛控、模式），證據不足時縮小結論範圍。SITL 與 HITL 結果一致，不代表模型等同實機。
-- **同一把尺**：SITL、HITL 與實飛使用相同的情境、判定程式與紀錄格式（ULog）。各層之間的差異本身就是待查的資訊。
-- **單一來源**：每項資訊只存在一處，也不為尚未出現的需求預先設計。
-- **環境不寫死，驗收標準寫死**：路徑、編譯器與 PX4 原始碼樹自動偵測，也可另外指定；版本鎖、容差與時序門檻則不隨環境改變。
-- **安全檢查不可繞過**：飛控身分、未解鎖狀態、參數讀回與恢復程序為強制項目。其餘非預設設定照常執行並記錄，異常由 agent 回報、由人決定。
-- **人決定方向，agent 負責技術**：目標、方案選擇與成功條件由人決定；技術查證與實作由 agent 負責，並以使用者慣用的語言回報。
+  With this, an agent that meets an anomaly can locate its cause instead of bypassing a check. Tools capture understanding that already exists: a procedure becomes a command only after it has been done two or three times.
+- **Conclusions match their evidence.** Every conclusion states its basis (which test, which record) and its scope (versions, recipe, flight controller, mode). Less evidence means a narrower claim. Agreement between SITL and HITL does not show that the model matches the real vehicle.
+- **One measuring stick.** SITL, HITL and flight use the same scenarios, the same checks and the same record format (ULog). Differences between levels are information to investigate.
+- **One source.** Each piece of information lives in one place. Nothing is designed ahead for needs that have not appeared.
+- **Environments are discovered; acceptance criteria are fixed.** Paths, compilers and PX4 source trees are detected and can be overridden. Version locks, tolerances and timing limits do not change with the environment.
+- **Safety checks cannot be bypassed.** Flight-controller identity, disarmed state, parameter read-back and recovery are mandatory. Other non-default settings run as given and are recorded. The agent reports anomalies, and people decide.
+- **People set direction; agents handle the technical work.** Goals, choices between approaches and success criteria are decided by people. Agents research and implement, and report in the user's language.
 
-## 架構
+## Architecture
 
 ```
-  PX4（飛控）          JSBSim（飛行動力學）     上游專案：鎖定版本，不修改
-           \            /
-        px4-llm-sim2hitl（整合層）             本 repo
-                 |  鎖定版本使用
-   載具 repo：SkySurfer、SkyTalon、…           載具定義、任務、紀錄
+  PX4 (flight control)     JSBSim (flight dynamics)     upstream: locked versions, unmodified
+            \                 /
+        px4-llm-sim2hitl (integration layer)           this repository
+                    |  pinned version
+   vehicle repositories: SkySurfer, SkyTalon, ...      vehicle definition, tasks, records
 ```
 
-## 支援載具
+## Supported vehicles
 
-凡 JSBSim 能描述的載具都在支援範圍內，例如固定翼、多旋翼、VTOL 與直升機。本專案以兩台測試載具（固定翼、四旋翼）驗證所有介面，避免介面隱含特定的載具形式。實際支援以驗證矩陣為準，未經驗證的組合不算支援。
+Any vehicle JSBSim can describe is in scope, for example fixed-wing aircraft, multirotors, VTOL aircraft and helicopters. Every interface is verified with two test vehicles, one fixed-wing and one quadrotor, so that no interface assumes a particular vehicle type. Actual support is what the verification matrix shows: an unverified combination is not supported.
 
-## 功能
+## Features
 
-- **模擬主機**：JSBSim 加上航電模型（感測器、舵機訊號鏈），以 PX4 標準 HIL MAVLink 訊息通訊。連接 PX4 SITL 即為 SITL，連接飛控即為 HITL，兩者是同一個程式。
-- **部署流程**：編譯 → 燒錄 → 身分核對 → 參數 → 開機檔 → HITL → 飛控紀錄，以單一指令完成。
-- **測試案例**：情境、判定與紀錄格式統一，適用於演算法層、SITL、HITL 與實飛。
-- **錨點**：記錄載具的參考行為並加以鎖定，變更須經人確認。
-- **本機資源管理**：多個載具 repo 共用同一台電腦時，協調飛控、SITL 實例與 PX4 原始碼樹的使用。
-- **載具產生器**：建立新的載具 repo。
+- **Simulation host.** JSBSim plus an avionics model (sensors, servo signal chain), talking to PX4 through its standard HIL MAVLink messages. Connected to PX4 SITL it is SITL; connected to a flight controller it is HITL. It is the same program in both cases.
+- **Deployment pipeline.** Build → flash → identity check → parameters → boot file → HITL → flight-controller log, in one command.
+- **Test cases.** One format for scenarios, checks and records, used at the algorithm level, in SITL, in HITL and in flight.
+- **Anchor.** The recorded reference behaviour of a vehicle, locked; changing it requires a person's approval.
+- **Machine resources.** When several vehicle repositories share one computer, flight controllers, SITL instances and PX4 source trees are coordinated between them.
+- **Vehicle generator.** Creates a new vehicle repository.
 
-## 開發流程
+## Development flow
 
-1. **需求與規格**：定義目標與成功條件。agent 先閱讀鎖定版本的 PX4 原始碼，提出可行的整合方式供人選擇，並建議先完成一次最小打通。
-2. **SITL**：在電腦上反覆驗證。
-3. **HITL**：以部署流程在實體飛控上驗證。
-4. **實飛與回饋**（規劃中）：以飛行資料修正載具模型，並經人確認後更新錨點。
+1. **Requirements and specification.** Define the goal and the success criteria. The agent first reads the locked PX4 source, presents the feasible integration approaches for a person to choose, and recommends a minimal end-to-end pass first.
+2. **SITL.** Iterate on the computer.
+3. **HITL.** Verify on a real flight controller through the deployment pipeline.
+4. **Flight and feedback** (planned). Flight data corrects the vehicle model; the anchor is updated after a person approves.
 
-## 快速開始
+## Getting started
 
-將本 repo 的網址提供給 AI agent（例如 Claude Code、Codex），並說明目標。
+Give the URL of this repository to an AI agent (for example Claude Code or Codex) and state your goal.
 
-- **新載具**：以載具產生器建立載具 repo，先以測試載具完成 SITL → HITL。
-- **既有載具**：在該載具 repo 內開發，不需要直接修改本專案。
+- **New vehicle:** create a vehicle repository with the vehicle generator, then take the test vehicle through SITL → HITL first.
+- **Existing vehicle:** work in that vehicle's repository; this project does not need to be modified directly.
 
-## 語言
+## Language
 
-- 本 README 以繁體中文撰寫。其餘文件（`AGENTS.md`、各資料夾說明、程式註解、commit 訊息）一律使用英文，只維護單一版本。
-- agent 與人溝通時，使用對方慣用的語言，術語依照術語對照表（規劃中）。
+- This README is in English, and it is the authoritative version. [README.zh-TW.md](README.zh-TW.md) is a translation; where the two disagree, this version wins.
+- All other documentation (`AGENTS.md`, folder READMEs, code comments, commit messages) is in English only, in a single version.
+- Agents talk to people in each person's own language, using the terms in the glossary (planned).
 
-## 授權
+## License
 
-待定。
+To be decided.
