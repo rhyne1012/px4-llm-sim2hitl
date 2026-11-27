@@ -6,6 +6,8 @@
 
 > 狀態：v2 草稿，開發中。v1（Simulink → C → HITL，範例機 SkySurfer）封存於 tag `v1-final` 與分支 `legacy-v1`。
 
+![總覽：鎖定版本的 PX4 與 JSBSim；工具包作為黏合層（模擬主機、部署與飛行、快速核心、AI 規則）；SITL、HITL 與實飛用同一把尺判定；載具 repo；人做決定，AI 做技術；核心精神](images/overview.svg)
+
 ## 概述
 
 本專案位於 PX4 與 JSBSim 之間。兩者都以鎖定的原始版本使用，不修改、不分叉；本專案只實作兩者之間缺少的部分：
