@@ -34,7 +34,7 @@ def flying(core, n, rng, settings=None):
     u = np.zeros((n, core.nu))
     u[:, core.U['fcs/throttle-cmd-norm[0]']] = 0.64
     u[:, core.U['fcs/elevator-cmd-norm']] = 0.02
-    e = core.env(n, origin_alt_msl=300.0)
+    e = core.env(n, latitude_deg=22.9, origin_alt_msl=300.0)
     p = core.params(n, settings or {})
     core.reset(x, u, p)
     return x, u, p, e

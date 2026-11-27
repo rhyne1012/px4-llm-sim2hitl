@@ -6,7 +6,7 @@
     x = core.zeros(n); core.set_state(x, pos_ned=..., vel_body=..., euler=..., rates=..., rpm=...)
     u = np.zeros((n, core.nu)); u[:, core.U['fcs/throttle-cmd-norm[0]']] = 0.6
     p = core.params(n, load_config('vehicles/testbird/configs/aft_cg.toml'))   # per-vehicle parameters
-    env = core.env(n)
+    env = core.env(n, latitude_deg=22.9)
     core.reset(x, u, p)
     y = core.step(x, u, p, env, dt=0.004, k=25)   # 0.1 s, outputs at the final state
 
@@ -23,6 +23,7 @@ from pathlib import Path
 import numpy as np
 
 _D = ctypes.POINTER(ctypes.c_double)
+EARTH_RATE = 7.292115e-5   # rad/s, WGS84 (JSBSim FGInertial)
 
 
 def _ptr(a):
@@ -80,12 +81,17 @@ class Core:
                 p[:, self.P[k]] = v
         return np.ascontiguousarray(p)
 
-    def env(self, n, gravity=9.80665, origin_alt_msl=0.0, ground_alt_msl=0.0, wind_ned=(0.0, 0.0, 0.0)):
+    def env(self, n, latitude_deg, gravity=9.80665, origin_alt_msl=0.0, ground_alt_msl=0.0, wind_ned=(0.0, 0.0, 0.0),
+            earth_rate=EARTH_RATE):
+        """The environment: the latitude sets the Earth rate's direction (Coriolis); earth_rate=0 for a non-rotating
+        Earth. gravity is the effective gravity there (gravitation and centrifugal)."""
         e = np.zeros((n, self.ne))
         e[:, 0:3] = wind_ned
         e[:, 3] = gravity
         e[:, 4] = origin_alt_msl
         e[:, 5] = ground_alt_msl
+        e[:, 6] = latitude_deg
+        e[:, 7] = earth_rate
         return e
 
     def set_state(self, x, pos_ned=None, vel_body=None, euler=None, rates=None, rpm=None):

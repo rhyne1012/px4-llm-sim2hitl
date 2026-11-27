@@ -6,7 +6,8 @@
 1. Snapshots (translation): JSBSim flies from random states with random inputs and random parameters (point masses,
    declared properties); at a random frame its full state (actuator positions, propeller speed, the previous frame's
    accelerations) goes into the core, and every force, moment, aerodynamic function, propeller value, mass property and
-   angular acceleration is compared. JSBSim runs on a non-rotating Earth here, so the two must agree to rounding.
+   angular acceleration is compared, half of them on a non-rotating Earth (with wind in half of those) and half on the
+   rotating Earth (without wind, see snapshots()). They must agree to rounding.
 2. Flight-control sequences (translation): random command sequences with random actuator failures switched on and off,
    with and without the servo chain, at 1 ms. The core's actuator positions must equal JSBSim's frame by frame; JSBSim's
    commands go through an independent Python servo chain (fastcore.ServoChainRef).
@@ -48,11 +49,16 @@ IN_PER_M = 3.2808399 * 12.0
 LAT0, LON0 = 22.91, 120.31
 
 # Limits. Snapshots and flight-control sequences: relative error (snapshots, against max(|JSBSim value|, a floor per
-# quantity)) and absolute error in rad (sequences). Flights: set by a person on 2026-11-27 after the first Testbird
-# measurement (worst 0.08 m, 0.09 deg, 0.008 m/s); see fastcore/README.md.
+# quantity)) and absolute error in rad (sequences). Flights, the largest difference within the horizon for the 4 ms core:
+# set by a person on 2026-11-27, after the first Testbird measurement (worst 0.08 m, 0.09 deg, 0.008 m/s); failure
+# flights, which can end in violent motion (aileron hardover: a spiral dive at 280 deg/s roll, where JSBSim at 1 ms
+# itself differs from JSBSim at 0.25 ms by 0.16 deg), have their own attitude limit, set by the same person the same day.
 SNAPSHOT_LIMIT = 1e-9
 SEQUENCE_LIMIT_RAD = 1e-12
-FLIGHT_LIMITS = {'dt_0.004': {'pos_m': 0.3, 'att_deg': 0.3, 'airspeed_mps': 0.03}, 'horizon_s': 10.0}
+FLIGHT_LIMITS = {'horizon_s': 10.0,
+                 'flight': {'pos_m': 0.3, 'att_deg': 0.3, 'airspeed_mps': 0.03},
+                 'failure': {'pos_m': 0.3, 'att_deg': 1.0, 'airspeed_mps': 0.03}}
+EARTH_RATE = 7.292115e-5
 
 NON_ROTATING = '<?xml version="1.0"?>\n<planet name="Earth"><rotation_rate unit="RAD/SEC"> 0 </rotation_rate></planet>\n'
 
@@ -114,8 +120,9 @@ def capture(fdm, core, x, prev_uvwdot):
     x[core.X['aux:fcs_initialized']] = 1.0
 
 
-def env_of(fdm, core):
-    e = core.env(1, gravity=9.80665, origin_alt_msl=fdm['position/h-sl-ft'] * FT, ground_alt_msl=0.0)
+def env_of(fdm, core, rotating=True):
+    e = core.env(1, latitude_deg=fdm['position/lat-geod-deg'], gravity=9.80665, origin_alt_msl=fdm['position/h-sl-ft'] * FT,
+                 ground_alt_msl=0.0, earth_rate=EARTH_RATE if rotating else 0.0)
     e[0, 0:3] = [fdm[f'atmosphere/total-wind-{c}-fps'] * FT for c in ('north', 'east', 'down')]
     return e
 
@@ -140,20 +147,27 @@ def random_mass(rng, core):
 def snapshots(vehicle, core, n, seed):
     rng = np.random.default_rng(seed)
     floors = {'force_N': 0.01, 'moment_Nm': 0.001, 'angle_rad': 1e-6, 'rate_rps': 1e-6, 'qbar_Pa': 0.01, 'rho': 1e-6,
-              'rpm': 0.01, 'omega_dot': 0.01, 'current_A': 0.001, 'fn': 1e-4, 'mass': 1e-6, 'cg_in': 1e-6,
+              # omega_dot: JSBSim's value is a difference of two rpm 1 ms apart, resolved to about 1e-10 rad/s2
+              'rpm': 0.01, 'omega_dot': 1.0, 'current_A': 0.001, 'fn': 1e-4, 'mass': 1e-6, 'cg_in': 1e-6,
               'inertia': 1e-9, 'ang_acc': 1e-6}
     worst = {}
     used = []
     t0 = time.time()
 
+    sample = {'max_rel': 0.0, 'what': ''}
+
     def cmp(key, kind, a, b):
         e = float(abs(a - b) / max(abs(b), floors[kind]))
         if e > worst.get(key, (-1.0,))[0]:
             worst[key] = (e, float(a), float(b))
+        if e > sample['max_rel']:
+            sample.update(max_rel=e, what=key)
 
     for s in range(n):
+        sample.update(max_rel=0.0, what='')
         settings = random_mass(rng, core) if s % 4 else {}   # every fourth one with the vehicle's own values
-        fdm = jsb(vehicle, 0.001, rotating=False, settings=settings)
+        rotating = s % 2 == 1
+        fdm = jsb(vehicle, 0.001, rotating=rotating, settings=settings)
         V = rng.uniform(8, 32)
         al, be = math.radians(rng.uniform(-25, 35)), math.radians(rng.uniform(-20, 20))
         uvw = (V * math.cos(al) * math.cos(be), V * math.sin(be), V * math.sin(al) * math.cos(be))
@@ -166,7 +180,11 @@ def snapshots(vehicle, core, n, seed):
             fdm.run()
         for name, i in core.U.items():
             u[i] = rng.uniform(0, 1) if 'throttle' in name else (rng.uniform(-1, 1) if 'trim' not in name else rng.uniform(-0.2, 0.2))
-        if rng.uniform() < 0.5:     # wind for half of them
+        # wind for half of the non-rotating ones. On the rotating Earth JSBSim's reported Euler angles and the
+        # transformation it applies to the wind differ by about 2e-10 rad, which the core then sees as an input error;
+        # the rotating ones test the Earth-rate terms without wind.
+        windy = rng.uniform() < 0.5 and not rotating
+        if windy:
             for c in ('north', 'east', 'down'):
                 fdm[f'atmosphere/wind-{c}-fps'] = rng.uniform(-8, 8) / FT * (0.3 if c == 'down' else 1.0)
         set_inputs(fdm, core, u)
@@ -179,7 +197,7 @@ def snapshots(vehicle, core, n, seed):
         capture(fdm, core, x[0], prev)
         x[0, core.X['omega_rps[0]']] = rpm_prev * 2 * math.pi / 60   # the frame computed its forces from this speed
         p = core.params(1, split(settings)[0])
-        e = env_of(fdm, core)
+        e = env_of(fdm, core, rotating)
         xd, y = core.eval(x, p, e, jsbsim_order=True)
         Y = {k: y[0, i] for k, i in core.Y.items()}
         for c in 'xyz':
@@ -193,6 +211,7 @@ def snapshots(vehicle, core, n, seed):
             cmp(f'total_m{c}', 'moment_Nm', Y[f'm{c}_Nm'], fdm[f'moments/{m}-total-lbsft'] * FTLBF)
         for i, c in enumerate('pqr'):
             cmp(f'{c}dot', 'ang_acc', xd[0, 10 + i], fdm[f'accelerations/{c}dot-rad_sec2'])
+            cmp(f'gyro_{c}', 'rate_rps', Y[f'gyro_{"xyz"[i]}_rps'], fdm[f'velocities/{c}i-rad_sec'])
         for k in ('ixx', 'iyy', 'izz', 'ixy', 'ixz', 'iyz'):
             # the core gives the products as integrals (ixz = sum x z dm); JSBSim's inertia/ixz property alone keeps the
             # XML's negated sign (FGMassBalance::GetIxz returns mJ(1,3), GetIxy and GetIyz return -mJ)
@@ -213,12 +232,17 @@ def snapshots(vehicle, core, n, seed):
             if name.startswith('fn:'):
                 cmp(name, 'fn', Y[name], fdm[name[3:]])
         used.append({'V': round(V, 2), 'alpha_deg': round(math.degrees(al), 1), 'beta_deg': round(math.degrees(be), 1),
-                     'rpm': round(rpm_prev), 'mass_kg': round(Y['mass_kg'], 3), 'cg_x_m': round(Y['cg_x_in'] / IN_PER_M, 4)})
+                     'rpm': round(rpm_prev), 'mass_kg': round(Y['mass_kg'], 3), 'cg_x_m': round(Y['cg_x_in'] / IN_PER_M, 4),
+                     'index': s, 'rotating': rotating, 'wind': windy, 'max_rel': sample['max_rel'], 'worst': sample['what'],
+                     'airspeed_now_mps': round(Y['airspeed_mps'], 3), 'alpha_now_deg': round(math.degrees(Y['alpha_rad']), 2),
+                     'h_agl_m': round(fdm['position/h-agl-ft'] * FT, 1), 'lat_deg': round(fdm['position/lat-geod-deg'], 5)})
     worst_all = max(v[0] for v in worst.values())
     return {'n': n, 'seed': seed, 'seconds': round(time.time() - t0, 1), 'limit': SNAPSHOT_LIMIT,
             'max_relative_error': float(worst_all), 'pass': bool(worst_all <= SNAPSHOT_LIMIT),
             'worst': {k: {'rel': v[0], 'core': v[1], 'jsbsim': v[2]} for k, v in sorted(worst.items(), key=lambda kv: -kv[1][0])[:12]},
-            'ranges': {k: [min(s_[k] for s_ in used), max(s_[k] for s_ in used)] for k in used[0]}}
+            'ranges': {k: [min(s_[k] for s_ in used), max(s_[k] for s_ in used)]
+                       for k in ('V', 'alpha_deg', 'beta_deg', 'rpm', 'mass_kg', 'cg_x_m')},
+            'worst_samples': sorted(used, key=lambda s_: -s_['max_rel'])[:5]}
 
 
 # -- 2. flight-control sequences ----------------------------------------------------------------------------------------
@@ -242,7 +266,7 @@ def sequences(vehicle, core, n, seed, seconds=3.0):
         x = core.zeros(1)
         capture(fdm, core, x[0], [0.0, 0.0, 0.0])
         p = core.params(1, settings)
-        e = env_of(fdm, core)
+        e = env_of(fdm, core, rotating=False)
         core.reset(x, u, p)
         ref = ServoChainRef(len(servo_props), *chain, 0.001, [u[0, core.U[q]] for q in servo_props])
         frames = int(seconds / 0.001)
@@ -453,10 +477,13 @@ def flights(vehicle, core, seed, configs, T=20.0):
         print(json.dumps({name: out['cases'][name]['dt_0.004']['10s']}), flush=True)
     lim = FLIGHT_LIMITS
     h = f'{lim["horizon_s"]:g}s'
-    worst = {k: max(c['dt_0.004'][h][k] for c in out['cases'].values()) for k in lim['dt_0.004']}
     out['limits'] = lim
-    out['worst_dt_0.004_' + h] = worst
-    out['pass'] = bool(all(worst[k] <= lim['dt_0.004'][k] for k in worst))
+    out['pass'] = True
+    for group in ('flight', 'failure'):
+        names = [n_ for n_ in out['cases'] if (n_ in faults) == (group == 'failure')]
+        worst = {k: max(out['cases'][n_]['dt_0.004'][h][k] for n_ in names) for k in lim[group]}
+        out[f'worst_{group}_dt_0.004_{h}'] = worst
+        out['pass'] = bool(out['pass'] and all(worst[k] <= lim[group][k] for k in worst))
     return out
 
 
@@ -486,7 +513,8 @@ def main():
     print(json.dumps({'sequences': {k: rep['sequences'][k] for k in ('n', 'max_abs_rad', 'pass')}}), flush=True)
     if not a.skip_flights:
         rep['flights'] = flights(a.vehicle, core, a.seed, configs)
-        print(json.dumps({'flights_worst': rep['flights']['worst_dt_0.004_10s'], 'pass': rep['flights']['pass']}), flush=True)
+        print(json.dumps({'flights_worst': rep['flights']['worst_flight_dt_0.004_10s'],
+                          'failures_worst': rep['flights']['worst_failure_dt_0.004_10s'], 'pass': rep['flights']['pass']}), flush=True)
     rep['pass'] = rep['snapshots']['pass'] and rep['sequences']['pass'] and rep.get('flights', {'pass': True})['pass']
     (out / 'check.json').write_text(json.dumps(rep, indent=1) + '\n')
     print(json.dumps({'check': str(out / 'check.json'), 'pass': rep['pass']}))

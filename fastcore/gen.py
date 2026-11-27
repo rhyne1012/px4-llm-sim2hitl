@@ -793,7 +793,13 @@ def mass_props_code(g):
     L = ['typedef struct {', '  double mass_kg, J[3][3], Jinv[3][3]; /* SI, about the CG */',
          '  double cg_in[3], rp_ft[3]; /* structural CG; AERORP from the CG, body axes */',
          f'  double eng_ft[{max(1, len(g.engines))}][3], contact_m[{max(1, len(g.contacts))}][3]; '
-         '/* from the CG, body axes */', '} MassProps;', '',
+         '/* from the CG, body axes */', '  double wn[3]; /* Earth rate in NED (rad/s), from env */', '} MassProps;', '',
+         '/* The Earth rate in the local NED frame at the latitude of env: (cos lat, 0, -sin lat) times the rate. */',
+         'static void earth_rate(const double *env, MassProps *m)',
+         '{',
+         '  const double lat = env[6] * (FC_PI / 180.0);',
+         '  m->wn[0] = env[7] * cos(lat); m->wn[1] = 0.0; m->wn[2] = -env[7] * sin(lat);',
+         '}', '',
          '/* FGMassBalance::GetPointmassInertia */',
          'static void pm_inertia(double m_sl, const double *r_in, const double *cg, double J[3][3])',
          '{',
@@ -883,10 +889,12 @@ def emit(v, g, out, servo_capacity):
     u_names = list(g.inputs)
     p_names = [p for p, _ in g.params]
     p_defaults = [d for _, d in g.params]
-    env_names = ['wind_n_mps', 'wind_e_mps', 'wind_d_mps', 'gravity_mps2', 'origin_alt_msl_m', 'ground_alt_msl_m']
+    env_names = ['wind_n_mps', 'wind_e_mps', 'wind_d_mps', 'gravity_mps2', 'origin_alt_msl_m', 'ground_alt_msl_m',
+                 'latitude_deg', 'earth_rate_rps']
     y_names = ['fx_N', 'fy_N', 'fz_N', 'mx_Nm', 'my_Nm', 'mz_Nm',
                'aero_fx_N', 'aero_fy_N', 'aero_fz_N', 'aero_mx_Nm', 'aero_my_Nm', 'aero_mz_Nm',
                'specific_force_x_mps2', 'specific_force_y_mps2', 'specific_force_z_mps2',
+               'gyro_x_rps', 'gyro_y_rps', 'gyro_z_rps',
                'alpha_rad', 'beta_rad', 'airspeed_mps', 'qbar_Pa', 'rho_kgm3', 'alphadot_rps', 'betadot_rps',
                'cl_squared', 'lift_N', 'drag_N', 'side_N', 'agl_cg_m', 'agl_lowest_contact_m',
                'mass_kg', 'cg_x_in', 'cg_y_in', 'cg_z_in', 'ixx_kgm2', 'iyy_kgm2', 'izz_kgm2', 'ixy_kgm2', 'ixz_kgm2',
@@ -913,7 +921,7 @@ def emit(v, g, out, servo_capacity):
     a('#include "servo_chain.h"')
     a('#include <string.h>')
     a('')
-    a(f'#define NX {nx}\n#define NC {nc}\n#define NU {len(u_names)}\n#define NP {len(p_names)}\n#define NE 6\n#define NY {ny}')
+    a(f'#define NX {nx}\n#define NC {nc}\n#define NU {len(u_names)}\n#define NP {len(p_names)}\n#define NE 8\n#define NY {ny}')
     a(f'#define X_HELD0 {x_held0}\n#define X_FCS0 {x_fcs0}\n#define X_AUX0 {x_aux0}\n#define X_SERVO0 {x_servo0}')
     a(f'#define X_AUX_UDOT {x_aux0}\n#define X_AUX_CLSQ {x_aux0 + 3}\n#define X_AUX_INIT {x_aux0 + 4}')
     a(f'#define NSERVO {ns}\n#define SERVO_CAP {cap}')
@@ -958,6 +966,11 @@ def emit(v, g, out, servo_capacity):
     a('  const double wbz = C[0][2] * env[0] + C[1][2] * env[1] + C[2][2] * env[2];')
     a('  const double ua = (x[3] - wbx) / FC_FT, va = (x[4] - wby) / FC_FT, wa = (x[5] - wbz) / FC_FT;')
     a('  const double pa = x[10], qa = x[11], ra = x[12];')
+    a('  /* Earth rate in body axes; the rates in x are relative to the Earth, a gyro measures them plus this */')
+    a('  const double Wb[3] = {C[0][0] * m->wn[0] + C[1][0] * m->wn[1] + C[2][0] * m->wn[2],')
+    a('                        C[0][1] * m->wn[0] + C[1][1] * m->wn[1] + C[2][1] * m->wn[2],')
+    a('                        C[0][2] * m->wn[0] + C[1][2] * m->wn[1] + C[2][2] * m->wn[2]};')
+    a('  const double pI = pa + Wb[0], qI = qa + Wb[1], rI = ra + Wb[2];')
     a('  const double mUW = ua * ua + wa * wa, Vt2 = mUW + va * va, Vt = sqrt(Vt2);')
     a('  double alpha = 0.0, beta = 0.0, adot = 0.0, bdot = 0.0, ca = 1.0, sa = 0.0, cb = 1.0, sb = 0.0;')
     a('  if (Vt > 0.001) {')
@@ -1019,36 +1032,39 @@ def emit(v, g, out, servo_capacity):
         a('    const double Fb[3] = {mT[0][0] * thrust, mT[1][0] * thrust, mT[2][0] * thrust};')
         a('    const double Hb[3] = {mT[0][0] * hx, mT[1][0] * hx, mT[2][0] * hx};')
         a('    const double Tb[3] = {mT[0][0] * tx, mT[1][0] * tx, mT[2][0] * tx};')
-        a('    const double Mp[3] = {qa * Hb[2] - ra * Hb[1] + Tb[0] + r[1] * Fb[2] - r[2] * Fb[1],')
-        a('                          ra * Hb[0] - pa * Hb[2] + Tb[1] + r[2] * Fb[0] - r[0] * Fb[2],')
-        a('                          pa * Hb[1] - qa * Hb[0] + Tb[2] + r[0] * Fb[1] - r[1] * Fb[0]};')
+        a('    const double Mp[3] = {qI * Hb[2] - rI * Hb[1] + Tb[0] + r[1] * Fb[2] - r[2] * Fb[1],')
+        a('                          rI * Hb[0] - pI * Hb[2] + Tb[1] + r[2] * Fb[0] - r[0] * Fb[2],')
+        a('                          pI * Hb[1] - qI * Hb[0] + Tb[2] + r[0] * Fb[1] - r[1] * Fb[0]};')
         a('    F[0] += Fb[0]; F[1] += Fb[1]; F[2] += Fb[2]; M[0] += Mp[0]; M[1] += Mp[1]; M[2] += Mp[2];')
         b = yi[f'thrust_N[{i}]']
         a(f'    if (y) {{ y[{b}] = thrust * FC_LBF; y[{b + 1}] = RPM; y[{b + 2}] = I; y[{b + 3}] = Peng * FC_FTLBF;')
         a(f'      y[{b + 4}] = J; for (int k = 0; k < 3; ++k) {{ y[{b + 5} + k] = Fb[k] * FC_LBF; y[{b + 8} + k] = Mp[k] * FC_FTLBF; }} }}')
         a('  }')
-    a('  /* equations of motion, flat Earth, SI */')
+    a('  /* equations of motion on a flat Earth that rotates (FGAccelerations): Coriolis in the translation, inertial')
+    a('   * rates in Euler\'s equation; the centrifugal part is in the effective gravity of env. SI */')
     a('  const double f[3] = {F[0] * FC_LBF / m->mass_kg, F[1] * FC_LBF / m->mass_kg, F[2] * FC_LBF / m->mass_kg};')
     a('  const double mo[3] = {M[0] * FC_FTLBF, M[1] * FC_FTLBF, M[2] * FC_FTLBF};')
     a('  const double p_ = x[10], q = x[11], r = x[12], u = x[3], v = x[4], w = x[5], g = env[3];')
     a('  const double (*JS)[3] = m->J, (*JI)[3] = m->Jinv;')
-    a('  const double Jw[3] = {JS[0][0] * p_ + JS[0][1] * q + JS[0][2] * r, JS[1][0] * p_ + JS[1][1] * q + JS[1][2] * r,')
-    a('                        JS[2][0] * p_ + JS[2][1] * q + JS[2][2] * r};')
-    a('  const double e0 = mo[0] - (q * Jw[2] - r * Jw[1]), e1 = mo[1] - (r * Jw[0] - p_ * Jw[2]), e2 = mo[2] - (p_ * Jw[1] - q * Jw[0]);')
+    a('  const double Jw[3] = {JS[0][0] * pI + JS[0][1] * qI + JS[0][2] * rI, JS[1][0] * pI + JS[1][1] * qI + JS[1][2] * rI,')
+    a('                        JS[2][0] * pI + JS[2][1] * qI + JS[2][2] * rI};')
+    a('  const double e0 = mo[0] - (qI * Jw[2] - rI * Jw[1]), e1 = mo[1] - (rI * Jw[0] - pI * Jw[2]), e2 = mo[2] - (pI * Jw[1] - qI * Jw[0]);')
+    a('  const double cp = p_ + 2.0 * Wb[0], cq = q + 2.0 * Wb[1], cr = r + 2.0 * Wb[2];')
     a('  if (xd) {')
     a('    xd[0] = C[0][0] * u + C[0][1] * v + C[0][2] * w;')
     a('    xd[1] = C[1][0] * u + C[1][1] * v + C[1][2] * w;')
     a('    xd[2] = C[2][0] * u + C[2][1] * v + C[2][2] * w;')
-    a('    xd[3] = f[0] + C[2][0] * g - (q * w - r * v);')
-    a('    xd[4] = f[1] + C[2][1] * g - (r * u - p_ * w);')
-    a('    xd[5] = f[2] + C[2][2] * g - (p_ * v - q * u);')
+    a('    xd[3] = f[0] + C[2][0] * g - (cq * w - cr * v);')
+    a('    xd[4] = f[1] + C[2][1] * g - (cr * u - cp * w);')
+    a('    xd[5] = f[2] + C[2][2] * g - (cp * v - cq * u);')
     a('    xd[6] = 0.5 * (-x[7] * p_ - x[8] * q - x[9] * r);')
     a('    xd[7] = 0.5 * (x[6] * p_ + x[8] * r - x[9] * q);')
     a('    xd[8] = 0.5 * (x[6] * q - x[7] * r + x[9] * p_);')
     a('    xd[9] = 0.5 * (x[6] * r + x[7] * q - x[8] * p_);')
-    a('    xd[10] = JI[0][0] * e0 + JI[0][1] * e1 + JI[0][2] * e2;')
-    a('    xd[11] = JI[1][0] * e0 + JI[1][1] * e1 + JI[1][2] * e2;')
-    a('    xd[12] = JI[2][0] * e0 + JI[2][1] * e1 + JI[2][2] * e2;')
+    a('    /* inertial angular acceleration, then relative to the Earth: + w x Wb */')
+    a('    xd[10] = JI[0][0] * e0 + JI[0][1] * e1 + JI[0][2] * e2 + (q * Wb[2] - r * Wb[1]);')
+    a('    xd[11] = JI[1][0] * e0 + JI[1][1] * e1 + JI[1][2] * e2 + (r * Wb[0] - p_ * Wb[2]);')
+    a('    xd[12] = JI[2][0] * e0 + JI[2][1] * e1 + JI[2][2] * e2 + (p_ * Wb[1] - q * Wb[0]);')
     a('  }')
     a('  if (y) {')
     a('    double lowest = 1e300;')
@@ -1068,6 +1084,7 @@ def emit(v, g, out, servo_capacity):
           f'y[{yi["side_N"]}] = ax_SIDE * FC_LBF;')
     a(f'    y[{yi["agl_cg_m"]}] = hagl_ft * FC_FT; y[{yi["agl_lowest_contact_m"]}] = hagl_ft * FC_FT + lowest;')
     a(f'    y[{yi["mass_kg"]}] = m->mass_kg;')
+    a(f'    y[{yi["gyro_x_rps"]}] = pI; y[{yi["gyro_y_rps"]}] = qI; y[{yi["gyro_z_rps"]}] = rI;')
     a(f'    y[{yi["ixx_kgm2"]}] = JS[0][0]; y[{yi["iyy_kgm2"]}] = JS[1][1]; y[{yi["izz_kgm2"]}] = JS[2][2];')
     a(f'    y[{yi["ixy_kgm2"]}] = -JS[0][1]; y[{yi["ixz_kgm2"]}] = -JS[0][2]; y[{yi["iyz_kgm2"]}] = -JS[1][2];')
     for prop, var in g.aero_funcs:
@@ -1111,6 +1128,7 @@ def emit(v, g, out, servo_capacity):
     a('    const double *ui = u + (size_t)i * NU, *pi = p + (size_t)i * NP, *ei = env + (size_t)i * NE;')
     a('    MassProps m;')
     a('    mass_props(pi, &m);')
+    a('    earth_rate(ei, &m);')
     a('    sc_ticks tk;')
     a('    if (servo_ticks(pi, dt, &tk) != 0) { bad = bad ? bad : i + 1; continue; }')
     a('    (void)tk;')
@@ -1150,6 +1168,7 @@ def emit(v, g, out, servo_capacity):
     a('    const double *xi = x + (size_t)i * NX, *pi = p + (size_t)i * NP;')
     a('    MassProps m;')
     a('    mass_props(pi, &m);')
+    a('    earth_rate(env + (size_t)i * NE, &m);')
     a('    deriv(xi, xi + X_AUX_UDOT, pi, &m, env + (size_t)i * NE, jsbsim_order, xd ? xd + (size_t)i * NC : NULL,')
     a('          y ? y + (size_t)i * NY : NULL);')
     a('  }')
@@ -1161,7 +1180,7 @@ def emit(v, g, out, servo_capacity):
          f'#ifndef {P}_CORE_H', f'#define {P}_CORE_H', '#ifdef __cplusplus', 'extern "C" {', '#endif',
          f'#define {P}_NX {nx}  /* state */', f'#define {P}_NC {nc}  /* continuous part of the state */',
          f'#define {P}_NU {len(u_names)}  /* inputs */', f'#define {P}_NP {len(p_names)}  /* parameters */',
-         f'#define {P}_NE 6  /* environment */', f'#define {P}_NY {ny}  /* outputs */',
+         f'#define {P}_NE 8  /* environment */', f'#define {P}_NY {ny}  /* outputs */',
          '/* The parameters as the JSBSim definition gives them (n rows). */',
          f'void {N}_defaults(int n, double *p);',
          '/* Set the flight-control, servo-chain and auxiliary states from the inputs, as JSBSim\'s RunIC does;',
@@ -1183,7 +1202,9 @@ def emit(v, g, out, servo_capacity):
                   'body to NED, scalar first; rates in body axes; parameters in JSBSim property units; outputs '
                   'ixy/ixz/iyz are the products of inertia as integrals (ixz = sum x z dm, body axes)',
         'not_modelled': v.notes + [
-            'flat, non-rotating Earth with constant gravity (env gravity_mps2): no Coriolis or transport rate',
+            'flat Earth rotating at env earth_rate_rps about the axis at env latitude_deg (Coriolis and the Earth '
+            'rate are modelled), constant effective gravity (env gravity_mps2); no curvature, transport rate or '
+            'gravity variation',
             'standard atmosphere, first layer only (below 11 km)',
             'no turbulence; the wind is constant within a call (env)',
             'alphadot from the previous derivative evaluation (JSBSim: the previous frame)',
