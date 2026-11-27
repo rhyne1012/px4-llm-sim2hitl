@@ -131,8 +131,10 @@ Several vehicle repositories can share one computer. A machine-wide registry and
 
 | Limit | Where it is handled |
 |---|---|
-| JSBSim tables clamp instead of extrapolating | vehicle definitions give tables enough breakpoints |
-| FGTrim fails with electric motors faster than about 0.25 s (`GetSteadyState` uses fixed 0.5 s steps) | steady states are found by flying (`tools/vehicle_check.py`) |
+| JSBSim tables clamp instead of extrapolating | vehicle definitions give tables enough breakpoints; a propeller beyond its table gives a thrust that stops changing, so trims start from a scanned angle of attack and throttle (`tools/linear.py`) |
+| FGTrim fails with electric motors faster than about 0.25 s (`GetSteadyState` uses fixed 0.5 s steps) | trims solve the equilibrium with the engines run to their steady speed (`tools/linear.py`), or are flown (`tools/vehicle_check.py`); FGTrim is reported next to them as a check |
+| FGLinearization's engine-speed rows are wrong for an electric motor and propeller (Testbird: thrust follows the throttle at once) | `tools/linear.py` linearises by its own central differences, with the thrust quasi-steady and the engine's lag measured separately |
+| `RunIC` also advances the flight-control components (they keep the step they were loaded with), and `forces/hold-down` zeroes the velocities | actuator and engine poles are measured on free runs with the airframe's own response taken out (`tools/linear.py`) |
 | JSBSim has no RK4 integrator | Adams-Bashforth 2 with 1 kHz substeps |
 | Propeller thrust uses only the axial inflow (no rotor drag in edgewise flight) | aerodynamic functions in the vehicle definition (multirotors) |
 | `execrate` has no phase, so PWM hold timing cannot be modelled in JSBSim | avionics layer |

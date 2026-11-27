@@ -99,7 +99,8 @@ The table is the upper bound, not a list to run every time: say which behaviours
 |---|---|
 | simhost, avionics (`simhost/`, `avionics/`) | `tests/test_simhost_*.py`; Testbird's recipe in SITL (`tools/fly.py sitl vehicles/testbird/recipes/cubeorangeplus_hitl`); HITL on a flight controller when timing or the serial link may be affected |
 | the fast core (`fastcore/`) | `fastcore/check.py` and `fastcore/bench.py` for Testbird |
-| a vehicle definition (`vehicles/`) | `tools/vehicle_check.py`, then its SITL flight |
+| a vehicle definition (`vehicles/`) | `tools/vehicle_check.py`, `tools/linear.py` (its check), then its SITL flight |
+| trims and linear models (`tools/linear.py`, `tools/linear_model.m`) | `tests/test_linear.py`; `linear_model.m` in MATLAB on its output |
 | deploy and the flight-controller link (`tools/deploy.py`, `fc.py`, `mavftp.py`, `recipe.py`, `px4build.py`) | a deploy plan on a flight controller; `--reuse` when writes changed; a firmware build that reproduces a recorded identity when the build changed |
 | the SITL FC, pilot, flight runner (`tools/sitl_fc.py`, `pilot.py`, `sequence.py`, `fly.py`) | a vehicle repository's SITL health check through the local link; its HITL when the HITL path changed |
 | the PX4 or JSBSim version | everything above, a new minor release (section 7), and every vehicle repository's health checks before it moves |
