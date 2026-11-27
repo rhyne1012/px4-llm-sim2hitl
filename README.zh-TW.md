@@ -81,4 +81,4 @@
 
 ## 授權
 
-待定。
+BSD 3-Clause，見 [LICENSE](LICENSE)。PX4（BSD 3-Clause）與 JSBSim（LGPL-2.1）依各自的授權原封不動使用；JSBSim 由鎖定版本的原始碼編譯。

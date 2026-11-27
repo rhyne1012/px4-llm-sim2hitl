@@ -81,4 +81,4 @@ Give the URL of this repository to an AI agent (for example Claude Code or Codex
 
 ## License
 
-To be decided.
+BSD 3-Clause, see [LICENSE](LICENSE). PX4 (BSD 3-Clause) and JSBSim (LGPL-2.1) are used unmodified under their own licenses; JSBSim is built from its locked source release.
