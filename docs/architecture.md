@@ -90,12 +90,19 @@ The same test case runs at every level, and each level proves something differen
 
 ### Orchestration
 
-A Python package with a command line drives everything that is not physics:
+Python tools in `tools/` drive everything that is not physics:
 
-- recipes, firmware build, flashing, identity check, parameters and boot file
-- running test cases, checks and records
+| Tool | Does | Documented in |
+|---|---|---|
+| `recipe.py` | reads a deploy recipe and checks a full parameter readback against it | [recipes.md](recipes.md) |
+| `px4build.py` | builds a recipe's firmware: pinned PX4, committed patches, external modules | [recipes.md](recipes.md) |
+| `fc.py` | one flight controller over MAVLink: identity, parameters (exact bytes), SD files (MAVLink FTP), logs, disarm, reboot, recover | [recipes.md](recipes.md) |
+| `deploy.py` | puts a recipe on a flight controller: flash, parameters, boot file, logger topics, one reboot, the proof | [recipes.md](recipes.md) |
+| `sitl_fc.py` | a recipe's SITL FC: PX4 SITL built with its modules and started like the flight controller | [sitl_fc.md](sitl_fc.md) |
+| `pilot.py`, `sequence.py` | the pilot (a fixed-wing takeoff flown with sticks) and the command scripts it runs | [pilot.md](pilot.md) |
+| `fly.py` | one test flight of a recipe, SITL or HITL: FC, simhost, pilot, recover, the flight's log, the check | [recipes.md](recipes.md) |
 
-It also enforces the safety rules: flight-controller identity, disarmed state, parameter read-back and recovery cannot be skipped.
+They enforce the safety rules: flight-controller identity, disarmed state, parameter read-back, a log newer than the flight's start, and the recovery after a HITL flight cannot be skipped.
 
 ### Anchor
 
