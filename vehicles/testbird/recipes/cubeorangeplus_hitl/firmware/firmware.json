@@ -15,5 +15,72 @@
   "px4": {
     "tag": "v1.18.0",
     "commit": "935addf1d6bec6e955b155494a52e7eb4b750eb3"
+  },
+  "outputs": {
+    "firmware": {
+      "file": "cubepilot_cubeorangeplus_hil.px4",
+      "sha256": "57aeaa8d10a043785b404ea9ccdddc4372648cc69d9ef091af9f96dcaa2bd05d",
+      "size": 1832251
+    },
+    "image_bin": {
+      "file": "not kept (inside the .px4 image field)",
+      "sha256": "05abfa72c78632cc8475e18aa2acc055cbe69e51243700535ed3f5ae4b91bf19",
+      "size": 1921040
+    },
+    "parameters": {
+      "file": "parameters.json.xz",
+      "sha256": "6f982d6740711e898ca43304934908a660b9611a8cf1b522eac5bdc68c20d693",
+      "count": 1898,
+      "origin": "PX4 build output, unmodified"
+    }
+  },
+  "embedded": {
+    "board_id": 1063,
+    "board_version": 4184,
+    "git_identity": "v1.18.0-1-g5248b44b26",
+    "git_hash": "5248b44b26022c327fe690d5c5579e3db1776139",
+    "nuttx_git_hash": "3cc0c49601597d4a0c4df43b134b0dbc633dd04c",
+    "image_size": 1921040,
+    "image_maxsize": 1966080,
+    "flash_used_percent": 97.71
+  },
+  "build": {
+    "tool": "px4-llm-sim2hitl tools/px4build.py",
+    "command": "make cubepilot_cubeorangeplus_hil BUILD_DIR_SUFFIX=_cubeorangeplus_hitl",
+    "build_tree": "<PX4 build tree>",
+    "output_dir": "<PX4 build tree>/build/cubepilot_cubeorangeplus_hil_cubeorangeplus_hitl",
+    "committer": {
+      "name": "sim2hitl build",
+      "email": "build@sim2hitl.invalid"
+    },
+    "patches": [
+      {
+        "file": "px4/patches/cubeorangeplus_hil_variant.patch",
+        "sha256": "ee873b2271b893aa5b72985ede5c4f90427d07be93029645c2a1230906ed9d0a",
+        "repo": ".",
+        "commit": "5248b44b26022c327fe690d5c5579e3db1776139"
+      }
+    ],
+    "modules": {},
+    "toolchain": "arm-none-eabi-gcc (15:13.2.rel1-2) 13.2.1 20231009",
+    "built_at_utc": "2026-11-27T18:31:23Z",
+    "seconds": 55.9,
+    "log": "~/.cache/px4-llm-sim2hitl/v2/firmware/px4-llm-sim2hitl-prerelease/cubeorangeplus_hitl/build_20261128_023027.log"
+  },
+  "flashed": {
+    "status": "PASS",
+    "at_utc": "2026-11-27T18:35:15Z",
+    "tool": "px4-llm-sim2hitl tools/deploy.py",
+    "uploader": "<PX4 tree>/Tools/px4_uploader.py --noninteractive --port /dev/ttyACM0 cubepilot_cubeorangeplus_hil.px4",
+    "attempts": 1,
+    "after": {
+      "px4_version": "1.18.0",
+      "git_hash_prefix": "5248b44b26",
+      "os_hash_prefix": "3cc0c49601597d4a",
+      "board_version": 4184
+    },
+    "uid": 3545266500430018352,
+    "image_sha256": "57aeaa8d10a043785b404ea9ccdddc4372648cc69d9ef091af9f96dcaa2bd05d",
+    "evidence": "~/.cache/px4-llm-sim2hitl/v2/deploy/20261127-183434_cubeorangeplus_hitl"
   }
 }

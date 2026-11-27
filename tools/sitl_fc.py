@@ -10,8 +10,9 @@ controller that runs the recipe, for simhost's SITL FC transport (--sitl-udp, --
     python3 tools/sitl_fc.py restart --instance N
 
 build: the PX4 of px4/lock.toml, target px4_sitl_default (lockstep: PX4's clock follows simhost's sensor time), with the
-recipe's external modules (<repo>/modules/src/<name>) and the vehicle repository's SITL patches (--patch, committed with
-git am under --committer, which sets the commit hashes PX4 reports). The recipe's own patches are not applied: they
+recipe's external modules (<repo>/modules/src/<name>), the toolkit's SITL patches (px4/patches/sitl/*.patch, every vehicle
+needs them with simhost), then the vehicle repository's own (--patch), each committed with git am under --committer,
+which sets the commit hashes PX4 reports). The recipe's own patches are not applied: they
 change board files and NuttX, which the computer build does not use. Builds run in a tree of this tool's own
 (--build-tree), copied once from --copy-from without its build outputs and reset to the lock before every build.
 <cache>/builds/<recipe>/build.json records the inputs and their hashes; start refuses a build whose inputs changed.
@@ -226,7 +227,13 @@ def cmd_build(a):
         c = (lock.get('firmware_build') or {}).get('committer')
         a.committer = f'{c["name"]} <{c["email"]}>' if c else COMMITTER
     specs = a.patch or (lock.get('sitl_build') or {}).get('patches', [])
-    patches = [parse_patch(s, recipe.repo) for s in specs]
+    # the toolkit's own SITL patches first (fixes every vehicle needs with simhost), then the vehicle repository's
+    patches = [parse_patch(str(f), TOOLKIT) | {'file': f'toolkit:{f.relative_to(TOOLKIT)}'}
+               for f in sorted((TOOLKIT / 'px4' / 'patches' / 'sitl').glob('*.patch'))]
+    patches += [parse_patch(s, recipe.repo) for s in specs]
+    names = [p['path'].name for p in patches]
+    if len(set(names)) != len(names):
+        raise SystemExit(f'a SITL patch is given twice (the toolkit applies px4/patches/sitl/ itself): {names}')
     parse_committer(a.committer)
     probe = subprocess.run(['python3', '-c', 'import em, jinja2, yaml'], capture_output=True)
     if probe.returncode:
@@ -295,7 +302,10 @@ def build_problems(recipe, build):
         if name in build['modules'] and module_files(recipe.repo, name) != build['modules'][name]:
             problems.append(f'module {name} changed')
     for p in build['patches']:
-        path = Path(p['file']) if Path(p['file']).is_absolute() else recipe.repo / p['file']
+        if p['file'].startswith('toolkit:'):   # the toolkit's own SITL patches (px4/patches/sitl/)
+            path = TOOLKIT / p['file'][len('toolkit:'):]
+        else:
+            path = Path(p['file']) if Path(p['file']).is_absolute() else recipe.repo / p['file']
         if not path.is_file() or sha256(path) != p['sha256']:
             problems.append(f'patch {p["file"]} changed or missing')
     px4 = Path(build['binary']['path'])

@@ -92,6 +92,20 @@ class SitlInstance(unittest.TestCase):
             self.assertFalse(any('stop' in c for c in calls), calls)
             self.assertIn('--fresh', calls[0])
 
+    def test_no_earlier_log_after_a_failed_start(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            repo = make_repo(root, '')
+            run = fly.Run(args(repo, root / 'run'))
+            old = root / 'old.ulg'
+            old.write_bytes(b'an earlier flight')
+            run.sh = lambda cmd, **_: subprocess.CompletedProcess(cmd, 1, '', 'sitl_fc start: refused')
+            run.sitl_logs = lambda: {old}
+            with self.assertRaises(RuntimeError):
+                run.prepare_sitl()
+            self.assertIsNone(run.sitl_log())   # the earlier log is not taken for this run
+            self.assertFalse((root / 'run' / 'fc_log.ulg').exists())
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

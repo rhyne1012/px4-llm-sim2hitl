@@ -1,0 +1,47 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: sim2hitl build <build@sim2hitl.invalid>
+Date: Sun, 25 Oct 2026 22:00:00 +0800
+Subject: [PATCH] sensors: seed VehicleIMU integrators without a pre-sample interval
+
+The previous sample timestamps start at zero. If simulated sensors start
+seconds after boot, the first integration interval includes all that idle
+time. Calibration then subtracts offsets over the bogus interval, and
+EKF2 may accept a badly tilted initial gravity vector after clamping dt.
+
+Use zero dt for the first accel and gyro samples. Integrator::put resets
+and seeds its previous value at zero dt; the next sample therefore starts
+the first real interval. Keep subsequent samples and saved calibration
+unchanged.
+
+Verified against PX4 v1.17.0 (d6f12ad1) with recorded SITL sensor streams.
+---
+ src/modules/sensors/vehicle_imu/VehicleIMU.cpp | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/src/modules/sensors/vehicle_imu/VehicleIMU.cpp b/src/modules/sensors/vehicle_imu/VehicleIMU.cpp
+--- a/src/modules/sensors/vehicle_imu/VehicleIMU.cpp
++++ b/src/modules/sensors/vehicle_imu/VehicleIMU.cpp
+@@ -348,7 +348,9 @@
+ 		}
+ 
+ 
+-		const float dt = (accel.timestamp_sample - _accel_timestamp_sample_last) * 1e-6f;
++		// The first sample establishes the endpoint; no interval exists before it.
++		const float dt = (_accel_timestamp_sample_last != 0)
++			? (accel.timestamp_sample - _accel_timestamp_sample_last) * 1e-6f : 0.f;
+ 		_accel_timestamp_sample_last = accel.timestamp_sample;
+ 
+ 		const Vector3f accel_raw{accel.x, accel.y, accel.z};
+@@ -456,7 +458,9 @@
+ 
+ 		_gyro_last_generation = _sensor_gyro_sub.get_last_generation();
+ 
+-		const float dt = (gyro.timestamp_sample - _gyro_timestamp_sample_last) * 1e-6f;
++		// The first sample establishes the endpoint; no interval exists before it.
++		const float dt = (_gyro_timestamp_sample_last != 0)
++			? (gyro.timestamp_sample - _gyro_timestamp_sample_last) * 1e-6f : 0.f;
+ 
+ 		_gyro_timestamp_sample_last = gyro.timestamp_sample;
+ 		_gyro_timestamp_last = gyro.timestamp;
+-- 
+2.43.0

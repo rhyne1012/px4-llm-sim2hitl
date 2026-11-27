@@ -1,0 +1,28 @@
+# The JSBSim this toolkit version is tested with, used unmodified (LGPL-2.1). The fingerprints say which bytes were used;
+# a copy of both files is kept as assets of this repository's GitHub release (from v2.1.0), so a build can be repeated
+# if the upstream files ever disappear. Check a copy with `sha256sum` against the values here before using it.
+[jsbsim]
+version = "1.3.3"
+tag = "v1.3.3"
+commit = "66f7fafc07fe13e7ede9db20873030fed2881713"
+repository = "https://github.com/JSBSim-Team/jsbsim"
+license = "LGPL-2.1"
+
+# The C++ library: simhost links it statically (simhost/CMakeLists.txt, JSBSIM_ROOT).
+[source]
+file = "jsbsim-66f7fafc07fe13e7ede9db20873030fed2881713.tar.gz"
+url = "https://github.com/JSBSim-Team/jsbsim/archive/66f7fafc07fe13e7ede9db20873030fed2881713.tar.gz"
+sha256 = "6c1946eafa52b13411f3430e1f293394642b1852f79cdd79f57fd73bc44ec600"
+size = 29166128
+build = "cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_PYTHON_MODULE=OFF -DBUILD_DOCS=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DBUILD_SHARED_LIBS=OFF, installed into ~/.cache/px4-llm-sim2hitl/jsbsim-1.3.3-install"
+
+# The Python module: tools/linear.py, tools/vehicle_check.py and fastcore/check.py use it, unpacked into a folder that
+# JSBSIM_PYTHON names (or installed with pip).
+[python]
+file = "jsbsim-1.3.3-cp312-cp312-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl"
+url = "https://pypi.org/project/jsbsim/1.3.3/"
+sha256 = "24a5df2fa606baabe16bf2b4faf12aeac41153c8226cb7d70e1e7950a2616dbb"
+size = 2126311
+
+[backup]
+where = "the GitHub release of this repository that first carries this lock (v2.1.0), assets named as the files above"

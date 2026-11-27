@@ -73,6 +73,8 @@ The expected value of every parameter is the firmware's default, overlaid with:
 | `verify_only` | someone else (a person, a calibration) | checks, never writes |
 | `set` | the toolkit | writes, checks |
 
+A HITL recipe states `GPS_1_CONFIG` 0 in `boot`: PX4's `rcS` sets it at every boot when `SYS_HITL` > 0 (it disables the real GPS), so otherwise the final check finds it off its default. `--reset-unmanaged` also writes the airframe values another recipe changed (see below).
+
 A name may be in one section only. Parameters matching `fc_owned.patterns` belong to the physical flight controller (calibration, counters, the operator's RC): they are read but neither compared nor written. `resolved_names` is the list the patterns gave when the recipe was reviewed; a firmware whose names give another list makes the check INCOMPLETE until the list is reviewed again.
 
 The check (`tools/recipe.py`, `Recipe.check`) compares a full readback with these values. Int32 values compare exactly, Float values as float32 bits. Its verdict:
@@ -84,6 +86,8 @@ The check (`tools/recipe.py`, `Recipe.check`) compares a full readback with thes
 A `set` value equal to the firmware default is reported as `redundant` (harmless).
 
 PX4 itself writes some parameters that a recipe does not state. EKF2 writes `EKF2_SENS_EN` at every disarm and sets only the GNSS 0 bit for GPS, so the default 8191 becomes 8189 after the first flight (PX4 v1.18 `EKF2::syncSensEnParam`); the check reports exactly that value as `px4_rewritten`, not as a failure (`PX4_REWRITES` in `tools/recipe.py`). An output function change sets that output's PWM limits; `deploy.py` writes `set` values again when PX4 changed them. `--reset-unmanaged` writes any other parameter that differs back to its default.
+
+**Moving a flight controller between recipes or vehicles.** PX4's airframe and board scripts set only defaults, so a parameter an earlier recipe set keeps its value, also one of the new recipe's `airframe` or `boot` values; and the earlier recipe's `set` values stay where the new one is silent. The deploy reports both and stops; `--reset-unmanaged` writes the unstated ones back to their defaults and the airframe and boot ones to the recipe's values. A recipe states its board's script defaults in `boot` (on a Cube Orange+: `EKF2_MULTI_IMU`, `MC_AT_EN`, `SENS_EN_THERMAL`, `SENS_IMU_MODE`, `UAVCAN_ENABLE`), or a deploy with `--reset-unmanaged` would write them back to the firmware's defaults. The readback before the deploy is kept (`params_before.json`; `tools/fc.py params-restore --from` puts it back).
 
 ### SD files
 

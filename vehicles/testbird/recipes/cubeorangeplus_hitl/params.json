@@ -4,7 +4,7 @@
   "firmware": "firmware/firmware.json",
   "firmware_params": {
     "file": "firmware/parameters.json.xz",
-    "sha256": null
+    "sha256": "6f982d6740711e898ca43304934908a660b9611a8cf1b522eac5bdc68c20d693"
   },
   "fc_owned": {
     "patterns": [
@@ -128,7 +128,32 @@
       "why": "PX4 rc.fw_defaults (param set-default), PX4 v1.18.0"
     }
   },
-  "boot": {},
+  "boot": {
+    "EKF2_MULTI_IMU": {
+      "value": 3,
+      "script": "platforms/nuttx/init/stm32h7/rc.board_arch_defaults (set-default -s)"
+    },
+    "GPS_1_CONFIG": {
+      "value": 0,
+      "script": "ROMFS/px4fmu_common/init.d/rcS, SYS_HITL > 0 branch (param set: HITL disables the real GPS on every boot)"
+    },
+    "MC_AT_EN": {
+      "value": 1,
+      "script": "platforms/nuttx/init/stm32h7/rc.board_arch_defaults (set-default -s)"
+    },
+    "SENS_EN_THERMAL": {
+      "value": 0,
+      "script": "boards/cubepilot/cubeorangeplus/init/rc.board_defaults (set-default): the Cube board disables IMU thermal control"
+    },
+    "SENS_IMU_MODE": {
+      "value": 0,
+      "script": "platforms/nuttx/init/stm32h7/rc.board_arch_defaults (set-default)"
+    },
+    "UAVCAN_ENABLE": {
+      "value": 2,
+      "script": "platforms/nuttx/init/stm32h7/rc.board_arch_defaults (set-default -s)"
+    }
+  },
   "verify_only": {},
   "set": {
     "SYS_AUTOSTART": {

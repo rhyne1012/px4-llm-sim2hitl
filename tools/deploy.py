@@ -24,7 +24,9 @@ then:
    read again and what still differs is written again (at most three rounds). A parameter the recipe does not state
    must be at its firmware default; PX4 itself sometimes writes one (EKF2 writes EKF2_SENS_EN back without bit 1
    when a sensor is switched by command), which the final check reports. --reset-unmanaged writes those back to
-   their default (they are listed in the plan first).
+   their default, and the recipe's airframe and boot values that another recipe changed (PX4's airframe and board
+   scripts set only defaults, so a value an earlier recipe set stays): moving an FC between recipes or vehicles needs it. Both are
+   listed in the plan first.
 3. SD files. The boot file (/fs/microsd/etc/extras.txt) and the logger topics (/fs/microsd/etc/logging/
    logger_topics.txt) are made to hold the recipe's file, or removed when the recipe has none: written to a
    temporary file, read back, then renamed.
@@ -248,6 +250,9 @@ class Deploy:
             if self.a.reset_unmanaged:
                 todo += [{'name': n['name'], 'fc': n['fc'], 'expected': n['default'], 'section': 'default'}
                          for n in check['not_default']]
+                # an airframe or board-script value another recipe set: PX4's scripts change only defaults (or set the
+                # value again at every boot), so a value stored by an earlier recipe stays
+                todo += [w for w in check['wrong_value'] if w['section'] in ('airframe', 'boot')]
             if not todo:
                 self.step('parameters', 'PASS', rounds=round_ - 1, written=written)
                 return written
@@ -333,7 +338,8 @@ def main():
     g.add_argument('--reuse', action='store_true')
     p.add_argument('--allow-hitl-change', action='store_true')
     p.add_argument('--reset-unmanaged', action='store_true',
-                   help='also write back to its default every parameter the recipe does not state that differs')
+                   help='also write back every parameter the recipe does not state that differs from its default, and '
+                        'the recipe\'s airframe and boot values another recipe changed (moving an FC between recipes or vehicles)')
     a = p.parse_args()
     d = Deploy(a)
     d.go()
