@@ -93,10 +93,10 @@ def name_of(prop):
 class Model:
     """The vehicle in JSBSim, with the airframe held at a state while everything else runs."""
 
-    def __init__(self, folder, configs=()):
+    def __init__(self, folder, configs=(), settings=None):
         self.folder = Path(folder).resolve()
         self.toml = tomllib.loads((self.folder / 'vehicle.toml').read_text())
-        self.settings = load_config(*configs)
+        self.settings = dict(settings) if settings is not None else load_config(*configs)
         self.fdm = f = VC.load(self.folder, DT)
         for k in ('rate/rotational', 'rate/translational', 'position/rotational', 'position/translational'):
             f[f'simulation/integrator/{k}'] = AB2
