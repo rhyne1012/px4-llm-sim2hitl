@@ -46,7 +46,9 @@ One C++ program, linked with the locked JSBSim:
 - **PX4 interface.** PX4's standard HIL MAVLink messages: out `HIL_SENSOR`, `HIL_GPS` and, optionally, `HIL_STATE_QUATERNION` (ground truth); in `HIL_ACTUATOR_CONTROLS`. The C headers are generated with mavgen from the message definitions in the locked PX4 tree.
 - **Transports.**
   - SITL: a TCP server on port 4560. PX4's `simulator_mavlink` connects to it, in lockstep: PX4's actuator messages advance the clock.
+  - SITL FC: a vehicle repository's own flight-controller build on the computer, with its own startup instead of PX4's posix rcS. `simulator_mavlink` runs in UDP mode (`--sitl-udp`), and its MAVLink instance is a second UDP link (`--mavlink-udp`).
   - HITL: the flight controller's serial port, in real time with a fixed deadline per step.
+- **Other MAVLink users.** A UDP relay (`--relay-port`) gives a flight script, a pilot and a ground station the flight controller's MAVLink at the same time. In lockstep, a pilot process that runs on the simulated clock can gate the simulation (`--simclock`, `--pilot-sync`), so that its keep-alive and its checks never fall behind PX4's simulated time.
 - **Inputs at run time.**
   - Wind, turbulence and gusts use JSBSim's own models.
   - Faults use JSBSim's actuator fail properties and the avionics layer.
