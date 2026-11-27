@@ -52,6 +52,10 @@ COPY_FROM = Path.home() / 'px4' / f'PX4-Autopilot-{PX4_LOCK["tag"]}-build'
 COMMITTER = 'sim2hitl build <build@sim2hitl.invalid>'
 OWNED_VALUES = 'sitl/sitl_fc_owned.json'   # in the vehicle repository
 
+# Values that stand for the FC on the computer, unless the recipe states them: PX4's commander measures CPU load in wall
+# time, which says nothing about the FC when lockstep runs faster than real time (seen 2026-11-27: "Preflight Fail: CPU
+# load too high: 100.0%" refused arming); PX4's own posix rcS sets the same (ROMFS init.d-posix/rcS, v1.18.0 line 158).
+SITL_DEFAULTS = {'COM_CPU_MAX': (-1, 'SITL: the computer\'s CPU load is not the FC\'s (PX4 posix rcS sets the same)')}
 # The HIL outputs of a recipe (pwm_out_sim -m hil, HIL_ACT_*) on the SITL outputs (pwm_out_sim -m sim, PWM_MAIN_*).
 OUTPUT_RENAME = {f'HIL_ACT_FUNC{n}': f'PWM_MAIN_FUNC{n}' for n in range(1, 17)}
 OUTPUT_RENAME['HIL_ACT_REV'] = 'PWM_MAIN_REV'
@@ -342,6 +346,10 @@ def derive(recipe, build, out):
         if name in params['set']:
             for section in ('airframe', 'boot', 'verify_only'):
                 params[section].pop(name, None)
+    stated = {n for section in SECTIONS for n in params.get(section, {})}
+    for name, (value, why) in SITL_DEFAULTS.items():
+        if name in firmware and name not in stated:
+            params['boot'][name] = {'value': value, 'why': why}
     rule = re.compile('|'.join(params['fc_owned']['patterns']))
     params['fc_owned']['resolved_names'] = sorted(n for n in firmware if rule.search(n))
     params['fc_owned']['resolved_count'] = len(params['fc_owned']['resolved_names'])

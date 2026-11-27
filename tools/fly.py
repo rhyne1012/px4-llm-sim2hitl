@@ -6,7 +6,8 @@
         --link /dev/serial/by-id/<the FC> [--deploy reuse|flash|none]
 
 The recipe's hitl.json says what to fly (docs/recipes.md): "after" (the command script), "check" (the program that
-judges the flight's ULog), "climb_bank", "flight_timeout". The vehicle folder is simhost's (its vehicle.toml carries the
+judges the flight's ULog), "climb_bank", "flight_timeout" (seconds of flight: wall time in HITL, simulated time
+in SITL; 900 by default, plus 300 for the takeoff). The vehicle folder is simhost's (its vehicle.toml carries the
 pilot's [pilot] numbers). Steps:
 
   1. The FC.
@@ -34,6 +35,7 @@ import hashlib
 import json
 import os
 import signal
+import struct
 import subprocess
 import sys
 import time
@@ -215,11 +217,25 @@ class Run:
         self.procs['pilot'] = subprocess.Popen(cmd, env=env, stdout=open(self.out / 'pilot.log', 'w'), stderr=subprocess.STDOUT)
         self.event('pilot started', cmd=' '.join(cmd))
 
+    def sim_seconds(self):
+        """SITL: simhost's simulated time (its --simclock file: simulated ns, monotonic ns), or None."""
+        try:
+            return struct.unpack('<QQ', self.simclock.read_bytes()[:16])[0] / 1e9
+        except (OSError, struct.error):
+            return None
+
     def wait_pilot(self, m):
-        timeout = float(self.hitl.get('flight_timeout', 900)) * (1.0 if self.a.mode == 'hitl' else 2.0) + 300
-        end, last, stopping = time.monotonic() + timeout, 0.0, False
+        # flight_timeout is flight time: wall seconds in HITL, simulated seconds in SITL (lockstep runs many times faster
+        # than real time; a wall-clock limit there let a stuck flight run for hours of simulated time). A wall-clock
+        # limit stays in SITL as a backstop.
+        limit = float(self.hitl.get('flight_timeout', 900)) + 300
+        wall_limit = limit if self.a.mode == 'hitl' else 4 * limit
+        end, last, stopping = time.monotonic() + wall_limit, 0.0, False
         status = self.out / 'pilot' / 'status.json'
+        timeout = limit
         while time.monotonic() < end:
+            if self.a.mode == 'sitl' and (self.sim_seconds() or 0) > limit:
+                break
             rc = self.procs['pilot'].poll()
             if not stopping and status.exists():
                 try:
@@ -240,7 +256,8 @@ class Run:
                 m.mav.heartbeat_send(mavutil.mavlink.MAV_TYPE_GCS, mavutil.mavlink.MAV_AUTOPILOT_INVALID, 0, 0, 0)
                 last = time.monotonic()
             m.recv_match(blocking=True, timeout=0.2)
-        self.event('flight timed out', seconds=timeout)
+        self.event('flight timed out', seconds=timeout, clock='wall' if self.a.mode == 'hitl' else 'simulated',
+                   simulated_s=self.sim_seconds() if self.a.mode == 'sitl' else None)
         (self.out / 'pilot').mkdir(exist_ok=True)
         (self.out / 'pilot' / 'stop').touch()
         try:

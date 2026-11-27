@@ -100,7 +100,7 @@ The boot file runs at the end of PX4's boot (ROMFS `rcS`, `/fs/microsd/etc/extra
 | `after` | the command script the pilot runs once the aircraft flies level: a path in the repository ending in `.py`, or a name in the commands folder |
 | `check` | a program in the repository, run as `<python> -B <check> <ulog> --out <check.json>`; it writes `{"verdict": "PASS" or ...}` |
 | `climb_bank` | degrees: climb in a banked circle, for a script whose area a straight climb-out would leave |
-| `flight_timeout` | seconds of the whole flight (doubled in SITL, where the clock can be slower than real time) |
+| `flight_timeout` | seconds of the whole flight, 900 by default, plus 300 for the takeoff: wall time in HITL, simulated time in SITL (lockstep runs many times faster than real time) |
 
 A vehicle repository may add its own keys (which model configuration a recipe flies, for example); the toolkit ignores them.
 
