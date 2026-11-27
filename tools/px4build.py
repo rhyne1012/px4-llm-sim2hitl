@@ -26,6 +26,7 @@ Prints one JSON line.
 import argparse
 import base64
 import datetime
+import fcntl
 import hashlib
 import json
 import lzma
@@ -81,6 +82,19 @@ def committer_of(repo):
         if c:
             return {'name': c['name'], 'email': c['email']}
     return dict(DEFAULT_COMMITTER)
+
+
+def hold_tree_lock(source):
+    """One build at a time in the build tree (a reset or a build of another run would trample this one): the lock is
+    held until the returned file is closed, or the process ends."""
+    tree = Path(os.environ.get('SIM2HITL_PX4_BUILD_TREE') or str(source) + '-build-sim2hitl')
+    f = open(str(tree) + '.lock', 'w')
+    try:
+        fcntl.flock(f, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        print(json.dumps({'status': 'WAITING', 'why': f'another build runs in {tree}'}), file=sys.stderr, flush=True)
+        fcntl.flock(f, fcntl.LOCK_EX)
+    return f
 
 
 def build_tree(source, commit):
@@ -176,6 +190,7 @@ def build(recipe_dir, repo=None, px4=None):
     committer = committer_of(repo)
     work = CACHE / repo.name / recipe_dir.name
     work.mkdir(parents=True, exist_ok=True)
+    lock = hold_tree_lock(source)
     tree = build_tree(source, commit)
     applied = apply_patches(repo, tree, recipe.get('patches', []), committer)
     modules = recipe.get('modules', [])
@@ -237,6 +252,7 @@ def build(recipe_dir, repo=None, px4=None):
     }
     info['flashed'] = None
     info_path.write_text(json.dumps(info, indent=2, ensure_ascii=False) + '\n')
+    lock.close()
     params_path = recipe_dir / 'params.json'
     if params_path.is_file():
         p = json.loads(params_path.read_text())

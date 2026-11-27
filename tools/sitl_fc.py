@@ -48,7 +48,18 @@ PX4_LOCK = tomllib.loads((TOOLKIT / 'px4' / 'lock.toml').read_text())['px4']
 TARGET = 'px4_sitl_default'
 CACHE = Path(os.environ.get('XDG_CACHE_HOME') or Path.home() / '.cache') / 'px4-llm-sim2hitl' / 'v2' / 'sitl_fc'
 BUILD_TREE = Path.home() / 'px4' / f'PX4-Autopilot-{PX4_LOCK["tag"]}-build-v2sitl'
-COPY_FROM = Path.home() / 'px4' / f'PX4-Autopilot-{PX4_LOCK["tag"]}-build'
+def default_copy_from():
+    """The PX4 tree a new build tree is copied from: SIM2HITL_PX4_ROOT, else ~/.config/px4-llm-sim2hitl/px4_root (the
+    same lookup as tools/px4build.py); the copy is then reset to the lock's commit."""
+    if os.environ.get('SIM2HITL_PX4_ROOT'):
+        return Path(os.environ['SIM2HITL_PX4_ROOT']).expanduser()
+    cfg = Path(os.environ.get('XDG_CONFIG_HOME') or Path.home() / '.config') / 'px4-llm-sim2hitl' / 'px4_root'
+    if cfg.is_file() and cfg.read_text().strip():
+        return Path(cfg.read_text().strip()).expanduser()
+    return Path.home() / 'px4' / f'PX4-Autopilot-{PX4_LOCK["tag"]}'
+
+
+COPY_FROM = default_copy_from()
 COMMITTER = 'sim2hitl build <build@sim2hitl.invalid>'
 OWNED_VALUES = 'sitl/sitl_fc_owned.json'   # in the vehicle repository
 
@@ -201,8 +212,9 @@ def build_lock():
         yield
 
 
-def build_dir(recipe_name):
-    return CACHE / 'builds' / recipe_name
+def build_dir(recipe):
+    """A recipe's SITL FC build, per vehicle repository: two repositories may have recipes of the same name."""
+    return CACHE / 'builds' / recipe.repo.name / recipe.name
 
 
 def cmd_build(a):
@@ -220,7 +232,7 @@ def cmd_build(a):
     if probe.returncode:
         raise SystemExit('python3 in PATH lacks the PX4 build modules (empy, jinja2, pyyaml): put the PX4 Python '
                          'environment first in PATH')
-    out = build_dir(recipe.name)
+    out = build_dir(recipe)
     out.mkdir(parents=True, exist_ok=True)
     previous = json.loads((out / 'build.json').read_text()) if (out / 'build.json').is_file() else None
     with build_lock():
@@ -289,14 +301,14 @@ def build_problems(recipe, build):
     px4 = Path(build['binary']['path'])
     if not px4.is_file() or sha256(px4) != build['binary']['sha256']:
         problems.append(f'{px4} missing or built again since build.json')
-    listing = build_dir(recipe.name) / build['parameters']['file']
+    listing = build_dir(recipe) / build['parameters']['file']
     if not listing.is_file() or sha256(listing) != build['parameters']['sha256']:
         problems.append(f'{listing} missing or changed')
     return problems
 
 
 def load_build(recipe):
-    path = build_dir(recipe.name) / 'build.json'
+    path = build_dir(recipe) / 'build.json'
     if not path.is_file():
         raise SystemExit(f'no SITL FC build of {recipe.name}: run tools/sitl_fc.py build --recipe {recipe.dir}')
     return json.loads(path.read_text())
@@ -324,7 +336,7 @@ def derive(recipe, build, out):
     if out.exists():
         shutil.rmtree(out)
     (out / 'firmware').mkdir(parents=True)
-    listing = build_dir(recipe.name) / build['parameters']['file']
+    listing = build_dir(recipe) / build['parameters']['file']
     shutil.copy2(listing, out / 'firmware' / listing.name)
     firmware = load_firmware_params(out / 'firmware' / listing.name)
     params = json.loads(recipe.params_path.read_text())
@@ -587,7 +599,7 @@ def cmd_start(a):
     prepare_etc(work, build_etc, derived.logger_topics)
     info = {'schema_version': 1, 'instance': n, 'recipe': recipe.name, 'recipe_dir': str(recipe.dir),
             'vehicle_repo': str(recipe.repo), 'vehicle_repo_state': repo_state(recipe.repo),
-            'derived_recipe': str(derived.dir), 'build': str(build_dir(recipe.name) / 'build.json'),
+            'derived_recipe': str(derived.dir), 'build': str(build_dir(recipe) / 'build.json'),
             'px4': build['binary']['path'], 'px4_sha256': build['binary']['sha256'], 'git_hash': build['px4']['git_hash'],
             'build_etc': str(build_etc), 'ports': ports(n), 'simhost_args': simhost_args(n), 'lockstep': True,
             'vehicle_type': vtype, 'fc_owned_values': owned_record, 'streams': streams,
