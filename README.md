@@ -6,6 +6,8 @@ An integration layer between PX4 and JSBSim for agent-driven flight-control deve
 
 > Status: v2 draft, under development. v1 (Simulink → C → HITL, example aircraft SkySurfer) is archived as tag `v1-final` and branch `legacy-v1`.
 
+![Overview: PX4 and JSBSim at pinned versions; the toolkit as the glue layer (simhost, deploy and fly, fast core, agent rules); SITL, HITL and flight judged by one yardstick; vehicle repositories; a person decides and the AI does the technical work; the core spirit](images/overview.svg)
+
 ## Overview
 
 This project sits between [PX4](https://px4.io) (flight control) and [JSBSim](https://github.com/JSBSim-Team/jsbsim) (flight dynamics). Both are used unmodified, at locked versions. This project implements only what lies between them:
