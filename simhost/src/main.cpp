@@ -343,12 +343,14 @@ int main(int argc, char **argv) {
     };
 
     while (!g_stop) {
-      // lockstep with a pilot: do not step past the time it allows while it keeps writing (it gates the simulation)
+      // lockstep with a pilot: step while the simulated time has not passed the time it allows, so it ends at most one
+      // step past it (the pilot wakes once the time reaches its wake-up, which is rarely on the step grid and may round
+      // above it: stopping at or before it would leave both waiting), and only while the pilot keeps writing
       if (pilot_sync && answered) {
-        const uint64_t next_ns = (t_us + static_cast<uint64_t>(std::lround(o.hil_dt * 1e6))) * 1000;
+        const uint64_t now_ns = t_us * 1000;
         const auto pilot_holds = [&]() {
           const uint64_t w = pilot_sync->written_ns();
-          if (w == 0 || pilot_sync->value() >= next_ns) return false;
+          if (w == 0 || now_ns <= pilot_sync->value()) return false;
           const uint64_t now = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
               std::chrono::steady_clock::now().time_since_epoch()).count());
           return now - w < 1000000000ULL;
