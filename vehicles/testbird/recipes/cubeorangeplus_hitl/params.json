@@ -129,9 +129,29 @@
     }
   },
   "boot": {
+    "EKF2_MULTI_IMU": {
+      "value": 3,
+      "script": "platforms/nuttx/init/stm32h7/rc.board_arch_defaults (set-default -s)"
+    },
     "GPS_1_CONFIG": {
       "value": 0,
       "script": "ROMFS/px4fmu_common/init.d/rcS, SYS_HITL > 0 branch (param set: HITL disables the real GPS on every boot)"
+    },
+    "MC_AT_EN": {
+      "value": 1,
+      "script": "platforms/nuttx/init/stm32h7/rc.board_arch_defaults (set-default -s)"
+    },
+    "SENS_EN_THERMAL": {
+      "value": 0,
+      "script": "boards/cubepilot/cubeorangeplus/init/rc.board_defaults (set-default): the Cube board disables IMU thermal control"
+    },
+    "SENS_IMU_MODE": {
+      "value": 0,
+      "script": "platforms/nuttx/init/stm32h7/rc.board_arch_defaults (set-default)"
+    },
+    "UAVCAN_ENABLE": {
+      "value": 2,
+      "script": "platforms/nuttx/init/stm32h7/rc.board_arch_defaults (set-default -s)"
     }
   },
   "verify_only": {},
