@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<!-- Testbird flight-control actuators.
+     Commands are normalised to [-1, 1] (throttle [0, 1]); positions are in radians.
+     Sign conventions (positive command):
+       elevator  trailing edge down  -> nose down
+       aileron   left TED, right TEU -> roll right
+       rudder    trailing edge right -> nose right
+     Each surface: command + trim, clipped, scaled to +-25 deg, then a servo (first-order lag 25 rad/s, rate limit 300 deg/s). -->
+<system name="controls">
+  <channel name="pitch">
+    <summer name="fcs/elevator-sum">
+      <input>fcs/elevator-cmd-norm</input>
+      <input>fcs/pitch-trim-cmd-norm</input>
+      <clipto><min>-1</min><max>1</max></clipto>
+    </summer>
+    <pure_gain name="fcs/elevator-cmd-rad">
+      <input>fcs/elevator-sum</input>
+      <gain>0.4363</gain>
+    </pure_gain>
+    <actuator name="fcs/elevator-servo">
+      <input>fcs/elevator-cmd-rad</input>
+      <lag>25</lag>
+      <rate_limit>5.236</rate_limit>
+      <clipto><min>-0.4363</min><max>0.4363</max></clipto>
+      <output>fcs/elevator-pos-rad</output>
+    </actuator>
+  </channel>
+  <channel name="roll">
+    <summer name="fcs/aileron-sum">
+      <input>fcs/aileron-cmd-norm</input>
+      <input>fcs/roll-trim-cmd-norm</input>
+      <clipto><min>-1</min><max>1</max></clipto>
+    </summer>
+    <pure_gain name="fcs/aileron-cmd-rad">
+      <input>fcs/aileron-sum</input>
+      <gain>0.4363</gain>
+    </pure_gain>
+    <actuator name="fcs/aileron-servo">
+      <input>fcs/aileron-cmd-rad</input>
+      <lag>25</lag>
+      <rate_limit>5.236</rate_limit>
+      <clipto><min>-0.4363</min><max>0.4363</max></clipto>
+      <output>fcs/aileron-pos-rad</output>
+    </actuator>
+  </channel>
+  <channel name="yaw">
+    <summer name="fcs/rudder-sum">
+      <input>fcs/rudder-cmd-norm</input>
+      <input>fcs/yaw-trim-cmd-norm</input>
+      <clipto><min>-1</min><max>1</max></clipto>
+    </summer>
+    <pure_gain name="fcs/rudder-cmd-rad">
+      <input>fcs/rudder-sum</input>
+      <gain>0.4363</gain>
+    </pure_gain>
+    <actuator name="fcs/rudder-servo">
+      <input>fcs/rudder-cmd-rad</input>
+      <lag>25</lag>
+      <rate_limit>5.236</rate_limit>
+      <clipto><min>-0.4363</min><max>0.4363</max></clipto>
+      <output>fcs/rudder-pos-rad</output>
+    </actuator>
+    <!-- nose-wheel steering follows the rudder command -->
+    <pure_gain name="fcs/steer-cmd">
+      <input>fcs/rudder-sum</input>
+      <gain>1</gain>
+      <output>fcs/steer-cmd-norm</output>
+    </pure_gain>
+  </channel>
+</system>
