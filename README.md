@@ -48,17 +48,19 @@ Each vehicle lives in its own repository and pins a version of this project. Thi
 
 ## Supported vehicles
 
-Any vehicle JSBSim can describe is in scope, for example fixed-wing aircraft, multirotors, VTOL aircraft and helicopters. Every interface is verified with two test vehicles, one fixed-wing and one quadrotor, so that no interface assumes a particular vehicle type. Actual support is what the verification matrix shows: an unverified combination is not supported.
+Any vehicle JSBSim can describe is in scope, for example fixed-wing aircraft, multirotors, VTOL aircraft and helicopters. Every interface is to be verified with two test vehicles, one fixed-wing and one quadrotor, so that no interface assumes a particular vehicle type; the fixed-wing (`vehicles/testbird`) exists, the quadrotor is planned. Actual support is what the verification matrix shows: an unverified combination is not supported.
 
 ## Features
 
+What is built and verified is in [docs/verification.md](docs/verification.md); items marked *planned* are not built yet.
+
 - **Simulation host.** JSBSim plus an avionics model (sensors, servo signal chain), talking to PX4 through its standard HIL MAVLink messages. Connected to PX4 SITL it is SITL; connected to a flight controller it is HITL. It is the same program in both cases.
-- **Deployment pipeline.** Build → flash → identity check → parameters → boot file → HITL → flight-controller log, in one command.
-- **Test cases.** One format for scenarios, checks and records, used at the algorithm level, in SITL, in HITL and in flight.
-- **Anchor.** The recorded reference behaviour of a vehicle, locked; changing it requires a person's approval.
+- **Deployment pipeline.** Build → flash → identity check → parameters → boot file → HITL → flight-controller log, in one command (`tools/fly.py`; the recipe format is [docs/recipes.md](docs/recipes.md)).
+- **Test cases** (*planned*). One format for scenarios, checks and records, used at the algorithm level, in SITL, in HITL and in flight. Today a recipe's `hitl.json` names the command script and the check, and the vehicle repository keeps the records.
+- **Anchor** (*planned*). The recorded reference behaviour of a vehicle, locked; changing it requires a person's approval.
 - **Fast core.** A C version of a vehicle's JSBSim model, generated from its definition and checked against JSBSim, for training and other work that needs many simulated hours.
-- **Machine resources.** When several vehicle repositories share one computer, flight controllers, SITL instances and PX4 source trees are coordinated between them.
-- **Vehicle generator.** Creates a new vehicle repository.
+- **Machine resources** (*planned*). When several vehicle repositories share one computer, flight controllers, SITL instances and PX4 source trees are coordinated between them.
+- **Vehicle generator** (*planned*). Creates a new vehicle repository.
 
 ## Development flow
 
@@ -71,7 +73,7 @@ Any vehicle JSBSim can describe is in scope, for example fixed-wing aircraft, mu
 
 Give the URL of this repository to an AI agent (for example Claude Code or Codex) and state your goal.
 
-- **New vehicle:** create a vehicle repository with the vehicle generator, then take the test vehicle through SITL → HITL first.
+- **New vehicle:** create a vehicle repository (until the vehicle generator exists, start from the layout of `vehicles/testbird` and [docs/recipes.md](docs/recipes.md)), then take the test vehicle through SITL → HITL first.
 - **Existing vehicle:** work in that vehicle's repository; this project does not need to be modified directly.
 
 ## Language
