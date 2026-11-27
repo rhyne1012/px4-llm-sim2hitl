@@ -22,12 +22,12 @@ HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parent / 'tools'))
 import gen  # noqa: E402
-from fastcore import Core  # noqa: E402
+from fastcore import Core, load_config  # noqa: E402
 
 FT = 0.3048
 
 
-def flying(core, n, rng):
+def flying(core, n, rng, settings=None):
     x = core.zeros(n)
     core.set_state(x, pos_ned=(0, 0, 0), vel_body=np.c_[rng.uniform(15, 19, n), np.zeros(n), rng.uniform(0, 0.3, n)],
                    euler=(0.0, 0.01, 0.0), rates=(0, 0, 0), rpm=5000.0)
@@ -35,25 +35,27 @@ def flying(core, n, rng):
     u[:, core.U['fcs/throttle-cmd-norm[0]']] = 0.64
     u[:, core.U['fcs/elevator-cmd-norm']] = 0.02
     e = core.env(n, origin_alt_msl=300.0)
-    core.reset(x, u)
-    return x, u, e
+    p = core.params(n, settings or {})
+    core.reset(x, u, p)
+    return x, u, p, e
 
 
-def time_core(core, n, threads, calls, k=25, dt=0.004):
+def time_core(core, n, threads, calls, k=25, dt=0.004, settings=None, label='defaults'):
     rng = np.random.default_rng(0)
-    x, u, e = flying(core, n, rng)
+    x, u, p, e = flying(core, n, rng, settings)
     parts = np.array_split(np.arange(n), threads)
-    xs = [np.ascontiguousarray(x[p]) for p in parts]
-    us = [np.ascontiguousarray(u[p]) for p in parts]
-    es = [np.ascontiguousarray(e[p]) for p in parts]
+    xs = [np.ascontiguousarray(x[q]) for q in parts]
+    us = [np.ascontiguousarray(u[q]) for q in parts]
+    es = [np.ascontiguousarray(e[q]) for q in parts]
+    ps = [np.ascontiguousarray(p[q]) for q in parts]
     for i in range(threads):   # warm up
-        core.step(xs[i], us[i], es[i], dt=dt, k=k, outputs=False)
+        core.step(xs[i], us[i], ps[i], es[i], dt=dt, k=k, outputs=False)
     barrier = threading.Barrier(threads + 1)
 
     def work(i):
         barrier.wait()
         for _ in range(calls):
-            core.step(xs[i], us[i], es[i], dt=dt, k=k, outputs=False)
+            core.step(xs[i], us[i], ps[i], es[i], dt=dt, k=k, outputs=False)
         barrier.wait()
 
     ts = [threading.Thread(target=work, args=(i,)) for i in range(threads)]
@@ -67,7 +69,7 @@ def time_core(core, n, threads, calls, k=25, dt=0.004):
         t.join()
     steps = n * calls * k
     ok = all(np.isfinite(xi).all() for xi in xs)
-    return {'n': n, 'threads': threads, 'steps_per_call': k, 'wall_s': round(wall, 3), 'vehicle_steps': steps,
+    return {'n': n, 'threads': threads, 'steps_per_call': k, 'parameters': label, 'wall_s': round(wall, 3), 'vehicle_steps': steps,
             'ns_per_vehicle_step': round(wall / steps * 1e9, 1),
             'ns_per_vehicle_step_per_thread': round(wall * threads / steps * 1e9, 1),
             'vehicle_steps_per_s': round(steps / wall), 'finite': bool(ok)}
@@ -108,8 +110,10 @@ def main():
         core = Core(d, name)
         rows = [time_core(core, n, 1, max(4, 40000 // n)) for n in (1, 64, 1024, 4096)]
         rows += [time_core(core, 4096, t, 40) for t in a.threads if t > 1]
+        for cfg in sorted((Path(a.vehicle) / 'configs').glob('*.toml')):   # the vehicle's configurations (servo chain, ...)
+            rows.append(time_core(core, 4096, 1, 10, settings=load_config(cfg), label=cfg.name))
         rep[flavour] = rows
-        print(flavour, json.dumps([{k: r[k] for k in ('n', 'threads', 'ns_per_vehicle_step', 'ns_per_vehicle_step_per_thread')} for r in rows]), flush=True)
+        print(flavour, json.dumps([{k: r[k] for k in ('n', 'threads', 'parameters', 'ns_per_vehicle_step', 'ns_per_vehicle_step_per_thread')} for r in rows]), flush=True)
     if os.environ.get('JSBSIM_PYTHON'):
         sys.path.insert(0, os.environ['JSBSIM_PYTHON'])
     try:

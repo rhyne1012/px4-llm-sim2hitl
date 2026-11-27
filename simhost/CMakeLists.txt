@@ -29,7 +29,7 @@ add_custom_target(mavlink_headers DEPENDS "${MAVLINK_OUT}/common/mavlink.h")
 
 add_executable(simhost src/main.cpp src/vehicle.cpp src/avionics.cpp src/geomag.cpp src/link.cpp)
 add_dependencies(simhost mavlink_headers)
-target_include_directories(simhost PRIVATE src "${MAVLINK_OUT}" "${PX4_ROOT}/src/lib/world_magnetic_model")
+target_include_directories(simhost PRIVATE src ../avionics "${MAVLINK_OUT}" "${PX4_ROOT}/src/lib/world_magnetic_model")
 target_include_directories(simhost SYSTEM PRIVATE "${JSBSIM_ROOT}/include/JSBSim")
 target_compile_options(simhost PRIVATE -Wall -Wextra)
 target_link_libraries(simhost PRIVATE "${JSBSIM_ROOT}/lib/libJSBSim.a" dl)

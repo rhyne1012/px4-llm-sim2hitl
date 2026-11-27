@@ -1,12 +1,17 @@
 #!/usr/bin/env python3
 """Generate a fast C core from a JSBSim vehicle folder.
 
-    python3 fastcore/gen.py vehicles/testbird [--out build/fastcore/testbird] [--cc cc] [--native]
+    python3 fastcore/gen.py vehicles/testbird [--out build/fastcore/testbird] [--cc cc] [--native] [--servo-capacity 64]
 
 The vehicle's own parts are translated from its JSBSim files: aerodynamic functions and tables, flight-control
-components, mass and inertia, engine and propeller constants. The shared physics (equations of motion, atmosphere,
-interpolation) comes from fastcore/runtime/fastcore.h. The output is <name>_core.c/.h, lib<name>_core.so and
-<name>_core.json (the layout of the state, input, environment and output arrays, and what the core leaves out).
+components, mass and inertia with point masses, engine and propeller constants. The shared physics (equations of
+motion, atmosphere, interpolation) comes from fastcore/runtime/fastcore.h, the servo signal chain from
+avionics/servo_chain.h. The output is <name>_core.c/.h, lib<name>_core.so and <name>_core.json (the layout of the
+state, input, parameter, environment and output arrays, and what the core leaves out).
+
+Parameters are what a configuration or an experiment may change per vehicle without regenerating the core, under
+their JSBSim property names: the properties the vehicle declares (<property value=...>), the point masses
+(inertia/pointmass-*), the actuator failures (fcs/<actuator>/malfunction/*), and the servo chain (avionics/servo/*).
 
 Only the JSBSim elements listed in fastcore/README.md are translated. Anything else stops the generator with the file
 and the element, so a core never silently differs from its JSBSim definition.
@@ -18,11 +23,14 @@ import math
 import re
 import subprocess
 import sys
+import tomllib
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
 RUNTIME = HERE / 'runtime'
+AVIONICS = HERE.parent / 'avionics'
+SERVO_PARAMS = [('avionics/servo/pwm-period-s', 0.0), ('avionics/servo/pwm-phase-s', 0.0), ('avionics/servo/delay-s', 0.0)]
 
 
 class Unsupported(Exception):
@@ -66,16 +74,21 @@ def _units():
 
 UNITS = _units()
 LBTOSLUG = 1.0 / 32.174049          # FGJSBBase::lbtoslug
+INCHTOFT = 1.0 / 12.0               # FGJSBBase::inchtoft
 RADTODEG = 180.0 / math.pi
 NM_TO_FTLB = 1.3558                 # FGBrushLessDCMotor.h NMtoftpound
 WATT_PER_RPM_TO_FTLB = 60.0 / (2.0 * math.pi * NM_TO_FTLB)
+NUM_RE = re.compile(r'^\s*[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?\s*$')
+
+
+def is_num(text):
+    return text is not None and NUM_RE.match(text) is not None
 
 
 def num(text, where):
-    try:
-        return float(text.strip())
-    except (ValueError, AttributeError):
-        raise Unsupported(f'{where}: expected a number, got {text!r} (properties as parameters are not supported)')
+    if not is_num(text):
+        raise Unsupported(f'{where}: expected a number, got {text!r}')
+    return float(text.strip())
 
 
 def value_to(el, target, where):
@@ -128,6 +141,10 @@ def cnum(v):
     return repr(float(v))
 
 
+def mat(m):
+    return '{' + ', '.join('{' + ', '.join(map(cnum, r)) + '}' for r in m) + '}'
+
+
 # --- the vehicle -----------------------------------------------------------------------------------------------------
 
 class Vehicle:
@@ -138,6 +155,11 @@ class Vehicle:
         self.files = [self.main]
         self.root = self.parse(self.main)
         self.notes = []
+        self.toml = None
+        t = self.folder / 'vehicle.toml'
+        if t.exists():
+            self.files.append(t)
+            self.toml = tomllib.loads(t.read_text())
 
     def parse(self, path):
         if not path.exists():
@@ -146,7 +168,8 @@ class Vehicle:
 
     def include(self, sub, name):
         path = self.folder / sub / (name if name.endswith('.xml') else name + '.xml')
-        self.files.append(path)
+        if path not in self.files:
+            self.files.append(path)
         return self.parse(path)
 
 
@@ -157,15 +180,51 @@ class Gen:
         self.v = v
         self.where = str(v.main.relative_to(v.folder.parent))
         self.tables = []            # C definitions of tables
-        self.props = {}             # JSBSim property -> C expression (JSBSim units), for what is available
+        self.props = {}             # JSBSim property -> C expression (JSBSim units)
+        self.params = []            # (property, default) of the per-vehicle parameters
         self.inputs = []            # FCS input properties, in input order
-        self.held = []              # (property, C var) held from the FCS update into the continuous part
+        self.held = []              # (property, C expression) held from the FCS update into the continuous part
         self.fcs_states = []        # names of discrete FCS states
         self.fcs_code = []
+        self.fcs_vars = {}
+        self.fcs_refs = {}
         self.aero_code = []
         self.aero_funcs = []        # (property, C var) of every aero function, for the outputs
         self.contacts = []
         self.engines = []
+        self.pointmasses = []
+        self.servo_props = []
+
+    # -- parameters ----------------------------------------------------------------------------------------------------
+    def param(self, prop, default):
+        for i, (p, _) in enumerate(self.params):
+            if p == prop:
+                return f'p[{i}]'
+        self.params.append((prop, float(default)))
+        return f'p[{len(self.params) - 1}]'
+
+    def pindex(self, prop):
+        return next(i for i, (p, _) in enumerate(self.params) if p == prop)
+
+    def declared(self, el, where):
+        """<property value="...">name</property> declarations (FGPropertyReader::Load): per-vehicle parameters."""
+        for pr in el.findall('property'):
+            name = pr.text.strip()
+            val = pr.get('value')
+            self.props[name] = self.param(name, num(val, where) if val is not None else 0.0)
+            self.fcs_vars[name] = self.props[name]
+
+    def numeric(self, el, where):
+        """A component value that JSBSim reads as an FGParameterValue: a number, or a (declared) property."""
+        t = el.text.strip()
+        if is_num(t):
+            return cnum(float(t))
+        sign = ''
+        if t.startswith('-'):
+            sign, t = '-', t[1:]
+        if t in [p for p, _ in self.params]:
+            return f'({sign}p[{self.pindex(t)}])'
+        raise Unsupported(f'{where}: {t!r} is neither a number nor a declared property')
 
     # -- expressions ---------------------------------------------------------------------------------------------------
     def prop(self, text, where):
@@ -240,21 +299,12 @@ class Gen:
         if tag == 'sum':
             return '(' + ' + '.join(args()) + ')'
         if tag == 'difference':
-            a = args()
-            return '(' + ' - '.join(a) + ')'
-        if tag == 'quotient':
-            a = args()
-            if len(a) != 2:
-                raise Unsupported(f'{here}: needs two arguments')
-            return f'fc_div({a[0]}, {a[1]})'
-        if tag == 'pow':
+            return '(' + ' - '.join(args()) + ')'
+        if tag in ('quotient', 'pow', 'atan2', 'mod'):
             a = args()
             if len(a) != 2:
                 raise Unsupported(f'{here}: needs two arguments')
-            return f'pow({a[0]}, {a[1]})'
-        if tag == 'atan2':
-            a = args()
-            return f'atan2({a[0]}, {a[1]})'
+            return {'quotient': 'fc_div', 'pow': 'pow', 'atan2': 'atan2', 'mod': 'fmod'}[tag] + f'({a[0]}, {a[1]})'
         if tag in self.UNARY:
             a = args()
             if len(a) != 1:
@@ -272,9 +322,6 @@ class Gen:
         if tag == 'fraction':
             a = args()
             return f'({a[0]} - trunc({a[0]}))'
-        if tag == 'mod':
-            a = args()
-            return f'fmod({a[0]}, {a[1]})'
         if tag in self.COMPARE:
             a = args()
             return f'(({a[0]}) {self.COMPARE[tag]} ({a[1]}) ? 1.0 : 0.0)'
@@ -316,17 +363,14 @@ class Gen:
                 self.rp_in = triplet_to(loc, 'IN', f'{w}/<location AERORP>')
         if self.rp_in is None:
             raise Unsupported(f'{w}: AERORP location is missing')
-        for tag in ('aero_ref_pt_shift_x',):
-            if m.find(tag) is not None:
-                raise Unsupported(f'{w}: <{tag}> is not supported')
+        if m.find('aero_ref_pt_shift_x') is not None:
+            raise Unsupported(f'{w}: <aero_ref_pt_shift_x> is not supported')
 
     def mass(self):
         mb = self.v.root.find('mass_balance')
         w = f'{self.where}/<mass_balance>'
         if mb is None:
             raise Unsupported(f'{w}: missing')
-        if mb.findall('pointmass'):
-            raise Unsupported(f'{w}: <pointmass> is not supported yet')
         if self.v.root.find('propulsion/tank') is not None:
             raise Unsupported(f'{w}: fuel tanks are not supported (mass would change)')
         g = {k: child_to(mb, k, 'SLUG*FT2', w, 0.0) for k in ('ixx', 'iyy', 'izz', 'ixy', 'ixz', 'iyz')}
@@ -334,29 +378,32 @@ class Gen:
             J = [[g['ixx'], g['ixy'], -g['ixz']], [g['ixy'], g['iyy'], g['iyz']], [-g['ixz'], g['iyz'], g['izz']]]
         else:
             J = [[g['ixx'], -g['ixy'], g['ixz']], [-g['ixy'], g['iyy'], -g['iyz']], [g['ixz'], -g['iyz'], g['izz']]]
-        self.J_slugft2 = J
-        self.weight_lbs = child_to(mb, 'emptywt', 'LBS', w)
-        self.mass_slug = LBTOSLUG * self.weight_lbs
+        self.baseJ = J
+        self.empty_lbs = child_to(mb, 'emptywt', 'LBS', w)
         cg = None
         for loc in mb.findall('location'):
             if loc.get('name') == 'CG':
                 cg = triplet_to(loc, 'IN', f'{w}/<location CG>')
         if cg is None:
             raise Unsupported(f'{w}: CG location is missing')
-        self.cg_in = cg
-
-    def to_body_ft(self, r_in):
-        """FGMassBalance::StructuralToBody: from the CG, x forward, z down, in ft."""
-        d = [r_in[i] - self.cg_in[i] for i in range(3)]
-        return [-d[0] / 12.0, d[1] / 12.0, -d[2] / 12.0]
+        self.base_cg_in = cg
+        for i, pm in enumerate(mb.findall('pointmass')):
+            pw = f'{w}/<pointmass {pm.get("name")}>'
+            if pm.find('form') is not None:
+                raise Unsupported(f'{pw}: <form> (shape inertia) is not supported yet')
+            loc = triplet_to(pm.find('location'), 'IN', pw)
+            wt = child_to(pm, 'weight', 'LBS', pw)
+            self.pointmasses.append(pm.get('name', str(i)))
+            self.param(f'inertia/pointmass-weight-lbs[{i}]', wt)
+            for c, val in zip('XYZ', loc):
+                self.param(f'inertia/pointmass-location-{c}-inches[{i}]', val)
 
     def ground(self):
         gr = self.v.root.find('ground_reactions')
         if gr is None:
             return
         for c in gr.findall('contact'):
-            loc = c.find('location')
-            self.contacts.append((c.get('name', '?'), self.to_body_ft(triplet_to(loc, 'IN', f'{self.where}/<contact>'))))
+            self.contacts.append((c.get('name', '?'), triplet_to(c.find('location'), 'IN', f'{self.where}/<contact>')))
         self.v.notes.append('ground reactions are not modelled: the core is for flight; outputs give the height of the '
                             'lowest contact point above the ground so a training loop can end an episode on contact')
 
@@ -367,9 +414,9 @@ class Gen:
         for e_i, eng in enumerate(pr.findall('engine')):
             w = f'{self.where}/<propulsion>/<engine {e_i}>'
             edoc = self.v.include('Engines', eng.get('file'))
-            if edoc.tag != 'brushless_dc_motor':
-                raise Unsupported(f'{w}: engine type <{edoc.tag}> is not supported (brushless_dc_motor is)')
             ew = f'Engines/{eng.get("file")}.xml'
+            if edoc.tag != 'brushless_dc_motor':
+                raise Unsupported(f'{ew}: engine type <{edoc.tag}> is not supported (brushless_dc_motor is)')
             motor = dict(maxv=child_to(edoc, 'maxvolts', 'VOLTS', ew), kv=num(edoc.find('velocityconstant').text, ew),
                          r=child_to(edoc, 'coilresistance', 'OHMS', ew), i0=child_to(edoc, 'noloadcurrent', 'AMPERES', ew))
             th = eng.find('thruster')
@@ -384,10 +431,9 @@ class Gen:
                 raise Unsupported(f'{tw}: constant-speed propellers are not supported')
             if tdoc.find('gearratio') is not None and num(tdoc.find('gearratio').text, tw) != 1.0:
                 raise Unsupported(f'{tw}: <gearratio> other than 1 is not supported yet')
-            for tag in ('table',):
-                for t in tdoc.findall(tag):
-                    if t.get('name') not in ('C_THRUST', 'C_POWER', 'CT_RPM_FACTOR', 'CP_RPM_FACTOR'):
-                        raise Unsupported(f'{tw}: propeller table {t.get("name")} is not supported')
+            for t in tdoc.findall('table'):
+                if t.get('name') not in ('C_THRUST', 'C_POWER', 'CT_RPM_FACTOR', 'CP_RPM_FACTOR'):
+                    raise Unsupported(f'{tw}: propeller table {t.get("name")} is not supported')
             for tag in ('ct_factor', 'cp_factor'):
                 if tdoc.find(tag) is not None:
                     raise Unsupported(f'{tw}: <{tag}> is not supported yet')
@@ -419,8 +465,7 @@ class Gen:
             if 'CP_RPM_FACTOR' in tabs:
                 cpw = f'({cpw} * {self.table(tabs["CP_RPM_FACTOR"], tw, keys=["RPM"])})'
             self.engines.append(dict(motor=motor, ixx=ixx, dia=dia, sense=sense, sense_mult=sense_mult, mT=mT,
-                                     r=self.to_body_ft(triplet_to(loc, 'IN', w)), ct=ct, cp=cpw,
-                                     engine_file=ew, thruster_file=tw))
+                                     loc_in=triplet_to(loc, 'IN', w), ct=ct, cp=cpw, engine_file=ew, thruster_file=tw))
 
     # -- flight control ------------------------------------------------------------------------------------------------
     FCS_BUILTIN_CMDS = ['fcs/aileron-cmd-norm', 'fcs/elevator-cmd-norm', 'fcs/rudder-cmd-norm', 'fcs/flap-cmd-norm',
@@ -428,25 +473,25 @@ class Gen:
                         'fcs/roll-trim-cmd-norm', 'fcs/yaw-trim-cmd-norm', 'fcs/steer-cmd-norm',
                         'fcs/left-brake-cmd-norm', 'fcs/right-brake-cmd-norm', 'fcs/center-brake-cmd-norm']
 
-    def fcs(self):
-        systems = []
+    def systems(self):
+        out = []
         for el in self.v.root:
             if el.tag in ('system', 'flight_control', 'autopilot'):
                 if el.get('file'):
-                    systems.append((f'Systems/{el.get("file")}.xml', self.v.include('Systems', el.get('file'))))
+                    out.append((f'Systems/{el.get("file")}.xml', self.v.include('Systems', el.get('file'))))
                 else:
-                    systems.append((self.where, el))
-        n_eng = len(self.engines)
-        # inputs: the commands the FCS reads, discovered as they are used; throttle commands always
-        self.fcs_vars = {}
-        for i in range(n_eng):
+                    out.append((self.where, el))
+        self.system_els = out
+        for where, sysel in out:
+            self.declared(sysel, where)
+
+    def fcs(self):
+        for i in range(len(self.engines)):
             self.add_input(f'fcs/throttle-cmd-norm[{i}]')
-            self.fcs_vars[f'fcs/throttle-pos-norm[{i}]'] = f'u[U_THROTTLE_CMD{i}]'
+            self.fcs_vars[f'fcs/throttle-pos-norm[{i}]'] = f'u[{i}]'
             if i == 0:
-                self.fcs_vars['fcs/throttle-pos-norm'] = 'u[U_THROTTLE_CMD0]'
-        for where, sysel in systems:
-            for prop in sysel.findall('property'):
-                raise Unsupported(f'{where}: <property> declarations are not supported yet ({prop.text})')
+                self.fcs_vars['fcs/throttle-pos-norm'] = 'u[0]'
+        for where, sysel in self.system_els:
             for ch in sysel.findall('channel'):
                 if ch.get('execrate') not in (None, '1'):
                     raise Unsupported(f'{where}: channel {ch.get("name")}: execrate is not supported')
@@ -474,7 +519,8 @@ class Gen:
             i = self.add_input(p)
             self.fcs_vars[p] = f'u[{i}]'
             return f'({sign}u[{i}])'
-        raise Unsupported(f'{where}: FCS input {p} is neither a command nor written by an earlier component')
+        raise Unsupported(f'{where}: FCS input {p} is neither a command, a declared property, nor written by an earlier '
+                          'component')
 
     def clip(self, comp, where):
         c = comp.find('clipto')
@@ -482,7 +528,10 @@ class Gen:
             return None
         if c.get('type') == 'cyclic':
             raise Unsupported(f'{where}: cyclic clipping is not supported')
-        return num(c.find('min').text, where), num(c.find('max').text, where)
+        return self.numeric(c.find('min'), where), self.numeric(c.find('max'), where)
+
+    ALLOWED = {'summer': {'bias'}, 'pure_gain': {'gain'}, 'aerosurface_scale': {'domain', 'range', 'zero_centered', 'gain'},
+               'lag_filter': {'c1'}, 'actuator': {'lag', 'rate_limit', 'bias'}}
 
     def component(self, comp, where):
         name = comp.get('name')
@@ -490,96 +539,45 @@ class Gen:
         w = f'{where}/<{comp.tag} {name}>'
         var = cname(prop)
         code = self.fcs_code
-        allowed = {'summer': {'bias'}, 'pure_gain': {'gain'}, 'aerosurface_scale': {'domain', 'range', 'zero_centered', 'gain'},
-                   'lag_filter': {'c1'}, 'actuator': {'lag', 'rate_limit', 'bias'}}
-        if comp.tag not in allowed:
+        if comp.tag not in self.ALLOWED:
             raise Unsupported(f'{w}: FCS component <{comp.tag}> is not supported')
         for k in comp:
-            if k.tag not in allowed[comp.tag] | {'input', 'clipto', 'output', 'description'}:
+            if k.tag not in self.ALLOWED[comp.tag] | {'input', 'clipto', 'output', 'description'}:
                 raise Unsupported(f'{w}: <{k.tag}> is not supported')
         inputs = [self.fcs_in(i.text, w) for i in comp.findall('input')]
+        cl = self.clip(comp, w)
         if comp.tag == 'summer':
             bias = num(comp.find('bias').text, w) if comp.find('bias') is not None else 0.0
-            expr = ' + '.join(inputs) + (f' + {cnum(bias)}' if bias else '')
-            code.append(f'  double {var} = {expr};')
+            code.append(f'  double {var} = {" + ".join(inputs)}' + (f' + {cnum(bias)}' if bias else '') + ';')
         elif comp.tag == 'pure_gain':
-            gain = num(comp.find('gain').text, w)
-            code.append(f'  double {var} = {cnum(gain)} * {inputs[0]};')
+            code.append(f'  double {var} = {self.numeric(comp.find("gain"), w)} * {inputs[0]};')
         elif comp.tag == 'aerosurface_scale':
-            dom = comp.find('domain')
-            rng = comp.find('range')
+            dom, rng = comp.find('domain'), comp.find('range')
             imin, imax = (num(dom.find('min').text, w), num(dom.find('max').text, w)) if dom is not None else (-1.0, 1.0)
             omin, omax = (num(rng.find('min').text, w), num(rng.find('max').text, w)) if rng is not None else (0.0, 0.0)
             zc = comp.find('zero_centered')
             zc = True if zc is None else zc.text.strip().lower() not in ('0', 'false')
-            gain = num(comp.find('gain').text, w) if comp.find('gain') is not None else 1.0
+            gain = self.numeric(comp.find('gain'), w) if comp.find('gain') is not None else '1.0'
             x = inputs[0]
             if zc:
                 e = (f'({x} == 0.0 ? 0.0 : ({x} > 0.0 ? ({x} / {cnum(imax)}) * {cnum(omax)} '
                      f': ({x} / {cnum(imin)}) * {cnum(omin)}))')
             else:
                 e = f'({cnum(omin)} + (({x} - {cnum(imin)}) / {cnum(imax - imin)}) * {cnum(omax - omin)})'
-            code.append(f'  double {var} = {e} * {cnum(gain)};')
+            code.append(f'  double {var} = {e} * {gain};')
         elif comp.tag == 'lag_filter':
-            c1 = num(comp.find('c1').text, w)
+            c1 = self.numeric(comp.find('c1'), w)
             si, so = self.fcs_state(prop, 'in'), self.fcs_state(prop, 'out')
             # FGFilter lag: Tustin, ca = dt c1 / (2 + dt c1), cb = (2 - dt c1) / (2 + dt c1); pass-through when uninitialized
             code.append(f'  double {var};')
-            code.append(f'  {{ const double in = {inputs[0]}, d = dt * {cnum(c1)};')
+            code.append(f'  {{ const double in = {inputs[0]}, d = dt * {c1};')
             code.append(f'    {var} = init ? (d / (2.0 + d)) * (in + x[{si}]) + ((2.0 - d) / (2.0 + d)) * x[{so}] : in;')
             code.append(f'    x[{si}] = in; x[{so}] = {var}; }}')
         elif comp.tag == 'actuator':
-            for t in ('deadband_width', 'hysteresis_width', 'delay'):
-                if comp.find(t) is not None:
-                    raise Unsupported(f'{w}: <{t}> is not supported yet')
-            lag = comp.find('lag')
-            lag = num(lag.text, w) if lag is not None else 0.0
-            incr = decr = None
-            for rl in comp.findall('rate_limit'):
-                v = num(rl.text, w)
-                s = rl.get('sense', '')
-                if s.startswith('incr'):
-                    incr = v
-                elif s.startswith('decr'):
-                    decr = v
-                else:
-                    incr = decr = v
-            bias = num(comp.find('bias').text, w) if comp.find('bias') is not None else 0.0
-            code.append(f'  double {var};')
-            code.append(f'  {{ double out = {inputs[0]};')
-            if lag:
-                li, lo = self.fcs_state(prop, 'lag_in'), self.fcs_state(prop, 'lag_out')
-                code.append(f'    {{ const double in = out, d = dt * {cnum(lag)};')
-                code.append(f'      if (init) out = (d / (2.0 + d)) * (in + x[{li}]) + x[{lo}] * ((2.0 - d) / (2.0 + d));')
-                code.append(f'      x[{li}] = in; x[{lo}] = out; }}')
-            if incr is not None or decr is not None:
-                ro = self.fcs_state(prop, 'rate_out')
-                code.append('    if (init) {')
-                code.append(f'      const double delta = out - x[{ro}];')
-                if incr:
-                    code.append(f'      if (delta > dt * {cnum(incr)}) out = x[{ro}] + {cnum(incr)} * dt;')
-                if decr:
-                    code.append(f'      if (delta < dt * {cnum(-decr)}) out = x[{ro}] + {cnum(-decr)} * dt;')
-                code.append('    }')
-                code.append(f'    x[{ro}] = out;')
-            if bias:
-                code.append(f'    out += {cnum(bias)};')
-            cl = self.clip(comp, w)
-            if cl:
-                code.append(f'    out = fc_clip(out, {cnum(cl[0])}, {cnum(cl[1])});')
-                cl = None
-            code.append(f'    {var} = out; }}')
-            self.write_outputs(comp, prop, var, w, None)
-            return
-        self.write_outputs(comp, prop, var, w, self.clip(comp, w))
-
-    def fcs_state(self, prop, what):
-        self.fcs_states.append(f'{prop}:{what}')
-        return f'X_FCS0 + {len(self.fcs_states) - 1}'
-
-    def write_outputs(self, comp, prop, var, where, cl):
+            self.actuator(comp, prop, var, inputs, cl, w)
+            cl = None
         if cl:
-            self.fcs_code.append(f'  {var} = fc_clip({var}, {cnum(cl[0])}, {cnum(cl[1])});')
+            code.append(f'  {var} = fc_clip({var}, {cl[0]}, {cl[1]});')
         self.fcs_vars[prop] = var
         for o in comp.findall('output'):
             p = o.text.strip()
@@ -587,15 +585,70 @@ class Gen:
             if p.endswith('-pos-rad') and p.startswith('fcs/'):
                 self.fcs_vars[p[:-4] + '-deg'] = f'({var} * {cnum(RADTODEG)})'
 
+    def actuator(self, comp, prop, var, inputs, cl, w):
+        """FGActuator::Run: failures, lag (Tustin), rate limit, bias, clip; the failures are per-vehicle parameters."""
+        code = self.fcs_code
+        for t in ('deadband_width', 'hysteresis_width', 'delay'):
+            if comp.find(t) is not None:
+                raise Unsupported(f'{w}: <{t}> is not supported yet')
+        lag = self.numeric(comp.find('lag'), w) if comp.find('lag') is not None else None
+        incr = decr = None
+        for rl in comp.findall('rate_limit'):
+            v = self.numeric(rl, w)
+            s = rl.get('sense', '')
+            if s.startswith('incr'):
+                incr = v
+            elif s.startswith('decr'):
+                decr = v
+            else:
+                incr = decr = v
+        bias = num(comp.find('bias').text, w) if comp.find('bias') is not None else 0.0
+        fz = self.param(f'{prop}/malfunction/fail_zero', 0.0)
+        fh = self.param(f'{prop}/malfunction/fail_hardover', 0.0) if cl else None
+        fs = self.param(f'{prop}/malfunction/fail_stuck', 0.0)
+        prev = self.fcs_state(prop, 'prev_out')
+        code.append(f'  double {var};')
+        code.append(f'  {{ double out = {inputs[0]};')
+        code.append(f'    if ({fz} != 0.0) out = 0.0;')
+        if fh:
+            code.append(f'    if ({fh} != 0.0) out = out < 0.0 ? {cl[0]} : {cl[1]};')
+        code.append(f'    if ({fs} != 0.0) {{ out = x[{prev}]; }} else {{')
+        if lag is not None:
+            li, lo = self.fcs_state(prop, 'lag_in'), self.fcs_state(prop, 'lag_out')
+            code.append(f'    {{ const double in = out, d = dt * {lag};')
+            code.append(f'      if (init) out = (d / (2.0 + d)) * (in + x[{li}]) + x[{lo}] * ((2.0 - d) / (2.0 + d));')
+            code.append(f'      x[{li}] = in; x[{lo}] = out; }}')
+        if incr is not None or decr is not None:
+            ro = self.fcs_state(prop, 'rate_out')
+            code.append('    if (init) {')
+            code.append(f'      const double delta = out - x[{ro}];')
+            if incr is not None:
+                code.append(f'      if (delta > dt * {incr}) out = x[{ro}] + {incr} * dt;')
+            if decr is not None:
+                code.append(f'      if (delta < dt * -{decr}) out = x[{ro}] + -{decr} * dt;')
+            code.append('    }')
+            code.append(f'    x[{ro}] = out;')
+        if bias:
+            code.append(f'    out += {cnum(bias)};')
+        code.append('    }')
+        code.append(f'    x[{prev}] = out;')
+        if cl:
+            code.append(f'    out = fc_clip(out, {cl[0]}, {cl[1]});')
+        code.append(f'    {var} = out; }}')
+
+    def fcs_state(self, prop, what):
+        self.fcs_states.append(f'{prop}:{what}')
+        return f'X_FCS0 + {len(self.fcs_states) - 1}'
+
     # -- aerodynamics --------------------------------------------------------------------------------------------------
     def aero(self):
         ae = self.v.root.find('aerodynamics')
         w = f'{self.where}/<aerodynamics>'
         if ae is None:
             raise Unsupported(f'{w}: missing')
-        for t in ('alphalimits', 'hysteresis_limits'):
-            if ae.find(t) is not None:
-                raise Unsupported(f'{w}: <{t}> is not supported yet')
+        for el in ae:
+            if el.tag not in ('axis', 'function', 'property', 'description'):
+                raise Unsupported(f'{w}: <{el.tag}> is not supported')
         code = self.aero_code
         for f in ae.findall('function'):  # pre-functions
             self.aero_function(f, f'{w}/<function {f.get("name")}>')
@@ -611,19 +664,14 @@ class Gen:
         if wind and body:
             raise Unsupported(f'{w}: wind and body force axes mixed')
         self.wind_axes = bool(wind) or not body
-        order = ['DRAG', 'SIDE', 'LIFT'] if self.wind_axes else ['X', 'Y', 'Z']
         # lift first, so aero/cl-squared can come from this evaluation's lift (JSBSim uses the previous frame's)
-        sums = {}
-        eval_order = (['LIFT', 'DRAG', 'SIDE'] if self.wind_axes else order) + ['ROLL', 'PITCH', 'YAW']
+        eval_order = (['LIFT', 'DRAG', 'SIDE'] if self.wind_axes else ['X', 'Y', 'Z']) + ['ROLL', 'PITCH', 'YAW']
         for n in eval_order:
-            terms = []
-            for f in (axes[n].findall('function') if n in axes else []):
-                terms.append(self.aero_function(f, f'{w}/<axis {n}>/<function {f.get("name")}>'))
-            sums[n] = ' + '.join(terms) if terms else '0.0'
-            code.append(f'  const double ax_{n} = {sums[n]};')
+            terms = [self.aero_function(f, f'{w}/<axis {n}>/<function {f.get("name")}>')
+                     for f in (axes[n].findall('function') if n in axes else [])]
+            code.append(f'  const double ax_{n} = {" + ".join(terms) if terms else "0.0"};')
             if n == 'LIFT':
-                code.append('  /* aero/cl-squared: FGAerodynamics::Run, from the lift; the reference order uses the stored'
-                            ' value */')
+                code.append('  /* aero/cl-squared (FGAerodynamics::Run) from this lift; the reference order uses the stored value */')
                 code.append('  const double cl2 = jsb ? x[X_AUX_CLSQ] : (qbar > 1e-9 ? (ax_LIFT / (SW * qbar)) * '
                             '(ax_LIFT / (SW * qbar)) : 0.0);')
                 self.props['aero/cl-squared'] = 'cl2'
@@ -640,10 +688,8 @@ class Gen:
         self.aero_funcs.append((name, var))
         return var
 
-    # -- properties available to the functions -------------------------------------------------------------------------
     def base_props(self):
-        p = self.props
-        p.update({
+        self.props.update({
             'aero/qbar-psf': 'qbar', 'aero/qbarUW-psf': 'qbarUW', 'aero/qbarUV-psf': 'qbarUV',
             'aero/alpha-rad': 'alpha', 'aero/alpha-deg': f'(alpha * {cnum(RADTODEG)})',
             'aero/beta-rad': 'beta', 'aero/beta-deg': f'(beta * {cnum(RADTODEG)})',
@@ -667,19 +713,34 @@ class Gen:
             'atmosphere/rho-slugs_ft3': 'rho', 'atmosphere/T-R': 'T_R', 'atmosphere/P-psf': 'P_psf',
             'position/h-sl-ft': 'h_ft', 'position/h-agl-ft': 'hagl_ft',
         })
-        # FCS values the continuous part reads are held: computed in the FCS update, stored in the state
-        self.fcs_refs = {}
 
     def hold(self, prop):
         """Make an FCS value available to the continuous part through a held state slot."""
         if prop in self.fcs_refs:
             return self.fcs_refs[prop]
-        if prop not in self.fcs_vars:
+        if prop not in self.fcs_vars or self.fcs_vars[prop].startswith('p['):
             return None
         i = len(self.held)
         self.held.append((prop, self.fcs_vars[prop]))
         self.fcs_refs[prop] = f'x[X_HELD0 + {i}]'
         return self.fcs_refs[prop]
+
+    def servo_inputs(self):
+        """The inputs that come from servo outputs (vehicle.toml [[actuators]] kind = "servo")."""
+        props = []
+        for a in (self.v.toml or {}).get('actuators', []):
+            kind = a.get('kind')
+            if kind not in ('servo', 'motor'):
+                raise Unsupported(f'vehicle.toml: actuator channel {a.get("channel")}: kind must be "servo" or "motor"')
+            p = a['property']
+            if kind == 'servo' and p not in props:
+                if p not in self.inputs:
+                    raise Unsupported(f'vehicle.toml: servo property {p} is not an input of the flight control')
+                props.append(p)
+        self.servo_props = props
+        if props:
+            for name, default in SERVO_PARAMS:
+                self.param(name, default)
 
 
 class LazyProps(dict):
@@ -703,13 +764,17 @@ class LazyProps(dict):
 
 # --- emit --------------------------------------------------------------------------------------------------------------
 
-def generate(folder, out):
+def generate(folder, out, servo_capacity=64):
     v = Vehicle(folder)
     g = Gen(v)
     g.metrics()
     g.mass()
     g.ground()
     g.propulsion()
+    ae = v.root.find('aerodynamics')
+    if ae is not None:
+        g.declared(ae, f'{g.where}/<aerodynamics>')
+    g.systems()
     g.fcs()
     g.base_props()
     g.props = LazyProps(g, g.props)
@@ -717,17 +782,90 @@ def generate(folder, out):
     for t in ('external_reactions', 'buoyant_forces'):
         if v.root.find(t) is not None:
             raise Unsupported(f'{g.where}: <{t}> is not supported')
-    for e in g.engines:
-        g.hold(f'fcs/throttle-pos-norm[{g.engines.index(e)}]')
-    return emit(v, g, Path(out))
+    for i in range(len(g.engines)):
+        g.hold(f'fcs/throttle-pos-norm[{i}]')
+    g.servo_inputs()
+    return emit(v, g, Path(out), servo_capacity)
 
 
-def emit(v, g, out):
+def mass_props_code(g):
+    """FGMassBalance::Run with point masses, in its order of operations (weights in lbs, locations in inches)."""
+    L = ['typedef struct {', '  double mass_kg, J[3][3], Jinv[3][3]; /* SI, about the CG */',
+         '  double cg_in[3], rp_ft[3]; /* structural CG; AERORP from the CG, body axes */',
+         f'  double eng_ft[{max(1, len(g.engines))}][3], contact_m[{max(1, len(g.contacts))}][3]; '
+         '/* from the CG, body axes */', '} MassProps;', '',
+         '/* FGMassBalance::GetPointmassInertia */',
+         'static void pm_inertia(double m_sl, const double *r_in, const double *cg, double J[3][3])',
+         '{',
+         '  const double v[3] = {INCHTOFT * (cg[0] - r_in[0]), INCHTOFT * (r_in[1] - cg[1]), INCHTOFT * (cg[2] - r_in[2])};',
+         '  const double sv[3] = {m_sl * v[0], m_sl * v[1], m_sl * v[2]};',
+         '  const double xx = sv[0] * v[0], yy = sv[1] * v[1], zz = sv[2] * v[2];',
+         '  const double xy = -sv[0] * v[1], xz = -sv[0] * v[2], yz = -sv[1] * v[2];',
+         '  J[0][0] = yy + zz; J[0][1] = xy; J[0][2] = xz; J[1][0] = xy; J[1][1] = xx + zz; J[1][2] = yz;',
+         '  J[2][0] = xz; J[2][1] = yz; J[2][2] = xx + yy;',
+         '}', '',
+         '/* FGMassBalance::StructuralToBody: from the CG, x forward, z down, ft */',
+         'static void body_ft(const double *r_in, const double *cg, double *out)',
+         '{',
+         '  out[0] = INCHTOFT * (cg[0] - r_in[0]); out[1] = INCHTOFT * (r_in[1] - cg[1]); out[2] = INCHTOFT * (cg[2] - r_in[2]);',
+         '}', '',
+         'static void mass_props(const double *p, MassProps *m)',
+         '{',
+         '  (void)p;',
+         f'  const double EW = {cnum(g.empty_lbs)}, BCG[3] = {{{", ".join(map(cnum, g.base_cg_in))}}};',
+         f'  static const double BASEJ[3][3] = {mat(g.baseJ)};',
+         '  double PMW = 0.0, PMM[3] = {0.0, 0.0, 0.0};']
+    for i in range(len(g.pointmasses)):
+        w = g.pindex(f'inertia/pointmass-weight-lbs[{i}]')
+        xi = g.pindex(f'inertia/pointmass-location-X-inches[{i}]')
+        L.append(f'  PMW += p[{w}];')
+        L.append(f'  for (int k = 0; k < 3; ++k) PMM[k] += p[{w}] * p[{xi} + k];')
+    L += ['  const double W = EW + PMW;',
+          '  const double iW = 1.0 / W;  /* FGColumnVector3 / scalar multiplies by the reciprocal */',
+          '  for (int k = 0; k < 3; ++k) m->cg_in[k] = (EW * BCG[k] + PMM[k]) * iW;',
+          '  double J[3][3], T[3][3];',
+          '  memcpy(J, BASEJ, sizeof J);',
+          '  pm_inertia(LBTOSLUG * EW, BCG, m->cg_in, T);',
+          '  for (int r = 0; r < 3; ++r) for (int c = 0; c < 3; ++c) J[r][c] += T[r][c];',
+          '  double PJ[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};']
+    for i in range(len(g.pointmasses)):
+        w = g.pindex(f'inertia/pointmass-weight-lbs[{i}]')
+        xi = g.pindex(f'inertia/pointmass-location-X-inches[{i}]')
+        L.append(f'  pm_inertia(LBTOSLUG * p[{w}], p + {xi}, m->cg_in, T);')
+        L.append('  for (int r = 0; r < 3; ++r) for (int c = 0; c < 3; ++c) PJ[r][c] += T[r][c];')
+    L += ['  for (int r = 0; r < 3; ++r) for (int c = 0; c < 3; ++c) J[r][c] += PJ[r][c];',
+          '  /* the inverse as FGMassBalance::Run computes it */',
+          '  const double Ixx = J[0][0], Iyy = J[1][1], Izz = J[2][2], Ixy = -J[0][1], Ixz = -J[0][2], Iyz = -J[1][2];',
+          '  double k1 = Iyy * Izz - Iyz * Iyz, k2 = Iyz * Ixz + Ixy * Izz, k3 = Ixy * Iyz + Iyy * Ixz;',
+          '  const double den = 1.0 / (Ixx * k1 - Ixy * k2 - Ixz * k3);',
+          '  k1 *= den; k2 *= den; k3 *= den;',
+          '  const double k4 = (Izz * Ixx - Ixz * Ixz) * den, k5 = (Ixy * Ixz + Iyz * Ixx) * den, k6 = (Ixx * Iyy - Ixy * Ixy) * den;',
+          '  const double Ji[3][3] = {{k1, k2, k3}, {k2, k4, k5}, {k3, k5, k6}};',
+          '  for (int r = 0; r < 3; ++r)',
+          '    for (int c = 0; c < 3; ++c) { m->J[r][c] = J[r][c] * FC_SLUGFT2; m->Jinv[r][c] = Ji[r][c] / FC_SLUGFT2; }',
+          '  m->mass_kg = LBTOSLUG * W * FC_SLUG;',
+          f'  static const double RP_IN[3] = {{{", ".join(map(cnum, g.rp_in))}}};',
+          '  body_ft(RP_IN, m->cg_in, m->rp_ft);']
+    for i, e in enumerate(g.engines):
+        L.append(f'  {{ static const double r[3] = {{{", ".join(map(cnum, e["loc_in"]))}}}; body_ft(r, m->cg_in, m->eng_ft[{i}]); }}')
+    if g.contacts:
+        L.append(f'  static const double CT_IN[{len(g.contacts)}][3] = {mat([c for _, c in g.contacts])};')
+        L.append(f'  for (int k = 0; k < {len(g.contacts)}; ++k) {{ body_ft(CT_IN[k], m->cg_in, m->contact_m[k]); '
+                 'for (int c = 0; c < 3; ++c) m->contact_m[k][c] *= FC_FT; }')
+    else:
+        L.append('  m->contact_m[0][0] = m->contact_m[0][1] = m->contact_m[0][2] = 0.0;')
+    L.append('}')
+    return L
+
+
+def emit(v, g, out, servo_capacity):
     out.mkdir(parents=True, exist_ok=True)
     N = v.name
     P = N.upper()
     ne = len(g.engines)
-    # state layout
+    ns = len(g.servo_props)
+    cap = servo_capacity if ns else 0
+    # state layout: the continuous part, then everything the derivative reads, then the servo chain (not copied per stage)
     x_names = ['n_m', 'e_m', 'd_m', 'u_mps', 'v_mps', 'w_mps', 'q0', 'q1', 'q2', 'q3', 'p_rps', 'q_rps', 'r_rps']
     x_names += [f'omega_rps[{i}]' for i in range(ne)]
     nc = len(x_names)
@@ -737,28 +875,32 @@ def emit(v, g, out):
     x_names += [f'fcs:{s}' for s in g.fcs_states]
     x_aux0 = len(x_names)
     x_names += ['aux:udot_mps2', 'aux:vdot_mps2', 'aux:wdot_mps2', 'aux:cl_squared', 'aux:fcs_initialized']
+    x_servo0 = len(x_names)
+    if ns:
+        x_names += ['servo:tick', 'servo:head'] + [f'servo:held:{p}' for p in g.servo_props]
+        x_names += [f'servo:line[{k}]:{p}' for k in range(cap) for p in g.servo_props]
     nx = len(x_names)
     u_names = list(g.inputs)
+    p_names = [p for p, _ in g.params]
+    p_defaults = [d for _, d in g.params]
     env_names = ['wind_n_mps', 'wind_e_mps', 'wind_d_mps', 'gravity_mps2', 'origin_alt_msl_m', 'ground_alt_msl_m']
     y_names = ['fx_N', 'fy_N', 'fz_N', 'mx_Nm', 'my_Nm', 'mz_Nm',
                'aero_fx_N', 'aero_fy_N', 'aero_fz_N', 'aero_mx_Nm', 'aero_my_Nm', 'aero_mz_Nm',
                'specific_force_x_mps2', 'specific_force_y_mps2', 'specific_force_z_mps2',
                'alpha_rad', 'beta_rad', 'airspeed_mps', 'qbar_Pa', 'rho_kgm3', 'alphadot_rps', 'betadot_rps',
-               'cl_squared', 'lift_N', 'drag_N', 'side_N', 'agl_cg_m', 'agl_lowest_contact_m']
+               'cl_squared', 'lift_N', 'drag_N', 'side_N', 'agl_cg_m', 'agl_lowest_contact_m',
+               'mass_kg', 'cg_x_in', 'cg_y_in', 'cg_z_in', 'ixx_kgm2', 'iyy_kgm2', 'izz_kgm2', 'ixy_kgm2', 'ixz_kgm2',
+               'iyz_kgm2']
     for i in range(ne):
         y_names += [f'thrust_N[{i}]', f'rpm[{i}]', f'current_A[{i}]', f'engine_power_W[{i}]', f'advance_ratio[{i}]',
                     f'prop_fx_N[{i}]', f'prop_fy_N[{i}]', f'prop_fz_N[{i}]',
                     f'prop_mx_Nm[{i}]', f'prop_my_Nm[{i}]', f'prop_mz_Nm[{i}]']
     y_names += [f'fn:{p}' for p, _ in g.aero_funcs]
     ny = len(y_names)
-
-    J = g.J_slugft2
-    Jsi = [[J[r][c] * 1.3558179483314004 for c in range(3)] for r in range(3)]
-    Jinv = inv3(Jsi)
-    mass_kg = g.mass_slug * (4.4482216152605 / 0.3048)
-    rp = g.to_body_ft(g.rp_in)
+    yi = {n: i for i, n in enumerate(y_names)}
     srcs = {str(f.relative_to(v.folder)): hashlib.sha256(f.read_bytes()).hexdigest() for f in v.files}
-    gen_hash = hashlib.sha256((Path(__file__).read_bytes() + (RUNTIME / 'fastcore.h').read_bytes())).hexdigest()
+    gen_hash = hashlib.sha256(Path(__file__).read_bytes() + (RUNTIME / 'fastcore.h').read_bytes()
+                              + (AVIONICS / 'servo_chain.h').read_bytes()).hexdigest()
 
     L = []
     a = L.append
@@ -768,45 +910,46 @@ def emit(v, g, out):
     a(f' *   generator + runtime sha256 {gen_hash} */')
     a(f'#include "{N}_core.h"')
     a('#include "fastcore.h"')
+    a('#include "servo_chain.h"')
     a('#include <string.h>')
     a('')
-    a(f'#define NX {nx}\n#define NC {nc}\n#define NU {len(u_names)}\n#define NE 6\n#define NY {ny}')
-    a(f'#define X_HELD0 {x_held0}\n#define X_FCS0 {x_fcs0}\n#define X_AUX0 {x_aux0}')
+    a(f'#define NX {nx}\n#define NC {nc}\n#define NU {len(u_names)}\n#define NP {len(p_names)}\n#define NE 6\n#define NY {ny}')
+    a(f'#define X_HELD0 {x_held0}\n#define X_FCS0 {x_fcs0}\n#define X_AUX0 {x_aux0}\n#define X_SERVO0 {x_servo0}')
     a(f'#define X_AUX_UDOT {x_aux0}\n#define X_AUX_CLSQ {x_aux0 + 3}\n#define X_AUX_INIT {x_aux0 + 4}')
-    for i in range(ne):
-        a(f'#define U_THROTTLE_CMD{i} {u_names.index(f"fcs/throttle-cmd-norm[{i}]")}')
+    a(f'#define NSERVO {ns}\n#define SERVO_CAP {cap}')
     a(f'#define SW {cnum(g.Sw)}\n#define BW {cnum(g.bw)}\n#define CBAR {cnum(g.cbar)}\n#define IW {cnum(g.iw)}')
-    a(f'#define MASS_KG {cnum(mass_kg)}')
-    a(f'static const double JSI[3][3] = {{{", ".join("{" + ", ".join(map(cnum, r)) + "}" for r in Jsi)}}};')
-    a(f'static const double JINV[3][3] = {{{", ".join("{" + ", ".join(map(cnum, r)) + "}" for r in Jinv)}}};')
-    a(f'static const double RP_FT[3] = {{{", ".join(map(cnum, rp))}}};  /* AERORP from the CG, body axes */')
-    a(f'static const double CONTACT_M[{max(1, len(g.contacts))}][3] = {{'
-      + ', '.join('{' + ', '.join(cnum(c * 0.3048) for c in r) + '}' for _, r in g.contacts) + '};' if g.contacts
-      else 'static const double CONTACT_M[1][3] = {{0, 0, 0}};')
-    a(f'#define N_CONTACTS {len(g.contacts) or 1}')
+    a(f'#define LBTOSLUG {cnum(LBTOSLUG)}\n#define INCHTOFT {cnum(INCHTOFT)}')
+    a(f'#define N_CONTACTS {max(1, len(g.contacts))}')
+    a(f'static const double P_DEFAULT[{max(1, len(p_defaults))}] = {{{", ".join(map(cnum, p_defaults)) or "0"}}};')
+    if ns:
+        a(f'static const int SERVO_U[NSERVO] = {{{", ".join(str(u_names.index(p)) for p in g.servo_props)}}};')
+        a(f'#define P_SERVO {g.pindex(SERVO_PARAMS[0][0])}  /* period, phase, delay */')
+    a('')
+    L.extend(mass_props_code(g))
     a('')
     a('\n'.join(g.tables))
     a('')
-    # FCS update
     a('/* Flight control, once per step with the inputs u (FGFCS::Run and the components\' Run). Writes the held values')
-    a(' * and the components\' own states into x. Before the first step after a reset the components pass their input')
-    a(' * through, as JSBSim\'s do on their first frame. */')
-    a('static void fcs_update(double *x, const double *u, double dt)')
+    a(' * and the components\' own states into x. Uninitialized components pass their input through, as JSBSim\'s do on')
+    a(' * their first frame (RunIC). */')
+    a('static void fcs_update(double *x, const double *u, const double *p, double dt)')
     a('{')
     a('  const int init = x[X_AUX_INIT] != 0.0;')
-    a('  (void)dt; (void)u;')
+    a('  (void)dt; (void)u; (void)p;')
     L.extend(g.fcs_code)
-    for i, (p, var) in enumerate(g.held):
-        a(f'  x[X_HELD0 + {i}] = {var};  /* {p} */')
+    for i, (prop, var) in enumerate(g.held):
+        a(f'  x[X_HELD0 + {i}] = {var};  /* {prop} */')
     a('  x[X_AUX_INIT] = 1.0;')
     a('}')
     a('')
-    # derivative
-    a('/* Continuous dynamics: xd[0..NC) from x and the environment, and the outputs y (may be NULL). uvwdot is the')
-    a(' * body acceleration used for alphadot (JSBSim: the previous frame\'s). jsb != 0 reproduces JSBSim\'s order exactly')
-    a(' * (aero/cl-squared from the state instead of this evaluation\'s lift); the check uses it. */')
-    a('static void deriv(const double *x, const double *uvwdot, const double *env, int jsb, double *xd, double *y)')
+    a('/* Continuous dynamics: xd[0..NC) from x, the parameters, the mass properties and the environment, and the')
+    a(' * outputs y (may be NULL). uvwdot is the body acceleration used for alphadot (JSBSim: the previous frame\'s).')
+    a(' * jsb != 0 reproduces JSBSim\'s order exactly (aero/cl-squared from the state); the check uses it. */')
+    a('static void deriv(const double *x, const double *uvwdot, const double *p, const MassProps *m, const double *env,')
+    a('                  int jsb, double *xd, double *y)')
     a('{')
+    a('  (void)p;')
+    a('  const double *RP_FT = m->rp_ft;')
     a('  double C[3][3];')
     a('  fc_quat_dcm(x + 6, C);')
     a('  /* FGAuxiliary::Run: air-relative velocity and rates, ft/s */')
@@ -849,18 +992,17 @@ def emit(v, g, out):
     a('                        ax_YAW + RP_FT[0] * Fa[1] - RP_FT[1] * Fa[0]};')
     a('  double F[3] = {Fa[0], Fa[1], Fa[2]}, M[3] = {Ma[0], Ma[1], Ma[2]};')
     for i, e in enumerate(g.engines):
-        m, mT, r = e['motor'], e['mT'], e['r']
-        D = e['dia']
+        mo, mT, D = e['motor'], e['mT'], e['dia']
         a(f'  /* engine {i}: FGBrushLessDCMotor::Calculate ({e["engine_file"]}) and FGPropeller::Calculate ({e["thruster_file"]}) */')
         a('  {')
-        a(f'    static const double mT[3][3] = {{{", ".join("{" + ", ".join(map(cnum, row)) + "}" for row in mT)}}};')
-        a(f'    static const double r[3] = {{{", ".join(map(cnum, r))}}};')
+        a(f'    static const double mT[3][3] = {mat(mT)};')
+        a(f'    const double *r = m->eng_ft[{i}];')
         a(f'    const double thr = {g.fcs_refs[f"fcs/throttle-pos-norm[{i}]"]};')
         a(f'    const double RPM = x[{13 + i}] * 60.0 / (2.0 * FC_PI);')
-        a(f'    const double V = {cnum(m["maxv"])} * thr;')
-        a(f'    const double I = (V - RPM / {cnum(m["kv"])}) / {cnum(m["r"])};')
-        a(f'    const double If = RPM > 0.0 ? {cnum(m["i0"])} : (RPM < 0.0 ? {cnum(-m["i0"])} : fc_clip(I, {cnum(-m["i0"])}, {cnum(m["i0"])}));')
-        a(f'    const double Tq = (I - If) / {cnum(m["kv"])} * {cnum(WATT_PER_RPM_TO_FTLB)};')
+        a(f'    const double V = {cnum(mo["maxv"])} * thr;')
+        a(f'    const double I = (V - RPM / {cnum(mo["kv"])}) / {cnum(mo["r"])};')
+        a(f'    const double If = RPM > 0.0 ? {cnum(mo["i0"])} : (RPM < 0.0 ? {cnum(-mo["i0"])} : fc_clip(I, {cnum(-mo["i0"])}, {cnum(mo["i0"])}));')
+        a(f'    const double Tq = (I - If) / {cnum(mo["kv"])} * {cnum(WATT_PER_RPM_TO_FTLB)};')
         a('    const double Peng = (2.0 * FC_PI) * fmax(RPM, 0.0001) * Tq / 60.0;')
         a('    const double lx = ua + (qa * r[2] - ra * r[1]), ly = va + (ra * r[0] - pa * r[2]), lz = wa + (pa * r[1] - qa * r[0]);')
         a('    const double Vel = mT[0][0] * lx + mT[1][0] * ly + mT[2][0] * lz;')
@@ -881,44 +1023,43 @@ def emit(v, g, out):
         a('                          ra * Hb[0] - pa * Hb[2] + Tb[1] + r[2] * Fb[0] - r[0] * Fb[2],')
         a('                          pa * Hb[1] - qa * Hb[0] + Tb[2] + r[0] * Fb[1] - r[1] * Fb[0]};')
         a('    F[0] += Fb[0]; F[1] += Fb[1]; F[2] += Fb[2]; M[0] += Mp[0]; M[1] += Mp[1]; M[2] += Mp[2];')
-        base = y_names.index(f'thrust_N[{i}]')
-        a(f'    if (y) {{ y[{base}] = thrust * FC_LBF; y[{base + 1}] = RPM; y[{base + 2}] = I; y[{base + 3}] = Peng * FC_FTLBF;')
-        a(f'      y[{base + 4}] = J; for (int k = 0; k < 3; ++k) {{ y[{base + 5} + k] = Fb[k] * FC_LBF; y[{base + 8} + k] = Mp[k] * FC_FTLBF; }} }}')
+        b = yi[f'thrust_N[{i}]']
+        a(f'    if (y) {{ y[{b}] = thrust * FC_LBF; y[{b + 1}] = RPM; y[{b + 2}] = I; y[{b + 3}] = Peng * FC_FTLBF;')
+        a(f'      y[{b + 4}] = J; for (int k = 0; k < 3; ++k) {{ y[{b + 5} + k] = Fb[k] * FC_LBF; y[{b + 8} + k] = Mp[k] * FC_FTLBF; }} }}')
         a('  }')
     a('  /* equations of motion, flat Earth, SI */')
-    a('  const double f[3] = {F[0] * FC_LBF / MASS_KG, F[1] * FC_LBF / MASS_KG, F[2] * FC_LBF / MASS_KG};')
+    a('  const double f[3] = {F[0] * FC_LBF / m->mass_kg, F[1] * FC_LBF / m->mass_kg, F[2] * FC_LBF / m->mass_kg};')
     a('  const double mo[3] = {M[0] * FC_FTLBF, M[1] * FC_FTLBF, M[2] * FC_FTLBF};')
-    a('  const double p = x[10], q = x[11], r = x[12], u = x[3], v = x[4], w = x[5], g = env[3];')
-    a('  const double ud = f[0] + C[2][0] * g - (q * w - r * v);')
-    a('  const double vd = f[1] + C[2][1] * g - (r * u - p * w);')
-    a('  const double wd = f[2] + C[2][2] * g - (p * v - q * u);')
-    a('  const double Jw[3] = {JSI[0][0] * p + JSI[0][1] * q + JSI[0][2] * r, JSI[1][0] * p + JSI[1][1] * q + JSI[1][2] * r,')
-    a('                        JSI[2][0] * p + JSI[2][1] * q + JSI[2][2] * r};')
-    a('  const double e0 = mo[0] - (q * Jw[2] - r * Jw[1]), e1 = mo[1] - (r * Jw[0] - p * Jw[2]), e2 = mo[2] - (p * Jw[1] - q * Jw[0]);')
+    a('  const double p_ = x[10], q = x[11], r = x[12], u = x[3], v = x[4], w = x[5], g = env[3];')
+    a('  const double (*JS)[3] = m->J, (*JI)[3] = m->Jinv;')
+    a('  const double Jw[3] = {JS[0][0] * p_ + JS[0][1] * q + JS[0][2] * r, JS[1][0] * p_ + JS[1][1] * q + JS[1][2] * r,')
+    a('                        JS[2][0] * p_ + JS[2][1] * q + JS[2][2] * r};')
+    a('  const double e0 = mo[0] - (q * Jw[2] - r * Jw[1]), e1 = mo[1] - (r * Jw[0] - p_ * Jw[2]), e2 = mo[2] - (p_ * Jw[1] - q * Jw[0]);')
     a('  if (xd) {')
     a('    xd[0] = C[0][0] * u + C[0][1] * v + C[0][2] * w;')
     a('    xd[1] = C[1][0] * u + C[1][1] * v + C[1][2] * w;')
     a('    xd[2] = C[2][0] * u + C[2][1] * v + C[2][2] * w;')
-    a('    xd[3] = ud; xd[4] = vd; xd[5] = wd;')
-    a('    xd[6] = 0.5 * (-x[7] * p - x[8] * q - x[9] * r);')
-    a('    xd[7] = 0.5 * (x[6] * p + x[8] * r - x[9] * q);')
-    a('    xd[8] = 0.5 * (x[6] * q - x[7] * r + x[9] * p);')
-    a('    xd[9] = 0.5 * (x[6] * r + x[7] * q - x[8] * p);')
-    a('    xd[10] = JINV[0][0] * e0 + JINV[0][1] * e1 + JINV[0][2] * e2;')
-    a('    xd[11] = JINV[1][0] * e0 + JINV[1][1] * e1 + JINV[1][2] * e2;')
-    a('    xd[12] = JINV[2][0] * e0 + JINV[2][1] * e1 + JINV[2][2] * e2;')
+    a('    xd[3] = f[0] + C[2][0] * g - (q * w - r * v);')
+    a('    xd[4] = f[1] + C[2][1] * g - (r * u - p_ * w);')
+    a('    xd[5] = f[2] + C[2][2] * g - (p_ * v - q * u);')
+    a('    xd[6] = 0.5 * (-x[7] * p_ - x[8] * q - x[9] * r);')
+    a('    xd[7] = 0.5 * (x[6] * p_ + x[8] * r - x[9] * q);')
+    a('    xd[8] = 0.5 * (x[6] * q - x[7] * r + x[9] * p_);')
+    a('    xd[9] = 0.5 * (x[6] * r + x[7] * q - x[8] * p_);')
+    a('    xd[10] = JI[0][0] * e0 + JI[0][1] * e1 + JI[0][2] * e2;')
+    a('    xd[11] = JI[1][0] * e0 + JI[1][1] * e1 + JI[1][2] * e2;')
+    a('    xd[12] = JI[2][0] * e0 + JI[2][1] * e1 + JI[2][2] * e2;')
     a('  }')
     a('  if (y) {')
     a('    double lowest = 1e300;')
     a('    for (int k = 0; k < N_CONTACTS; ++k) {')
-    a('      const double hz = C[2][0] * CONTACT_M[k][0] + C[2][1] * CONTACT_M[k][1] + C[2][2] * CONTACT_M[k][2];')
+    a('      const double hz = C[2][0] * m->contact_m[k][0] + C[2][1] * m->contact_m[k][1] + C[2][2] * m->contact_m[k][2];')
     a('      if (-hz < lowest) lowest = -hz;')
     a('    }')
-    yi = {n: i for i, n in enumerate(y_names)}
     a(f'    y[{yi["fx_N"]}] = F[0] * FC_LBF; y[{yi["fy_N"]}] = F[1] * FC_LBF; y[{yi["fz_N"]}] = F[2] * FC_LBF;')
     a(f'    y[{yi["mx_Nm"]}] = mo[0]; y[{yi["my_Nm"]}] = mo[1]; y[{yi["mz_Nm"]}] = mo[2];')
     a(f'    for (int k = 0; k < 3; ++k) {{ y[{yi["aero_fx_N"]} + k] = Fa[k] * FC_LBF; y[{yi["aero_mx_Nm"]} + k] = Ma[k] * FC_FTLBF; '
-      f'y[{yi["specific_force_x_mps2"]} + k] = f[k]; }}')
+      f'y[{yi["specific_force_x_mps2"]} + k] = f[k]; y[{yi["cg_x_in"]} + k] = m->cg_in[k]; }}')
     a(f'    y[{yi["alpha_rad"]}] = alpha; y[{yi["beta_rad"]}] = beta; y[{yi["airspeed_mps"]}] = Vt * FC_FT;')
     a(f'    y[{yi["qbar_Pa"]}] = qbar * (FC_LBF / (FC_FT * FC_FT)); y[{yi["rho_kgm3"]}] = rho * (FC_SLUG / (FC_FT * FC_FT * FC_FT));')
     a(f'    y[{yi["alphadot_rps"]}] = adot; y[{yi["betadot_rps"]}] = bdot;')
@@ -926,83 +1067,128 @@ def emit(v, g, out):
         a(f'    y[{yi["cl_squared"]}] = cl2; y[{yi["lift_N"]}] = ax_LIFT * FC_LBF; y[{yi["drag_N"]}] = ax_DRAG * FC_LBF; '
           f'y[{yi["side_N"]}] = ax_SIDE * FC_LBF;')
     a(f'    y[{yi["agl_cg_m"]}] = hagl_ft * FC_FT; y[{yi["agl_lowest_contact_m"]}] = hagl_ft * FC_FT + lowest;')
-    for p, var in g.aero_funcs:
-        a(f'    y[{yi["fn:" + p]}] = {var};')
+    a(f'    y[{yi["mass_kg"]}] = m->mass_kg;')
+    a(f'    y[{yi["ixx_kgm2"]}] = JS[0][0]; y[{yi["iyy_kgm2"]}] = JS[1][1]; y[{yi["izz_kgm2"]}] = JS[2][2];')
+    a(f'    y[{yi["ixy_kgm2"]}] = -JS[0][1]; y[{yi["ixz_kgm2"]}] = -JS[0][2]; y[{yi["iyz_kgm2"]}] = -JS[1][2];')
+    for prop, var in g.aero_funcs:
+        a(f'    y[{yi["fn:" + prop]}] = {var};')
     a('  }')
     a('}')
     a('')
-    a(f'void {N}_reset(int n, double *x, const double *u)')
+    a(f'void {N}_defaults(int n, double *p)')
+    a('{')
+    a('  for (int i = 0; i < n; ++i) memcpy(p + (size_t)i * NP, P_DEFAULT, sizeof(double) * NP);')
+    a('}')
+    a('')
+    a('static int servo_ticks(const double *p, double dt, sc_ticks *t)')
+    a('{')
+    if ns:
+        a('  return sc_ticks_from(p[P_SERVO], p[P_SERVO + 1], p[P_SERVO + 2], dt, SERVO_CAP, t);')
+    else:
+        a('  (void)p; (void)dt; t->frame = 1; t->phase = 0; t->delay = 0; return 0;')
+    a('}')
+    a('')
+    a(f'void {N}_reset(int n, double *x, const double *u, const double *p)')
     a('{')
     a('  for (int i = 0; i < n; ++i) {')
     a('    double *xi = x + (size_t)i * NX;')
+    a('    const double *ui = u + (size_t)i * NU;')
     a('    fc_quat_normalize(xi + 6);')
     a('    memset(xi + X_FCS0, 0, sizeof(double) * (NX - X_FCS0));')
-    a('    fcs_update(xi, u + (size_t)i * NU, 0.0);  /* like JSBSim\'s RunIC: components pass their input through */')
+    if ns:
+        a('    double c[NSERVO];')
+        a('    for (int j = 0; j < NSERVO; ++j) c[j] = ui[SERVO_U[j]];')
+        a('    sc_reset(xi + X_SERVO0, NSERVO, SERVO_CAP, c);')
+    a('    fcs_update(xi, ui, p + (size_t)i * NP, 0.0);  /* like JSBSim\'s RunIC: components pass their input through */')
     a('  }')
     a('}')
     a('')
-    a(f'void {N}_step(int n, double *x, const double *u, const double *env, double dt, int k, double *y)')
+    a(f'int {N}_step(int n, double *x, const double *u, const double *p, const double *env, double dt, int k, double *y)')
     a('{')
+    a('  int bad = 0;')
     a('  for (int i = 0; i < n; ++i) {')
     a('    double *xi = x + (size_t)i * NX;')
-    a('    const double *ui = u + (size_t)i * NU, *ei = env + (size_t)i * NE;')
+    a('    const double *ui = u + (size_t)i * NU, *pi = p + (size_t)i * NP, *ei = env + (size_t)i * NE;')
+    a('    MassProps m;')
+    a('    mass_props(pi, &m);')
+    a('    sc_ticks tk;')
+    a('    if (servo_ticks(pi, dt, &tk) != 0) { bad = bad ? bad : i + 1; continue; }')
+    a('    (void)tk;')
     a('    for (int s = 0; s < k; ++s) {')
-    a('      double k1[NC], k2[NC], k3[NC], k4[NC], xt[NX];')
-    a('      fcs_update(xi, ui, dt);')
+    a('      double k1[NC], k2[NC], k3[NC], k4[NC], xt[X_SERVO0];')
+    if ns:
+        a('      double ue[NU], c[NSERVO], o[NSERVO];')
+        a('      memcpy(ue, ui, sizeof ue);')
+        a('      for (int j = 0; j < NSERVO; ++j) c[j] = ui[SERVO_U[j]];')
+        a('      sc_tick(xi + X_SERVO0, NSERVO, SERVO_CAP, &tk, c, o);')
+        a('      for (int j = 0; j < NSERVO; ++j) ue[SERVO_U[j]] = o[j];')
+        a('      fcs_update(xi, ue, pi, dt);')
+    else:
+        a('      fcs_update(xi, ui, pi, dt);')
     a('      memcpy(xt, xi, sizeof(xt));')
-    a('      deriv(xi, xi + X_AUX_UDOT, ei, 0, k1, NULL);')
+    a('      deriv(xi, xi + X_AUX_UDOT, pi, &m, ei, 0, k1, NULL);')
     a('      for (int j = 0; j < NC; ++j) xt[j] = xi[j] + 0.5 * dt * k1[j];')
-    a('      deriv(xt, k1 + 3, ei, 0, k2, NULL);')
+    a('      deriv(xt, k1 + 3, pi, &m, ei, 0, k2, NULL);')
     a('      for (int j = 0; j < NC; ++j) xt[j] = xi[j] + 0.5 * dt * k2[j];')
-    a('      deriv(xt, k2 + 3, ei, 0, k3, NULL);')
+    a('      deriv(xt, k2 + 3, pi, &m, ei, 0, k3, NULL);')
     a('      for (int j = 0; j < NC; ++j) xt[j] = xi[j] + dt * k3[j];')
-    a('      deriv(xt, k3 + 3, ei, 0, k4, NULL);')
+    a('      deriv(xt, k3 + 3, pi, &m, ei, 0, k4, NULL);')
     a('      for (int j = 0; j < NC; ++j) xi[j] += dt / 6.0 * (k1[j] + 2.0 * k2[j] + 2.0 * k3[j] + k4[j]);')
     a('      xi[X_AUX_UDOT] = k4[3]; xi[X_AUX_UDOT + 1] = k4[4]; xi[X_AUX_UDOT + 2] = k4[5];')
     a('      fc_quat_normalize(xi + 6);')
     for i in range(ne):
         a(f'      if (xi[{13 + i}] < 0.0) xi[{13 + i}] = 0.0;  /* FGPropeller: the engine does not turn backwards */')
     a('    }')
-    a('    if (y) deriv(xi, xi + X_AUX_UDOT, ei, 0, NULL, y + (size_t)i * NY);')
+    a('    if (y) deriv(xi, xi + X_AUX_UDOT, pi, &m, ei, 0, NULL, y + (size_t)i * NY);')
     a('  }')
+    a('  return bad;')
     a('}')
     a('')
-    a(f'void {N}_eval(int n, const double *x, const double *env, int jsbsim_order, double *xd, double *y)')
+    a(f'void {N}_eval(int n, const double *x, const double *p, const double *env, int jsbsim_order, double *xd, double *y)')
     a('{')
     a('  for (int i = 0; i < n; ++i) {')
-    a('    const double *xi = x + (size_t)i * NX;')
-    a('    deriv(xi, xi + X_AUX_UDOT, env + (size_t)i * NE, jsbsim_order, xd ? xd + (size_t)i * NC : NULL, y ? y + (size_t)i * NY : NULL);')
+    a('    const double *xi = x + (size_t)i * NX, *pi = p + (size_t)i * NP;')
+    a('    MassProps m;')
+    a('    mass_props(pi, &m);')
+    a('    deriv(xi, xi + X_AUX_UDOT, pi, &m, env + (size_t)i * NE, jsbsim_order, xd ? xd + (size_t)i * NC : NULL,')
+    a('          y ? y + (size_t)i * NY : NULL);')
     a('  }')
     a('}')
     src = '\n'.join(L) + '\n'
-    src = src.replace('X_HELD0 + 0]', 'X_HELD0]')
 
     H = [f'/* {N}_core.h: generated by px4-llm-sim2hitl fastcore/gen.py from vehicles/{N}. Do not edit.',
          f' * Layout of the arrays: {N}_core.json. All arrays are row-major, one row per vehicle. */',
          f'#ifndef {P}_CORE_H', f'#define {P}_CORE_H', '#ifdef __cplusplus', 'extern "C" {', '#endif',
          f'#define {P}_NX {nx}  /* state */', f'#define {P}_NC {nc}  /* continuous part of the state */',
-         f'#define {P}_NU {len(u_names)}  /* inputs */', f'#define {P}_NE 6  /* environment */',
-         f'#define {P}_NY {ny}  /* outputs */',
-         f'/* Set the FCS and auxiliary states from the inputs; pos, velocity, attitude, rates and rpm are kept. */',
-         f'void {N}_reset(int n, double *x, const double *u);',
-         f'/* k steps of dt seconds for n vehicles; y (n x NY, may be NULL) gets the outputs at the final state. */',
-         f'void {N}_step(int n, double *x, const double *u, const double *env, double dt, int k, double *y);',
-         f'/* Derivatives (n x NC, may be NULL) and outputs (n x NY, may be NULL) at the given states. */',
-         f'void {N}_eval(int n, const double *x, const double *env, int jsbsim_order, double *xd, double *y);',
+         f'#define {P}_NU {len(u_names)}  /* inputs */', f'#define {P}_NP {len(p_names)}  /* parameters */',
+         f'#define {P}_NE 6  /* environment */', f'#define {P}_NY {ny}  /* outputs */',
+         '/* The parameters as the JSBSim definition gives them (n rows). */',
+         f'void {N}_defaults(int n, double *p);',
+         '/* Set the flight-control, servo-chain and auxiliary states from the inputs, as JSBSim\'s RunIC does;',
+         ' * position, velocity, attitude, rates and propeller speed are kept. */',
+         f'void {N}_reset(int n, double *x, const double *u, const double *p);',
+         '/* k steps of dt seconds for n vehicles; y (n x NY, may be NULL) gets the outputs at the final state.',
+         ' * Returns 0, or 1 + the index of the first vehicle whose servo-chain times are not whole multiples of dt or',
+         ' * exceed the capacity (that vehicle is not advanced). */',
+         f'int {N}_step(int n, double *x, const double *u, const double *p, const double *env, double dt, int k, double *y);',
+         '/* Derivatives (n x NC, may be NULL) and outputs (n x NY, may be NULL) at the given states. */',
+         f'void {N}_eval(int n, const double *x, const double *p, const double *env, int jsbsim_order, double *xd, double *y);',
          '#ifdef __cplusplus', '}', '#endif', '#endif', '']
     layout = {
         'vehicle': N, 'generator': 'px4-llm-sim2hitl fastcore/gen.py', 'sources_sha256': srcs, 'generator_sha256': gen_hash,
-        'x': x_names, 'continuous': nc, 'u': u_names, 'env': env_names, 'y': y_names,
-        'mass_kg': mass_kg, 'inertia_kgm2': Jsi,
+        'x': x_names, 'continuous': nc, 'u': u_names, 'p': p_names, 'p_default': p_defaults, 'env': env_names, 'y': y_names,
+        'servo_inputs': g.servo_props, 'servo_capacity_steps': cap, 'pointmasses': g.pointmasses,
         'contacts': [n for n, _ in g.contacts],
         'frames': 'NED position from an origin at origin_alt_msl_m; body velocity relative to the ground; quaternion '
-                  'body to NED, scalar first; rates in body axes',
+                  'body to NED, scalar first; rates in body axes; parameters in JSBSim property units; outputs '
+                  'ixy/ixz/iyz are the products of inertia as integrals (ixz = sum x z dm, body axes)',
         'not_modelled': v.notes + [
             'flat, non-rotating Earth with constant gravity (env gravity_mps2): no Coriolis or transport rate',
             'standard atmosphere, first layer only (below 11 km)',
             'no turbulence; the wind is constant within a call (env)',
             'alphadot from the previous derivative evaluation (JSBSim: the previous frame)',
-            'flight control runs once per step (dt) and its outputs are held over the step'],
+            'flight control and the servo chain run once per step (dt); their outputs are held over the step',
+            'parameters are constant within a call; a change of point masses moves the CG between calls'],
     }
     (out / f'{N}_core.c').write_text(src)
     (out / f'{N}_core.h').write_text('\n'.join(H))
@@ -1010,23 +1196,13 @@ def emit(v, g, out):
     return out
 
 
-def inv3(m):
-    a, b, c = m[0]
-    d, e, f = m[1]
-    g, h, i = m[2]
-    det = a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g)
-    return [[(e * i - f * h) / det, (c * h - b * i) / det, (b * f - c * e) / det],
-            [(f * g - d * i) / det, (a * i - c * g) / det, (c * d - a * f) / det],
-            [(d * h - e * g) / det, (b * g - a * h) / det, (a * e - b * d) / det]]
-
-
 def build(out, name, cc='cc', native=False):
     flags = ['-O3', '-fPIC', '-shared', '-fno-math-errno', '-ffp-contract=off', '-Wall', '-Wextra', '-Werror',
-             '-Wno-unused-variable', '-Wno-unused-parameter']
+             '-Wno-unused-variable', '-Wno-unused-parameter', '-Wno-unused-function']
     if native:
         flags.append('-march=native')
     lib = out / f'lib{name}_core.so'
-    cmd = [cc, *flags, '-I', str(RUNTIME), '-o', str(lib), str(out / f'{name}_core.c'), '-lm']
+    cmd = [cc, *flags, '-I', str(RUNTIME), '-I', str(AVIONICS), '-o', str(lib), str(out / f'{name}_core.c'), '-lm']
     subprocess.run(cmd, check=True)
     return lib
 
@@ -1037,11 +1213,12 @@ def main():
     p.add_argument('--out')
     p.add_argument('--cc', default='cc')
     p.add_argument('--native', action='store_true', help='-march=native (faster, not portable)')
+    p.add_argument('--servo-capacity', type=int, default=64, help='servo-chain delay line, in steps (default 64)')
     a = p.parse_args()
     name = Path(a.vehicle).resolve().name
     out = Path(a.out) if a.out else Path('build/fastcore') / name
     try:
-        generate(a.vehicle, out)
+        generate(a.vehicle, out, a.servo_capacity)
     except Unsupported as e:
         sys.exit(f'fastcore: {e}')
     lib = build(out, name, a.cc, a.native)

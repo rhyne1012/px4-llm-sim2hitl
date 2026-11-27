@@ -38,13 +38,25 @@
   </metrics>
 
   <mass_balance>
-    <!-- radii of gyration 0.25 (roll, of half span), 0.38 (pitch, of half length 1.6 m), 0.39 (yaw) -->
+    <!-- 6.0 kg in all: a 4.8 kg airframe and a 1.2 kg battery, both centred at x 0.40 m, so the battery's position moves
+         the CG at constant mass. Configurations move the battery or add a payload through the JSBSim point-mass
+         properties (inertia/pointmass-*), for example vehicles/testbird/configs/aft_cg.toml.
+         Radii of gyration 0.25 (roll, of half span), 0.38 (pitch, of half length 1.6 m), 0.39 (yaw); the battery at the
+         CG adds nothing, so the airframe's inertia is the whole aircraft's. -->
     <ixx unit="KG*M2"> 0.634 </ixx>
     <iyy unit="KG*M2"> 0.554 </iyy>
     <izz unit="KG*M2"> 1.006 </izz>
     <ixz unit="KG*M2"> 0.0   </ixz>
-    <emptywt unit="KG"> 6.0 </emptywt>
+    <emptywt unit="KG"> 4.8 </emptywt>
     <location name="CG" unit="M"> <x> 0.40 </x> <y> 0 </y> <z> 0 </z> </location>
+    <pointmass name="battery">
+      <weight unit="KG"> 1.2 </weight>
+      <location unit="M"> <x> 0.40 </x> <y> 0 </y> <z> 0 </z> </location>
+    </pointmass>
+    <pointmass name="payload">
+      <weight unit="KG"> 0.0 </weight>
+      <location unit="M"> <x> 0.40 </x> <y> 0 </y> <z> 0 </z> </location>
+    </pointmass>
   </mass_balance>
 
   <ground_reactions>
@@ -120,6 +132,10 @@
 
   <aerodynamics>
 
+    <!-- Experiment knobs: scale factors an override file can set (1 = the coefficients below). -->
+    <property value="1.0">aero/scale/cm-alpha</property>
+    <property value="1.0">aero/scale/elevator</property>
+
     <axis name="LIFT">
       <function name="aero/force/lift_alpha">
         <description>CL(alpha): CL0 0.40, CLalpha 5.40 /rad, stall near 9 deg (CLmax 1.25), flat-plate beyond</description>
@@ -169,6 +185,7 @@
         <product>
           <property>aero/qbar-psf</property> <property>metrics/Sw-sqft</property>
           <property>fcs/elevator-pos-rad</property>
+          <property>aero/scale/elevator</property>
           <value> 0.251 </value>
         </product>
       </function>
@@ -310,6 +327,7 @@
         <product>
           <property>aero/qbar-psf</property> <property>metrics/Sw-sqft</property> <property>metrics/cbarw-ft</property>
           <property>aero/alpha-rad</property>
+          <property>aero/scale/cm-alpha</property>
           <value> -0.648 </value>
         </product>
       </function>
@@ -334,6 +352,7 @@
         <product>
           <property>aero/qbar-psf</property> <property>metrics/Sw-sqft</property> <property>metrics/cbarw-ft</property>
           <property>fcs/elevator-pos-rad</property>
+          <property>aero/scale/elevator</property>
           <value> -0.872 </value>
         </product>
       </function>

@@ -24,10 +24,10 @@ A vehicle is a JSBSim aircraft folder (`<name>/<name>.xml`, `Engines/`, `Systems
 
 - the JSBSim model name
 - the PX4 airframe and parameter file for each recipe kind
-- the actuator map: PX4 output channel → JSBSim command property, with scale and sign
+- the actuator map: PX4 output channel → JSBSim command property, with scale, sign and kind (servo or motor)
 - the default avionics profile
 
-The JSBSim folder is the single source of truth for the vehicle's physics. Configurations (mass, CG, payload) and experiments (coefficient scaling, faults) are layers of JSBSim property settings applied at start; they never edit the XML.
+The JSBSim folder is the single source of truth for the vehicle's physics. Configurations (mass, CG, payload, servos) and experiments (coefficient scaling, faults) are files of property settings, `configs/*.toml`, applied at start; they never edit the XML. What a configuration may move is in the definition: point masses for mass and CG, declared properties for experiment knobs, JSBSim's actuator failure properties for faults. One file serves SITL, HITL and the fast core, and an unknown property is an error at every level.
 
 ### Avionics
 
@@ -36,7 +36,7 @@ Sensors and the servo signal chain belong to the flight controller, not to the a
 - the IMU, magnetometer, barometer, airspeed sensor and GPS, with their noise, bias, delay and rate
 - the PWM output timing, and the servo delay and hold
 
-The simulation host applies the profile between JSBSim and PX4. Effects that JSBSim cannot express belong in this layer.
+The simulation host applies the profile between JSBSim and PX4. Effects that JSBSim cannot express belong in this layer. Each effect is written once, in plain C under `avionics/`, and used by both the simulation host and the fast core; the servo signal chain (`avionics/servo_chain.h`: PWM hold, then transport delay, on the servo channels) is the first. The sensor models are still in the simulation host (`simhost/src/avionics.cpp`).
 
 ### Simulation host
 
@@ -50,7 +50,7 @@ One C++ program, linked with the locked JSBSim:
 - **Inputs at run time.**
   - Wind, turbulence and gusts use JSBSim's own models.
   - Faults use JSBSim's actuator fail properties and the avionics layer.
-  - Scenario events are applied at scheduled times.
+  - Scenario events are applied at scheduled times (`--at T:PROPERTY=VALUE`).
 - **Outputs.** A time history of the truth state and of the commands, for the record.
 - **Several vehicles in one world.** Planned (one JSBSim instance per vehicle); not built yet.
 
@@ -67,7 +67,7 @@ The same core runs in the algorithm-level tests, in training, in SITL, in HITL a
 
 ### Fast core
 
-For training and other sim-bound work, `fastcore/gen.py` turns a vehicle's JSBSim folder into a C core with a C and Python interface: the vehicle's own parts (aerodynamic functions and tables, flight-control components, mass, propulsion constants) are translated, and the shared physics is written once. JSBSim stays the reference: `fastcore/check.py` compares every generated core with JSBSim, exactly at the level of forces and moments and within stated limits in flight. The generator lives here; a generated core is a build product of the vehicle repository that uses it. See `fastcore/README.md`.
+For training and other sim-bound work, `fastcore/gen.py` turns a vehicle's JSBSim folder into a C core with a C and Python interface: the vehicle's own parts (aerodynamic functions and tables, flight-control components, mass, propulsion constants) are translated, and the shared physics is written once. Everything a configuration may change is a per-vehicle parameter of the core, under the same property names, so a batch can mix configurations and a failure can start mid-episode. JSBSim stays the reference: `fastcore/check.py` compares every generated core with JSBSim, exactly at the level of forces and moments and within stated limits in flight. The generator lives here; a generated core is a build product of the vehicle repository that uses it. See `fastcore/README.md`.
 
 ### Test cases
 

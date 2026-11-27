@@ -1,0 +1,7 @@
+# Testbird with its battery 10 cm aft: the CG moves 2 cm aft (x 0.42 m) at the same mass, and the static margin drops
+# from 12 % to about 5 % of the mean chord.
+# Values are JSBSim properties in JSBSim's units; point mass 0 is the battery (testbird.xml).
+description = "battery 10 cm aft: CG x 0.42 m, static margin about 5 %"
+
+[set]
+"inertia/pointmass-location-X-inches[0]" = 19.6850394   # 0.50 m

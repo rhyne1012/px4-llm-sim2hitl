@@ -1,0 +1,8 @@
+# Testbird with slow servos: 50 Hz PWM frames sampled 8 ms into the frame, then 40 ms of transport delay. Used to
+# exercise the servo chain; not a measurement of any servo.
+description = "servos: 50 Hz PWM hold sampled at 8 ms, 40 ms delay"
+
+[set]
+"avionics/servo/pwm-period-s" = 0.020
+"avionics/servo/pwm-phase-s" = 0.008
+"avionics/servo/delay-s" = 0.040

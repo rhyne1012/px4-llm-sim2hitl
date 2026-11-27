@@ -7,6 +7,12 @@
 // each step waits for the HIL_ACTUATOR_CONTROLS that answers it. HITL: the same messages over the flight controller's
 // serial port, paced by the wall clock. Out: HIL_SENSOR every step (250 Hz), HIL_GPS every 0.1 s. In: the actuator
 // outputs, mapped onto JSBSim properties by --actuator CHANNEL:PROPERTY:GAIN[:OFFSET] (entries for one property add).
+// Channels given with --servo-channel go through the servo signal chain first (avionics/servo_chain.h, at the physics
+// step), set by --set avionics/servo/{pwm-period-s,pwm-phase-s,delay-s}=VALUE; it is off by default.
+// --set PROP=VALUE sets a JSBSim property before the start (configurations: point masses, declared properties, ...);
+// --at T:PROP=VALUE sets one when the simulated time reaches T (scenario events such as actuator failures). Both refuse
+// a property the vehicle does not have, since JSBSim would create it silently.
+#include <algorithm>
 #include <csignal>
 #include <chrono>
 #include <cmath>
@@ -27,6 +33,7 @@
 
 #include "avionics.hpp"
 #include "link.hpp"
+#include "servo_chain.h"
 #include "vehicle.hpp"
 
 namespace {
@@ -39,8 +46,17 @@ struct Mapping {
   double gain, offset;
 };
 
+struct Event {
+  double t;
+  std::string property;
+  double value;
+};
+
 struct Options {
   std::string vehicle, serial, record, extra;
+  std::vector<int> servo_channels;
+  double servo_period = 0.0, servo_phase = 0.0, servo_delay = 0.0;
+  std::vector<Event> events;
   int sitl_port = 0, baud = 2000000, relay_port = 0;
   bool lockstep = false;
   double lat = 22.9100, lon = 120.3110, agl = 0.19, heading = 0.0, duration = 0.0, physics_dt = 0.001, hil_dt = 0.004;
@@ -52,7 +68,8 @@ struct Options {
 [[noreturn]] void usage(const char *why) {
   std::fprintf(stderr,
                "%s\nusage: simhost --vehicle DIR (--sitl-port N [--lockstep] | --serial DEV [--baud B])\n"
-               "               [--actuator CH:PROP:GAIN[:OFFSET]]... [--set PROP=VALUE]... [--lat D --lon D --agl M --heading D]\n"
+               "               [--actuator CH:PROP:GAIN[:OFFSET]]... [--servo-channel CH]... [--set PROP=VALUE]...\n"
+               "               [--at T:PROP=VALUE]... [--lat D --lon D --agl M --heading D]\n"
                "               [--duration S] [--record FILE.csv] [--seed N] [--relay-port N (HITL: UDP for other MAVLink users)]\n",
                why);
   std::exit(2);
@@ -87,11 +104,24 @@ Options parse(int argc, char **argv) {
       f.push_back(v.substr(start));
       if (f.size() < 3 || f.size() > 4) usage(("bad --actuator " + v).c_str());
       o.actuators[f[1]].push_back({std::stoi(f[0]), std::stod(f[2]), f.size() == 4 ? std::stod(f[3]) : 0.0});
+    } else if (a == "--servo-channel") {
+      o.servo_channels.push_back(std::stoi(next()));
     } else if (a == "--set") {
       const std::string v = next();
       const size_t k = v.find('=');
       if (k == std::string::npos) usage(("bad --set " + v).c_str());
-      o.sets.emplace_back(v.substr(0, k), std::stod(v.substr(k + 1)));
+      const std::string key = v.substr(0, k);
+      const double val = std::stod(v.substr(k + 1));
+      if (key == "avionics/servo/pwm-period-s") o.servo_period = val;
+      else if (key == "avionics/servo/pwm-phase-s") o.servo_phase = val;
+      else if (key == "avionics/servo/delay-s") o.servo_delay = val;
+      else if (key.rfind("avionics/", 0) == 0) usage(("unknown avionics setting " + key).c_str());
+      else o.sets.emplace_back(key, val);
+    } else if (a == "--at") {
+      const std::string v = next();
+      const size_t c = v.find(':'), k = v.find('=');
+      if (c == std::string::npos || k == std::string::npos || k < c) usage(("bad --at " + v).c_str());
+      o.events.push_back({std::stod(v.substr(0, c)), v.substr(c + 1, k - c - 1), std::stod(v.substr(k + 1))});
     } else usage(("unknown option " + a).c_str());
   }
   if (o.vehicle.empty()) usage("--vehicle is required");
@@ -116,15 +146,37 @@ int main(int argc, char **argv) {
     };
     std::vector<Target> targets;
     for (const auto &[prop, maps] : o.actuators) targets.push_back({vehicle.node(prop), maps});
+    for (const auto &[prop, value] : o.sets) {
+      if (!vehicle.has(prop)) throw std::runtime_error("--set: the vehicle has no property " + prop);
+      vehicle.set(prop, value);
+    }
+    std::vector<Event> events = o.events;
+    std::sort(events.begin(), events.end(), [](const Event &a, const Event &b) { return a.t < b.t; });
+    for (const Event &e : events)
+      if (!vehicle.has(e.property)) throw std::runtime_error("--at: the vehicle has no property " + e.property);
+    size_t next_event = 0;
     vehicle.start(o.lat, o.lon, o.agl, o.heading);
-    for (const auto &[prop, value] : o.sets) vehicle.set(prop, value);
+
+    // Servo signal chain on the servo channels, ticked at the physics step.
+    const int n_servo = static_cast<int>(o.servo_channels.size());
+    const int servo_cap = std::max(1, static_cast<int>(std::lround(o.servo_delay / o.physics_dt)));
+    sc_ticks servo_ticks{1, 0, 0};
+    if (sc_ticks_from(o.servo_period, o.servo_phase, o.servo_delay, o.physics_dt, servo_cap, &servo_ticks) != 0)
+      throw std::runtime_error("servo chain: period, phase and delay must be whole multiples of the physics step");
+    std::vector<double> servo_state(static_cast<size_t>(sc_state_size(n_servo, servo_cap)));
+    std::vector<double> servo_in(static_cast<size_t>(n_servo), 0.0), servo_out(static_cast<size_t>(n_servo), 0.0);
+    sc_reset(servo_state.data(), n_servo, servo_cap, servo_in.data());
+    for (int ch : o.servo_channels)
+      if (ch < 0 || ch >= 16) throw std::runtime_error("--servo-channel must be 0..15");
 
     AvionicsProfile profile;
     profile.seed = o.seed;
     Avionics avionics(profile);
 
     std::cerr << "simhost: vehicle " << o.vehicle << ", physics " << o.physics_dt * 1e3 << " ms x " << substeps
-              << ", HIL " << o.hil_dt * 1e3 << " ms" << (o.lockstep ? ", lockstep" : ", real time") << '\n';
+              << ", HIL " << o.hil_dt * 1e3 << " ms" << (o.lockstep ? ", lockstep" : ", real time") << ", " << o.sets.size()
+              << " settings, " << events.size() << " events, servo chain on " << n_servo << " channels (frame "
+              << servo_ticks.frame << ", phase " << servo_ticks.phase << ", delay " << servo_ticks.delay << " steps)\n";
     Link link = o.sitl_port > 0 ? Link::tcp_server(o.sitl_port, 120.0) : Link::serial(o.serial, o.baud);
     std::cerr << "simhost: connected on " << link.description() << '\n';
 
@@ -163,12 +215,26 @@ int main(int argc, char **argv) {
     };
 
     while (!g_stop) {
-      for (const Target &tg : targets) {
-        double v = 0.0;
-        for (const Mapping &m : tg.maps) v += m.gain * controls[m.channel] + m.offset;
-        tg.node->setDoubleValue(v);
+      while (next_event < events.size() && events[next_event].t <= static_cast<double>(t_us) * 1e-6 + 1e-9) {
+        const Event &e = events[next_event++];
+        vehicle.set(e.property, e.value);
+        std::cerr << "simhost: t " << static_cast<double>(t_us) * 1e-6 << " s: " << e.property << " = " << e.value << '\n';
       }
-      if (!vehicle.step(substeps)) throw std::runtime_error("JSBSim stopped");
+      for (int sub = 0; sub < substeps; ++sub) {
+        double ch[16];
+        for (int c = 0; c < 16; ++c) ch[c] = controls[c];
+        if (n_servo > 0) {
+          for (int j = 0; j < n_servo; ++j) servo_in[static_cast<size_t>(j)] = controls[o.servo_channels[static_cast<size_t>(j)]];
+          sc_tick(servo_state.data(), n_servo, servo_cap, &servo_ticks, servo_in.data(), servo_out.data());
+          for (int j = 0; j < n_servo; ++j) ch[o.servo_channels[static_cast<size_t>(j)]] = servo_out[static_cast<size_t>(j)];
+        }
+        for (const Target &tg : targets) {
+          double v = 0.0;
+          for (const Mapping &m : tg.maps) v += m.gain * ch[m.channel] + m.offset;
+          tg.node->setDoubleValue(v);
+        }
+        if (!vehicle.step(1)) throw std::runtime_error("JSBSim stopped");
+      }
       t_us += static_cast<uint64_t>(std::lround(o.hil_dt * 1e6));
       ++steps;
       const Truth t = vehicle.truth();

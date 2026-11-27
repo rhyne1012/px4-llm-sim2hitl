@@ -4,7 +4,7 @@ The toolkit's fixed-wing test vehicle. It is not a real aircraft, and it never s
 
 | | |
 |---|---|
-| Mass | 6.0 kg, CG on the reference point |
+| Mass | 6.0 kg: a 4.8 kg airframe and a 1.2 kg battery (a point mass), both at the reference point |
 | Wing | span 2.60 m, area 0.75 m² (aspect ratio 9.0), mean chord 0.2885 m |
 | Tail | horizontal 0.12 m², vertical 0.065 m², both 1.00 m behind the CG |
 | Propulsion | brushless motor (6S, 340 rpm/V, 0.06 Ω) on an APC 18x8E propeller, tractor |
@@ -41,7 +41,8 @@ AeromatiC++ 3.3.21, JSBSim's own generator, was tried first. Its empirical sizin
   - Ailerons: Clδa 0.18, with adverse yaw Cnδa −0.015.
   - Rudder: Cnδr 0.046, CYδr −0.119, Clδr −0.005.
   - With Clβ = −0.07, the spiral mode diverged fast enough to roll the aircraft over in about 20 s with no roll control; −0.10 makes it nearly neutral.
-- **Inertia.** From radii of gyration 0.25 (roll, of the half span), 0.38 (pitch, of the half length) and 0.39 (yaw).
+- **Inertia.** From radii of gyration 0.25 (roll, of the half span), 0.38 (pitch, of the half length) and 0.39 (yaw). The battery sits at the CG, so it adds nothing; moving it (`configs/aft_cg.toml`) moves the CG at constant mass and adds its parallel-axis inertia.
+- **Configurations and knobs.** `configs/aft_cg.toml` (battery 10 cm aft: CG 2 cm aft, static margin about 5 %), `configs/slow_servos.toml` (slow servos: 50 Hz PWM sampled 8 ms into the frame, 40 ms delay). Declared properties `aero/scale/cm-alpha` and `aero/scale/elevator` (default 1) scale Cmα and the elevator derivatives for experiments.
 - **Gear.** Springs for about 15 mm static deflection, with damping ratio about 0.6. The mains carry 85 % of the weight.
 
 ## Checks

@@ -23,6 +23,9 @@ from pathlib import Path
 
 from pymavlink import mavutil
 
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / 'fastcore'))
+from fastcore import load_config  # noqa: E402  (the one reader of configuration files, shared with the fast core)
+
 AUTO, AUTO_TAKEOFF, AUTO_LOITER = 4, 2, 3
 INT_TYPES = {mavutil.mavlink.MAV_PARAM_TYPE_INT8, mavutil.mavlink.MAV_PARAM_TYPE_UINT8, mavutil.mavlink.MAV_PARAM_TYPE_INT16,
              mavutil.mavlink.MAV_PARAM_TYPE_UINT16, mavutil.mavlink.MAV_PARAM_TYPE_INT32, mavutil.mavlink.MAV_PARAM_TYPE_UINT32}
@@ -38,6 +41,21 @@ def decode_param(raw, ptype):
     if ptype in INT_TYPES:
         return float(struct.unpack('<i', struct.pack('<f', raw))[0])
     return float(raw)
+
+
+def simhost_vehicle_args(toml, configs=(), events=()):
+    """simhost arguments for a vehicle: its actuator map and servo channels (vehicle.toml), its configuration files
+    (JSBSim property and servo-chain settings, applied before the start), and scenario events (T:PROPERTY=VALUE)."""
+    args = []
+    for m in toml['actuators']:
+        args += ['--actuator', f"{m['channel']}:{m['property']}:{m['gain']}:{m.get('offset', 0.0)}"]
+        if m.get('kind') == 'servo':
+            args += ['--servo-channel', str(m['channel'])]
+    for k, v in load_config(*configs).items():
+        args += ['--set', f'{k}={v!r}']
+    for e in events:
+        args += ['--at', e]
+    return args
 
 
 class Flight:
@@ -61,8 +79,7 @@ class Flight:
         sim = [str(Path(self.a.simhost).resolve()), '--vehicle', str(self.vehicle), '--sitl-port', str(4560 + i), '--lockstep',
                '--record', str(self.out / 'simhost.csv'), '--agl', str(self.toml['start']['agl_m']),
                '--heading', str(self.toml['start']['heading_deg'])]
-        for m in self.toml['actuators']:
-            sim += ['--actuator', f"{m['channel']}:{m['property']}:{m['gain']}:{m.get('offset', 0.0)}"]
+        sim += simhost_vehicle_args(self.toml, self.a.config, self.a.at)
         self.procs.append(subprocess.Popen(sim, stdout=subprocess.DEVNULL, stderr=open(self.out / 'simhost.log', 'w')))
         build = Path(self.a.px4_build).resolve()
         work = self.out / 'px4'
@@ -261,6 +278,9 @@ def main():
     p.add_argument('--instance', type=int, default=9)
     p.add_argument('--loiter', type=float, default=60.0, help='seconds of PX4 time in loiter after the takeoff')
     p.add_argument('--timeout', type=float, default=600.0, help='wall seconds for the whole flight')
+    p.add_argument('--config', action='append', default=[], help='vehicle configuration file (TOML [set]); repeatable')
+    p.add_argument('--at', action='append', default=[], metavar='T:PROPERTY=VALUE',
+                   help='set a JSBSim property at simulated time T, e.g. an actuator failure; repeatable')
     a = p.parse_args()
     f = Flight(a)
     result, error = None, None

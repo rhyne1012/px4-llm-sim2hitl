@@ -3,13 +3,16 @@
 
     JSBSIM_PYTHON=<unpacked jsbsim 1.3.3 wheel> <python with numpy> fastcore/check.py vehicles/testbird [--out DIR]
 
-1. Snapshots: JSBSim flies from random states with random inputs; at a random instant its full state (including the
-   actuator positions, the propeller speed and the accelerations of the previous frame) goes into the core, and every
-   force, moment, aerodynamic function and propeller value is compared. JSBSim runs on a non-rotating Earth here, so
-   the two must agree to rounding: this tests that the translation is exact.
-2. Flights: from trimmed level flight both fly the same open-loop input sequences, JSBSim as simhost runs it (1 ms,
-   Adams-Bashforth 2, rotating WGS84 Earth), the core at 1 ms and at 4 ms. The differences are what the core's
-   simplifications cost (step size, flat Earth, alphadot and cl-squared timing).
+1. Snapshots (translation): JSBSim flies from random states with random inputs and random parameters (point masses,
+   declared properties); at a random frame its full state (actuator positions, propeller speed, the previous frame's
+   accelerations) goes into the core, and every force, moment, aerodynamic function, propeller value, mass property and
+   angular acceleration is compared. JSBSim runs on a non-rotating Earth here, so the two must agree to rounding.
+2. Flight-control sequences (translation): random command sequences with random actuator failures switched on and off,
+   with and without the servo chain, at 1 ms. The core's actuator positions must equal JSBSim's frame by frame; JSBSim's
+   commands go through an independent Python servo chain (fastcore.ServoChainRef).
+3. Flights (simplifications): from trimmed level flight both fly the same open-loop input sequences, JSBSim as simhost
+   runs it (1 ms, Adams-Bashforth 2, rotating WGS84 Earth), the core at 1 ms and at 4 ms; also with the vehicle's
+   configuration files and with failures during flight. The differences are what the core's simplifications cost.
 
 Writes <out>/check.json and exits 1 if a limit is exceeded.
 """
@@ -30,25 +33,39 @@ sys.path.insert(0, str(HERE.parent / 'tools'))
 if os.environ.get('JSBSIM_PYTHON'):
     sys.path.insert(0, os.environ['JSBSIM_PYTHON'])
 import gen  # noqa: E402
-from fastcore import Core, euler_to_quat, quat_to_euler  # noqa: E402
+from fastcore import Core, ServoChainRef, euler_to_quat, load_config, quat_to_euler  # noqa: E402
 from vehicle_check import load  # noqa: E402
 
 FT = 0.3048
 LBF = 4.4482216152605
 FTLBF = LBF * FT
+SLUG = LBF / FT
+SLUGFT2 = SLUG * FT * FT
 PSF = LBF / FT ** 2
-SLUGFT3 = (LBF / FT) / FT ** 3
+SLUGFT3 = SLUG / FT ** 3
+LB_PER_KG = 1.0 / 0.45359237
+IN_PER_M = 3.2808399 * 12.0
 LAT0, LON0 = 22.91, 120.31
 
-# Limits. Snapshots: relative to max(|JSBSim value|, the floor of the quantity). Flights: set by a person on 2026-11-27
-# after the first Testbird measurement (worst 0.08 m, 0.09 deg, 0.008 m/s); see fastcore/README.md.
+# Limits. Snapshots and flight-control sequences: relative error (snapshots, against max(|JSBSim value|, a floor per
+# quantity)) and absolute error in rad (sequences). Flights: set by a person on 2026-11-27 after the first Testbird
+# measurement (worst 0.08 m, 0.09 deg, 0.008 m/s); see fastcore/README.md.
 SNAPSHOT_LIMIT = 1e-9
+SEQUENCE_LIMIT_RAD = 1e-12
 FLIGHT_LIMITS = {'dt_0.004': {'pos_m': 0.3, 'att_deg': 0.3, 'airspeed_mps': 0.03}, 'horizon_s': 10.0}
 
 NON_ROTATING = '<?xml version="1.0"?>\n<planet name="Earth"><rotation_rate unit="RAD/SEC"> 0 </rotation_rate></planet>\n'
 
 
-def jsb(vehicle, dt, rotating=True):
+def split(settings):
+    """JSBSim properties, and the servo chain's settings (avionics/servo/*, not JSBSim's)."""
+    js = {k: v for k, v in settings.items() if not k.startswith('avionics/')}
+    sv = {k: v for k, v in settings.items() if k.startswith('avionics/')}
+    return js, (sv.get('avionics/servo/pwm-period-s', 0.0), sv.get('avionics/servo/pwm-phase-s', 0.0),
+                sv.get('avionics/servo/delay-s', 0.0))
+
+
+def jsb(vehicle, dt, rotating=True, settings=None):
     fdm = load(vehicle, dt)
     for k in ('rate/rotational', 'rate/translational', 'position/rotational', 'position/translational'):
         fdm[f'simulation/integrator/{k}'] = 3  # Adams-Bashforth 2, as simhost
@@ -56,6 +73,11 @@ def jsb(vehicle, dt, rotating=True):
         p = Path(tempfile.mkdtemp(prefix='fastcore_planet_')) / 'planet.xml'
         p.write_text(NON_ROTATING)
         fdm.load_planet(str(p), False)
+    pm = fdm.get_property_manager()
+    for k, v in split(settings or {})[0].items():
+        if not pm.hasNode(k):
+            raise SystemExit(f'JSBSim has no property {k}: setting it would create it silently')
+        fdm[k] = v
     return fdm
 
 
@@ -80,7 +102,7 @@ def set_inputs(fdm, core, u):
 def capture(fdm, core, x, prev_uvwdot):
     """JSBSim's state into a core state row; the NED origin is the current position."""
     x[:] = 0.0
-    x[core.X['u_mps']:core.X['u_mps'] + 3] = [fdm[f'velocities/{c}-fps'] * FT for c in 'uvw']
+    x[3:6] = [fdm[f'velocities/{c}-fps'] * FT for c in 'uvw']
     x[6:10] = euler_to_quat(fdm['attitude/phi-rad'], fdm['attitude/theta-rad'], fdm['attitude/psi-rad'])
     x[10:13] = [fdm[f'velocities/{c}-rad_sec'] for c in 'pqr']
     x[core.X['omega_rps[0]']] = fdm['propulsion/engine/propeller-rpm'] * 2 * math.pi / 60
@@ -98,29 +120,45 @@ def env_of(fdm, core):
     return e
 
 
+def random_mass(rng, core):
+    """Random point masses and declared properties, in JSBSim property units."""
+    s = {}
+    pms = core.layout['pointmasses']
+    for i in range(len(pms)):
+        s[f'inertia/pointmass-weight-lbs[{i}]'] = rng.uniform(0.0, 2.0) * LB_PER_KG
+        s[f'inertia/pointmass-location-X-inches[{i}]'] = rng.uniform(0.25, 0.60) * IN_PER_M
+        s[f'inertia/pointmass-location-Y-inches[{i}]'] = rng.uniform(-0.3, 0.3) * IN_PER_M
+        s[f'inertia/pointmass-location-Z-inches[{i}]'] = rng.uniform(-0.1, 0.1) * IN_PER_M
+    for name, d in zip(core.layout['p'], core.layout['p_default']):
+        if not (name.startswith('inertia/') or name.startswith('fcs/') or name.startswith('avionics/')):
+            s[name] = d * rng.uniform(0.5, 1.5) if d else rng.uniform(-1, 1)
+    return s
+
+
 # -- 1. snapshots -------------------------------------------------------------------------------------------------------
 
 def snapshots(vehicle, core, n, seed):
     rng = np.random.default_rng(seed)
     floors = {'force_N': 0.01, 'moment_Nm': 0.001, 'angle_rad': 1e-6, 'rate_rps': 1e-6, 'qbar_Pa': 0.01, 'rho': 1e-6,
-              'rpm': 0.01, 'omega_dot': 0.01, 'current_A': 0.001, 'fn': 1e-4}
+              'rpm': 0.01, 'omega_dot': 0.01, 'current_A': 0.001, 'fn': 1e-4, 'mass': 1e-6, 'cg_in': 1e-6,
+              'inertia': 1e-9, 'ang_acc': 1e-6}
     worst = {}
     used = []
     t0 = time.time()
 
     def cmp(key, kind, a, b):
         e = float(abs(a - b) / max(abs(b), floors[kind]))
-        if e > worst.get(key, (0.0,))[0]:
+        if e > worst.get(key, (-1.0,))[0]:
             worst[key] = (e, float(a), float(b))
 
     for s in range(n):
-        fdm = jsb(vehicle, 0.001, rotating=False)
+        settings = random_mass(rng, core) if s % 4 else {}   # every fourth one with the vehicle's own values
+        fdm = jsb(vehicle, 0.001, rotating=False, settings=settings)
         V = rng.uniform(8, 32)
         al, be = math.radians(rng.uniform(-25, 35)), math.radians(rng.uniform(-20, 20))
         uvw = (V * math.cos(al) * math.cos(be), V * math.sin(be), V * math.sin(al) * math.cos(be))
-        eul = (rng.uniform(-70, 70), rng.uniform(-45, 45), rng.uniform(0, 360))
-        pqr = rng.uniform(-1.5, 1.5, 3)
-        ic(fdm, rng.uniform(150, 1500), uvw, eul, pqr)
+        ic(fdm, rng.uniform(150, 1500), uvw, (rng.uniform(-70, 70), rng.uniform(-45, 45), rng.uniform(0, 360)),
+           rng.uniform(-1.5, 1.5, 3))
         u = np.zeros(core.nu)
         u[core.U['fcs/throttle-cmd-norm[0]']] = rng.uniform(0.2, 1.0)
         set_inputs(fdm, core, u)
@@ -140,17 +178,27 @@ def snapshots(vehicle, core, n, seed):
         x = core.zeros(1)
         capture(fdm, core, x[0], prev)
         x[0, core.X['omega_rps[0]']] = rpm_prev * 2 * math.pi / 60   # the frame computed its forces from this speed
+        p = core.params(1, split(settings)[0])
         e = env_of(fdm, core)
-        xd, y = core.eval(x, e, jsbsim_order=True)
+        xd, y = core.eval(x, p, e, jsbsim_order=True)
         Y = {k: y[0, i] for k, i in core.Y.items()}
-        for i, c in enumerate('xyz'):
+        for c in 'xyz':
             cmp(f'aero_f{c}', 'force_N', Y[f'aero_f{c}_N'], fdm[f'forces/fb{c}-aero-lbs'] * LBF)
             cmp(f'prop_f{c}', 'force_N', Y[f'prop_f{c}_N[0]'], fdm[f'forces/fb{c}-prop-lbs'] * LBF)
             cmp(f'total_f{c}', 'force_N', Y[f'f{c}_N'], fdm[f'forces/fb{c}-total-lbs'] * LBF)
+            cmp(f'cg_{c}', 'cg_in', Y[f'cg_{c}_in'], fdm[f'inertia/cg-{c}-in'])
         for c, m in zip('xyz', 'lmn'):
             cmp(f'aero_m{c}', 'moment_Nm', Y[f'aero_m{c}_Nm'], fdm[f'moments/{m}-aero-lbsft'] * FTLBF)
             cmp(f'prop_m{c}', 'moment_Nm', Y[f'prop_m{c}_Nm[0]'], fdm[f'moments/{m}-prop-lbsft'] * FTLBF)
             cmp(f'total_m{c}', 'moment_Nm', Y[f'm{c}_Nm'], fdm[f'moments/{m}-total-lbsft'] * FTLBF)
+        for i, c in enumerate('pqr'):
+            cmp(f'{c}dot', 'ang_acc', xd[0, 10 + i], fdm[f'accelerations/{c}dot-rad_sec2'])
+        for k in ('ixx', 'iyy', 'izz', 'ixy', 'ixz', 'iyz'):
+            # the core gives the products as integrals (ixz = sum x z dm); JSBSim's inertia/ixz property alone keeps the
+            # XML's negated sign (FGMassBalance::GetIxz returns mJ(1,3), GetIxy and GetIyz return -mJ)
+            sign = -1.0 if k == 'ixz' else 1.0
+            cmp(k, 'inertia', Y[f'{k}_kgm2'], sign * fdm[f'inertia/{k}-slugs_ft2'] * SLUGFT2)
+        cmp('mass', 'mass', Y['mass_kg'], fdm['inertia/mass-slugs'] * SLUG)
         cmp('alpha', 'angle_rad', Y['alpha_rad'], fdm['aero/alpha-rad'])
         cmp('beta', 'angle_rad', Y['beta_rad'], fdm['aero/beta-rad'])
         cmp('alphadot', 'rate_rps', Y['alphadot_rps'], fdm['aero/alphadot-rad_sec'])
@@ -165,15 +213,65 @@ def snapshots(vehicle, core, n, seed):
             if name.startswith('fn:'):
                 cmp(name, 'fn', Y[name], fdm[name[3:]])
         used.append({'V': round(V, 2), 'alpha_deg': round(math.degrees(al), 1), 'beta_deg': round(math.degrees(be), 1),
-                     'rpm': round(rpm_prev), 'elev_pos_rad': round(fdm['fcs/elevator-pos-rad'], 4)})
+                     'rpm': round(rpm_prev), 'mass_kg': round(Y['mass_kg'], 3), 'cg_x_m': round(Y['cg_x_in'] / IN_PER_M, 4)})
     worst_all = max(v[0] for v in worst.values())
     return {'n': n, 'seed': seed, 'seconds': round(time.time() - t0, 1), 'limit': SNAPSHOT_LIMIT,
             'max_relative_error': float(worst_all), 'pass': bool(worst_all <= SNAPSHOT_LIMIT),
             'worst': {k: {'rel': v[0], 'core': v[1], 'jsbsim': v[2]} for k, v in sorted(worst.items(), key=lambda kv: -kv[1][0])[:12]},
-            'ranges': {k: [min(s[k] for s in used), max(s[k] for s in used)] for k in used[0]}}
+            'ranges': {k: [min(s_[k] for s_ in used), max(s_[k] for s_ in used)] for k in used[0]}}
 
 
-# -- 2. flights ---------------------------------------------------------------------------------------------------------
+# -- 2. flight-control sequences ----------------------------------------------------------------------------------------
+
+def sequences(vehicle, core, n, seed, seconds=3.0):
+    rng = np.random.default_rng(seed + 100)
+    servo_props = core.layout['servo_inputs']
+    faults = [p for p in core.layout['p'] if '/malfunction/' in p]
+    surfaces = [p for p in core.X if p.startswith('held:') and 'throttle' not in p]
+    worst, cases = 0.0, []
+    t0 = time.time()
+    for s in range(n):
+        chain = (0.0, 0.0, 0.0) if s % 2 == 0 else (0.020, 0.008, 0.040) if s % 4 == 1 else (0.010, 0.0, 0.012)
+        settings = {'avionics/servo/pwm-period-s': chain[0], 'avionics/servo/pwm-phase-s': chain[1],
+                    'avionics/servo/delay-s': chain[2]}
+        fdm = jsb(vehicle, 0.001, rotating=False)
+        u = np.zeros((1, core.nu))
+        u[0, core.U['fcs/throttle-cmd-norm[0]']] = 0.6
+        set_inputs(fdm, core, u[0])
+        ic(fdm, 800.0, (17.0, 0, 0.3), (0, 1.0, 0), (0, 0, 0))
+        x = core.zeros(1)
+        capture(fdm, core, x[0], [0.0, 0.0, 0.0])
+        p = core.params(1, settings)
+        e = env_of(fdm, core)
+        core.reset(x, u, p)
+        ref = ServoChainRef(len(servo_props), *chain, 0.001, [u[0, core.U[q]] for q in servo_props])
+        frames = int(seconds / 0.001)
+        changes = sorted(set(int(v) for v in rng.integers(0, frames, 60)))
+        toggles = {int(f): faults[int(rng.integers(0, len(faults)))] for f in rng.integers(0, frames, 6)}
+        err = 0.0
+        for f in range(frames):
+            if f in changes:
+                for name, i in core.U.items():
+                    if 'throttle' not in name and 'trim' not in name:
+                        u[0, i] = rng.uniform(-1.2, 1.2)
+            if f in toggles:
+                k = toggles[f]
+                p[0, core.P[k]] = 1.0 - p[0, core.P[k]]
+                fdm[k] = p[0, core.P[k]]
+            out = ref([u[0, core.U[q]] for q in servo_props])
+            for name, i in core.U.items():
+                fdm[name] = out[servo_props.index(name)] if name in servo_props else float(u[0, i])
+            fdm.run()
+            core.step(x, u, p, e, dt=0.001, k=1, outputs=False)
+            for h in surfaces:
+                err = max(err, abs(x[0, core.X[h]] - fdm[h[5:]]))
+        worst = max(worst, err)
+        cases.append({'servo_chain_s': chain, 'faults_toggled': sorted(set(toggles.values())), 'max_abs_rad': err})
+    return {'n': n, 'seconds_each': seconds, 'limit_rad': SEQUENCE_LIMIT_RAD, 'max_abs_rad': worst,
+            'pass': bool(worst <= SEQUENCE_LIMIT_RAD), 'cases': cases, 'wall_s': round(time.time() - t0, 1)}
+
+
+# -- 3. flights ---------------------------------------------------------------------------------------------------------
 
 def ecef(lat, lon, h):
     a, f = 6378137.0, 1 / 298.257223563
@@ -192,30 +290,39 @@ def ned_of(lat0, lon0, h0):
     return lambda lat, lon, h: R @ (ecef(lat, lon, h) - o)
 
 
-def trim(vehicle, speed=17.0, height=100.0, seconds=30.0):
-    """Fly JSBSim to steady level flight (the controller of tools/vehicle_check.py), then hold the last commands."""
-    fdm = jsb(vehicle, 0.001)
+TRIM_INPUTS = ['fcs/throttle-cmd-norm[0]', 'fcs/elevator-cmd-norm', 'fcs/aileron-cmd-norm', 'fcs/rudder-cmd-norm']
+
+
+def trim(vehicle, core, settings, speed=17.0, height=100.0, seconds=30.0):
+    """Fly JSBSim to steady level flight (the controller of tools/vehicle_check.py, through the servo chain of the
+    settings), then hold the last commands so the actuators and the chain settle on them."""
+    fdm = jsb(vehicle, 0.001, settings=settings)
     ic(fdm, height, (speed, 0, 0), (0, 1.0, 0), (0, 0, 0))
+    servo = core.layout['servo_inputs']
+    ref = ServoChainRef(len(servo), *split(settings)[1], 0.001, [0.0] * len(servo))
     theta_i, thr_i = math.radians(1.0), 0.7
     dt = 0.001
-    for _ in range(int(seconds / dt)):
-        vt = fdm['velocities/vt-fps'] * FT
-        hdot = fdm['velocities/h-dot-fps'] * FT
-        h = fdm['position/h-agl-ft'] * FT
-        theta_i = min(0.26, max(-0.26, theta_i - 0.01 * (speed - vt) * dt))
-        theta_c = min(0.26, max(-0.26, theta_i - 0.02 * (speed - vt)))
-        elev = min(1.0, max(-1.0, 1.0 * (fdm['attitude/theta-rad'] - theta_c) + 0.2 * fdm['velocities/q-rad_sec']))
-        e_h = -hdot + 0.1 * (height - h)
-        thr_i = min(1.0, max(0.0, thr_i + 0.05 * e_h * dt))
-        thr = min(1.0, max(0.0, thr_i + 0.1 * e_h))
-        ail = min(1.0, max(-1.0, -1.0 * fdm['attitude/phi-rad'] - 0.1 * fdm['velocities/p-rad_sec']))
-        rud = min(1.0, max(-1.0, -0.5 * fdm['velocities/r-rad_sec']))
-        fdm['fcs/throttle-cmd-norm'], fdm['fcs/elevator-cmd-norm'] = thr, elev
-        fdm['fcs/aileron-cmd-norm'], fdm['fcs/rudder-cmd-norm'] = ail, rud
+    cmd = {}
+    for k in range(int(seconds / dt) + int(2.0 / dt)):
+        if k < int(seconds / dt):
+            vt = fdm['velocities/vt-fps'] * FT
+            hdot = fdm['velocities/h-dot-fps'] * FT
+            h = fdm['position/h-agl-ft'] * FT
+            theta_i = min(0.26, max(-0.26, theta_i - 0.01 * (speed - vt) * dt))
+            theta_c = min(0.26, max(-0.26, theta_i - 0.02 * (speed - vt)))
+            e_h = -hdot + 0.1 * (height - h)
+            thr_i = min(1.0, max(0.0, thr_i + 0.05 * e_h * dt))
+            cmd = {'fcs/throttle-cmd-norm[0]': min(1.0, max(0.0, thr_i + 0.1 * e_h)),
+                   'fcs/elevator-cmd-norm': min(1.0, max(-1.0, 1.0 * (fdm['attitude/theta-rad'] - theta_c) + 0.2 * fdm['velocities/q-rad_sec'])),
+                   'fcs/aileron-cmd-norm': min(1.0, max(-1.0, -1.0 * fdm['attitude/phi-rad'] - 0.1 * fdm['velocities/p-rad_sec'])),
+                   'fcs/rudder-cmd-norm': min(1.0, max(-1.0, -0.5 * fdm['velocities/r-rad_sec']))}
+        out = ref([cmd[q] for q in servo])
+        for q, v in cmd.items():
+            fdm[q] = out[servo.index(q)] if q in servo else v
         fdm.run()
-    for _ in range(int(1.0 / dt)):   # hold the last commands so the actuators settle on them
-        fdm.run()
-    return fdm
+    trim_u = {n_: 0.0 for n_ in core.U}
+    trim_u.update(cmd)
+    return fdm, trim_u
 
 
 def cases(rng):
@@ -228,98 +335,125 @@ def cases(rng):
         s = [float(sum(0.05 * math.sin(2 * math.pi * f * t + p) for f, p in zip(fr, ph[i]))) for i in range(4)]
         return {'fcs/elevator-cmd-norm': s[0], 'fcs/aileron-cmd-norm': s[1], 'fcs/rudder-cmd-norm': s[2],
                 'fcs/throttle-cmd-norm[0]': 2 * s[3]}
-    return {
-        'hold': (lambda t: {}, None),
-        'elevator_doublet': (doublet('fcs/elevator-cmd-norm', 0.15), None),
-        'aileron_doublet': (doublet('fcs/aileron-cmd-norm', 0.2), None),
-        'rudder_doublet': (doublet('fcs/rudder-cmd-norm', 0.3), None),
-        'throttle_steps': (lambda t: {'fcs/throttle-cmd-norm[0]': 0.3 if 1 <= t < 5 else (-0.4 if 5 <= t < 9 else 0.0)}, None),
-        'multisine': (multisine, None),
-        'crosswind_aileron': (doublet('fcs/aileron-cmd-norm', 0.2), (0.0, 5.0, 0.0)),
+    none = lambda t: {}  # noqa: E731
+    base = {
+        'hold': (none, None, {}),
+        'elevator_doublet': (doublet('fcs/elevator-cmd-norm', 0.15), None, {}),
+        'aileron_doublet': (doublet('fcs/aileron-cmd-norm', 0.2), None, {}),
+        'rudder_doublet': (doublet('fcs/rudder-cmd-norm', 0.3), None, {}),
+        'throttle_steps': (lambda t: {'fcs/throttle-cmd-norm[0]': 0.3 if 1 <= t < 5 else (-0.4 if 5 <= t < 9 else 0.0)}, None, {}),
+        'multisine': (multisine, None, {}),
+        'crosswind_aileron': (doublet('fcs/aileron-cmd-norm', 0.2), (0.0, 5.0, 0.0), {}),
         'pull_to_stall': (lambda t: {'fcs/elevator-cmd-norm': -0.8 if 1 <= t < 4 else 0.0,
-                                     'fcs/throttle-cmd-norm[0]': -0.6 if 1 <= t < 4 else 0.0}, None),
+                                     'fcs/throttle-cmd-norm[0]': -0.6 if 1 <= t < 4 else 0.0}, None, {}),
     }
+    faults = {   # failures switched on during the flight, flown at 1500 m so no case reaches the ground in 20 s
+        'elevator_stuck_in_doublet': (doublet('fcs/elevator-cmd-norm', 0.15), None, {1.5: {'fcs/elevator-servo/malfunction/fail_stuck': 1}}),
+        'rudder_fail_zero': (doublet('fcs/rudder-cmd-norm', 0.3), None, {1.5: {'fcs/rudder-servo/malfunction/fail_zero': 1}}),
+        'aileron_hardover': (none, None, {2.0: {'fcs/aileron-servo/malfunction/fail_hardover': 1}}),
+    }
+    return base, faults
 
 
-def flights(vehicle, core, seed, T=20.0):
-    rng = np.random.default_rng(seed)
-    base = trim(vehicle)
-    names = ['fcs/throttle-cmd-norm[0]', 'fcs/elevator-cmd-norm', 'fcs/aileron-cmd-norm', 'fcs/rudder-cmd-norm']
-    trim_u = {n: base[n] for n in names}
-    for n in core.U:
-        trim_u.setdefault(n, 0.0)
-    out = {'trim': {k: round(v, 4) for k, v in trim_u.items() if k in names}}
-    out['trim']['airspeed_mps'] = round(base['velocities/vt-fps'] * FT, 3)
-    out['trim']['alpha_deg'] = round(base['aero/alpha-deg'], 3)
-    # gravity the core should use here: JSBSim's own at this place, from an instance at rest in the air
-    g0 = jsb(vehicle, 0.001)
-    ic(g0, 100.0, (0, 0, 0), (0, 0, 0), (0, 0, 0))
-    gravity = g0['accelerations/wdot-ft_sec2'] * FT
-    out['gravity_mps2'] = gravity
-    for name, (fn, wind) in cases(rng).items():
-        fdm = trim(vehicle)
-        if wind is not None:
-            for c, w in zip(('north', 'east', 'down'), wind):
-                fdm[f'atmosphere/wind-{c}-fps'] = w / FT
-        lat0, lon0, h0 = fdm['position/lat-geod-deg'], fdm['position/long-gc-deg'], fdm['position/h-sl-ft'] * FT
-        ned = ned_of(lat0, lon0, h0)
-        x0 = core.zeros(1)
-        capture(fdm, core, x0[0], [fdm[f'accelerations/{c}dot-ft_sec2'] * FT for c in 'uvw'])
-        e = env_of(fdm, core)
-        e[0, 3] = gravity
-        if wind is not None:        # JSBSim's total-wind properties update only in its next frame
-            e[0, 0:3] = wind
-        res = {}
-        uarr0 = np.array([[trim_u[n_] for n_ in core.layout['u']]])
-        for dt in (0.001, 0.004):
-            x = x0.copy()
-            core.reset(x, uarr0)    # actuator filters at rest on the trim commands, as JSBSim's after the hold
-            x[0, core.X['aux:udot_mps2']:core.X['aux:udot_mps2'] + 3] = x0[0, core.X['aux:udot_mps2']:core.X['aux:udot_mps2'] + 3]
-            uarr = uarr0.copy()
-            traj_c = []
-            for i in range(int(round(T / dt))):
-                t = i * dt
-                d = fn(t)
-                for n_ in core.U:
-                    uarr[0, core.U[n_]] = min(1.0, max(0.0 if 'throttle' in n_ else -1.0, trim_u[n_] + d.get(n_, 0.0)))
-                y = core.step(x, uarr, e, dt=dt, k=1)
-                tt = (i + 1) * dt
-                if abs(tt / 0.1 - round(tt / 0.1)) < 1e-6:
-                    traj_c.append((round(tt, 3), x[0, 0:3].copy(), x[0, 6:10].copy(), y[0, core.Y['airspeed_mps']], x[0, 10:13].copy(), y[0, core.Y['rpm[0]']]))
-            res[dt] = traj_c
-        # JSBSim
-        traj_j = []
-        for i in range(int(round(T / 0.001))):
-            t = i * 0.001
+def fly_case(vehicle, core, settings, fn, wind, events, gravity, T, height=100.0, dts=(0.001, 0.004)):
+    fdm, trim_u = trim(vehicle, core, settings, height=height)
+    if wind is not None:
+        for c, w in zip(('north', 'east', 'down'), wind):
+            fdm[f'atmosphere/wind-{c}-fps'] = w / FT
+    ned = ned_of(fdm['position/lat-geod-deg'], fdm['position/long-gc-deg'], fdm['position/h-sl-ft'] * FT)
+    x0 = core.zeros(1)
+    capture(fdm, core, x0[0], [fdm[f'accelerations/{c}dot-ft_sec2'] * FT for c in 'uvw'])
+    e = env_of(fdm, core)
+    e[0, 3] = gravity
+    if wind is not None:        # JSBSim's total-wind properties update only in its next frame
+        e[0, 0:3] = wind
+    uarr0 = np.array([[trim_u[n_] for n_ in core.layout['u']]])
+    servo = core.layout['servo_inputs']
+    clamp = lambda n_, v: min(1.0, max(0.0 if 'throttle' in n_ else -1.0, v))  # noqa: E731
+    res = {}
+    for dt in dts:
+        x = x0.copy()
+        p = core.params(1, settings)
+        core.reset(x, uarr0, p)    # actuator filters and servo chain at rest on the trim commands, as JSBSim's after the hold
+        x[0, core.X['aux:udot_mps2']:core.X['aux:udot_mps2'] + 3] = x0[0, core.X['aux:udot_mps2']:core.X['aux:udot_mps2'] + 3]
+        u = uarr0.copy()
+        traj = []
+        for i in range(int(round(T / dt))):
+            t = i * dt
+            for te, ev in events.items():
+                if abs(t - te) < dt / 2:
+                    for k, v in ev.items():
+                        p[0, core.P[k]] = v
             d = fn(t)
             for n_ in core.U:
-                fdm[n_] = min(1.0, max(0.0 if 'throttle' in n_ else -1.0, trim_u[n_] + d.get(n_, 0.0)))
-            fdm.run()
-            tt = (i + 1) * 0.001
+                u[0, core.U[n_]] = clamp(n_, trim_u[n_] + d.get(n_, 0.0))
+            y = core.step(x, u, p, e, dt=dt, k=1)
+            tt = (i + 1) * dt
             if abs(tt / 0.1 - round(tt / 0.1)) < 1e-6:
-                q = euler_to_quat(fdm['attitude/phi-rad'], fdm['attitude/theta-rad'], fdm['attitude/psi-rad'])
-                traj_j.append((round(tt, 3), ned(fdm['position/lat-geod-deg'], fdm['position/long-gc-deg'], fdm['position/h-sl-ft'] * FT),
-                               q, fdm['velocities/vt-fps'] * FT, np.array([fdm[f'velocities/{c}-rad_sec'] for c in 'pqr']),
-                               fdm['propulsion/engine/propeller-rpm']))
-        case = {}
-        for dt, tc in res.items():
-            rows = []
-            for (t, pc, qc, vc, wc, rc), (_, pj, qj, vj, wj, rj) in zip(tc, traj_j):
-                dq = abs(float(np.dot(qc, qj)))
-                rows.append((t, float(np.linalg.norm(pc - pj)), math.degrees(2 * math.acos(min(1.0, dq))), abs(vc - vj),
-                             math.degrees(float(np.max(np.abs(wc - wj)))), abs(rc - rj)))
-            def mx(h, col):
-                return max(r[col] for r in rows if r[0] <= h + 1e-9)
-            case[f'dt_{dt}'] = {f'{h:g}s': {'pos_m': round(mx(h, 1), 3), 'att_deg': round(mx(h, 2), 3),
-                                            'airspeed_mps': round(mx(h, 3), 4), 'rate_dps': round(mx(h, 4), 3),
-                                            'rpm': round(mx(h, 5), 1)} for h in (5.0, 10.0, 20.0)}
-        end = traj_j[-1]
-        case['jsbsim_end'] = {'pos_from_start_m': [round(float(c), 1) for c in end[1]], 'airspeed_mps': round(end[3], 2),
-                              'euler_deg': [round(math.degrees(float(a)), 1) for a in quat_to_euler(end[2])]}
-        out[name] = case
+                traj.append((round(tt, 3), x[0, 0:3].copy(), x[0, 6:10].copy(), y[0, core.Y['airspeed_mps']], x[0, 10:13].copy(), y[0, core.Y['rpm[0]']]))
+        res[dt] = traj
+    ref = ServoChainRef(len(servo), *split(settings)[1], 0.001, [trim_u[q] for q in servo])
+    traj_j = []
+    for i in range(int(round(T / 0.001))):
+        t = i * 0.001
+        for te, ev in events.items():
+            if abs(t - te) < 0.0005:
+                for k, v in ev.items():
+                    fdm[k] = v
+        d = fn(t)
+        cmd = {n_: clamp(n_, trim_u[n_] + d.get(n_, 0.0)) for n_ in core.U}
+        out = ref([cmd[q] for q in servo])
+        for n_, v in cmd.items():
+            fdm[n_] = out[servo.index(n_)] if n_ in servo else v
+        fdm.run()
+        tt = (i + 1) * 0.001
+        if abs(tt / 0.1 - round(tt / 0.1)) < 1e-6:
+            q = euler_to_quat(fdm['attitude/phi-rad'], fdm['attitude/theta-rad'], fdm['attitude/psi-rad'])
+            traj_j.append((round(tt, 3), ned(fdm['position/lat-geod-deg'], fdm['position/long-gc-deg'], fdm['position/h-sl-ft'] * FT),
+                           q, fdm['velocities/vt-fps'] * FT, np.array([fdm[f'velocities/{c}-rad_sec'] for c in 'pqr']),
+                           fdm['propulsion/engine/propeller-rpm']))
+    case = {}
+    for dt, tc in res.items():
+        rows = []
+        for (t, pc, qc, vc, wc, rc), (_, pj, qj, vj, wj, rj) in zip(tc, traj_j):
+            dq = abs(float(np.dot(qc, qj)))
+            rows.append((t, float(np.linalg.norm(pc - pj)), math.degrees(2 * math.acos(min(1.0, dq))), abs(vc - vj),
+                         math.degrees(float(np.max(np.abs(wc - wj)))), abs(rc - rj)))
+
+        def mx(h, col):
+            return max(r[col] for r in rows if r[0] <= h + 1e-9)
+        case[f'dt_{dt}'] = {f'{h:g}s': {'pos_m': round(mx(h, 1), 3), 'att_deg': round(mx(h, 2), 3),
+                                        'airspeed_mps': round(mx(h, 3), 4), 'rate_dps': round(mx(h, 4), 3),
+                                        'rpm': round(mx(h, 5), 1)} for h in (5.0, 10.0, 20.0)}
+    end = traj_j[-1]
+    case['trim'] = {k: round(v, 4) for k, v in trim_u.items() if k in TRIM_INPUTS}
+    case['start_agl_m'] = height
+    case['jsbsim_min_agl_m'] = round(height - max(float(r[1][2]) for r in traj_j), 1)
+    case['jsbsim_end'] = {'pos_from_start_m': [round(float(c), 1) for c in end[1]], 'airspeed_mps': round(end[3], 2),
+                          'euler_deg': [round(math.degrees(float(a)), 1) for a in quat_to_euler(end[2])]}
+    return case
+
+
+def flights(vehicle, core, seed, configs, T=20.0):
+    rng = np.random.default_rng(seed)
+    g0 = jsb(vehicle, 0.001)   # gravity the core should use: JSBSim's own here, from an instance at rest in the air
+    ic(g0, 100.0, (0, 0, 0), (0, 0, 0), (0, 0, 0))
+    gravity = g0['accelerations/wdot-ft_sec2'] * FT
+    out = {'gravity_mps2': gravity, 'configs': {str(c): load_config(c) for c in configs}, 'cases': {}}
+    base, faults = cases(rng)
+    runs = [(name, {}, c) for name, c in base.items()]
+    if configs:
+        both = load_config(*configs)
+        label = '+'.join(Path(c).stem for c in configs)
+        runs += [(f'{label}:{name}', both, base[name]) for name in ('hold', 'elevator_doublet', 'aileron_doublet', 'multisine')]
+    runs += [(name, {}, c) for name, c in faults.items()]
+    for name, settings, (fn, wind, events) in runs:
+        height = 1500.0 if name in faults else 100.0
+        out['cases'][name] = fly_case(vehicle, core, settings, fn, wind, events, gravity, T, height)
+        print(json.dumps({name: out['cases'][name]['dt_0.004']['10s']}), flush=True)
     lim = FLIGHT_LIMITS
     h = f'{lim["horizon_s"]:g}s'
-    worst = {k: max(out[c]['dt_0.004'][h][k] for c in out if isinstance(out[c], dict) and 'dt_0.004' in out[c]) for k in lim['dt_0.004']}
+    worst = {k: max(c['dt_0.004'][h][k] for c in out['cases'].values()) for k in lim['dt_0.004']}
     out['limits'] = lim
     out['worst_dt_0.004_' + h] = worst
     out['pass'] = bool(all(worst[k] <= lim['dt_0.004'][k] for k in worst))
@@ -331,7 +465,10 @@ def main():
     p.add_argument('vehicle')
     p.add_argument('--out', help='default build/fastcore/<vehicle>')
     p.add_argument('--snapshots', type=int, default=300)
+    p.add_argument('--sequences', type=int, default=8)
     p.add_argument('--seed', type=int, default=1)
+    p.add_argument('--config', action='append', default=None,
+                   help='configuration file(s) flown together in the flights (default: every file in <vehicle>/configs)')
     p.add_argument('--skip-flights', action='store_true')
     a = p.parse_args()
     name = Path(a.vehicle).resolve().name
@@ -340,14 +477,17 @@ def main():
     gen.build(out, name)
     core = Core(out)
     import jsbsim
+    configs = a.config if a.config is not None else sorted(str(c) for c in (Path(a.vehicle) / 'configs').glob('*.toml'))
     rep = {'vehicle': name, 'jsbsim': jsbsim.__version__, 'core': core.layout['sources_sha256'],
            'generator_sha256': core.layout['generator_sha256']}
     rep['snapshots'] = snapshots(a.vehicle, core, a.snapshots, a.seed)
     print(json.dumps({'snapshots': {k: rep['snapshots'][k] for k in ('n', 'max_relative_error', 'pass')}}), flush=True)
+    rep['sequences'] = sequences(a.vehicle, core, a.sequences, a.seed)
+    print(json.dumps({'sequences': {k: rep['sequences'][k] for k in ('n', 'max_abs_rad', 'pass')}}), flush=True)
     if not a.skip_flights:
-        rep['flights'] = flights(a.vehicle, core, a.seed)
+        rep['flights'] = flights(a.vehicle, core, a.seed, configs)
         print(json.dumps({'flights_worst': rep['flights']['worst_dt_0.004_10s'], 'pass': rep['flights']['pass']}), flush=True)
-    rep['pass'] = rep['snapshots']['pass'] and rep.get('flights', {'pass': True})['pass']
+    rep['pass'] = rep['snapshots']['pass'] and rep['sequences']['pass'] and rep.get('flights', {'pass': True})['pass']
     (out / 'check.json').write_text(json.dumps(rep, indent=1) + '\n')
     print(json.dumps({'check': str(out / 'check.json'), 'pass': rep['pass']}))
     sys.exit(0 if rep['pass'] else 1)

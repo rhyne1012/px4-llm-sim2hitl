@@ -52,6 +52,7 @@ SGPropertyNode *Vehicle::node(const std::string &property) {
 }
 
 double Vehicle::get(const std::string &property) const { return fdm_->GetPropertyValue(property); }
+bool Vehicle::has(const std::string &property) const { return fdm_->GetPropertyManager()->HasNode(property); }
 void Vehicle::set(const std::string &property, double value) { fdm_->SetPropertyValue(property, value); }
 
 void Vehicle::start(double lat_deg, double lon_deg, double agl_m, double heading_deg) {

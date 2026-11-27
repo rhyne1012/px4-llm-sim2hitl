@@ -39,6 +39,7 @@ class Vehicle {
   Truth truth() const;
 
   double get(const std::string &property) const;
+  bool has(const std::string &property) const;
   void set(const std::string &property, double value);
   // A property node resolved once, for values written every step.
   SGPropertyNode *node(const std::string &property);

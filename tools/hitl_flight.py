@@ -27,7 +27,7 @@ from pathlib import Path
 from pymavlink import mavutil
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from sitl_flight import AUTO, AUTO_LOITER, AUTO_TAKEOFF, decode_param, encode_param, summarize  # noqa: E402
+from sitl_flight import AUTO, AUTO_LOITER, AUTO_TAKEOFF, decode_param, encode_param, simhost_vehicle_args, summarize  # noqa: E402
 
 FORCE_DISARM = 21196
 
@@ -164,8 +164,7 @@ class Hitl:
         sim = [str(Path(self.a.simhost).resolve()), '--vehicle', str(self.vehicle), '--serial', self.a.serial, '--baud', str(self.a.baud),
                '--relay-port', str(self.a.relay_port), '--record', str(self.out / 'simhost.csv'),
                '--agl', str(self.toml['start']['agl_m']), '--heading', str(self.toml['start']['heading_deg'])]
-        for mp in self.toml['actuators']:
-            sim += ['--actuator', f"{mp['channel']}:{mp['property']}:{mp['gain']}:{mp.get('offset', 0.0)}"]
+        sim += simhost_vehicle_args(self.toml, self.a.config, self.a.at)
         self.procs.append(subprocess.Popen(sim, stdout=subprocess.DEVNULL, stderr=open(self.out / 'simhost.log', 'w')))
         self.event('simhost started', cmd=' '.join(sim))
         time.sleep(2)
@@ -302,6 +301,9 @@ def main():
     p.add_argument('--relay-port', type=int, default=14561)
     p.add_argument('--loiter', type=float, default=60.0)
     p.add_argument('--timeout', type=float, default=600.0)
+    p.add_argument('--config', action='append', default=[], help='vehicle configuration file (TOML [set]); repeatable')
+    p.add_argument('--at', action='append', default=[], metavar='T:PROPERTY=VALUE',
+                   help='set a JSBSim property at simulated time T, e.g. an actuator failure; repeatable')
     a = p.parse_args()
     h = Hitl(a)
     result, error, recovered = None, None, None

@@ -9,6 +9,8 @@ airframe = 1033              # PX4's "Plane SITL" (init.d-posix/airframes/1033_j
 params = "px4/sitl.params"   # applied after boot and read back
 
 # HIL_ACTUATOR_CONTROLS channel (0-based) -> JSBSim property; the property gets sum(gain * output + offset).
+# kind "servo" outputs go through the servo signal chain (avionics/servo_chain.h: PWM hold, then delay; off unless a
+# configuration sets avionics/servo/*); "motor" outputs do not.
 # Airframe 1033 outputs: 2 rudder (CS3), 3 left flap, 4 motor, 5 left aileron (CS0), 6 right aileron (CS1),
 # 7 elevator (CS2), 8 right flap.
 # PX4 signs: a positive deflection produces the torque in CA_SV_CSn_TRQ_* (elevator +1 pitch up, rudder +1 yaw right,
@@ -17,26 +19,31 @@ params = "px4/sitl.params"   # applied after boot and read back
 [[actuators]]
 channel = 4
 property = "fcs/throttle-cmd-norm"
+kind = "motor"
 gain = 1.0
 
 [[actuators]]
 channel = 7
 property = "fcs/elevator-cmd-norm"
+kind = "servo"
 gain = -1.0
 
 [[actuators]]
 channel = 5
 property = "fcs/aileron-cmd-norm"
+kind = "servo"
 gain = -0.5
 
 [[actuators]]
 channel = 6
 property = "fcs/aileron-cmd-norm"
+kind = "servo"
 gain = 0.5
 
 [[actuators]]
 channel = 2
 property = "fcs/rudder-cmd-norm"
+kind = "servo"
 gain = 1.0
 
 [start]
