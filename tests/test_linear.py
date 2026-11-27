@@ -65,6 +65,24 @@ class TestLinear(unittest.TestCase):
         failed = {f['item'] for f in json.loads(moved.stdout)['failed']}
         self.assertTrue(any('short_period' in f for f in failed), failed)
 
+    def test_no_check(self):
+        out = self.tmp / 'nocheck.json'
+        r = run(TESTBIRD, '--level', 17, '--linear', 17, '--no-check', '--out', out)
+        self.assertEqual(r.returncode, 0, r.stderr[-800:])
+        self.assertIn('skipped', json.loads(out.read_text())['linear'][0]['check'])
+
+    def test_compare_catches_failed_or_missing_evidence(self):
+        def changed(edit):
+            d = json.loads(self.base.read_text())
+            edit(d)
+            f = self.tmp / 'changed.json'
+            f.write_text(json.dumps(d))
+            return run('--compare', self.base, f).returncode
+        self.assertEqual(changed(lambda d: d['trims'][0].update(converged=False)), 1)
+        self.assertEqual(changed(lambda d: d['linear'][0]['check'].pop('rows')), 1)
+        self.assertEqual(changed(lambda d: d['outputs']['elevator'][0].update(gain=1.0)), 1)
+        self.assertEqual(changed(lambda d: d['trims'].pop()), 1)
+
 
 if __name__ == '__main__':
     unittest.main()
