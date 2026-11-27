@@ -2,7 +2,7 @@
 
 A generated C version of a vehicle's JSBSim model, for work that needs many simulated hours: reinforcement learning, sweeps, Monte Carlo. JSBSim stays the reference; the core is derived from it and checked against it every time it is generated.
 
-Status: v2 draft, 2026-11-27. Verified on Testbird only (`docs/verification.md`).
+Status: v2 draft, 2026-11-27. Verified on Testbird only (`docs/verification.md`). **Optional**: a vehicle uses a fast core only when its training needs one, and only when its JSBSim file stays within the subset below ("Coverage"); the generator refuses anything else. An element is added when a vehicle that needs it is ready for it, with a check that covers it; it is not added ahead of need.
 
 ## Why
 
@@ -49,7 +49,7 @@ description = "battery 10 cm aft: CG x 0.42 m, static margin about 5 %"
 "inertia/pointmass-location-X-inches[0]" = 19.6850394   # 0.50 m
 ```
 
-The same file drives every level: `fastcore.load_config()` reads it for the core (`core.params(n, settings)`), and `tools/sitl_flight.py --config` and `tools/hitl_flight.py --config` pass it to simhost, which sets the JSBSim properties before the start and the servo chain from the `avionics/servo/*` keys. A name the vehicle does not have is an error everywhere: JSBSim would create the property silently. Failures during a flight are scenario events: `--at T:PROPERTY=VALUE` in the flight scripts and simhost, a change of `p` between `step` calls in training.
+The same file drives every level: `fastcore.load_config()` reads it for the core (`core.params(n, settings)`), and `tools/fly.py --config` (through `tools/simhost_args.py`) passes it to simhost, which sets the JSBSim properties before the start and the servo chain from the `avionics/servo/*` keys. A name the vehicle does not have is an error everywhere: JSBSim would create the property silently. Failures during a flight are scenario events: `--at T:PROPERTY=VALUE` in the flight scripts and simhost, a change of `p` between `step` calls in training.
 
 A vehicle exposes experiment knobs as declared properties that its functions multiply in (Testbird: `aero/scale/cm-alpha`, `aero/scale/elevator`), and models what can move as point masses (Testbird's battery, so its CG moves at constant mass). Mass, CG and inertia follow from the point masses in JSBSim's own order of operations.
 

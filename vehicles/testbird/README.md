@@ -18,6 +18,20 @@ The toolkit's fixed-wing test vehicle. It is not a real aircraft, and it never s
 - `Engines/testbird_motor.xml`: the motor (JSBSim `brushless_dc_motor`).
 - `Engines/APC_18x8E.xml`: the propeller, copied unchanged from JSBSim's `engine/` folder (LGPL-2.1). It is APC's PER3 measurement data, converted by JSBSim's `apc_dat_to_jsbsim_xml.py`.
 - `aeromatic/answers.txt`: the first attempt (see below).
+- `vehicle.toml`: how PX4's outputs drive the model, the start position, and the pilot's numbers (`[pilot]`).
+- `configs/`: model configurations (`aft_cg.toml`, `slow_servos.toml`).
+- `recipes/cubeorangeplus_hitl/`: its deploy recipe ([docs/recipes.md](../../docs/recipes.md)): PX4 v1.18.0 plus the Cube Orange+ HIL board variant, no external module; airframe 2100 (its `param set-default` values in the `airframe` section), the control allocation and HIL outputs of PX4's plane SITL airframe, and Testbird's speeds and trim. The image and parameter list are build products (`tools/px4build.py`), not tracked.
+- `commands/loiter.py`, `checks/loiter_check.py`: the test flight: after the pilot's level-off, 60 s in PX4's loiter, judged on the ULog (limits in the check).
+
+## Flying it
+
+```sh
+PY=<python with pymavlink and pyulog>
+"$PY" -B tools/fly.py sitl vehicles/testbird/recipes/cubeorangeplus_hitl --vehicle vehicles/testbird --instance 9
+"$PY" -B tools/fly.py hitl vehicles/testbird/recipes/cubeorangeplus_hitl --vehicle vehicles/testbird --link /dev/serial/by-id/<the FC> --deploy flash
+```
+
+HITL needs the aircraft made safe first (propellers off, ESCs unpowered) and flashes the Cube with Testbird's image. The SITL flight passed on 2026-11-27 (docs/verification.md); the HITL flight through this pipeline has not been flown yet.
 
 ## Where the numbers come from
 

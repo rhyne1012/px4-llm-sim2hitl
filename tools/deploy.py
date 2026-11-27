@@ -33,7 +33,8 @@ then:
 
 Refuses an armed FC, and an FC whose SYS_HITL differs from the recipe's (a HITL recipe goes only onto an FC that is
 already in HITL; --allow-hitl-change when a person has made the aircraft safe: propellers off). Nothing is rolled back
-on a failure: the report keeps the readback from before, which tools/fc_params.py can put back.
+on a failure: the report keeps the readback from before (params_before.json), which `tools/fc.py params-restore --from`
+puts back.
 Report: ~/.cache/px4-llm-sim2hitl/v2/deploy/<UTC>_<recipe>/report.json; the last line printed is its summary.
 """
 import argparse

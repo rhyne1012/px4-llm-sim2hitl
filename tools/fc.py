@@ -6,6 +6,7 @@
     ... sd-list [PATH] | sd-get PATH --out DIR | sd-put PATH FILE | sd-rm PATH
     ... logs | log-get [--id N] --out FILE.ulg
     ... recover [--force-disarm] [--expect-hitl 0|1]
+    ... params-restore --from <readback.json>     put every parameter back as a saved readback had it (exact bytes)
 
 --link is a serial device (a /dev path, at --baud) or a pymavlink UDP address (udpout:127.0.0.1:14612 for simhost's
 MAVLink relay, which serves every peer it heard in the last 10 s; this tool sends a GCS heartbeat every second).
@@ -333,7 +334,10 @@ class FC:
     def set(self, name, kind, value):
         """PARAM_SET with the exact bytes; returns when the FC answers with the same name, type and bytes. That says
         the value is in RAM: a reboot and a readback prove it was saved."""
-        bits = encode(kind, value)
+        return self.set_bits(name, kind, encode(kind, value), value)
+
+    def set_bits(self, name, kind, bits, value=None):
+        """PARAM_SET of these 4 value bytes (see set)."""
         message = mav.MAVLink_param_set_message(*self.target, name.encode(), 0.0, kind)
         answers = []
         for _ in range(PARAM_SET_TRIES):
@@ -347,7 +351,8 @@ class FC:
                     break
                 answers.append((got.param_type, param_bits(got).hex()))
                 if got.param_type == kind and param_bits(got) == bits:
-                    self.record('param set', name=name, type=kind, value=value, bits=bits.hex())
+                    self.record('param set', name=name, type=kind, value=value if value is not None else decode(kind, bits),
+                                bits=bits.hex())
                     return answers
         raise FCError(f'{name}: no matching PARAM_VALUE after {PARAM_SET_TRIES} PARAM_SET (sent {bits.hex()}, '
                       f'answers {answers[-3:]})')
@@ -687,6 +692,8 @@ def main():
     s.add_argument('--id', type=int)
     s.add_argument('--out', required=True)
     s.add_argument('--once', action='store_true', help='read it once (no second read to compare)')
+    s = sub.add_parser('params-restore')
+    s.add_argument('--from', dest='source', required=True, help='a readback file (params-read, or a deploy report\'s params_before.json)')
     s = sub.add_parser('recover')
     s.add_argument('--force-disarm', action='store_true')
     s.add_argument('--expect-hitl', type=int, choices=[0, 1])
@@ -729,6 +736,22 @@ def main():
         if not logs:
             sys.exit('no logs on the FC')
         out = fc.log_download(a.id if a.id is not None else max(logs), a.out, twice=not a.once)
+    elif a.action == 'params-restore':
+        if fc.identity()['armed'] is not False:
+            sys.exit('the FC is armed or silent; refusing')
+        saved = {e['name']: e for e in json.loads(Path(a.source).read_text())['parameters']}
+        now = {e['name']: e for e in fc.read_all(saved)['parameters']}
+        todo = [n for n in sorted(saved) if n in now and (saved[n]['type'], saved[n]['bits']) != (now[n]['type'], now[n]['bits'])]
+        for n in todo:
+            fc.set_bits(n, saved[n]['type'], bytes.fromhex(saved[n]['bits']))
+        if todo:
+            fc.reboot()
+        after = {e['name']: e for e in fc.read_all(saved)['parameters']}
+        still = [n for n in todo if (after.get(n) or {}).get('bits') != saved[n]['bits']]
+        out = {'restored': len(todo) - len(still), 'differed': todo, 'still_different': still,
+               'not_on_fc': sorted(n for n in saved if n not in now)}
+        print(json.dumps(out, default=str))
+        sys.exit(1 if still else 0)
     elif a.action == 'recover':
         out = fc.recover(force_disarm=a.force_disarm, expect_hitl=a.expect_hitl)
     print(json.dumps(out, default=str))
