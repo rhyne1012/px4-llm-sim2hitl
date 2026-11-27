@@ -162,8 +162,7 @@ class Hitl:
     # --- through simhost ---
     def start_simhost(self):
         sim = [str(Path(self.a.simhost).resolve()), '--vehicle', str(self.vehicle), '--serial', self.a.serial, '--baud', str(self.a.baud),
-               '--relay-port', str(self.a.relay_port), '--record', str(self.out / 'simhost.csv'),
-               '--agl', str(self.toml['start']['agl_m']), '--heading', str(self.toml['start']['heading_deg'])]
+               '--relay-port', str(self.a.relay_port), '--record', str(self.out / 'simhost.csv')]
         sim += simhost_vehicle_args(self.toml, self.a.config, self.a.at)
         self.procs.append(subprocess.Popen(sim, stdout=subprocess.DEVNULL, stderr=open(self.out / 'simhost.log', 'w')))
         self.event('simhost started', cmd=' '.join(sim))

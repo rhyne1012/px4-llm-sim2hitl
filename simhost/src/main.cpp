@@ -12,6 +12,17 @@
 // --set PROP=VALUE sets a JSBSim property before the start (configurations: point masses, declared properties, ...);
 // --at T:PROP=VALUE sets one when the simulated time reaches T (scenario events such as actuator failures). Both refuse
 // a property the vehicle does not have, since JSBSim would create it silently.
+//
+// A SITL FC with its own startup (a vehicle repository's flight-controller build on the computer, PX4's
+// simulator_mavlink in UDP mode): --sitl-udp LOCAL:REMOTE for the simulator link and --mavlink-udp LOCAL:REMOTE for its
+// MAVLink instance, whose messages then go to the relay instead of the simulator link's.
+// --relay-port N: every other MAVLink user (a flight script, a pilot, a ground station) on UDP 127.0.0.1:N; messages go
+// to every peer heard in the last 10 s.
+// --simclock FILE / --pilot-sync FILE (lockstep): the simulated time for a pilot process, and the time it lets the
+// simulation run to (16 bytes each, two little-endian uint64: ns, then the CLOCK_MONOTONIC ns of the write). simhost
+// does not step past the pilot's time while the pilot has written within the last second of wall time.
+// --record-property P (repeatable): the properties after the fixed columns of --record (default: the elevator,
+// aileron, rudder and throttle positions, thrust and rpm of a conventional JSBSim aircraft, those it has).
 #include <algorithm>
 #include <csignal>
 #include <chrono>
@@ -20,6 +31,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <fstream>
+#include <functional>
 #include <iomanip>
 #include <iostream>
 #include <map>
@@ -28,6 +40,11 @@
 #include <string>
 #include <thread>
 #include <vector>
+
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <poll.h>
+#include <unistd.h>
 
 #include <simgear/props/props.hxx>
 
@@ -52,8 +69,45 @@ struct Event {
   double value;
 };
 
+// 16 bytes shared with another process through a mapped file (--simclock, --pilot-sync).
+class SharedClock {
+ public:
+  explicit SharedClock(const std::string &path) {
+    fd_ = ::open(path.c_str(), O_RDWR | O_CREAT | O_CLOEXEC, 0644);
+    if (fd_ < 0 || ::ftruncate(fd_, 16) < 0) throw std::runtime_error("cannot open " + path);
+    void *p = ::mmap(nullptr, 16, PROT_READ | PROT_WRITE, MAP_SHARED, fd_, 0);
+    if (p == MAP_FAILED) throw std::runtime_error("cannot map " + path);
+    w_ = static_cast<volatile uint64_t *>(p);
+    w_[0] = 0;
+    w_[1] = 0;
+  }
+  ~SharedClock() {
+    if (w_) ::munmap(const_cast<uint64_t *>(w_), 16);
+    if (fd_ >= 0) ::close(fd_);
+  }
+  void write(uint64_t ns) {
+    w_[0] = ns;
+    w_[1] = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
+        std::chrono::steady_clock::now().time_since_epoch()).count());
+  }
+  uint64_t value() const { return w_[0]; }
+  uint64_t written_ns() const { return w_[1]; }
+
+ private:
+  int fd_ = -1;
+  volatile uint64_t *w_ = nullptr;
+};
+
+std::pair<int, int> port_pair(const std::string &v) {
+  const size_t k = v.find(':');
+  if (k == std::string::npos) throw std::invalid_argument(v);
+  return {std::stoi(v.substr(0, k)), std::stoi(v.substr(k + 1))};
+}
+
 struct Options {
-  std::string vehicle, serial, record, extra;
+  std::string vehicle, serial, record, extra, simclock, pilot_sync;
+  std::pair<int, int> sitl_udp{0, 0}, mavlink_udp{0, 0};
+  std::vector<std::string> record_props;
   std::vector<int> servo_channels;
   double servo_period = 0.0, servo_phase = 0.0, servo_delay = 0.0;
   std::vector<Event> events;
@@ -67,10 +121,11 @@ struct Options {
 
 [[noreturn]] void usage(const char *why) {
   std::fprintf(stderr,
-               "%s\nusage: simhost --vehicle DIR (--sitl-port N [--lockstep] | --serial DEV [--baud B])\n"
+               "%s\nusage: simhost --vehicle DIR (--sitl-port N | --sitl-udp L:R [--mavlink-udp L:R]) [--lockstep [--simclock F --pilot-sync F]]\n"
+               "               | --serial DEV [--baud B])\n"
                "               [--actuator CH:PROP:GAIN[:OFFSET]]... [--servo-channel CH]... [--set PROP=VALUE]...\n"
                "               [--at T:PROP=VALUE]... [--lat D --lon D --agl M --heading D]\n"
-               "               [--duration S] [--record FILE.csv] [--seed N] [--relay-port N (HITL: UDP for other MAVLink users)]\n",
+               "               [--duration S] [--record FILE.csv [--record-property P]...] [--seed N] [--relay-port N]\n",
                why);
   std::exit(2);
 }
@@ -85,6 +140,11 @@ Options parse(int argc, char **argv) {
     };
     if (a == "--vehicle") o.vehicle = next();
     else if (a == "--sitl-port") o.sitl_port = std::stoi(next());
+    else if (a == "--sitl-udp") o.sitl_udp = port_pair(next());
+    else if (a == "--mavlink-udp") o.mavlink_udp = port_pair(next());
+    else if (a == "--simclock") o.simclock = next();
+    else if (a == "--pilot-sync") o.pilot_sync = next();
+    else if (a == "--record-property") o.record_props.push_back(next());
     else if (a == "--lockstep") o.lockstep = true;
     else if (a == "--serial") o.serial = next();
     else if (a == "--baud") o.baud = std::stoi(next());
@@ -125,8 +185,11 @@ Options parse(int argc, char **argv) {
     } else usage(("unknown option " + a).c_str());
   }
   if (o.vehicle.empty()) usage("--vehicle is required");
-  if ((o.sitl_port > 0) == !o.serial.empty()) usage("give exactly one of --sitl-port and --serial");
-  if (o.lockstep && o.sitl_port <= 0) usage("--lockstep needs --sitl-port");
+  if ((o.sitl_port > 0) + (o.sitl_udp.first > 0) + !o.serial.empty() != 1)
+    usage("give exactly one of --sitl-port, --sitl-udp and --serial");
+  if (o.lockstep && !o.serial.empty()) usage("--lockstep is for SITL");
+  if (o.mavlink_udp.first > 0 && o.sitl_udp.first <= 0) usage("--mavlink-udp goes with --sitl-udp");
+  if ((!o.simclock.empty() || !o.pilot_sync.empty()) && !o.lockstep) usage("--simclock and --pilot-sync need --lockstep");
   return o;
 }
 
@@ -177,13 +240,41 @@ int main(int argc, char **argv) {
               << ", HIL " << o.hil_dt * 1e3 << " ms" << (o.lockstep ? ", lockstep" : ", real time") << ", " << o.sets.size()
               << " settings, " << events.size() << " events, servo chain on " << n_servo << " channels (frame "
               << servo_ticks.frame << ", phase " << servo_ticks.phase << ", delay " << servo_ticks.delay << " steps)\n";
-    Link link = o.sitl_port > 0 ? Link::tcp_server(o.sitl_port, 120.0) : Link::serial(o.serial, o.baud);
-    std::cerr << "simhost: connected on " << link.description() << '\n';
-
+    Link link = o.sitl_port > 0 ? Link::tcp_server(o.sitl_port, 120.0)
+                : o.sitl_udp.first > 0 ? Link::udp(o.sitl_udp.first, o.sitl_udp.second) : Link::serial(o.serial, o.baud);
+    std::cerr << "simhost: simulator link " << link.description() << '\n';
+    std::unique_ptr<Link> mav;
+    if (o.mavlink_udp.first > 0) {
+      mav = std::make_unique<Link>(Link::udp(o.mavlink_udp.first, o.mavlink_udp.second));
+      std::cerr << "simhost: MAVLink link " << mav->description() << '\n';
+    }
     std::unique_ptr<Relay> relay;
     if (o.relay_port > 0) {
       relay = std::make_unique<Relay>(o.relay_port);
       std::cerr << "simhost: MAVLink relay on UDP 127.0.0.1:" << o.relay_port << '\n';
+    }
+    std::unique_ptr<SharedClock> simclock, pilot_sync;
+    if (!o.simclock.empty()) simclock = std::make_unique<SharedClock>(o.simclock);
+    if (!o.pilot_sync.empty()) pilot_sync = std::make_unique<SharedClock>(o.pilot_sync);
+
+    // record: fixed columns, then the record properties (by default those of a conventional JSBSim aircraft it has)
+    struct Column {
+      std::string name, property;
+      double scale;
+    };
+    std::vector<Column> columns;
+    if (o.record_props.empty()) {
+      const Column defaults[] = {{"elevator_rad", "fcs/elevator-pos-rad", 1.0}, {"aileron_rad", "fcs/aileron-pos-rad", 1.0},
+                                 {"rudder_rad", "fcs/rudder-pos-rad", 1.0}, {"throttle", "fcs/throttle-pos-norm", 1.0},
+                                 {"thrust_N", "propulsion/engine/thrust-lbs", 4.4482216152605},
+                                 {"rpm", "propulsion/engine/propeller-rpm", 1.0}};
+      for (const Column &c : defaults)
+        if (vehicle.has(c.property)) columns.push_back(c);
+    } else {
+      for (const std::string &p : o.record_props) {
+        if (!vehicle.has(p)) throw std::runtime_error("--record-property: the vehicle has no property " + p);
+        columns.push_back({p, p, 1.0});
+      }
     }
     std::ofstream rec;
     if (!o.record.empty()) {
@@ -191,7 +282,8 @@ int main(int argc, char **argv) {
       rec << "t_s,lat_deg,lon_deg,alt_msl_m,agl_m,roll_deg,pitch_deg,yaw_deg,p_rad_s,q_rad_s,r_rad_s,airspeed_m_s,alpha_deg,"
              "beta_deg,vn_m_s,ve_m_s,vd_m_s,on_ground,armed";
       for (int c = 0; c < 16; ++c) rec << ",ctrl" << c;
-      rec << ",elevator_rad,aileron_rad,rudder_rad,throttle,thrust_N,rpm\n";
+      for (const Column &c : columns) rec << ',' << c.name;
+      rec << '\n';
     }
 
     float controls[16] = {};
@@ -201,10 +293,11 @@ int main(int argc, char **argv) {
     double max_late_ms = 0.0;
     const int gps_every = static_cast<int>(std::lround(profile.gps_period_s / o.hil_dt));
     auto wall_next = std::chrono::steady_clock::now();
-    mavlink_message_t msg;
+    long pilot_waits = 0;
 
+    // Messages of the simulator link: the actuator outputs; to the relay too unless a MAVLink link carries the rest.
     const auto handle = [&](const mavlink_message_t &m) {
-      if (relay) relay->to_peer(m);
+      if (relay && !mav) relay->to_peers(m);
       if (m.msgid != MAVLINK_MSG_ID_HIL_ACTUATOR_CONTROLS) return;
       mavlink_hil_actuator_controls_t a;
       mavlink_msg_hil_actuator_controls_decode(&m, &a);
@@ -213,8 +306,57 @@ int main(int argc, char **argv) {
       answered = true;
       last_answer_us = a.time_usec;
     };
+    const auto handle_mav = [&](const mavlink_message_t &m) {
+      if (relay) relay->to_peers(m);
+    };
+    // Serve every link and the relay until `done` (or the time is up); true if done.
+    uint8_t dgram[2048];
+    const auto service = [&](double timeout_s, const std::function<bool()> &done) {
+      const auto deadline = std::chrono::steady_clock::now() + std::chrono::duration<double>(timeout_s);
+      for (;;) {
+        link.drain(handle);
+        if (mav) mav->drain(handle_mav);
+        if (done && done()) return true;
+        const auto left = std::chrono::duration_cast<std::chrono::microseconds>(deadline - std::chrono::steady_clock::now()).count();
+        if (left <= 0 || g_stop) return false;
+        pollfd p[3];
+        int n = 0, i_mav = -1, i_relay = -1;
+        p[n++] = {link.fd(), POLLIN, 0};
+        if (mav) { i_mav = n; p[n++] = {mav->fd(), POLLIN, 0}; }
+        if (relay) { i_relay = n; p[n++] = {relay->fd(), POLLIN, 0}; }
+        timespec ts{static_cast<time_t>(left / 1000000), static_cast<long>(left % 1000000) * 1000};
+        const int r = ::ppoll(p, static_cast<nfds_t>(n), &ts, nullptr);
+        if (r < 0) {
+          if (errno == EINTR) continue;
+          throw std::runtime_error("poll failed");
+        }
+        if (r == 0) continue;
+        if (p[0].revents & POLLIN) link.pump(handle);
+        else if (p[0].revents & (POLLERR | POLLHUP)) throw std::runtime_error(link.description() + " lost");
+        if (i_mav >= 0 && (p[i_mav].revents & (POLLIN | POLLERR))) mav->pump(handle_mav);
+        if (i_relay >= 0 && (p[i_relay].revents & POLLIN)) {
+          const size_t got = relay->from_peer(dgram, sizeof dgram);
+          if (got) (mav ? *mav : link).send_raw(dgram, got);
+        }
+      }
+    };
 
     while (!g_stop) {
+      // lockstep with a pilot: do not step past the time it allows while it keeps writing (it gates the simulation)
+      if (pilot_sync && answered) {
+        const uint64_t next_ns = (t_us + static_cast<uint64_t>(std::lround(o.hil_dt * 1e6))) * 1000;
+        const auto pilot_holds = [&]() {
+          const uint64_t w = pilot_sync->written_ns();
+          if (w == 0 || pilot_sync->value() >= next_ns) return false;
+          const uint64_t now = static_cast<uint64_t>(std::chrono::duration_cast<std::chrono::nanoseconds>(
+              std::chrono::steady_clock::now().time_since_epoch()).count());
+          return now - w < 1000000000ULL;
+        };
+        if (pilot_holds()) {
+          ++pilot_waits;
+          while (!g_stop && pilot_holds()) service(0.0005, nullptr);
+        }
+      }
       while (next_event < events.size() && events[next_event].t <= static_cast<double>(t_us) * 1e-6 + 1e-9) {
         const Event &e = events[next_event++];
         vehicle.set(e.property, e.value);
@@ -237,6 +379,7 @@ int main(int argc, char **argv) {
       }
       t_us += static_cast<uint64_t>(std::lround(o.hil_dt * 1e6));
       ++steps;
+      if (simclock) simclock->write(t_us * 1000);
       const Truth t = vehicle.truth();
 
       mavlink_message_t out;
@@ -257,10 +400,8 @@ int main(int argc, char **argv) {
             << t.airspeed_m_s << ',' << t.alpha_rad * D << ',' << t.beta_rad * D << ',' << t.v_ned_m_s[0] << ','
             << t.v_ned_m_s[1] << ',' << t.v_ned_m_s[2] << ',' << t.on_ground << ',' << armed;
         for (float c : controls) rec << ',' << c;
-        rec << ',' << vehicle.get("fcs/elevator-pos-rad") << ',' << vehicle.get("fcs/aileron-pos-rad") << ','
-            << vehicle.get("fcs/rudder-pos-rad") << ',' << vehicle.get("fcs/throttle-pos-norm") << ','
-            << vehicle.get("propulsion/engine/thrust-lbs") * 4.4482216152605 << ','
-            << vehicle.get("propulsion/engine/propeller-rpm") << '\n';
+        for (const Column &c : columns) rec << ',' << vehicle.get(c.property) * c.scale;
+        rec << '\n';
       }
       if (steps % static_cast<long>(std::lround(5.0 / o.hil_dt)) == 0)
         std::cerr << "simhost: t " << t.time_s << " s, agl " << t.alt_agl_m << " m, airspeed " << t.airspeed_m_s
@@ -269,15 +410,7 @@ int main(int argc, char **argv) {
 
       if (o.lockstep && answered) {
         // Lockstep: wait for PX4's answer to this step (its time follows the HIL_SENSOR time).
-        bool got = false;
-        while (!g_stop && !got) {
-          if (!link.receive(&msg, 2.0)) {
-            ++waits_timed_out;
-            break;
-          }
-          handle(msg);
-          got = last_answer_us >= t_us;
-        }
+        if (!service(2.0, [&]() { return last_answer_us >= t_us; })) ++waits_timed_out;
       } else {
         // Real time (HITL, or SITL before PX4 first answers): keep the HIL period on the wall clock, serve what comes.
         // A step is late when its sensor message leaves more than one HIL period after its slot.
@@ -289,16 +422,13 @@ int main(int argc, char **argv) {
         }
         wall_next += std::chrono::microseconds(static_cast<long>(std::lround(o.hil_dt * 1e6)));
         const double left = std::chrono::duration<double>(wall_next - std::chrono::steady_clock::now()).count();
-        uint8_t dgram[2048];
-        link.serve(left > 0 ? left : 0.0, relay ? relay->fd() : -1, handle, [&]() {
-          const size_t n = relay->from_peer(dgram, sizeof dgram);
-          if (n) link.send_raw(dgram, n);
-        });
+        service(left > 0 ? left : 0.0, nullptr);
       }
       if (o.duration > 0 && t.time_s >= o.duration) break;
     }
     std::cerr << "simhost: stopped at " << steps * o.hil_dt << " s simulated, " << waits_timed_out
-              << " lockstep waits timed out, " << late_steps << " late steps (max lateness " << max_late_ms << " ms)\n";
+              << " lockstep waits timed out, " << late_steps << " late steps (max lateness " << max_late_ms << " ms), "
+              << pilot_waits << " waits for the pilot\n";
     return 0;
   } catch (const std::exception &e) {
     std::cerr << "simhost: " << e.what() << '\n';

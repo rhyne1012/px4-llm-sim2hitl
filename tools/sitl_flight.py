@@ -44,13 +44,22 @@ def decode_param(raw, ptype):
 
 
 def simhost_vehicle_args(toml, configs=(), events=()):
-    """simhost arguments for a vehicle: its actuator map and servo channels (vehicle.toml), its configuration files
-    (JSBSim property and servo-chain settings, applied before the start), and scenario events (T:PROPERTY=VALUE)."""
-    args = []
+    """simhost arguments for a vehicle: its actuator map and servo channels, start position and record properties
+    (vehicle.toml), its configuration files (JSBSim property and servo-chain settings, applied before the start), and
+    scenario events (T:PROPERTY=VALUE)."""
+    args, servo = [], []
     for m in toml['actuators']:
         args += ['--actuator', f"{m['channel']}:{m['property']}:{m['gain']}:{m.get('offset', 0.0)}"]
-        if m.get('kind') == 'servo':
-            args += ['--servo-channel', str(m['channel'])]
+        if m.get('kind') == 'servo' and m['channel'] not in servo:
+            servo.append(m['channel'])
+    for ch in servo:
+        args += ['--servo-channel', str(ch)]
+    start = toml.get('start', {})
+    for key, opt in (('lat_deg', '--lat'), ('lon_deg', '--lon'), ('agl_m', '--agl'), ('heading_deg', '--heading')):
+        if key in start:
+            args += [opt, repr(float(start[key]))]
+    for prop in toml.get('record', {}).get('properties', []):
+        args += ['--record-property', prop]
     for k, v in load_config(*configs).items():
         args += ['--set', f'{k}={v!r}']
     for e in events:
@@ -77,8 +86,7 @@ class Flight:
     def start(self):
         i = self.a.instance
         sim = [str(Path(self.a.simhost).resolve()), '--vehicle', str(self.vehicle), '--sitl-port', str(4560 + i), '--lockstep',
-               '--record', str(self.out / 'simhost.csv'), '--agl', str(self.toml['start']['agl_m']),
-               '--heading', str(self.toml['start']['heading_deg'])]
+               '--record', str(self.out / 'simhost.csv')]
         sim += simhost_vehicle_args(self.toml, self.a.config, self.a.at)
         self.procs.append(subprocess.Popen(sim, stdout=subprocess.DEVNULL, stderr=open(self.out / 'simhost.log', 'w')))
         build = Path(self.a.px4_build).resolve()

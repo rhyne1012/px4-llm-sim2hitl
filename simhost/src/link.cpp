@@ -81,8 +81,29 @@ Link Link::serial(const std::string &device, int baud) {
   return Link(fd, "serial:" + device);
 }
 
+Link Link::udp(int local_port, int remote_port) {
+  const int s = ::socket(AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0);
+  if (s < 0) throw sys_error("socket");
+  sockaddr_in addr{};
+  addr.sin_family = AF_INET;
+  addr.sin_port = htons(static_cast<uint16_t>(local_port));
+  addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+  if (::bind(s, reinterpret_cast<sockaddr *>(&addr), sizeof addr) < 0) {
+    ::close(s);
+    throw sys_error("bind UDP port " + std::to_string(local_port));
+  }
+  addr.sin_port = htons(static_cast<uint16_t>(remote_port));
+  if (::connect(s, reinterpret_cast<sockaddr *>(&addr), sizeof addr) < 0) {
+    ::close(s);
+    throw sys_error("connect UDP port " + std::to_string(remote_port));
+  }
+  static int next_channel = 1;  // the parser channel of each UDP link (a second link must not share a parser)
+  return Link(s, "udp:" + std::to_string(local_port) + "->" + std::to_string(remote_port), next_channel++);
+}
+
 Link::Link(Link &&o) noexcept
-    : fd_(o.fd_), description_(std::move(o.description_)), status_(o.status_), buffered_(o.buffered_), read_pos_(o.read_pos_) {
+    : fd_(o.fd_), description_(std::move(o.description_)), channel_(o.channel_), status_(o.status_), buffered_(o.buffered_),
+      read_pos_(o.read_pos_) {
   std::memcpy(buffer_, o.buffer_, sizeof buffer_);
   o.fd_ = -1;
 }
@@ -109,7 +130,7 @@ bool Link::receive(mavlink_message_t *msg, double timeout_s) {
   const auto deadline = std::chrono::steady_clock::now() + std::chrono::duration<double>(timeout_s);
   for (;;) {
     while (read_pos_ < buffered_) {
-      if (mavlink_parse_char(MAVLINK_COMM_0, buffer_[read_pos_++], msg, &status_)) return true;
+      if (mavlink_parse_char(static_cast<uint8_t>(channel_), buffer_[read_pos_++], msg, &status_)) return true;
     }
     const auto left = std::chrono::duration_cast<std::chrono::milliseconds>(deadline - std::chrono::steady_clock::now()).count();
     pollfd p{fd_, POLLIN, 0};
@@ -136,7 +157,7 @@ void Link::serve(double timeout_s, int extra_fd, const std::function<void(const 
   mavlink_message_t msg;
   for (;;) {
     while (read_pos_ < buffered_) {
-      if (mavlink_parse_char(MAVLINK_COMM_0, buffer_[read_pos_++], &msg, &status_)) on_message(msg);
+      if (mavlink_parse_char(static_cast<uint8_t>(channel_), buffer_[read_pos_++], &msg, &status_)) on_message(msg);
     }
     const auto left = std::chrono::duration_cast<std::chrono::microseconds>(deadline - std::chrono::steady_clock::now()).count();
     if (left <= 0) return;
@@ -162,6 +183,26 @@ void Link::serve(double timeout_s, int extra_fd, const std::function<void(const 
       throw std::runtime_error(description_ + " lost");
     }
   }
+}
+
+void Link::drain(const std::function<void(const mavlink_message_t &)> &on_message) {
+  mavlink_message_t msg;
+  while (read_pos_ < buffered_) {
+    if (mavlink_parse_char(static_cast<uint8_t>(channel_), buffer_[read_pos_++], &msg, &status_)) on_message(msg);
+  }
+}
+
+void Link::pump(const std::function<void(const mavlink_message_t &)> &on_message) {
+  drain(on_message);
+  const ssize_t n = ::read(fd_, buffer_, sizeof buffer_);
+  if (n == 0 && description_.rfind("udp:", 0) != 0) throw std::runtime_error(description_ + " closed by the peer");
+  if (n < 0) {
+    if (errno == EINTR || errno == EAGAIN || errno == ECONNREFUSED) return;  // UDP: the peer is not there yet
+    throw sys_error("read " + description_);
+  }
+  buffered_ = static_cast<int>(n);
+  read_pos_ = 0;
+  drain(on_message);
 }
 
 void Link::send_raw(const uint8_t *data, size_t n) {
@@ -192,11 +233,13 @@ Relay::~Relay() {
   if (fd_ >= 0) ::close(fd_);
 }
 
-void Relay::to_peer(const mavlink_message_t &msg) {
-  if (!has_peer_) return;
+void Relay::to_peers(const mavlink_message_t &msg) {
+  if (peers_.empty()) return;
   uint8_t buf[MAVLINK_MAX_PACKET_LEN];
   const uint16_t n = mavlink_msg_to_send_buffer(buf, &msg);
-  ::sendto(fd_, buf, n, 0, reinterpret_cast<const sockaddr *>(peer_), sizeof(sockaddr_in));
+  const auto now = std::chrono::steady_clock::now();
+  for (const Peer &p : peers_)
+    if (now - p.seen < kPeerTimeout) ::sendto(fd_, buf, n, 0, reinterpret_cast<const sockaddr *>(p.addr), sizeof(sockaddr_in));
 }
 
 size_t Relay::from_peer(uint8_t *buf, size_t cap) {
@@ -204,8 +247,19 @@ size_t Relay::from_peer(uint8_t *buf, size_t cap) {
   socklen_t len = sizeof from;
   const ssize_t n = ::recvfrom(fd_, buf, cap, 0, reinterpret_cast<sockaddr *>(&from), &len);
   if (n <= 0) return 0;
-  std::memcpy(peer_, &from, sizeof from);
-  has_peer_ = true;
+  const auto now = std::chrono::steady_clock::now();
+  bool known = false;
+  for (Peer &p : peers_)
+    if (std::memcmp(p.addr, &from, sizeof from) == 0) {
+      p.seen = now;
+      known = true;
+    }
+  if (!known) {
+    Peer p{};
+    std::memcpy(p.addr, &from, sizeof from);
+    p.seen = now;
+    peers_.push_back(p);
+  }
   return static_cast<size_t>(n);
 }
 
