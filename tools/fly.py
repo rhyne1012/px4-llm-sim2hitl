@@ -398,6 +398,9 @@ class Run:
             fc.close()
 
     def sitl_log(self):
+        if not self.started_sitl:   # the logs seen before the start were never noted: none of them is this run's
+            self.event('ulog', problem='the SITL FC did not start: there is no log of this run')
+            return None
         new = sorted(self.sitl_logs() - self.logs_seen, key=lambda p: p.stat().st_mtime)
         if not new:
             self.event('ulog', problem='no new FC log: the flight wrote none (not armed?)')

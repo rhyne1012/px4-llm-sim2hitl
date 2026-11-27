@@ -302,7 +302,10 @@ def build_problems(recipe, build):
         if name in build['modules'] and module_files(recipe.repo, name) != build['modules'][name]:
             problems.append(f'module {name} changed')
     for p in build['patches']:
-        path = Path(p['file']) if Path(p['file']).is_absolute() else recipe.repo / p['file']
+        if p['file'].startswith('toolkit:'):   # the toolkit's own SITL patches (px4/patches/sitl/)
+            path = TOOLKIT / p['file'][len('toolkit:'):]
+        else:
+            path = Path(p['file']) if Path(p['file']).is_absolute() else recipe.repo / p['file']
         if not path.is_file() or sha256(path) != p['sha256']:
             problems.append(f'patch {p["file"]} changed or missing')
     px4 = Path(build['binary']['path'])
