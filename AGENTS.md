@@ -98,7 +98,7 @@ The table is the upper bound, not a list to run every time: say which behaviours
 | Changed | Run |
 |---|---|
 | simhost, avionics (`simhost/`, `avionics/`) | `tests/test_simhost_*.py`; Testbird's recipe in SITL (`tools/fly.py sitl vehicles/testbird/recipes/cubeorangeplus_hitl`); HITL on a flight controller when timing or the serial link may be affected |
-| the fast core (`fastcore/`) | `fastcore/check.py` and `fastcore/bench.py` for Testbird |
+| the fast core (`fastcore/`) | `fastcore/check.py` and `fastcore/bench.py` for Testbird, and for each vehicle repository that uses a core (through the local link) |
 | a vehicle definition (`vehicles/`) | `tools/vehicle_check.py`, `tools/linear.py` (its check), then its SITL flight |
 | trims and linear models (`tools/linear.py`, `tools/linear_model.m`) | `tests/test_linear.py`; `linear_model.m` in MATLAB on its output |
 | deploy and the flight-controller link (`tools/deploy.py`, `fc.py`, `mavftp.py`, `recipe.py`, `px4build.py`) | a deploy plan on a flight controller; `--reuse` when writes changed; a firmware build that reproduces a recorded identity when the build changed |
