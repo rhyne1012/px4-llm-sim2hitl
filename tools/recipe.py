@@ -23,6 +23,10 @@ from pathlib import Path
 KINDS = {'Int32': 6, 'Float': 9}   # PX4 parameters.json type -> MAVLink param_type
 SECTIONS = ['airframe', 'boot', 'verify_only', 'set']
 INT32 = (-2 ** 31, 2 ** 31 - 1)
+# Parameters PX4 itself rewrites, and the exact value it writes from the default. PX4 v1.18.0 EKF2 writes EKF2_SENS_EN
+# at every disarm (src/modules/ekf2/EKF2.cpp, syncSensEnParam from the disarm edge): it sets only the GNSS 0 bit for GPS,
+# so the default 8191 becomes 8189 after the first flight. Such a value is reported (px4_rewritten), not a failure.
+PX4_REWRITES = {'EKF2_SENS_EN': lambda default: int(default) & ~0b10}
 
 
 def sha256(path):
@@ -137,7 +141,8 @@ class Recipe:
         owned = set(self.owned(firmware))
         expected = self.managed()
         report = {k: [] for k in ('local_mismatch', 'identity', 'structure', 'wrong_value', 'not_default',
-                                  'unknown_name', 'not_read', 'not_in_firmware', 'fc_owned_set_changed', 'redundant')}
+                                  'unknown_name', 'not_read', 'not_in_firmware', 'fc_owned_set_changed', 'redundant',
+                                  'px4_rewritten')}
         report['local_mismatch'] = self.local_problems()
         version = readback.get('autopilot_version')
         e = self.firmware_info.get('embedded') or {}
@@ -188,7 +193,11 @@ class Recipe:
                 if got is None or not same(kind, got, want):
                     report['wrong_value'].append({'name': name, 'section': section, 'fc': got, 'expected': want})
             elif got is None or not same(kind, got, entry.get('default', 0)):
-                report['not_default'].append({'name': name, 'fc': got, 'default': entry.get('default', 0)})
+                default = entry.get('default', 0)
+                if name in PX4_REWRITES and got is not None and same(kind, got, PX4_REWRITES[name](default)):
+                    report['px4_rewritten'].append({'name': name, 'fc': got, 'default': default})
+                else:
+                    report['not_default'].append({'name': name, 'fc': got, 'default': default})
         failed = (report['local_mismatch'] or report['wrong_value'] or report['not_default']
                   or any(x['kind'] == 'fail' for x in report['identity']))
         incomplete = (report['structure'] or report['not_read'] or report['not_in_firmware'] or report['unknown_name']

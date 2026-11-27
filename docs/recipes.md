@@ -83,7 +83,7 @@ The check (`tools/recipe.py`, `Recipe.check`) compares a full readback with thes
 
 A `set` value equal to the firmware default is reported as `redundant` (harmless).
 
-PX4 itself writes some parameters that a recipe does not state. EKF2 writes `EKF2_SENS_EN` back without bit 1 (GNSS 1) when a sensor is switched by command (PX4 v1.18 `EKF2::syncSensEnParam`), and an output function change sets that output's PWM limits. `deploy.py` writes `set` values again when PX4 changed them; `--reset-unmanaged` also writes any other parameter back to its default.
+PX4 itself writes some parameters that a recipe does not state. EKF2 writes `EKF2_SENS_EN` at every disarm and sets only the GNSS 0 bit for GPS, so the default 8191 becomes 8189 after the first flight (PX4 v1.18 `EKF2::syncSensEnParam`); the check reports exactly that value as `px4_rewritten`, not as a failure (`PX4_REWRITES` in `tools/recipe.py`). An output function change sets that output's PWM limits; `deploy.py` writes `set` values again when PX4 changed them. `--reset-unmanaged` writes any other parameter that differs back to its default.
 
 ### SD files
 
