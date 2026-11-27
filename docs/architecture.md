@@ -65,6 +65,10 @@ Custom flight-control code lives in the vehicle repository as a PX4 external mod
 
 The same core runs in the algorithm-level tests, in training, in SITL, in HITL and in flight.
 
+### Fast core
+
+For training and other sim-bound work, `fastcore/gen.py` turns a vehicle's JSBSim folder into a C core with a C and Python interface: the vehicle's own parts (aerodynamic functions and tables, flight-control components, mass, propulsion constants) are translated, and the shared physics is written once. JSBSim stays the reference: `fastcore/check.py` compares every generated core with JSBSim, exactly at the level of forces and moments and within stated limits in flight. The generator lives here; a generated core is a build product of the vehicle repository that uses it. See `fastcore/README.md`.
+
 ### Test cases
 
 A test case is data and has three parts:
@@ -121,10 +125,11 @@ Several vehicle repositories can share one computer. A machine-wide registry and
 | JSBSim has no RK4 integrator | Adams-Bashforth 2 with 1 kHz substeps |
 | Propeller thrust uses only the axial inflow (no rotor drag in edgewise flight) | aerodynamic functions in the vehicle definition (multirotors) |
 | `execrate` has no phase, so PWM hold timing cannot be modelled in JSBSim | avionics layer |
+| JSBSim at 1 kHz is too slow for sim-bound training (SkyTalon PPO: 7.4× as long) | the fast core (`fastcore/`), generated from the JSBSim definition |
 
 ## Not in scope
 
-- A physics engine of our own.
+- A physics engine of our own. The fast core is a translation of a JSBSim definition, checked against JSBSim; it adds no physics of its own.
 - Flight-control algorithms. They live in vehicle repositories.
 - Training frameworks. Training repositories pin a vehicle repository and hand back artifacts.
 - Real-flight operations beyond records and checks.

@@ -10,6 +10,7 @@ Status: v2 draft. These rules apply to any agent working in this repository. The
 ## Upstream projects
 
 - Use PX4 and JSBSim as released, at the locked versions. Do not fork or patch them. If something is missing, add it beside them: in the simulation host, in the avionics layer or in a vehicle definition.
+- The fast core (`fastcore/`) is generated from a vehicle's JSBSim definition. Do not edit a generated core; change the definition or the generator. Train only on a core whose `fastcore/check.py` passed for the same vehicle files.
 - Before writing a component, check whether the upstream project already has one. Use it if it fits, and record why if it does not; for example, `vehicles/testbird/README.md` records why AeromatiC++ and FGTrim were not used.
 
 ## Evidence

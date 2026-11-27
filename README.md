@@ -56,6 +56,7 @@ Any vehicle JSBSim can describe is in scope, for example fixed-wing aircraft, mu
 - **Deployment pipeline.** Build → flash → identity check → parameters → boot file → HITL → flight-controller log, in one command.
 - **Test cases.** One format for scenarios, checks and records, used at the algorithm level, in SITL, in HITL and in flight.
 - **Anchor.** The recorded reference behaviour of a vehicle, locked; changing it requires a person's approval.
+- **Fast core.** A C version of a vehicle's JSBSim model, generated from its definition and checked against JSBSim, for training and other work that needs many simulated hours.
 - **Machine resources.** When several vehicle repositories share one computer, flight controllers, SITL instances and PX4 source trees are coordinated between them.
 - **Vehicle generator.** Creates a new vehicle repository.
 
