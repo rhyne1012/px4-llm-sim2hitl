@@ -4,7 +4,7 @@
   "firmware": "firmware/firmware.json",
   "firmware_params": {
     "file": "firmware/parameters.json.xz",
-    "sha256": null
+    "sha256": "6f982d6740711e898ca43304934908a660b9611a8cf1b522eac5bdc68c20d693"
   },
   "fc_owned": {
     "patterns": [
