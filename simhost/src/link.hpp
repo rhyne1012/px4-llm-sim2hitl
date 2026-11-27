@@ -36,6 +36,7 @@ class Link {
   // Hand the messages already buffered to on_message.
   void drain(const std::function<void(const mavlink_message_t &)> &on_message);
   int fd() const { return fd_; }
+  bool is_udp() const { return description_.rfind("udp:", 0) == 0; }
   const std::string &description() const { return description_; }
 
  private:

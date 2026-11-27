@@ -331,7 +331,8 @@ int main(int argc, char **argv) {
           throw std::runtime_error("poll failed");
         }
         if (r == 0) continue;
-        if (p[0].revents & POLLIN) link.pump(handle);
+        // UDP: an error is the peer's port not open yet (ICMP refused); reading clears it
+        if ((p[0].revents & POLLIN) || (link.is_udp() && (p[0].revents & POLLERR))) link.pump(handle);
         else if (p[0].revents & (POLLERR | POLLHUP)) throw std::runtime_error(link.description() + " lost");
         if (i_mav >= 0 && (p[i_mav].revents & (POLLIN | POLLERR))) mav->pump(handle_mav);
         if (i_relay >= 0 && (p[i_relay].revents & POLLIN)) {

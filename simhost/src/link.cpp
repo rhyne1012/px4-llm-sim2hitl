@@ -120,6 +120,7 @@ void Link::send(const mavlink_message_t &msg) {
     const ssize_t w = ::write(fd_, buf + done, n - done);
     if (w < 0) {
       if (errno == EINTR) continue;
+      if (is_udp() && errno == ECONNREFUSED) return;  // the peer's port not open yet
       throw sys_error("write " + description_);
     }
     done += static_cast<size_t>(w);
@@ -211,6 +212,7 @@ void Link::send_raw(const uint8_t *data, size_t n) {
     const ssize_t w = ::write(fd_, data + done, n - done);
     if (w < 0) {
       if (errno == EINTR) continue;
+      if (is_udp() && errno == ECONNREFUSED) return;
       throw sys_error("write " + description_);
     }
     done += static_cast<size_t>(w);
