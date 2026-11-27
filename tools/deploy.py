@@ -12,7 +12,13 @@ then:
    patches or modules changed). An old boot file that is not the recipe's is removed first: the new firmware runs it
    on its first boot. PX4's own uploader (<PX4 tree>/Tools/px4_uploader.py) writes the image, with one retry for a
    board left in its bootloader. Then the FC must report the recipe's identity (board, PX4 hash, NuttX hash), which
-   is recorded in firmware.json "flashed". Without --flash, the FC must already report it.
+   is recorded in firmware.json "flashed", and the board record (~/.cache/px4-llm-sim2hitl/v2/boards/<uid>.json)
+   notes which image went onto this board.
+   --reuse needs proof that the board already runs this recipe's image. The identity the FC reports is not enough:
+   it names the PX4 and NuttX commits only, so two recipes with the same patches but different external modules (or
+   a changed module) report the same identity. So --reuse requires the image to be current (built from the recipe's
+   present patches and modules), the identity to match, and the board record of this board (its uid) to name this
+   image's SHA-256. A board flashed by another tool has no such record: flash it once with --flash.
 2. Parameters. Only the recipe's "set" values are written, each confirmed by the FC with the same bytes. PX4 changes
    some parameters itself after others (an output function sets its PWM limits), so after the writes everything is
    read again and what still differs is written again (at most three rounds). A parameter the recipe does not state
@@ -48,6 +54,7 @@ from fc import FC, FCError  # noqa: E402
 from recipe import KINDS, Recipe, load_firmware_params  # noqa: E402
 
 CACHE = Path(os.environ.get('XDG_CACHE_HOME') or Path.home() / '.cache') / 'px4-llm-sim2hitl' / 'v2' / 'deploy'
+BOARDS = CACHE.parent / 'boards'   # <uid>.json: the image the toolkit last flashed onto that board
 SD_FILES = (mavftp.BOOT_FILE, mavftp.LOGGER_TOPICS)
 FUNCTION = re.compile(r'_FUNC\d+$')
 SETTLE_S = 1.5     # PX4 sets an output's PWM values up to about 1 s after its function changes
@@ -110,6 +117,28 @@ class Deploy:
             problems.append(f'NuttX hash {version.get("os_hash_prefix")}, recipe {e["nuttx_git_hash"][:16]}')
         return problems
 
+    def board_record(self, uid):
+        path = BOARDS / f'{uid}.json'
+        return json.loads(path.read_text()) if path.is_file() else None
+
+    def reuse_problems(self, version):
+        """Why the FC cannot be taken to run this recipe's image as it is (empty: it does)."""
+        r = self.recipe
+        problems = list(self.identity_problems(version))
+        wanted, why = px4build.needs_build(r.repo, r.dir)
+        if wanted:
+            problems.append(f'the image is not built from the recipe as it is now ({why})')
+        problems += r.local_problems()
+        image = (r.firmware_info.get('outputs') or {}).get('firmware', {}).get('sha256')
+        record = self.board_record(version.get('uid'))
+        if record is None:
+            problems.append(f'no record of what the toolkit flashed onto board {version.get("uid")}: flash it once '
+                            '(--flash)')
+        elif record.get('image_sha256') != image:
+            problems.append(f'board {version.get("uid")} was last flashed with {record.get("recipe")} '
+                            f'(image {str(record.get("image_sha256"))[:12]}), not this recipe\'s image {str(image)[:12]}')
+        return problems
+
     def safe_to_write(self, version):
         if version.get('armed') is not False:
             raise FCError('the FC is armed (or its heartbeat says nothing): refusing to write')
@@ -135,6 +164,7 @@ class Deploy:
         sd = self.sd_state()
         writes = [w for w in check.get('wrong_value', []) if w['section'] == 'set']
         self.step('plan', 'PASS', fc=version, fc_runs_recipe_firmware=not self.identity_problems(version),
+                  reuse_problems=self.reuse_problems(version),
                   identity_problems=self.identity_problems(version), build=('needed: ' + why) if wanted else why,
                   readback=str(path), check_verdict=check['verdict'], writes=len(writes),
                   checked_not_written=[w for w in check.get('wrong_value', []) if w['section'] != 'set'],
@@ -191,8 +221,15 @@ class Deploy:
                            'attempts': len(attempts),
                            'after': {k: version.get(k) for k in ('px4_version', 'git_hash_prefix', 'os_hash_prefix',
                                                                  'board_version')},
+                           'uid': version.get('uid'), 'image_sha256': info['outputs']['firmware']['sha256'],
                            'evidence': str(self.run).replace(str(Path.home()), '~')}
         r.firmware_info_path.write_text(json.dumps(info, indent=2, ensure_ascii=False) + '\n')
+        BOARDS.mkdir(parents=True, exist_ok=True)
+        (BOARDS / f'{version.get("uid")}.json').write_text(json.dumps({
+            'uid': version.get('uid'), 'board_version': version.get('board_version'), 'recipe': r.name,
+            'recipe_dir': str(r.dir), 'repo': str(r.repo), 'image': r.image.name,
+            'image_sha256': info['outputs']['firmware']['sha256'], 'git_hash_prefix': version.get('git_hash_prefix'),
+            'os_hash_prefix': version.get('os_hash_prefix'), 'flashed_utc': utc(), 'run': str(self.run)}, indent=1) + '\n')
         self.step('flash', 'PASS', attempts=attempts, fc=version)
         return version
 
@@ -264,13 +301,10 @@ class Deploy:
             if self.mode == 'flash':
                 self.flash(sd)
             else:
-                problems = self.identity_problems(version)
+                problems = self.reuse_problems(version)
                 if problems:
-                    raise RuntimeError('--reuse, but the FC runs other firmware: ' + '; '.join(problems) +
-                                       ' (use --flash)')
-                local = self.recipe.local_problems()
-                if local:
-                    raise RuntimeError('local recipe files: ' + '; '.join(local))
+                    raise RuntimeError('--reuse, but it is not proven that the FC runs this recipe\'s image: '
+                                       + '; '.join(problems) + ' (use --flash)')
             self.write_params()
             self.write_sd()
             self.report['fc_after'] = self.prove()

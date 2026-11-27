@@ -289,7 +289,8 @@ int main(int argc, char **argv) {
     float controls[16] = {};
     bool armed = false, answered = false;
     uint64_t t_us = 0, last_answer_us = 0;
-    long steps = 0, waits_timed_out = 0, late_steps = 0;
+    long steps = 0, waits_timed_out = 0, waits_interrupted = 0, late_steps = 0;
+    double first_timeout_s = -1.0;   // simulated time of the first lockstep wait that timed out
     double max_late_ms = 0.0;
     const int gps_every = static_cast<int>(std::lround(profile.gps_period_s / o.hil_dt));
     auto wall_next = std::chrono::steady_clock::now();
@@ -413,7 +414,14 @@ int main(int argc, char **argv) {
 
       if (o.lockstep && answered) {
         // Lockstep: wait for PX4's answer to this step (its time follows the HIL_SENSOR time).
-        if (!service(2.0, [&]() { return last_answer_us >= t_us; })) ++waits_timed_out;
+        if (!service(2.0, [&]() { return last_answer_us >= t_us; })) {
+          if (g_stop) {
+            ++waits_interrupted;   // a stop request ended the wait: not a missed reply
+          } else {
+            if (waits_timed_out == 0) first_timeout_s = static_cast<double>(t_us) * 1e-6;
+            ++waits_timed_out;
+          }
+        }
       } else {
         // Real time (HITL, or SITL before PX4 first answers): keep the HIL period on the wall clock, serve what comes.
         // A step is late when its sensor message leaves more than one HIL period after its slot.
@@ -432,6 +440,12 @@ int main(int argc, char **argv) {
     std::cerr << "simhost: stopped at " << steps * o.hil_dt << " s simulated, " << waits_timed_out
               << " lockstep waits timed out, " << late_steps << " late steps (max lateness " << max_late_ms << " ms), "
               << pilot_waits << " waits for the pilot\n";
+    // One machine-readable line for the runner: the first timeout locates a lockstep problem in simulated time.
+    std::cerr << "simhost-summary: {\"simulated_s\": " << steps * o.hil_dt << ", \"lockstep\": " << (o.lockstep ? "true" : "false")
+              << ", \"lockstep_waits_timed_out\": " << waits_timed_out << ", \"first_timeout_simulated_s\": "
+              << (first_timeout_s < 0 ? std::string("null") : std::to_string(first_timeout_s))
+              << ", \"lockstep_waits_ended_by_stop\": " << waits_interrupted << ", \"late_steps\": " << late_steps
+              << ", \"max_lateness_ms\": " << max_late_ms << ", \"pilot_waits\": " << pilot_waits << "}\n";
     return 0;
   } catch (const std::exception &e) {
     std::cerr << "simhost: " << e.what() << '\n';
