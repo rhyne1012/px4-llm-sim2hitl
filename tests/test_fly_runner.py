@@ -74,6 +74,20 @@ class CheckResult(unittest.TestCase):
                 fly.Run(args(repo, root / 'run'))
 
 
+class Verdict(unittest.TestCase):
+    GOOD = {'check': {'verdict': 'PASS', 'checker_exit': 0}, 'pilot_exit': 0, 'after_state': 'complete'}
+
+    def test_pass(self):
+        s = dict(self.GOOD, simhost_problems=fly.simhost_problems({'lockstep_waits_timed_out': 0, 'late_steps': 0}, 'sitl'))
+        self.assertEqual(fly.verdict(s), 'PASS')
+
+    def test_simhost_timing_fails_the_flight(self):
+        for sim, mode in (({'lockstep_waits_timed_out': 1}, 'sitl'), ({'late_steps': 2, 'max_lateness_ms': 6.1}, 'hitl'),
+                          (None, 'sitl')):
+            s = dict(self.GOOD, simhost_problems=fly.simhost_problems(sim, mode))
+            self.assertEqual(fly.verdict(s), 'FAIL', (sim, mode))
+
+
 class SitlInstance(unittest.TestCase):
     def test_a_running_instance_is_refused_and_not_stopped(self):
         with tempfile.TemporaryDirectory() as d:

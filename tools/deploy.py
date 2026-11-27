@@ -145,9 +145,9 @@ class Deploy:
     def safe_to_write(self, version):
         if version.get('armed') is not False:
             raise FCError('the FC is armed (or its heartbeat says nothing): refusing to write')
-        want = self.recipe.managed().get('SYS_HITL', (None,))[0]
+        want = self.recipe.managed().get('SYS_HITL', (0,))[0]   # unstated: the firmware default, 0 (not in HITL)
         have = self.fc.get('SYS_HITL')
-        if want is not None and have != want and not self.a.allow_hitl_change:
+        if have != want and not self.a.allow_hitl_change:
             raise FCError(f'SYS_HITL is {have} on the FC and {want} in the recipe: --allow-hitl-change only when a '
                           'person has made the aircraft safe')
         return have

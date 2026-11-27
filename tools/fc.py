@@ -275,9 +275,21 @@ class FC:
             raise FCError(f'force disarm failed (result {forced}, armed {self.armed})')
         return {'disarm': 'force disarmed', 'normal_result': result}
 
+    def boot_ms(self):
+        """The FC's time since boot (SYSTEM_TIME.time_boot_ms, asked for), or None when it does not answer."""
+        for _ in range(3):
+            self.m.mav.command_long_send(*self.target, mav.MAV_CMD_REQUEST_MESSAGE, 0, mav.MAVLINK_MSG_ID_SYSTEM_TIME,
+                                         0, 0, 0, 0, 0, 0)
+            got = self.wait(lambda msg: msg.get_type() == 'SYSTEM_TIME', 2.0)
+            if got is not None:
+                return int(got.time_boot_ms)
+        return None
+
     def reboot(self, wait_save=True):
         """Reboot (a serial FC: the USB port goes away and comes back) and connect again; the same board (uid) must
-        answer. wait_save: wait PARAM_SAVE_WAIT_S first, so PX4 has saved the last parameter change."""
+        answer, and it must have rebooted: an explicit refusal fails, and its time since boot must have started again
+        (or, if the FC gives no boot time, the command must have been accepted). wait_save: wait PARAM_SAVE_WAIT_S first,
+        so PX4 has saved the last parameter change."""
         if not self.serial:
             raise FCError('reboot over a UDP link: a SITL FC is restarted by tools/sitl_fc.py instead')
         if self.armed is not False:
@@ -285,8 +297,11 @@ class FC:
         uid = (self.version or self.identity())['uid']
         if wait_save:
             self.drain(PARAM_SAVE_WAIT_S)
+        before = self.boot_ms()
         result = self.command(mav.MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN, 1, wait=2.0, tries=1)
-        self.record('reboot', result=result)
+        self.record('reboot', result=result, boot_ms_before=before)
+        if result not in (None, mav.MAV_RESULT_ACCEPTED, mav.MAV_RESULT_IN_PROGRESS):
+            raise FCError(f'the FC refused the reboot (MAV_RESULT {result})')
         self.close()
         time.sleep(3.0)
         self.connect(RECONNECT_S)
@@ -295,7 +310,14 @@ class FC:
             raise FCError(f'after the reboot another board answers (uid {now["uid"]}, was {uid})')
         if now['armed'] is not False:
             raise FCError('armed after the reboot')
-        return now
+        after = self.boot_ms()
+        self.record('rebooted', boot_ms_before=before, boot_ms_after=after)
+        if before is not None and after is not None:
+            if after >= before:
+                raise FCError(f'the FC did not reboot: its time since boot went on ({before} ms, then {after} ms)')
+        elif result != mav.MAV_RESULT_ACCEPTED:
+            raise FCError('no evidence of a reboot: the command was not acknowledged and the FC gives no boot time')
+        return dict(now, boot_ms_before=before, boot_ms_after=after)
 
     def recover(self, force_disarm=False, expect_hitl=None):
         """The standard recover: disarm (force only if allowed and a normal disarm was refused), reboot, and the FC
@@ -694,6 +716,8 @@ def main():
     s.add_argument('--once', action='store_true', help='read it once (no second read to compare)')
     s = sub.add_parser('params-restore')
     s.add_argument('--from', dest='source', required=True, help='a readback file (params-read, or a deploy report\'s params_before.json)')
+    s.add_argument('--other-board', action='store_true', help='the readback is of another board (a person\'s decision)')
+    s.add_argument('--allow-hitl-change', action='store_true', help='SYS_HITL may change: a person has made the aircraft safe')
     s = sub.add_parser('recover')
     s.add_argument('--force-disarm', action='store_true')
     s.add_argument('--expect-hitl', type=int, choices=[0, 1])
@@ -737,11 +761,20 @@ def main():
             sys.exit('no logs on the FC')
         out = fc.log_download(a.id if a.id is not None else max(logs), a.out, twice=not a.once)
     elif a.action == 'params-restore':
-        if fc.identity()['armed'] is not False:
+        ident = fc.identity()
+        if ident['armed'] is not False:
             sys.exit('the FC is armed or silent; refusing')
-        saved = {e['name']: e for e in json.loads(Path(a.source).read_text())['parameters']}
+        source = json.loads(Path(a.source).read_text())
+        saved_uid = (source.get('autopilot_version') or {}).get('uid')
+        if saved_uid != ident['uid'] and not a.other_board:
+            sys.exit(f'the readback is of board {saved_uid}, this FC is {ident["uid"]}: refusing (--other-board when a '
+                     'person means to copy parameters onto another board)')
+        saved = {e['name']: e for e in source['parameters']}
         now = {e['name']: e for e in fc.read_all(saved)['parameters']}
         todo = [n for n in sorted(saved) if n in now and (saved[n]['type'], saved[n]['bits']) != (now[n]['type'], now[n]['bits'])]
+        if 'SYS_HITL' in todo and not a.allow_hitl_change:
+            sys.exit('the readback has another SYS_HITL than the FC: refusing (--allow-hitl-change only when a person has '
+                     'made the aircraft safe: propellers off)')
         for n in todo:
             fc.set_bits(n, saved[n]['type'], bytes.fromhex(saved[n]['bits']))
         if todo:

@@ -109,6 +109,24 @@ def keep_changes(path, out, name):
     return state
 
 
+def simhost_problems(sim, mode):
+    """A flight is evidence only if simhost kept time: in lockstep (SITL) no wait may have timed out, in real time
+    (HITL) no step may have been late."""
+    if sim is None:
+        return ['no simhost summary']
+    out = [f'{sim["lockstep_waits_timed_out"]} lockstep waits timed out'] if sim.get('lockstep_waits_timed_out') else []
+    if mode == 'hitl' and sim.get('late_steps'):
+        out.append(f'{sim["late_steps"]} late steps (max lateness {sim.get("max_lateness_ms")} ms)')
+    return out
+
+
+def verdict(summary):
+    ok = (not summary.get('simhost_problems') and summary['check'].get('verdict') == 'PASS'
+          and summary['check'].get('checker_exit') == 0 and summary.get('pilot_exit') == 0
+          and summary.get('after_state') == 'complete' and 'error' not in summary and 'error_after' not in summary)
+    return 'PASS' if ok else 'FAIL'
+
+
 class Run:
     def __init__(self, a):
         self.a = a
@@ -213,6 +231,23 @@ class Run:
             self.event('deploy', **result)
             if result.get('verdict') != 'PASS':
                 raise RuntimeError(f'deploy {result.get("verdict")}: {result.get("error")}')
+        else:   # nothing is written, but the FC must still hold the recipe: deploy's read-only plan
+            r = self.sh([self.py, '-B', TOOLKIT / 'tools' / 'deploy.py', self.recipe.dir, '--repo', self.repo,
+                         '--link', self.a.link], timeout=1800, check=False, log='deploy.log')
+            result = self.last_json(r)
+            plan = {}
+            if result.get('report') and Path(result['report']).is_file():
+                plan = next((s for s in json.loads(Path(result['report']).read_text())['steps'] if s['step'] == 'plan'), {})
+            sd_differ = [p for p, v in (plan.get('sd') or {}).items() if v.get('fc') != v.get('recipe')]
+            problems = ([] if plan.get('check_verdict') == 'PASS' else [f'parameters {plan.get("check_verdict")}'])
+            problems += [f'not reusable: {x}' for x in plan.get('reuse_problems') or []]
+            problems += [f'SD file {p} differs' for p in sd_differ]
+            self.event('deploy', verdict='PASS' if not problems else 'FAIL', mode='none (plan only)',
+                       report=result.get('report'), problems=problems)
+            if not problems and result.get('verdict') != 'PLAN':
+                problems.append(f'deploy plan {result.get("verdict")}: {result.get("error")}')
+            if problems:
+                raise RuntimeError('--deploy none, but the FC does not hold the recipe: ' + '; '.join(problems))
         fc = FC(self.a.link).connect()
         try:
             ident = fc.identity()
@@ -482,10 +517,8 @@ class Run:
         summary['simhost_line'] = tail[-1] if tail else None
         found = [x.split('simhost-summary: ', 1)[1] for x in lines if x.startswith('simhost-summary: ')]
         summary['simhost'] = json.loads(found[-1]) if found else None
-        ok = (summary['check'].get('verdict') == 'PASS' and summary['check'].get('checker_exit') == 0
-              and summary.get('pilot_exit') == 0
-              and summary['after_state'] == 'complete' and 'error' not in summary and 'error_after' not in summary)
-        summary['verdict'] = 'PASS' if ok else 'FAIL'
+        summary['simhost_problems'] = simhost_problems(summary['simhost'], self.a.mode)
+        summary['verdict'] = verdict(summary)
         (self.out / 'summary.json').write_text(json.dumps(summary, indent=1, default=str) + '\n')
         self.event('done', verdict=summary['verdict'], out=str(self.out))
         return 0 if ok else 1
