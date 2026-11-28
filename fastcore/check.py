@@ -14,6 +14,11 @@
 3. Flights (simplifications): from trimmed level flight both fly the same open-loop input sequences, JSBSim as simhost
    runs it (1 ms, Adams-Bashforth 2, rotating WGS84 Earth), the core at 1 ms and at 4 ms; also with the vehicle's
    configuration files and with failures during flight. The differences are what the core's simplifications cost.
+4. Turbulence (runtime/turbulence.h): the core's update against an independent Python transcription of JSBSim's
+   FGWinds (fastcore.TurbulenceRef) from the same states, to rounding; then, with the airframe held in level flight,
+   the core's and JSBSim's turbulence spectra and variances against the formulas of the formulation (Yeager 1998, as
+   JSBSim implements it), at two altitudes, both types. The comparison with MIL-F-8785C's Dryden forms is reported, not
+   judged: JSBSim's roll-rate model and its Milspec type are simplifications of them.
 
 Writes <out>/check.json and exits 1 if a limit is exceeded.
 """
@@ -154,8 +159,9 @@ def random_mass(rng, core):
         for c, r in (('X', 0.15), ('Y', 0.3), ('Z', 0.1)):
             k = f'inertia/pointmass-location-{c}-inches[{i}]'
             s[k] = d[k] + rng.uniform(-r, r) * IN_PER_M
+    turb = set(core.layout.get('turbulence', {}).get('parameters', []))   # checked on their own: turbulence()
     for name, d in zip(core.layout['p'], core.layout['p_default']):
-        if not (name.startswith('inertia/') or name.startswith('fcs/') or name.startswith('avionics/')):
+        if not (name.startswith('inertia/') or name.startswith('fcs/') or name.startswith('avionics/') or name in turb):
             s[name] = d * rng.uniform(0.5, 1.5) if d else rng.uniform(-1, 1)
     return s
 
@@ -525,6 +531,252 @@ def flights(vehicle, core, seed, configs, speed, T=20.0):
     return out
 
 
+# -- 4. turbulence ------------------------------------------------------------------------------------------------------
+#
+# Limits, set before the first run (2026-11-28, by the agent that wrote the turbulence; a person may change them, keeping
+# the results): translation as the snapshots (1e-9, absolute, ft/s and rad/s are of order 1); band-averaged power
+# spectra and variances against the formulas 10 % for the core (128 vehicles, 300 s each: the sampling error is 1-4 %),
+# 15 % for JSBSim (4 runs of 200 s: 2-5 %). JSBSim's slow components (u, v, w: time constants of seconds) are judged
+# only in the bands, not by their variance, which 800 s cannot estimate to 15 %.
+# The first run with these limits failed (2026-11-28; evidence kept in the runs folder, verification.md): the filters
+# started from zero without a warm-up (the slow u variance came out 13 % low at 800 m) and the segments were so short
+# that the lowest band lay 4 bins above the low-frequency power, where the Hann window's leakage added 7 % (core) and
+# up to 22 % (JSBSim). The estimator was fixed, the limits were not: a warm-up of five u time constants, segments of
+# 32.8 s (the lowest band 8 bins up), 600 s per core vehicle, 8 JSBSim runs, independent seeds per case.
+
+TURB_LIMITS = {'translation_abs': 1e-9, 'core_rel': 0.10, 'jsbsim_rel': 0.15}
+TURB_COMPONENTS = ('u', 'v', 'w', 'p', 'q', 'r')
+TURB_BANDS = (1.5, 3.0, 6.0, 12.0, 25.0, 50.0, 78.0)   # rad/s: above the u, v, w corners, below a tenth of 4 ms's Nyquist
+# type, formulation, height (m), wind at 20 ft (ft/s: 15 m/s, light to moderate), severity (used above 1000 ft)
+TURB_CASES = ((4, 'tustin', 100.0, 15.0 / FT, 3), (4, 'tustin', 800.0, 15.0 / FT, 3),
+              (3, 'milspec', 100.0, 15.0 / FT, 3), (3, 'milspec', 800.0, 15.0 / FT, 3))
+
+
+class Welch:
+    """Streaming Welch estimate (Hann, 50 % overlap) of one-sided power spectra per rad/s, for many series at once."""
+
+    def __init__(self, n_series, nseg, dt):
+        self.n, self.dt = nseg, dt
+        self.w = np.hanning(nseg)
+        self.buf = np.zeros((n_series, nseg))
+        self.fill, self.count = 0, 0
+        self.acc = np.zeros((n_series, nseg // 2 + 1))
+        self.sumsq, self.samples = np.zeros(n_series), 0
+        self.omega = 2 * math.pi * np.fft.rfftfreq(nseg, dt)
+
+    def add(self, v):
+        self.sumsq += v * v
+        self.samples += 1
+        self.buf[:, self.fill] = v
+        self.fill += 1
+        if self.fill == self.n:
+            X = np.fft.rfft(self.buf * self.w, axis=1)
+            self.acc += 2 * self.dt * np.abs(X) ** 2 / np.sum(self.w ** 2) / (2 * math.pi)
+            self.count += 1
+            self.buf[:, :self.n // 2] = self.buf[:, self.n // 2:]
+            self.fill = self.n // 2
+
+    def psd(self):
+        return self.acc / max(self.count, 1)
+
+    def variance(self):
+        return self.sumsq / max(self.samples, 1)
+
+
+def turb_spectra(L_u, L_w, sig_u, sig_w, b, V, kind):
+    """One-sided spectra (per rad/s, ft and s) of the six components; kind: 'tustin' or 'milspec' (the formulations the
+    core implements, Yeager 1998) or 'spec' (MIL-F-8785C's Dryden forms). Returns {component: Phi(omega)}."""
+    sig_p, L_p = 1.9 / math.sqrt(L_w * b) * sig_w, math.sqrt(L_w * b) / 2.6
+    tau_q, tau_r = 4 * b / math.pi / V, 3 * b / math.pi / V
+
+    def first(sig, tau):
+        return lambda w: sig ** 2 * (2 * tau / math.pi) / (1 + (tau * w) ** 2)
+
+    def dryden2(sig, L):
+        return lambda w: sig ** 2 * (L / (math.pi * V)) * (1 + 3 * (L * w / V) ** 2) / (1 + (L * w / V) ** 2) ** 2
+
+    u = first(sig_u, L_u / V)
+    if kind == 'milspec':
+        v, w_ = first(sig_u, L_u / V / 2), first(sig_w, L_w / V / 2)
+    else:
+        v, w_ = dryden2(sig_u, L_u), dryden2(sig_w, L_w)
+    if kind == 'spec':
+        p = lambda w: sig_w ** 2 * 0.8 * (math.pi * L_w / (4 * b)) ** (1 / 3) / (V * L_w * (1 + (4 * b * w / (math.pi * V)) ** 2))  # noqa: E731
+    else:
+        p = first(sig_p, L_p / V)
+    q = lambda w: (w / V) ** 2 / (1 + (tau_q * w) ** 2) * w_(w)  # noqa: E731
+    r = lambda w: (w / V) ** 2 / (1 + (tau_r * w) ** 2) * v(w)  # noqa: E731
+    return {'u': u, 'v': v, 'w': w_, 'p': p, 'q': q, 'r': r}
+
+
+def turb_variances(L_u, L_w, sig_u, sig_w, b, V, kind):
+    """The closed-form variances of u, v, w, p (q and r are judged in the bands only)."""
+    var = {'u': sig_u ** 2, 'v': sig_u ** 2, 'w': sig_w ** 2, 'p': (1.9 / math.sqrt(L_w * b) * sig_w) ** 2}
+    if kind == 'spec':
+        var['p'] = sig_w ** 2 * 0.8 * (math.pi * L_w / (4 * b)) ** (1 / 3) * math.pi ** 2 / (8 * b * L_w)
+    return var
+
+
+def turb_compare(est, analytic, variances, bands):
+    """est: Welch over the six components. Per component: the measured variance against the formula, and the measured
+    power in each band against the formula's (both as ratios measured / formula)."""
+    psd, om = est.psd(), est.omega
+    out = {}
+    for j, c in enumerate(TURB_COMPONENTS):
+        row = {}
+        if c in variances:
+            row['variance_ratio'] = float(est.variance()[j] / variances[c])
+        ratios = []
+        for lo, hi in zip(bands[:-1], bands[1:]):
+            m = (om >= lo) & (om < hi)
+            ratios.append(float(np.sum(psd[j, m]) / np.sum(analytic[c](om[m]))))
+        row['band_ratios'] = ratios
+        out[c] = row
+    return out
+
+
+def turb_worst(comp, judged=TURB_COMPONENTS, variance=True):
+    worst = 0.0
+    for c in judged:
+        r = comp[c]
+        vals = list(r['band_ratios']) + ([r['variance_ratio']] if variance and 'variance_ratio' in r else [])
+        worst = max(worst, max(abs(v - 1.0) for v in vals))
+    return worst
+
+
+def turb_case(core, kind_type, h_m, speed, w20_fps, severity, n=128, seconds=600.0, warmup=150.0, seed=1):
+    """The core with the airframe held at level flight (heading north, no mean wind: the turbulence frame is NED and
+    body), n vehicles with their own seeds; the six held turbulence components, ft/s and rad/s, after a warm-up (the
+    filters start from zero)."""
+    dt = 0.004
+    K, KW = int(round(seconds / dt)), int(round(warmup / dt))
+    x = core.zeros(n)
+    core.set_state(x, pos_ned=(0.0, 0.0, -h_m), vel_body=(speed, 0.0, 0.0), euler=(0.0, 0.0, 0.0), rates=(0.0, 0.0, 0.0))
+    x0 = x[:, :13].copy()
+    u = np.zeros((n, core.nu))
+    p = core.params(n, {'atmosphere/turb-type': kind_type, 'atmosphere/turbulence/milspec/windspeed_at_20ft_AGL-fps': w20_fps,
+                        'atmosphere/turbulence/milspec/severity': severity})
+    p[:, core.P['simulation/randomseed']] = seed * 100000 + np.arange(n)
+    env = core.env(n, latitude_deg=0.0, earth_rate=0.0)
+    core.reset(x, u, p)
+    cols = [core.X[f'turb:{s}'] for s in ('wind_n_mps', 'wind_e_mps', 'wind_d_mps', 'p_rps', 'q_rps', 'r_rps')]
+    scale = np.array([1 / FT, 1 / FT, 1 / FT, 1.0, 1.0, 1.0])
+    est = Welch(6 * n, 8192, dt)
+    for k in range(KW + K):
+        core.step(x, u, p, env, dt=dt, k=1, outputs=False)
+        if k >= KW:
+            est.add((x[:, cols] * scale).T.reshape(-1))
+        x[:, :13] = x0
+    # pool the vehicles: component j of vehicle i is series j * n + i
+    pooled = Welch(6, 8192, dt)
+    pooled.acc = est.acc.reshape(6, n, -1).mean(axis=1)
+    pooled.count = est.count
+    pooled.sumsq, pooled.samples = est.sumsq.reshape(6, n).mean(axis=1), est.samples
+    return pooled
+
+
+def turb_jsbsim_case(vehicle, kind_type, h_m, speed, w20_fps, severity, runs=8, seconds=200.0, warmup=30.0, seed=1):
+    """JSBSim (1 ms) with the airframe held (integrators off), the same settings; its turbulence properties."""
+    dt = 0.001
+    pooled = Welch(6, 32768, dt)
+    sums, samples, acc = np.zeros(6), 0, np.zeros((6, 32768 // 2 + 1))
+    for r in range(runs):
+        fdm = load(vehicle, dt)
+        fdm['simulation/randomseed'] = seed * 1000 + r
+        ic(fdm, h_m, (speed, 0.0, 0.0), (0.0, 0.0, 0.0), (0.0, 0.0, 0.0))
+        for k in ('rate/rotational', 'rate/translational', 'position/rotational', 'position/translational'):
+            fdm[f'simulation/integrator/{k}'] = 0   # eNone: the state is held
+        fdm['atmosphere/turb-type'] = kind_type
+        fdm['atmosphere/turbulence/milspec/windspeed_at_20ft_AGL-fps'] = w20_fps
+        fdm['atmosphere/turbulence/milspec/severity'] = severity
+        est = Welch(6, 32768, dt)
+        props = [f'atmosphere/total-wind-{c}-fps' for c in ('north', 'east', 'down')] + \
+                [f'atmosphere/{c}-turb-rad_sec' for c in 'pqr']
+        for k in range(int(round((warmup + seconds) / dt))):
+            fdm.run()
+            if k >= int(round(warmup / dt)):
+                est.add(np.array([fdm[pp] for pp in props]))
+        acc += est.acc
+        pooled.count += est.count
+        sums += est.sumsq
+        samples += est.samples
+        held = fdm['velocities/vt-fps'] * FT
+    pooled.acc, pooled.sumsq, pooled.samples = acc, sums, samples
+    return pooled, held
+
+
+def turbulence(vehicle, core, seed, speed, jsbsim=True):
+    """4. Turbulence: (a) the core's update against TurbulenceRef (a Python transcription of JSBSim's FGWinds) from the
+    same states, (b) the core's spectra and variances against the formulas of the formulation it implements and, for
+    information, against MIL-F-8785C's Dryden forms, (c) JSBSim's own turbulence (held airframe) against the same
+    formulas."""
+    from fastcore import TurbulenceRef
+    t0 = time.time()
+    b = core.layout['turbulence']['wingspan_ft']
+    out = {'limits': TURB_LIMITS, 'bands_rad_s': TURB_BANDS, 'wingspan_ft': b}
+    # (a) translation: free flights from a level state, three altitude regimes, both types, a mean wind
+    worst = 0.0
+    names = ('wind_n_mps', 'wind_e_mps', 'wind_d_mps', 'p_rps', 'q_rps', 'r_rps')
+    for tt in (3, 4):
+        for h0 in (60.0, 450.0, 900.0):   # m: below 1000 ft, the blend 1000-2000 ft, above 2000 ft
+            n = 3
+            x = core.zeros(n)
+            u = np.zeros((n, core.nu))
+            p = core.params(n, {'atmosphere/turb-type': tt, 'atmosphere/turbulence/milspec/windspeed_at_20ft_AGL-fps': 30.0,
+                                'atmosphere/turbulence/milspec/severity': 4})
+            p[:, core.P['simulation/randomseed']] = seed + np.arange(n)
+            env = core.env(n, latitude_deg=LAT0, wind_ned=(2.0, 3.0, 0.0))
+            core.set_state(x, pos_ned=(0, 0, -h0), vel_body=(speed, 0.3, 1.0), euler=(0.05, 0.06, 0.4),
+                           rates=(0.01, -0.02, 0.03))
+            core.reset(x, u, p)
+            refs = [TurbulenceRef(tt, 30.0, 4, seed + i, b) for i in range(n)]
+            cols = [core.X[f'turb:{s}'] for s in names]
+            for _ in range(500):
+                pre = x.copy()
+                core.step(x, u, p, env, dt=0.004, k=1, outputs=False)
+                for i in range(n):
+                    q0, q1, q2, q3 = pre[i, 6:10]
+                    C = np.array([[q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3, 2 * (q1 * q2 - q0 * q3), 2 * (q1 * q3 + q0 * q2)],
+                                  [2 * (q1 * q2 + q0 * q3), q0 * q0 - q1 * q1 + q2 * q2 - q3 * q3, 2 * (q2 * q3 - q0 * q1)],
+                                  [2 * (q1 * q3 - q0 * q2), 2 * (q2 * q3 + q0 * q1), q0 * q0 - q1 * q1 - q2 * q2 + q3 * q3]])
+                    w, pqr = refs[i].step(C, pre[i, 3:6], env[i, 0:3], (env[i, 4] - pre[i, 2]) / FT, 0.004)
+                    worst = max(worst, float(np.max(np.abs(x[i, cols] - np.r_[w, pqr]))))
+    out['translation'] = {'max_abs': worst, 'pass': bool(worst <= TURB_LIMITS['translation_abs'])}
+    print(json.dumps({'turbulence_translation': out['translation']}), flush=True)
+    # (b), (c): two altitude regimes, both types
+    out['cases'] = {}
+    ok = out['translation']['pass']
+    for ci, (tt, kind, h_m, w20, sev) in enumerate(TURB_CASES):   # each case its own seeds: independent samples
+        ref = TurbulenceRef(tt, w20, sev, 0, b)
+        V = speed / FT
+        L_u, L_w, sig_u, sig_w = ref.sigma_scale(h_m / FT)
+        form = turb_spectra(L_u, L_w, sig_u, sig_w, b, V, kind)
+        spec = turb_spectra(L_u, L_w, sig_u, sig_w, b, V, 'spec')
+        est = turb_case(core, tt, h_m, speed, w20, sev, seed=seed * 10 + ci)
+        case = {'type': tt, 'height_m': h_m, 'airspeed_mps': speed, 'w20_fps': w20, 'severity': sev,
+                'scales_ft': {'L_u': L_u, 'L_w': L_w, 'sigma_u_fps': sig_u, 'sigma_w_fps': sig_w}}
+        case['core_vs_formulation'] = turb_compare(est, form, turb_variances(L_u, L_w, sig_u, sig_w, b, V, kind), TURB_BANDS)
+        case['core_vs_mil_f_8785c'] = turb_compare(est, spec, turb_variances(L_u, L_w, sig_u, sig_w, b, V, 'spec'), TURB_BANDS)
+        case['core_worst'] = turb_worst(case['core_vs_formulation'])
+        case['pass'] = bool(case['core_worst'] <= TURB_LIMITS['core_rel'])
+        if jsbsim:
+            js, held = turb_jsbsim_case(vehicle, tt, h_m, speed, w20, sev, seed=seed * 10 + ci)
+            case['jsbsim_held_airspeed_mps'] = held
+            cj = turb_compare(js, form, turb_variances(L_u, L_w, sig_u, sig_w, b, V, kind), TURB_BANDS)
+            for c in ('u', 'v', 'w'):
+                cj[c].pop('variance_ratio', None)
+            case['jsbsim_vs_formulation'] = cj
+            case['jsbsim_worst'] = turb_worst(cj)
+            case['pass'] = bool(case['pass'] and case['jsbsim_worst'] <= TURB_LIMITS['jsbsim_rel'])
+        ok = ok and case['pass']
+        key = f'type {tt} {kind}, {h_m:g} m'
+        out['cases'][key] = case
+        print(json.dumps({key: {k: case[k] for k in ('core_worst', 'jsbsim_worst', 'pass') if k in case}}), flush=True)
+    out['pass'] = bool(ok)
+    out['wall_s'] = round(time.time() - t0, 1)
+    return out
+
+
 def main():
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument('vehicle')
@@ -535,6 +787,7 @@ def main():
     p.add_argument('--config', action='append', default=None,
                    help='configuration file(s) flown together in the flights (default: every file in <vehicle>/configs)')
     p.add_argument('--skip-flights', action='store_true')
+    p.add_argument('--skip-turbulence', action='store_true', help='leave out check 4 (a core whose use has no turbulence)')
     p.add_argument('--speed', type=float, default=17.0, help='airspeed of the trimmed flights (m/s)')
     a = p.parse_args()
     name = Path(a.vehicle).resolve().name
@@ -554,7 +807,12 @@ def main():
         rep['flights'] = flights(a.vehicle, core, a.seed, configs, a.speed)
         print(json.dumps({'flights_worst': rep['flights']['worst_flight_dt_0.004_10s'],
                           'failures_worst': rep['flights']['worst_failure_dt_0.004_10s'], 'pass': rep['flights']['pass']}), flush=True)
-    rep['pass'] = rep['snapshots']['pass'] and rep['sequences']['pass'] and rep.get('flights', {'pass': True})['pass']
+    if not a.skip_turbulence:
+        rep['turbulence'] = turbulence(a.vehicle, core, a.seed, a.speed)
+        print(json.dumps({'turbulence': {'translation_max_abs': rep['turbulence']['translation']['max_abs'],
+                                         'pass': rep['turbulence']['pass']}}), flush=True)
+    rep['pass'] = (rep['snapshots']['pass'] and rep['sequences']['pass'] and rep.get('flights', {'pass': True})['pass']
+                   and rep.get('turbulence', {'pass': True})['pass'])
     (out / 'check.json').write_text(json.dumps(rep, indent=1) + '\n')
     print(json.dumps({'check': str(out / 'check.json'), 'pass': rep['pass']}))
     sys.exit(0 if rep['pass'] else 1)
