@@ -19,12 +19,12 @@
   "outputs": {
     "firmware": {
       "file": "cubepilot_cubeorangeplus_hil.px4",
-      "sha256": "57aeaa8d10a043785b404ea9ccdddc4372648cc69d9ef091af9f96dcaa2bd05d",
+      "sha256": "2381e8d071cb5207c4664e21a115223d73a6eabc28789cce1f41fe5112e14ba6",
       "size": 1832251
     },
     "image_bin": {
       "file": "not kept (inside the .px4 image field)",
-      "sha256": "05abfa72c78632cc8475e18aa2acc055cbe69e51243700535ed3f5ae4b91bf19",
+      "sha256": "01784b73ead1c48668601855dea656c6cb1501fb62cb0aef7425187d60de88cb",
       "size": 1921040
     },
     "parameters": {
@@ -46,6 +46,8 @@
   },
   "build": {
     "tool": "px4-llm-sim2hitl tools/px4build.py",
+    "make_target": "cubepilot_cubeorangeplus_hil",
+    "px4_commit": "935addf1d6bec6e955b155494a52e7eb4b750eb3",
     "command": "make cubepilot_cubeorangeplus_hil BUILD_DIR_SUFFIX=_cubeorangeplus_hitl",
     "build_tree": "<PX4 build tree>",
     "output_dir": "<PX4 build tree>/build/cubepilot_cubeorangeplus_hil_cubeorangeplus_hitl",
@@ -63,7 +65,7 @@
     ],
     "modules": {},
     "toolchain": "arm-none-eabi-gcc (15:13.2.rel1-2) 13.2.1 20231009",
-    "built_at_utc": "2026-11-27T18:31:23Z",
-    "seconds": 55.9
+    "built_at_utc": "2026-11-28T02:12:46Z",
+    "seconds": 9.3
   }
 }

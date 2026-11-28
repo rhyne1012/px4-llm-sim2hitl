@@ -250,6 +250,7 @@ class Run:
                 problems.append(f'deploy plan {result.get("verdict")}: {result.get("error")}')
             if problems:
                 raise RuntimeError('--deploy none, but the FC does not hold the recipe: ' + '; '.join(problems))
+        self.recipe = Recipe(self.recipe.dir, self.repo)   # the deploy may have built the image: firmware.json is new
         fc = FC(self.a.link).connect()
         try:
             ident = fc.identity()
