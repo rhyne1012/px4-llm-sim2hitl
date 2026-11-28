@@ -4,7 +4,7 @@
 
 [English](README.md) | **繁體中文**（翻譯；以英文版為準）
 
-> 狀態：v2.1.0，於 2026-11-28 發布（[發布說明](docs/releases/v2.1.0.md)；已驗證項目見 [docs/verification.md](docs/verification.md)）。v1（Simulink → C → HITL）封存於 tag `v1-final` 與分支 `legacy-v1`。
+> 狀態：v2.1.2，於 2026-11-28 發布（[發布說明](docs/releases/v2.1.2.md)；已驗證項目見 [docs/verification.md](docs/verification.md)）。v1（Simulink → C → HITL）封存於 tag `v1-final` 與分支 `legacy-v1`。
 
 ![總覽：鎖定版本的 PX4 與 JSBSim；本專案作為整合層（模擬主機、部署與飛行、快速核心、AI 工作規範）；SITL、HITL 與實機飛行採統一判準；載具儲存庫；由人決策，由 AI 執行技術工作；核心精神](images/overview_toolkit.svg)
 
