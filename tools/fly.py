@@ -420,10 +420,15 @@ class Run:
     # -- 4. the FC log -------------------------------------------------------------------------------------------------
     def recover_and_log(self):
         """HITL: the standard recover, then the newest log, newer than the newest before the flight."""
-        fc = FC(self.a.link).connect()
+        steps = []   # what the FC link did (commands, reboot, reconnect): kept also when the recover fails
+        fc = FC(self.a.link, log=steps).connect()
         try:
-            recover = fc.recover(force_disarm=True, expect_hitl=1)
-            self.event('recover', **{k: v for k, v in recover.items() if k != 'after_reboot'})
+            try:
+                recover = fc.recover(force_disarm=True, expect_hitl=1)
+            except Exception as e:
+                self.event('recover failed', error=f'{type(e).__name__}: {e}', steps=steps)
+                raise
+            self.event('recover', **{k: v for k, v in recover.items() if k != 'after_reboot'}, steps=steps)
             logs = fc.logs()
             newest = max(logs) if logs else None
             if newest is None or self.newest_before is None or newest <= self.newest_before:

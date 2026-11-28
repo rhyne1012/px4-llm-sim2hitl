@@ -46,6 +46,8 @@ PARAM_SET_TRIES = 3
 PARAM_SET_WAIT_S = 2.0
 PARAM_SAVE_WAIT_S = 3.0         # after the last write, before a reboot: PX4 autosaves >= 300 ms later, at most every 2 s
 RECONNECT_S = 45.0              # a reboot: the USB port back and a heartbeat
+REBOOT_ANSWER_TRIES = 10        # then AUTOPILOT_VERSION, asked up to this often (2 s each): once, right after a HITL
+                                # flight, a rebooted Cube Orange+ sent heartbeats but did not answer it for 6 s
 FTP_WAIT_S = 1.5                # one FTP request: the reply within this long, or the same request again
 FTP_TRIES = 3
 FTP_SESSION_TRIES = 3           # PX4 has one FTP session for every client of a link: busy -> start the step again
@@ -277,14 +279,16 @@ class FC:
         return {'disarm': 'force disarmed', 'normal_result': result}
 
     def boot_ms(self):
-        """The FC's time since boot (SYSTEM_TIME.time_boot_ms, asked for), or None when it does not answer."""
-        for _ in range(3):
-            self.m.mav.command_long_send(*self.target, mav.MAV_CMD_REQUEST_MESSAGE, 0, mav.MAVLINK_MSG_ID_SYSTEM_TIME,
-                                         0, 0, 0, 0, 0, 0)
-            got = self.wait(lambda msg: msg.get_type() == 'SYSTEM_TIME', 2.0)
-            if got is not None:
-                return int(got.time_boot_ms)
-        return None
+        """The FC's time since boot in ms, or None when it gives none. PX4 sends TIMESYNC requests (tc1 0) on every link
+        with its time since boot in ts1 (ns), also in HITL; SYSTEM_TIME is only asked for when none comes, since PX4
+        denies it while its clock has no date (in HITL until simhost's GPS gives one)."""
+        got = self.wait(lambda msg: msg.get_type() == 'TIMESYNC' and msg.tc1 == 0 and msg.ts1 > 0, 3.0)
+        if got is not None:
+            return int(got.ts1 // 1_000_000)
+        self.m.mav.command_long_send(*self.target, mav.MAV_CMD_REQUEST_MESSAGE, 0, mav.MAVLINK_MSG_ID_SYSTEM_TIME,
+                                     0, 0, 0, 0, 0, 0)
+        got = self.wait(lambda msg: msg.get_type() == 'SYSTEM_TIME', 2.0)
+        return int(got.time_boot_ms) if got is not None else None
 
     def reboot(self, wait_save=True):
         """Reboot (a serial FC: the USB port goes away and comes back) and connect again; the same board (uid) must
@@ -306,7 +310,8 @@ class FC:
         self.close()
         time.sleep(3.0)
         self.connect(RECONNECT_S)
-        now = self.identity()
+        self.record('reconnected')
+        now = self.identity(tries=REBOOT_ANSWER_TRIES)
         if now['uid'] != uid:
             raise FCError(f'after the reboot another board answers (uid {now["uid"]}, was {uid})')
         if now['armed'] is not False:

@@ -65,5 +65,42 @@ class Reboot(unittest.TestCase):
             Stub(None, [None, None]).reboot(wait_save=False)
 
 
+class Msg:
+    def __init__(self, kind, **fields):
+        self.kind = kind
+        self.__dict__.update(fields)
+
+    def get_type(self):
+        return self.kind
+
+
+class BootTime(unittest.TestCase):
+    def fc(self, messages):
+        fc = F.FC('/dev/null')
+        fc.target = (1, 1)
+        asked = []
+
+        class Mav:
+            def command_long_send(self, *args):
+                asked.append(args)
+        fc.m = type('M', (), {'mav': Mav()})()
+        fc.wait = lambda match, timeout, any_source=False: next((m for m in messages if match(m)), None)
+        return fc, asked
+
+    def test_from_px4_timesync(self):   # PX4's own request (tc1 0): ts1 is its time since boot in ns
+        fc, asked = self.fc([Msg('TIMESYNC', tc1=5, ts1=9), Msg('TIMESYNC', tc1=0, ts1=125_908_146_000)])
+        self.assertEqual(fc.boot_ms(), 125_908)
+        self.assertEqual(asked, [])
+
+    def test_system_time_when_no_timesync(self):
+        fc, asked = self.fc([Msg('SYSTEM_TIME', time_boot_ms=4200)])
+        self.assertEqual(fc.boot_ms(), 4200)
+        self.assertEqual(len(asked), 1)
+
+    def test_none(self):
+        fc, _ = self.fc([])
+        self.assertIsNone(fc.boot_ms())
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)
