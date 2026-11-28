@@ -35,7 +35,7 @@ pilot's [pilot] numbers). Steps:
 PASS needs a check result written by this run with verdict PASS and the check's exit 0, the pilot's exit 0 and the
 script's after_state complete. simhost's own summary (simulated time, lockstep waits that timed out and when the first
 one did, late steps) is in summary.json "simhost". Everything lands in --out
-(default ~/.cache/px4-llm-sim2hitl/v2/runs/<UTC>_<sitl|hitl>_<repo>_<recipe>/): events.json, summary.json, simhost.csv,
+(default ~/.cache/px4-jsbsim-sim2hitl/v2/runs/<UTC>_<sitl|hitl>_<repo>_<recipe>/): events.json, summary.json, simhost.csv,
 the pilot's folder, the FC log and the check.
 """
 import argparse
@@ -59,8 +59,9 @@ from deploy import BOARDS  # noqa: E402
 from fc import FC, FORCE_DISARM  # noqa: E402
 from recipe import Recipe  # noqa: E402
 from simhost_args import simhost_vehicle_args  # noqa: E402
+from paths import cache  # noqa: E402
 
-CACHE = Path(os.environ.get('XDG_CACHE_HOME') or Path.home() / '.cache') / 'px4-llm-sim2hitl' / 'v2'
+CACHE = cache()
 SIMHOST = TOOLKIT / 'build' / 'simhost' / 'simhost'
 
 

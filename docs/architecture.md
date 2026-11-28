@@ -7,7 +7,7 @@ Status: as of v2.1.0 (2026-11-28); a part marked planned is not built. This page
 ```
 PX4 (flight control)        JSBSim (flight dynamics)          upstream, locked versions, not forked
         \                         /
-     px4-llm-sim2hitl: simulation host, deployment, test cases, records, agent rules
+     px4-jsbsim-sim2hitl: simulation host, deployment, test cases, records, agent rules
                      |  pinned version
      vehicle repository: vehicle definition, PX4 modules, recipes, tasks, records
 ```

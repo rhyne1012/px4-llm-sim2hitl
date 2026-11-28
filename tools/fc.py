@@ -22,7 +22,6 @@ unknown name at all).
 import argparse
 import hashlib
 import json
-import os
 import math
 import struct
 import sys
@@ -34,6 +33,7 @@ from pymavlink.generator.mavcrc import x25crc
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import mavftp  # noqa: E402
+from paths import cache  # noqa: E402
 
 mav = mavutil.mavlink
 SOURCE = (254, 190)
@@ -770,7 +770,7 @@ def main():
         out = fc.log_download(a.id if a.id is not None else max(logs), a.out, twice=not a.once)
     elif a.action == 'board-role':
         uid = fc.identity()['uid']
-        boards = Path(os.environ.get('XDG_CACHE_HOME') or Path.home() / '.cache') / 'px4-llm-sim2hitl' / 'v2' / 'boards'
+        boards = cache() / 'boards'
         f = boards / f'{uid}.role.json'
         if a.role:
             boards.mkdir(parents=True, exist_ok=True)

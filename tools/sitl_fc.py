@@ -44,18 +44,19 @@ from pathlib import Path
 TOOLKIT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(TOOLKIT / 'tools'))
 from recipe import SECTIONS, Recipe, is_int32, load_firmware_params, sha256  # noqa: E402
+from paths import NAME, cache, config  # noqa: E402
 
 PX4_LOCK = tomllib.loads((TOOLKIT / 'px4' / 'lock.toml').read_text())['px4']
 TARGET = 'px4_sitl_default'
-CACHE = Path(os.environ.get('XDG_CACHE_HOME') or Path.home() / '.cache') / 'px4-llm-sim2hitl' / 'v2' / 'sitl_fc'
+CACHE = cache() / 'sitl_fc'
 BUILD_TREE = Path(os.environ.get('SIM2HITL_SITL_BUILD_TREE')
                   or Path.home() / 'px4' / f'PX4-Autopilot-{PX4_LOCK["tag"]}-build-v2sitl')
 def default_copy_from():
-    """The PX4 tree a new build tree is copied from: SIM2HITL_PX4_ROOT, else ~/.config/px4-llm-sim2hitl/px4_root (the
+    """The PX4 tree a new build tree is copied from: SIM2HITL_PX4_ROOT, else ~/.config/px4-jsbsim-sim2hitl/px4_root (the
     same lookup as tools/px4build.py); the copy is then reset to the lock's commit."""
     if os.environ.get('SIM2HITL_PX4_ROOT'):
         return Path(os.environ['SIM2HITL_PX4_ROOT']).expanduser()
-    cfg = Path(os.environ.get('XDG_CONFIG_HOME') or Path.home() / '.config') / 'px4-llm-sim2hitl' / 'px4_root'
+    cfg = config() / 'px4_root'
     if cfg.is_file() and cfg.read_text().strip():
         return Path(cfg.read_text().strip()).expanduser()
     return Path.home() / 'px4' / f'PX4-Autopilot-{PX4_LOCK["tag"]}'
@@ -456,7 +457,7 @@ def startup_script(derived, firmware, instance, vtype, owned, owned_file, stream
     lines = [
         '#!/bin/sh',
         f'# SITL FC instance {instance} of {params["sitl"]["recipe"]}',
-        '# Written by tools/sitl_fc.py of px4-llm-sim2hitl (docs/sitl_fc.md): the FC\'s HITL apps, not PX4\'s posix rcS.',
+        f'# Written by tools/sitl_fc.py of {NAME} (docs/sitl_fc.md): the FC\'s HITL apps, not PX4\'s posix rcS.',
         'set +e',
         '. px4-alias.sh',
         f'set VEHICLE_TYPE {vtype}',

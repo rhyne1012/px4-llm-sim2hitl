@@ -1,4 +1,4 @@
-# px4-llm-sim2hitl
+# px4-jsbsim-sim2hitl
 
 An integration layer between PX4 and JSBSim for agent-driven flight-control development, from SITL to hardware-in-the-loop (HITL), for any vehicle type.
 
@@ -45,7 +45,7 @@ Each vehicle lives in its own repository and pins a version of this project. Thi
 ```
   PX4 (flight control)     JSBSim (flight dynamics)     upstream: locked versions, not forked
             \                 /
-        px4-llm-sim2hitl (integration layer)           this repository
+        px4-jsbsim-sim2hitl (integration layer)        this repository
                     |  pinned version
    vehicle repositories: one per aircraft              vehicle definition, tasks, records
 ```

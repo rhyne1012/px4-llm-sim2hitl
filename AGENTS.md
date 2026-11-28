@@ -63,7 +63,7 @@ After that every change goes through the automation (`tools/fly.py`), without re
 ## 2. Platform and permissions
 
 - The full workflow is verified on Ubuntu 24.04 x86-64 only ([docs/verification.md](docs/verification.md)). On another platform, check each requirement against the official documentation before installing; when something behaves differently, verify, keep the evidence, and propose a documentation update.
-- No machine paths in documents or commands: the PX4 tree is `SIM2HITL_PX4_ROOT` (or `~/.config/px4-llm-sim2hitl/px4_root`), the toolkit's location is in the vehicle repository's `sim2hitl.lock`.
+- No machine paths in documents or commands: the PX4 tree is `SIM2HITL_PX4_ROOT` (or `~/.config/px4-jsbsim-sim2hitl/px4_root`), the toolkit's location is in the vehicle repository's `sim2hitl.lock`.
 - **A flight controller this workflow has not used before** (for example one used with QGC or ArduPilot): read everything back first (`tools/deploy.py` plan, which writes nothing). Changing values the recipe does not state (`--reset-unmanaged`) or removing SD card files needs the person's agreement first.
 - **When the person says "I give you permission", the project is green-lit.** Before the first action of each kind (flashing, takeoff, parameter writes, load runs) ask once; after that, say what you are doing and do it. Three kinds always wait for an answer:
   1. Irreversible or outward: merge, deleting files, system settings (anything that needs sudo), pushing, publishing, downloads.

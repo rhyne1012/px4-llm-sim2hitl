@@ -17,10 +17,10 @@
 <fdm_config name="testbird" version="2.0" release="ALPHA">
 
   <fileheader>
-    <author>px4-llm-sim2hitl</author>
+    <author>px4-jsbsim-sim2hitl</author>
     <filecreationdate>2026-11-27</filecreationdate>
     <version>0.1</version>
-    <description>Testbird, the fixed-wing test vehicle of px4-llm-sim2hitl</description>
+    <description>Testbird, the fixed-wing test vehicle of px4-jsbsim-sim2hitl</description>
     <license licenseName="BSD-3-Clause" licenseURL="https://opensource.org/license/bsd-3-clause"/>
   </fileheader>
 

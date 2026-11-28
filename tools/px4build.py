@@ -11,7 +11,7 @@ The recipe's firmware/firmware.json says what to build:
                "modules": ["my_controller"]},                                      # folders of <repository>/modules/src
     "px4": {"tag": "v1.18.0", "commit": "<40 hex digits>"}      # must be the toolkit's px4/lock.toml commit
 
-The user's PX4 tree (--px4-root, SIM2HITL_PX4_ROOT or ~/.config/px4-llm-sim2hitl/px4_root) is never changed. Builds
+The user's PX4 tree (--px4-root, SIM2HITL_PX4_ROOT or ~/.config/px4-jsbsim-sim2hitl/px4_root) is never changed. Builds
 run in a build tree next to it (<tree>-build-sim2hitl, or SIM2HITL_PX4_BUILD_TREE), copied from it once and reset to
 the recipe's commit, with clean submodules, before every build. Each patch is committed in its repository with
 `git am`, with a fixed committer and the committer date set to the author date, so the same patches give the same
@@ -44,11 +44,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from recipe import find_repo  # noqa: E402
+from paths import NAME, cache, config  # noqa: E402
 
 TOOLKIT = Path(__file__).resolve().parents[1]
 TOOLKIT_PX4 = tomllib.loads((Path(__file__).resolve().parents[1] / 'px4' / 'lock.toml').read_text())['px4']
 DEFAULT_COMMITTER = {'name': 'sim2hitl build', 'email': 'build@sim2hitl.invalid'}
-CACHE = Path(os.environ.get('XDG_CACHE_HOME') or Path.home() / '.cache') / 'px4-llm-sim2hitl' / 'v2' / 'firmware'
+CACHE = cache() / 'firmware'
 
 
 def sha256(path):
@@ -60,10 +61,10 @@ def px4_root(explicit=None):
         return Path(explicit).expanduser().resolve()
     if os.environ.get('SIM2HITL_PX4_ROOT'):
         return Path(os.environ['SIM2HITL_PX4_ROOT']).expanduser().resolve()
-    cfg = Path(os.environ.get('XDG_CONFIG_HOME') or Path.home() / '.config') / 'px4-llm-sim2hitl' / 'px4_root'
+    cfg = config() / 'px4_root'
     if cfg.is_file() and cfg.read_text().strip():
         return Path(cfg.read_text().strip()).expanduser().resolve()
-    raise SystemExit('PX4 tree unknown: --px4-root, SIM2HITL_PX4_ROOT or ~/.config/px4-llm-sim2hitl/px4_root')
+    raise SystemExit('PX4 tree unknown: --px4-root, SIM2HITL_PX4_ROOT or ~/.config/px4-jsbsim-sim2hitl/px4_root')
 
 
 def git(tree, *args, env=None):
@@ -262,7 +263,7 @@ def build(recipe_dir, repo=None, px4=None):
     }
     gcc = subprocess.run(['arm-none-eabi-gcc', '--version'], capture_output=True, text=True).stdout.splitlines()
     info['build'] = {
-        'tool': 'px4-llm-sim2hitl tools/px4build.py', 'make_target': target, 'px4_commit': commit,
+        'tool': f'{NAME} tools/px4build.py', 'make_target': target, 'px4_commit': commit,
         'command': portable(' '.join(cmd), source, tree),
         'build_tree': '<PX4 build tree>', 'output_dir': portable(outdir, source, tree), 'committer': committer,
         'patches': applied, 'modules': {n: module_files(repo, n) for n in modules},

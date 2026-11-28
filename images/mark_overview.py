@@ -53,7 +53,7 @@ def main():
     digest = hashlib.sha256(source.encode()).hexdigest()[:16]
     out = source.replace('</svg>', marker + '</svg>')
     # (no double hyphen inside an XML comment)
-    out = out.replace('<title>', f'<!-- made by px4-llm-sim2hitl images/mark_overview.py: layer {a.layer}'
+    out = out.replace('<title>', f'<!-- made by px4-jsbsim-sim2hitl images/mark_overview.py: layer {a.layer}'
                       f'{", name " + name if name else ""}, from overview.svg sha256 {digest} -->\n  <title>', 1)
     out = re.sub(r'\(this repository / 本儲存庫\)', f'({en} / 本儲存庫)', out, count=1)
     Path(a.out).write_text(out, encoding='utf-8')

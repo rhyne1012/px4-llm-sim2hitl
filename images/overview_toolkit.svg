@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1372" width="1200" height="1372" font-family="'EmbeddedNotoSansTC','Noto Sans TC','Noto Sans CJK TC','PingFang TC','Microsoft JhengHei',sans-serif">
-  <!-- made by px4-llm-sim2hitl images/mark_overview.py: layer glue, from overview.svg sha256 e657c60dd5874d63 -->
-  <title>px4-llm-sim2hitl overview / 總覽 (This repository / 本儲存庫)</title>
+  <!-- made by px4-jsbsim-sim2hitl images/mark_overview.py: layer glue, from overview.svg sha256 9da1deeaaf7bf6ad -->
+  <title>px4-jsbsim-sim2hitl overview / 總覽 (This repository / 本儲存庫)</title>
   <defs>
     <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
       <path d="M1 1L9 5L1 9" fill="none" stroke="#2F2F2F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
@@ -35,7 +35,7 @@
   </style>
   <rect x="0" y="0" width="1200" height="1372" rx="16" fill="#F7F5F0"/>
 
-  <text x="60" y="72" class="ink h1">px4-llm-sim2hitl</text>
+  <text x="60" y="72" class="ink h1">px4-jsbsim-sim2hitl</text>
   <text x="60" y="106" class="ink en">The integration layer between PX4 and JSBSim, for agent-driven flight control from SITL to HITL</text>
   <text x="60" y="134" class="zh small">PX4 與 JSBSim 之間的整合層：以 AI 輔助飛控開發，涵蓋 SITL 至 HITL</text>
 
@@ -51,7 +51,7 @@
   <line x1="860" y1="282" x2="860" y2="326" class="line" marker-end="url(#arrow)"/>
 
   <rect id="layer-glue" x="60" y="330" width="1080" height="270" rx="12" class="box"/>
-  <text x="600" y="366" text-anchor="middle" class="ink h2">px4-llm-sim2hitl · the glue layer</text>
+  <text x="600" y="366" text-anchor="middle" class="ink h2">px4-jsbsim-sim2hitl · the glue layer</text>
   <text x="600" y="393" text-anchor="middle" class="zh small">整合層：僅補足 PX4 與 JSBSim 之間的缺口</text>
   <rect x="90" y="412" width="240" height="120" rx="8" class="box"/>
   <text x="210" y="447" text-anchor="middle" class="ink h3">simhost</text>

@@ -1,4 +1,4 @@
-# px4-llm-sim2hitl
+# px4-jsbsim-sim2hitl
 
 以 AI agent 為主要操作者的 PX4 飛控開發整合層。飛行動力學採用 JSBSim，飛控採用 PX4，提供從 SITL 到實體飛控 HITL 的一致工作流程，適用於各類載具。
 
@@ -45,7 +45,7 @@
 ```
   PX4（飛控）          JSBSim（飛行動力學）     上游專案：鎖定版本，不分叉
            \            /
-        px4-llm-sim2hitl（整合層）           本儲存庫
+        px4-jsbsim-sim2hitl（整合層）        本儲存庫
                  |  鎖定版本使用
    載具儲存庫：每架載具各一                    載具定義、任務、紀錄
 ```

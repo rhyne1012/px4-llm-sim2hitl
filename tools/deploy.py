@@ -12,7 +12,7 @@ then:
    patches or modules changed). An old boot file that is not the recipe's is removed first: the new firmware runs it
    on its first boot. PX4's own uploader (<PX4 tree>/Tools/px4_uploader.py) writes the image, with one retry for a
    board left in its bootloader. Then the FC must report the recipe's identity (board, PX4 hash, NuttX hash), which
-   is recorded in the board record (~/.cache/px4-llm-sim2hitl/v2/boards/<uid>.json), which notes which image went onto
+   is recorded in the board record (~/.cache/px4-jsbsim-sim2hitl/v2/boards/<uid>.json), which notes which image went onto
    this board; the recipe's files are not changed.
    --reuse needs proof that the board already runs this recipe's image. The identity the FC reports is not enough:
    it names the PX4 and NuttX commits only, so two recipes with the same patches but different external modules (or
@@ -37,7 +37,7 @@ Refuses an armed FC, and an FC whose SYS_HITL differs from the recipe's (a HITL 
 already in HITL; --allow-hitl-change when a person has made the aircraft safe: propellers off). Nothing is rolled back
 on a failure: the report keeps the readback from before (params_before.json), which `tools/fc.py params-restore --from`
 puts back.
-Report: ~/.cache/px4-llm-sim2hitl/v2/deploy/<UTC>_<recipe>/report.json; the last line printed is its summary.
+Report: ~/.cache/px4-jsbsim-sim2hitl/v2/deploy/<UTC>_<recipe>/report.json; the last line printed is its summary.
 """
 import argparse
 import datetime
@@ -55,8 +55,9 @@ import mavftp  # noqa: E402
 import px4build  # noqa: E402
 from fc import FC, FCError  # noqa: E402
 from recipe import KINDS, Recipe, load_firmware_params  # noqa: E402
+from paths import cache  # noqa: E402
 
-CACHE = Path(os.environ.get('XDG_CACHE_HOME') or Path.home() / '.cache') / 'px4-llm-sim2hitl' / 'v2' / 'deploy'
+CACHE = cache() / 'deploy'
 BOARDS = CACHE.parent / 'boards'   # <uid>.json: the image the toolkit last flashed onto that board; <uid>.role.json: its role
 # Which recipe roles a board of each role takes (tools/fc.py board-role sets a board's role, a person's decision)
 BOARD_TAKES = {'hitl': {'hitl', 'bench'}, 'aircraft': {'bench', 'flight'}}
