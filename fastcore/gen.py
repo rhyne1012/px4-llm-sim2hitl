@@ -11,7 +11,9 @@ state, input, parameter, environment and output arrays, and what the core leaves
 
 Parameters are what a configuration or an experiment may change per vehicle without regenerating the core, under
 their JSBSim property names: the properties the vehicle declares (<property value=...>), the point masses
-(inertia/pointmass-*), the actuator failures (fcs/<actuator>/malfunction/*), and the servo chain (avionics/servo/*).
+(inertia/pointmass-*), the actuator failures (fcs/<actuator>/malfunction/*), the servo chain (avionics/servo/*), and
+the turbulence (atmosphere/turb-type, atmosphere/turbulence/milspec/*, simulation/randomseed; every core has them,
+off by default as in JSBSim: fastcore/runtime/turbulence.h).
 
 Only the JSBSim elements listed in fastcore/README.md are translated. Anything else stops the generator with the file
 and the element, so a core never silently differs from its JSBSim definition.
@@ -31,6 +33,13 @@ HERE = Path(__file__).resolve().parent
 RUNTIME = HERE / 'runtime'
 AVIONICS = HERE.parent / 'avionics'
 SERVO_PARAMS = [('avionics/servo/pwm-period-s', 0.0), ('avionics/servo/pwm-phase-s', 0.0), ('avionics/servo/delay-s', 0.0)]
+# Turbulence parameters of every core, JSBSim's properties and defaults (FGWinds: type ttMilspec, severity 0 = off).
+TURB_PARAMS = [('atmosphere/turb-type', 3.0), ('atmosphere/turbulence/milspec/windspeed_at_20ft_AGL-fps', 0.0),
+               ('atmosphere/turbulence/milspec/severity', 0.0), ('simulation/randomseed', 0.0)]
+# The turbulence state, in the order of runtime/turbulence.h's enum (FT_COUNTER ... FT_R).
+TURB_STATES = ['counter', 'psiw_rad', 'xi_u_km1', 'nu_u_km1', 'xi_v_km1', 'xi_v_km2', 'nu_v_km1', 'nu_v_km2', 'xi_w_km1',
+               'xi_w_km2', 'nu_w_km1', 'nu_w_km2', 'xi_p_km1', 'nu_p_km1', 'xi_q_km1', 'xi_r_km1',
+               'wind_n_mps', 'wind_e_mps', 'wind_d_mps', 'p_rps', 'q_rps', 'r_rps']
 
 
 class Unsupported(Exception):
@@ -947,6 +956,10 @@ def generate(folder, out, servo_capacity=64):
     for i in range(len(g.engines)):
         g.hold(f'fcs/throttle-pos-norm[{i}]')
     g.servo_inputs()
+    for prop, default in TURB_PARAMS:
+        if prop in [q for q, _ in g.params]:
+            raise Unsupported(f'{g.where}: {prop} is the turbulence parameter of every core; the vehicle may not declare it')
+        g.param(prop, default)
     return emit(v, g, Path(out), servo_capacity)
 
 
@@ -1049,6 +1062,8 @@ def emit(v, g, out, servo_capacity):
     x_aux0 = len(x_names)
     x_names += ['aux:udot_mps2', 'aux:vdot_mps2', 'aux:wdot_mps2', 'aux:cl_squared', 'aux:fcs_initialized',
                 'aux:bi2vel', 'aux:ci2vel', 'aux:qbar_area', 'aux:alpha_wing']
+    x_turb0 = len(x_names)
+    x_names += [f'turb:{s}' for s in TURB_STATES]
     x_servo0 = len(x_names)
     if ns:
         x_names += ['servo:tick', 'servo:head'] + [f'servo:held:{p}' for p in g.servo_props]
@@ -1072,11 +1087,12 @@ def emit(v, g, out, servo_capacity):
                     f'prop_fx_N[{i}]', f'prop_fy_N[{i}]', f'prop_fz_N[{i}]',
                     f'prop_mx_Nm[{i}]', f'prop_my_Nm[{i}]', f'prop_mz_Nm[{i}]']
     y_names += [f'fn:{p}' for p, _ in g.aero_funcs]
+    y_names += ['turb_wind_n_mps', 'turb_wind_e_mps', 'turb_wind_d_mps', 'turb_p_rps', 'turb_q_rps', 'turb_r_rps']
     ny = len(y_names)
     yi = {n: i for i, n in enumerate(y_names)}
     srcs = {str(f.relative_to(v.folder)): hashlib.sha256(f.read_bytes()).hexdigest() for f in v.files}
     gen_hash = hashlib.sha256(Path(__file__).read_bytes() + (RUNTIME / 'fastcore.h').read_bytes()
-                              + (AVIONICS / 'servo_chain.h').read_bytes()).hexdigest()
+                              + (RUNTIME / 'turbulence.h').read_bytes() + (AVIONICS / 'servo_chain.h').read_bytes()).hexdigest()
 
     L = []
     a = L.append
@@ -1086,6 +1102,7 @@ def emit(v, g, out, servo_capacity):
     a(f' *   generator + runtime sha256 {gen_hash} */')
     a(f'#include "{N}_core.h"')
     a('#include "fastcore.h"')
+    a('#include "turbulence.h"')
     a('#include "servo_chain.h"')
     a('#include <string.h>')
     a('')
@@ -1093,6 +1110,8 @@ def emit(v, g, out, servo_capacity):
     a(f'#define X_HELD0 {x_held0}\n#define X_FCS0 {x_fcs0}\n#define X_AUX0 {x_aux0}\n#define X_SERVO0 {x_servo0}')
     a(f'#define X_AUX_UDOT {x_aux0}\n#define X_AUX_CLSQ {x_aux0 + 3}\n#define X_AUX_INIT {x_aux0 + 4}')
     a(f'#define X_AUX_PRE {x_aux0 + 5}  /* bi2vel, ci2vel, qbar-area, alpha-wing as the pre-functions see them (jsb) */')
+    a(f'#define X_TURB0 {x_turb0}  /* runtime/turbulence.h, FT_NSTATE values */')
+    a(f'#define P_TURB {g.pindex(TURB_PARAMS[0][0])}  /* turb-type, windspeed at 20 ft, severity, random seed */')
     a(f'#define NSERVO {ns}\n#define SERVO_CAP {cap}')
     a(f'#define SW {cnum(g.Sw)}\n#define BW {cnum(g.bw)}\n#define CBAR {cnum(g.cbar)}\n#define IW {cnum(g.iw)}')
     a(f'#define LBTOSLUG {cnum(LBTOSLUG)}\n#define INCHTOFT {cnum(INCHTOFT)}')
@@ -1129,17 +1148,20 @@ def emit(v, g, out, servo_capacity):
     a('  const double *RP_FT = m->rp_ft;')
     a('  double C[3][3];')
     a('  fc_quat_dcm(x + 6, C);')
-    a('  /* FGAuxiliary::Run: air-relative velocity and rates, ft/s */')
-    a('  const double wbx = C[0][0] * env[0] + C[1][0] * env[1] + C[2][0] * env[2];')
-    a('  const double wby = C[0][1] * env[0] + C[1][1] * env[1] + C[2][1] * env[2];')
-    a('  const double wbz = C[0][2] * env[0] + C[1][2] * env[1] + C[2][2] * env[2];')
+    a('  /* FGAuxiliary::Run: air-relative velocity and rates, ft/s; the total wind is the mean wind of env plus the')
+    a('   * turbulence held over the step (FGWinds::Run), the aerodynamic rates the body rates minus the turbulence rates */')
+    a('  const double *TB = x + X_TURB0;')
+    a('  const double wtn = env[0] + TB[FT_WIND_N], wte = env[1] + TB[FT_WIND_E], wtd = env[2] + TB[FT_WIND_D];')
+    a('  const double wbx = C[0][0] * wtn + C[1][0] * wte + C[2][0] * wtd;')
+    a('  const double wby = C[0][1] * wtn + C[1][1] * wte + C[2][1] * wtd;')
+    a('  const double wbz = C[0][2] * wtn + C[1][2] * wte + C[2][2] * wtd;')
     a('  const double ua = (x[3] - wbx) / FC_FT, va = (x[4] - wby) / FC_FT, wa = (x[5] - wbz) / FC_FT;')
-    a('  const double pa = x[10], qa = x[11], ra = x[12];')
+    a('  const double pa = x[10] - TB[FT_P], qa = x[11] - TB[FT_Q], ra = x[12] - TB[FT_R];')
     a('  /* Earth rate in body axes; the rates in x are relative to the Earth, a gyro measures them plus this */')
     a('  const double Wb[3] = {C[0][0] * m->wn[0] + C[1][0] * m->wn[1] + C[2][0] * m->wn[2],')
     a('                        C[0][1] * m->wn[0] + C[1][1] * m->wn[1] + C[2][1] * m->wn[2],')
     a('                        C[0][2] * m->wn[0] + C[1][2] * m->wn[1] + C[2][2] * m->wn[2]};')
-    a('  const double pI = pa + Wb[0], qI = qa + Wb[1], rI = ra + Wb[2];')
+    a('  const double pI = x[10] + Wb[0], qI = x[11] + Wb[1], rI = x[12] + Wb[2];')
     a('  const double mUW = ua * ua + wa * wa, Vt2 = mUW + va * va, Vt = sqrt(Vt2);')
     a('  double alpha = 0.0, beta = 0.0, adot = 0.0, bdot = 0.0, ca = 1.0, sa = 0.0, cb = 1.0, sb = 0.0;')
     a('  if (Vt > 0.001) {')
@@ -1289,6 +1311,7 @@ def emit(v, g, out, servo_capacity):
     a(f'    y[{yi["ixy_kgm2"]}] = -JS[0][1]; y[{yi["ixz_kgm2"]}] = -JS[0][2]; y[{yi["iyz_kgm2"]}] = -JS[1][2];')
     for prop, var in g.aero_funcs:
         a(f'    y[{yi["fn:" + prop]}] = {var};')
+    a(f'    for (int k = 0; k < 6; ++k) y[{yi["turb_wind_n_mps"]} + k] = TB[FT_WIND_N + k];')
     a('  }')
     a('}')
     a('')
@@ -1331,9 +1354,16 @@ def emit(v, g, out, servo_capacity):
     a('    earth_rate(ei, &m);')
     a('    sc_ticks tk;')
     a('    if (servo_ticks(pi, dt, &tk) != 0) { bad = bad ? bad : i + 1; continue; }')
+    a('    if (!fc_turbulence_type_ok(pi[P_TURB])) { bad = bad ? bad : -(i + 1); continue; }')
     a('    (void)tk;')
     a('    for (int s = 0; s < k; ++s) {')
     a('      double k1[NC], k2[NC], k3[NC], k4[NC], xt[X_SERVO0];')
+    a('      {  /* FGWinds before the flight control and the forces, from the state at the start of the step */')
+    a('        double C0[3][3];')
+    a('        fc_quat_dcm(xi + 6, C0);')
+    a('        fc_turbulence(xi + X_TURB0, pi[P_TURB], pi[P_TURB + 1], pi[P_TURB + 2], pi[P_TURB + 3], C0, xi + 3, ei,')
+    a('                      (ei[4] - xi[2]) / FC_FT, BW, dt);')
+    a('      }')
     if ns:
         a('      double ue[NU], c[NSERVO], o[NSERVO];')
         a('      memcpy(ue, ui, sizeof ue);')
@@ -1387,8 +1417,9 @@ def emit(v, g, out, servo_capacity):
          ' * position, velocity, attitude, rates and propeller speed are kept. */',
          f'void {N}_reset(int n, double *x, const double *u, const double *p);',
          '/* k steps of dt seconds for n vehicles; y (n x NY, may be NULL) gets the outputs at the final state.',
-         ' * Returns 0, or 1 + the index of the first vehicle whose servo-chain times are not whole multiples of dt or',
-         ' * exceed the capacity (that vehicle is not advanced). */',
+         ' * Returns 0; or 1 + the index of the first vehicle whose servo-chain times are not whole multiples of dt or',
+         ' * exceed the capacity; or -(1 + the index) of the first whose atmosphere/turb-type the core does not have',
+         ' * (0, 1, 3 and 4 it has). Such a vehicle is not advanced. */',
          f'int {N}_step(int n, double *x, const double *u, const double *p, const double *env, double dt, int k, double *y);',
          '/* Derivatives (n x NC, may be NULL) and outputs (n x NY, may be NULL) at the given states. */',
          f'void {N}_eval(int n, const double *x, const double *p, const double *env, int jsbsim_order, double *xd, double *y);',
@@ -1399,6 +1430,10 @@ def emit(v, g, out, servo_capacity):
         'servo_inputs': g.servo_props, 'servo_capacity_steps': cap, 'pointmasses': g.pointmasses,
         'actuators': g.actuator_deps, 'engines': [e['kind'] for e in g.engines],
         'contacts': [n for n, _ in g.contacts],
+        'turbulence': {'parameters': [q for q, _ in TURB_PARAMS], 'state': [f'turb:{s}' for s in TURB_STATES],
+                       'types': {'0': 'none', '1': 'none (JSBSim ttStandard is not implemented)', '3': 'Milspec',
+                                 '4': 'Tustin'}, 'wingspan_ft': g.bw,
+                       'random_numbers': 'SplitMix64 of the seed and the step counter, Box-Muller (runtime/turbulence.h)'},
         'frames': 'NED position from an origin at origin_alt_msl_m; body velocity relative to the ground; quaternion '
                   'body to NED, scalar first; rates in body axes; parameters in JSBSim property units; outputs '
                   'ixy/ixz/iyz are the products of inertia as integrals (ixz = sum x z dm, body axes)',
@@ -1407,7 +1442,10 @@ def emit(v, g, out, servo_capacity):
             'rate are modelled), constant effective gravity (env gravity_mps2); no curvature, transport rate or '
             'gravity variation',
             'standard atmosphere, first layer only (below 11 km)',
-            'no turbulence; the wind is constant within a call (env)',
+            'turbulence: only JSBSim\'s Milspec (3) and Tustin (4) Dryden types, with the core\'s own random numbers '
+            '(statistically, not sample for sample, JSBSim\'s); updated once per step from the state at its start and '
+            'held over the step, as JSBSim does per frame; eval() uses the held values',
+            'the mean wind is constant within a call (env)',
             'alphadot from the previous derivative evaluation (JSBSim: the previous frame)',
             'flight control and the servo chain run once per step (dt); their outputs are held over the step',
             'parameters are constant within a call; a change of point masses moves the CG between calls'],

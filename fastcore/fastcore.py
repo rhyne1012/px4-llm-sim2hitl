@@ -128,9 +128,11 @@ class Core:
         if outputs and y is None:
             y = np.empty((n, self.ny))
         bad = self._step(n, _ptr(x), _ptr(u), _ptr(p), _ptr(env), float(dt), int(k), _ptr(y) if outputs else None)
-        if bad:
+        if bad > 0:
             raise ValueError(f'vehicle {bad - 1}: servo-chain times must be whole multiples of dt={dt} and the delay at '
                              f'most {self.layout["servo_capacity_steps"]} steps')
+        if bad < 0:
+            raise ValueError(f'vehicle {-bad - 1}: atmosphere/turb-type must be 0, 1 (none), 3 (Milspec) or 4 (Tustin)')
         return y if outputs else None
 
     def eval(self, x, p, env, jsbsim_order=False):
@@ -185,3 +187,114 @@ class ServoChainRef:
             return list(self.held)
         self.line.append(list(self.held))
         return self.line.pop(0)
+
+
+TURB_STATES = ('counter', 'psiw_rad', 'xi_u_km1', 'nu_u_km1', 'xi_v_km1', 'xi_v_km2', 'nu_v_km1', 'nu_v_km2', 'xi_w_km1',
+               'xi_w_km2', 'nu_w_km1', 'nu_w_km2', 'xi_p_km1', 'nu_p_km1', 'xi_q_km1', 'xi_r_km1',
+               'wind_n_mps', 'wind_e_mps', 'wind_d_mps', 'p_rps', 'q_rps', 'r_rps')
+_POE_ALT = np.array([500, 1750, 3750, 7500, 15000, 25000, 35000, 45000, 55000, 65000, 75000, 80000], float)
+_POE = np.array([[3.2, 2.2, 1.5, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                 [4.2, 3.6, 3.3, 1.6, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                 [6.6, 6.9, 7.4, 6.7, 4.6, 2.7, 0.4, 0.0, 0.0, 0.0, 0.0, 0.0],
+                 [8.6, 9.6, 10.6, 10.1, 8.0, 6.6, 5.0, 4.2, 2.7, 0.0, 0.0, 0.0],
+                 [11.8, 13.0, 16.0, 15.1, 11.6, 9.7, 8.1, 8.2, 7.9, 4.9, 3.2, 2.1],
+                 [15.6, 17.6, 23.0, 23.6, 22.1, 20.0, 16.0, 15.1, 12.1, 7.9, 6.2, 5.1],
+                 [18.7, 21.5, 28.4, 30.2, 30.7, 31.0, 25.2, 23.1, 17.5, 10.7, 8.4, 7.2]])
+_M64 = (1 << 64) - 1
+
+
+def _mix(z):
+    z = (z + 0x9E3779B97F4A7C15) & _M64
+    z = ((z ^ (z >> 30)) * 0xBF58476D1CE4E5B9) & _M64
+    z = ((z ^ (z >> 27)) * 0x94D049BB133111EB) & _M64
+    return z ^ (z >> 31)
+
+
+def turb_normals(seed, counter):
+    """The four standard normal numbers of runtime/turbulence.h fc_turb_normals for one vehicle and step."""
+    s, c = _mix(int(seed) & _M64), int(counter)
+    uu = [((_mix(s ^ ((c * 4 + j) & _M64)) >> 11) + 0.5) / 9007199254740992.0 for j in range(4)]
+    out = []
+    for j in (0, 2):
+        r, a = math.sqrt(-2.0 * math.log(uu[j])), 2.0 * math.pi * uu[j + 1]
+        out += [r * math.cos(a), r * math.sin(a)]
+    return out
+
+
+class TurbulenceRef:
+    """An independent Python transcription of JSBSim 1.3.3 FGWinds::Turbulence (types 3 Milspec and 4 Tustin) and the
+    core's random numbers, for checks: one vehicle, one step from the state at its start. Units as JSBSim's inside;
+    wind_ned (m/s) and pqr_body (rad/s) are the held outputs."""
+
+    def __init__(self, type_, w20_fps, severity, seed, wingspan_ft):
+        self.type, self.w20, self.idx, self.seed = int(type_), float(w20_fps), int(severity), seed
+        self.b = wingspan_ft if wingspan_ft != 0 else 30.0
+        self.s = dict.fromkeys(TURB_STATES, 0.0)
+        self.counter = 0
+
+    def sigma_scale(self, h):
+        h = max(h, 10.0)
+        if h <= 1000:
+            return h / (0.177 + 0.000823 * h) ** 1.2, h, 0.1 * self.w20 / (0.177 + 0.000823 * h) ** 0.4, 0.1 * self.w20
+        poe = float(np.interp(h, _POE_ALT, _POE[min(max(self.idx, 1), 7) - 1]))
+        if h <= 2000:
+            L = 1000 + (h - 1000.) / 1000. * 750.
+            sig = 0.1 * self.w20 + (h - 1000.) / 1000. * (poe - 0.1 * self.w20)
+            return L, L, sig, sig
+        return 1750.0, 1750.0, poe, poe
+
+    def step(self, C, uvw_mps, wind_ned_mps, h_ft, T_V):
+        """C: body to NED (3x3). Returns (wind_ned_mps, pqr_body) after the step."""
+        s, ft = self.s, 0.3048
+        V = np.linalg.norm(np.asarray(uvw_mps) - C.T @ np.asarray(wind_ned_mps)) / ft
+        on = self.type in (3, 4) and self.idx != 0 and V != 0
+        if on:
+            L_u, L_w, sig_u, sig_w = self.sigma_scale(h_ft)
+            b = self.b
+            sig_p, L_p = 1.9 / math.sqrt(L_w * b) * sig_w, math.sqrt(L_w * b) / 2.6
+            tau_u, tau_w, tau_p, tau_q, tau_r = L_u / V, L_w / V, L_p / V, 4 * b / math.pi / V, 3 * b / math.pi / V
+            nu_u, nu_v, nu_w, nu_p = turb_normals(self.seed, self.counter)
+            if self.type == 4:
+                om_w, om_v = V / L_w, V / L_u
+                cb, cbp = 1 / tau_u / math.tan(T_V / 2 / tau_u), 1 / tau_p / math.tan(T_V / 2 / tau_p)
+                cbq, cbr = 1 / tau_q / math.tan(T_V / 2 / tau_q), 1 / tau_r / math.tan(T_V / 2 / tau_r)
+                r3 = math.sqrt(3.0)
+
+                def second(om, sig, nu, x1, x2, n1, n2):
+                    return (-2 * (om ** 2 - cb ** 2) / (om + cb) ** 2 * x1 - (om - cb) ** 2 / (om + cb) ** 2 * x2
+                            + sig * math.sqrt(3 * om / T_V) / (om + cb) ** 2
+                            * ((cb + om / r3) * nu + 2 / r3 * om * n1 + (om / r3 - cb) * n2))
+                xi_u = (-(1 - cb * tau_u) / (1 + cb * tau_u) * s['xi_u_km1']
+                        + sig_u * math.sqrt(2 * tau_u / T_V) / (1 + cb * tau_u) * (nu_u + s['nu_u_km1']))
+                xi_v = second(om_v, sig_u, nu_v, s['xi_v_km1'], s['xi_v_km2'], s['nu_v_km1'], s['nu_v_km2'])
+                xi_w = second(om_w, sig_w, nu_w, s['xi_w_km1'], s['xi_w_km2'], s['nu_w_km1'], s['nu_w_km2'])
+                xi_p = (-(1 - cbp * tau_p) / (1 + cbp * tau_p) * s['xi_p_km1']
+                        + sig_p * math.sqrt(2 * tau_p / T_V) / (1 + cbp * tau_p) * (nu_p + s['nu_p_km1']))
+                gq, gr = 4 * b * cbq / math.pi / V, 3 * b * cbr / math.pi / V
+                xi_q = -(1 - gq) / (1 + gq) * s['xi_q_km1'] + cbq / V / (1 + gq) * (xi_w - s['xi_w_km1'])
+                xi_r = -(1 - gr) / (1 + gr) * s['xi_r_km1'] + cbr / V / (1 + gr) * (xi_v - s['xi_v_km1'])
+            else:
+                xi_u = (1 - T_V / tau_u) * s['xi_u_km1'] + sig_u * math.sqrt(2 * T_V / tau_u) * nu_u
+                xi_v = (1 - 2 * T_V / tau_u) * s['xi_v_km1'] + sig_u * math.sqrt(4 * T_V / tau_u) * nu_v
+                xi_w = (1 - 2 * T_V / tau_w) * s['xi_w_km1'] + sig_w * math.sqrt(4 * T_V / tau_w) * nu_w
+                xi_p = (1 - T_V / tau_p) * s['xi_p_km1'] + sig_p * math.sqrt(2 * T_V / tau_p) * nu_p
+                xi_q = (1 - T_V / tau_q) * s['xi_q_km1'] + math.pi / 4 / b * (xi_w - s['xi_w_km1'])
+                xi_r = (1 - T_V / tau_r) * s['xi_r_km1'] + math.pi / 3 / b * (xi_v - s['xi_v_km1'])
+            cp, sp = math.cos(s['psiw_rad']), math.sin(s['psiw_rad'])
+            s['wind_n_mps'], s['wind_e_mps'], s['wind_d_mps'] = ((cp * xi_u + sp * xi_v) * ft,
+                                                                (-sp * xi_u + cp * xi_v) * ft, xi_w * ft)
+            s['p_rps'], s['q_rps'], s['r_rps'] = C.T @ np.array([cp * xi_p + sp * xi_q, -sp * xi_p + cp * xi_q, xi_r])
+            s['xi_u_km1'], s['nu_u_km1'] = xi_u, nu_u
+            s['xi_v_km2'], s['xi_v_km1'], s['nu_v_km2'], s['nu_v_km1'] = s['xi_v_km1'], xi_v, s['nu_v_km1'], nu_v
+            s['xi_w_km2'], s['xi_w_km1'], s['nu_w_km2'], s['nu_w_km1'] = s['xi_w_km1'], xi_w, s['nu_w_km1'], nu_w
+            s['xi_p_km1'], s['nu_p_km1'], s['xi_q_km1'], s['xi_r_km1'] = xi_p, nu_p, xi_q, xi_r
+        else:
+            for k in ('wind_n_mps', 'wind_e_mps', 'wind_d_mps', 'p_rps', 'q_rps', 'r_rps'):
+                s[k] = 0.0
+        if wind_ned_mps[0] != 0.0:
+            psi = math.atan2(wind_ned_mps[1], wind_ned_mps[0])
+            s['psiw_rad'] = psi + 2 * math.pi if psi < 0 else psi
+        self.counter += 1
+        s['counter'] = float(self.counter)
+        return (np.array([s['wind_n_mps'], s['wind_e_mps'], s['wind_d_mps']]),
+                np.array([s['p_rps'], s['q_rps'], s['r_rps']]))

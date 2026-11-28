@@ -40,6 +40,7 @@ What may differ between vehicles of one batch, or change during an episode, is a
 | declared properties | `<property value="...">` in the aerodynamics or a system | `aero/scale/cm-alpha` |
 | actuator failures | every `<actuator>` | `fcs/elevator-servo/malfunction/fail_stuck` (also `fail_zero`, `fail_hardover`) |
 | servo chain | `vehicle.toml` actuators of `kind = "servo"` | `avionics/servo/pwm-period-s`, `pwm-phase-s`, `delay-s` |
+| turbulence | every core (below, "Turbulence") | `atmosphere/turb-type`, `atmosphere/turbulence/milspec/windspeed_at_20ft_AGL-fps`, `atmosphere/turbulence/milspec/severity`, `simulation/randomseed` |
 
 A configuration (a CG, a payload, slow servos) or an experiment (a scaled coefficient) is a file of such settings, `vehicles/<name>/configs/*.toml`:
 
@@ -53,6 +54,23 @@ The same file drives every level: `fastcore.load_config()` reads it for the core
 
 A vehicle exposes experiment knobs as declared properties that its functions multiply in (Testbird: `aero/scale/cm-alpha`, `aero/scale/elevator`), and models what can move as point masses (Testbird's battery, so its CG moves at constant mass). Mass, CG and inertia follow from the point masses in JSBSim's own order of operations.
 
+## Turbulence
+
+Every core has JSBSim's continuous turbulence, written once for all vehicles in `runtime/turbulence.h`: JSBSim 1.3.3's `FGWinds::Turbulence` for its types 3 (Milspec) and 4 (Tustin).
+
+- **The model.** Scale lengths and intensities follow MIL-F-8785C: below 1000 ft from the wind at 20 ft (`windspeed_at_20ft_AGL-fps`), above 2000 ft from its probability-of-exceedance table (`severity` 1–7), and linear in between. The filters follow Yeager 1998 (NASA CR-1998-206937), as JSBSim implements them:
+  - type 4 is the Tustin form of the Dryden filters;
+  - type 3 is the first-order forms of MIL-STD-1797A.
+- **Where it acts.** The translational part is added to the wind in NED. The rotational part (p, q, r) is subtracted from the body rates the aerodynamics see (`velocities/*-aero-rad_sec`). The wingspan is the vehicle's.
+- **Settings.** The same properties and defaults as JSBSim: type 3, severity 0 = off. One configuration file therefore sets the turbulence in the core and in simhost. Types 0 and 1 give none, as in JSBSim; any other type (2, Culp) makes `step` fail for that vehicle.
+- **When it updates.** Once per step, from the state at its start, and held over the step, as JSBSim updates it once per frame. `eval` uses the held values. The outputs `turb_wind_{n,e,d}_mps` and `turb_{p,q,r}_rps` are the held turbulence.
+- **Random numbers.** The one deliberate difference from JSBSim. The core makes them from the vehicle's `simulation/randomseed` and its step counter (SplitMix64, Box–Muller): a run is reproduced from its parameters alone, k steps in one call equal k calls, and `reset` starts the sequence again. Give each vehicle of a batch its own seed. The sequences are not JSBSim's; their statistics are (Checks, 4).
+- **What JSBSim's model leaves out of MIL-F-8785C**, and so the core leaves out too:
+  - Its roll-rate turbulence is Yeager's first-order fit (σ_p = 1.9 σ_w / √(L_w b), L_p = √(L_w b) / 2.6), not the Dryden form with its corner at πV/(4b).
+  - Type 3 uses first-order filters for v and w, where the Dryden form is second order.
+  - The low-altitude model uses the altitude above sea level (JSBSim's `in.AltitudeASL`), not the height above the ground.
+  - The turbulence frame follows the mean wind's azimuth, updated only while its north part is not zero.
+
 ## Interface
 
 C (`<name>_core.h`) and Python (`fastcore.py`, ctypes; calls release the GIL). All arrays are float64, row-major, one row per vehicle; the column names are in `<name>_core.json`.
@@ -63,10 +81,10 @@ C (`<name>_core.h`) and Python (`fastcore.py`, ctypes; calls release the GIL). A
 | `u` (inputs) | The JSBSim command properties the flight control reads, e.g. `fcs/elevator-cmd-norm`, `fcs/throttle-cmd-norm[0]`. Servo inputs go through the servo chain first. |
 | `p` (parameters) | See above; `core.params(n, settings...)` starts from the vehicle's values. |
 | `env` | Wind NED (m/s), effective gravity (m/s², gravitation and centrifugal), altitude of the NED origin and of the ground above sea level (m), latitude (deg) and Earth rate (rad/s; 0 for a non-rotating Earth). |
-| `y` (outputs) | Forces and moments (total, aerodynamic, per propeller), specific force (what an accelerometer measures), inertial body rates (what a gyro measures), α, β, airspeed, dynamic pressure, density, propeller rpm, current and power, mass, CG and inertia, height of the lowest contact point above the ground, and the value of every aerodynamic function. |
+| `y` (outputs) | Forces and moments (total, aerodynamic, per propeller), specific force (what an accelerometer measures), inertial body rates (what a gyro measures), α, β, airspeed, dynamic pressure, density, propeller rpm, current and power, mass, CG and inertia, height of the lowest contact point above the ground, the value of every aerodynamic function, and the held turbulence. |
 
 - `reset(x, u, p)` initialises the flight-control and servo-chain states from the inputs, as JSBSim's `RunIC` does.
-- `step(x, u, p, env, dt, k, y)` advances `k` steps of `dt` (default 4 ms, RK4), with the servo chain and the flight control updated once per step. The servo-chain times must be whole multiples of `dt`; otherwise the call fails for that vehicle.
+- `step(x, u, p, env, dt, k, y)` advances `k` steps of `dt` (default 4 ms, RK4), with the servo chain and the flight control updated once per step. The servo-chain times must be whole multiples of `dt`, and `atmosphere/turb-type` one the core has; otherwise the call fails for that vehicle.
 - `eval(x, p, env, jsbsim_order, xd, y)` gives derivatives and outputs at given states without advancing them, e.g. for control-effectiveness derivatives by finite differences on the actuator positions.
 
 Call `step` with many vehicles and several steps at once: one call costs a few µs of Python overhead.
@@ -77,7 +95,7 @@ Written into each `<name>_core.json` as `not_modelled`:
 
 - **Ground reactions.** The core is for flight. The outputs give the height of the lowest contact point so a training loop can end an episode on contact.
 - **Earth.** Flat, but rotating: the local frame turns with the Earth at the latitude of `env`, so the Coriolis acceleration and the Earth rate in Euler's equation and in the propeller's gyroscopic moment are modelled. Constant effective gravity from `env`; no curvature, transport rate or change of gravity with height. Leaving the rotation out cost 0.05 m and 0.03° in 10 s of level flight at 17 m/s (Coriolis, 0.001 m/s²).
-- **Atmosphere.** Standard day, first layer only (below 11 km). No turbulence; the wind is constant within a call.
+- **Atmosphere.** Standard day, first layer only (below 11 km). The mean wind is constant within a call. Turbulence: only JSBSim's types 3 and 4, with the core's own random numbers ("Turbulence").
 - **Timing.** α̇ comes from the previous derivative evaluation, as JSBSim's comes from the previous frame. `aero/cl-squared` comes from the current lift, where JSBSim uses the previous frame's; likewise `aero/bi2vel`, `ci2vel`, `qbar-area` and `alpha-wing-rad` in aerodynamic pre-functions, which JSBSim updates after it runs them. The servo chain and the flight control run once per step and hold their outputs over the step. Parameters are constant within a call.
 
 ## Translated JSBSim elements
@@ -98,10 +116,23 @@ Not yet: point-mass shapes, fuel tanks, other engine and thruster types, `switch
 
 ## Checks
 
-`check.py` runs three checks and writes them to `check.json`:
+`check.py` runs four checks and writes them to `check.json`:
 
 1. **Snapshots (translation).** JSBSim flies from random states (8–32 m/s, α −25…35°, β ±20°, rates ±1.5 rad/s, random inputs) with random point masses and declared properties, half of them on a non-rotating Earth (with wind in half of those) and half on the rotating Earth. On the rotating Earth JSBSim's reported Euler angles and the transformation it applies to the wind differ by about 2e-10 rad, so those run without wind. At a random frame its full state, including actuator positions, propeller speed and the previous frame's accelerations, goes into the core in JSBSim's order, and every force, moment, aerodynamic function, propeller value, mass property and angular acceleration is compared. Limit: relative error 1e-9; rounding is about 1e-12.
 2. **Flight-control sequences (translation).** Random command sequences at 1 ms with actuator failures switched on and off at random, without and with two servo-chain settings. The core's actuator positions must equal JSBSim's frame by frame (limit 1e-12 rad); JSBSim's commands go through an independent Python servo chain (`fastcore.ServoChainRef`).
 3. **Flights (simplifications).** From trimmed level flight (`tools/linear.py`'s trim at `--speed`, default 17 m/s, then the airframe held while the actuators and engines settle), JSBSim as simhost runs it (1 ms, Adams-Bashforth 2, rotating WGS84 Earth) and the core at 1 ms and 4 ms fly open-loop input sequences for 20 s: hold, elevator, aileron and rudder doublets, throttle steps, a multisine on all inputs, a crosswind and a pull to the stall (the elevator sign that pitches the nose up); four of them again with all of the vehicle's configuration files; and three failures switched on in flight, each on the first actuator the command drives (elevator stuck, rudder zero, aileron hardover, or stuck where an actuator has no clip limits, from 1500 m). An open-loop unstable vehicle diverges from its trim, so its flights say nothing about the core: run it with `--skip-flights`. Limits, as the largest difference within the first 10 s for the 4 ms core: position 0.3 m, attitude 0.3°, airspeed 0.03 m/s; for the failure flights the attitude limit is 1°. A person set them on 2026-11-27, after the first Testbird measurement (worst 0.08 m, 0.09°, 0.008 m/s) and, for the failures, after the aileron hardover: it ends in a spiral dive at 280°/s roll and 63 m/s, where JSBSim at 1 ms itself differs from JSBSim at 0.25 ms by 0.16° and 1° is about 3.5 ms of roll. The flights run open loop, so differences grow with time; the 20 s values are recorded but not judged.
+4. **Turbulence** (`--skip-turbulence` leaves it out).
+   - *Translation.* The core's update is compared with `fastcore.TurbulenceRef`, an independent Python transcription of JSBSim's `FGWinds::Turbulence` and of the core's random numbers. Both start from the same states in free flight, at three altitudes (one in each altitude regime), with a mean wind, for both types. Limit: 1e-9 absolute.
+   - *Statistics.* The airframe is held in level flight at `--speed`, at 100 m and at 800 m, for both types. Measured:
+     - the core: 128 vehicles of 600 s at 4 ms, after a warm-up of 150 s (the filters start from zero);
+     - JSBSim with its integrators off: 8 runs of 200 s at 1 ms, after 30 s.
+     - Spectra from 32.8 s segments. Each case has its own seeds.
+   - *Judged.* Against the formulas of the formulation the code implements: the power in six frequency bands from 1.5 to 78 rad/s for all six components, and the variance of u, v, w and p (JSBSim: of p only, because its u, v and w change too slowly for 1600 s to estimate their variance). Limits: 10 % for the core, 15 % for JSBSim. They were set before the first run, by the agent that wrote the turbulence, from the expected sampling error.
+   - *The first run failed* (2026-11-28, docs/verification.md), because of two faults in the estimator:
+     - there was no warm-up, so the slow u variance came out 13 % low;
+     - the segments were half as long (16.4 s), so window leakage added up to 22 % in the lowest band.
+
+     The estimator was fixed; the limits were not changed.
+   - *Reported, not judged.* The comparison with MIL-F-8785C's Dryden forms (Turbulence, above).
 
 `bench.py` measures the core and JSBSim on the same machine, with the default parameters and with each configuration file.
