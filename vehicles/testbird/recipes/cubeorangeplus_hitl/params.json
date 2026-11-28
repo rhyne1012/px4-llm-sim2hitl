@@ -1,5 +1,6 @@
 {
   "schema_version": 1,
+  "role": "hitl",
   "note": "Testbird HITL recipe (SYS_HITL 1). Expected parameters = firmware defaults + airframe + boot + verify_only + set (docs/recipes.md). The airframe section is what PX4's airframe 2100 and rc.fw_defaults set (param set-default); the boot section is filled from the first readback of a flashed board (not yet).",
   "firmware": "firmware/firmware.json",
   "firmware_params": {

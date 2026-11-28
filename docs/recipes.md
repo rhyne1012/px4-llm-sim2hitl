@@ -40,13 +40,13 @@ A deploy recipe is everything one flight controller runs: firmware, parameters, 
              "patches": [{"file": "px4/patches/<name>.patch", "repo": "."}],
              "modules": ["<module>"]},
   "px4": {"tag": "v1.18.0", "commit": "935addf1d6bec6e955b155494a52e7eb4b750eb3"},
-  "outputs": {...}, "embedded": {...}, "build": {...}, "flashed": {...}
+  "outputs": {...}, "embedded": {...}, "build": {...}
 }
 ```
 
-- `recipe`: `make_target` is PX4's; each patch's `file` is a path in the vehicle repository and `repo` a folder of the PX4 tree (`.` for PX4 itself, `platforms/nuttx/NuttX/nuttx` for NuttX); `modules` are folders of `modules/src`. A recipe without `recipe` holds a prebuilt image.
+- `recipe`: `make_target` is PX4's; each patch's `file` is a path in the vehicle repository, or `toolkit:px4/patches/<file>` for one of the toolkit's (the Cube Orange+ HIL board variant, for example), and `repo` a folder of the PX4 tree (`.` for PX4 itself, `platforms/nuttx/NuttX/nuttx` for NuttX); `modules` are folders of `modules/src`. A recipe without `recipe` holds a prebuilt image.
 - `px4.commit` must be the commit of the toolkit's `px4/lock.toml`.
-- `px4build.py` writes `outputs` (SHA-256 of the image, the binary inside it and the parameter list), `embedded` (what the flight controller will report: board id, `board_version`, PX4 and NuttX commit) and `build` (command, committer, patch commits, the SHA-256 of every module file, toolchain), and clears `flashed`. `deploy.py --flash` writes `flashed`.
+- `px4build.py` writes `outputs` (SHA-256 of the image, the binary inside it and the parameter list), `embedded` (what the flight controller will report: board id, `board_version`, PX4 and NuttX commit) and `build` (make target, PX4 commit, command, committer, patch commits, the SHA-256 of every module file, toolchain), and the parameter list's SHA-256 into the `params.json` of every recipe that uses this `firmware/` folder (a recipe may link its folder to another's). `--if-needed` builds again when any of these inputs changed. Nothing machine-local goes into the recipe: what a board runs is that board's record (`~/.cache/px4-llm-sim2hitl/v2/boards/<uid>.json`), written by `deploy.py --flash`.
 - `board_version` is what PX4 reports in AUTOPILOT_VERSION: the USB product id (`CONFIG_CDCACM_PRODUCTID`), which differs from the image's board id on some boards (Cube Orange+: 4184 against 1063).
 
 The image is reproducible from the recipe only as far as the identity: the same PX4 and NuttX hashes and the same parameter list. Its bytes also depend on the build tree's path, because PX4 compiles a few source paths into the binary (`__FILE__` in assertions).
@@ -55,6 +55,7 @@ The image is reproducible from the recipe only as far as the identity: the same 
 
 ```json
 {
+  "role": "hitl",
   "firmware_params": {"file": "firmware/parameters.json.xz", "sha256": "..."},
   "fc_owned": {"patterns": ["^CAL_", "^RC\\d+_", ...], "resolved_names": [...]},
   "airframe":    {"NAME": {"value": 1, "why": "..."}},
@@ -89,6 +90,18 @@ PX4 itself writes some parameters that a recipe does not state. EKF2 writes `EKF
 
 **Moving a flight controller between recipes or vehicles.** PX4's airframe and board scripts set only defaults, so a parameter an earlier recipe set keeps its value, also one of the new recipe's `airframe` or `boot` values; and the earlier recipe's `set` values stay where the new one is silent. The deploy reports both and stops; `--reset-unmanaged` writes the unstated ones back to their defaults and the airframe and boot ones to the recipe's values. A recipe states its board's script defaults in `boot` (on a Cube Orange+: `EKF2_MULTI_IMU`, `MC_AT_EN`, `SENS_EN_THERMAL`, `SENS_IMU_MODE`, `UAVCAN_ENABLE`), or a deploy with `--reset-unmanaged` would write them back to the firmware's defaults. The readback before the deploy is kept (`params_before.json`; `tools/fc.py params-restore --from` puts it back).
 
+### Roles
+
+Every recipe states its `role` in `params.json`, and every flight controller has a role a person gives it once (`tools/fc.py --link <FC> board-role --role hitl|aircraft`, kept in `~/.cache/px4-llm-sim2hitl/v2/boards/<uid>.role.json`). Before it writes anything, `tools/deploy.py` checks both:
+
+| Recipe role | Means | `SYS_HITL` | Goes onto a board whose role is |
+|---|---|---|---|
+| `hitl` | simulation on a flight controller, no physical outputs | 1 | `hitl` |
+| `bench` | the aircraft's own flight controller on the ground: physical outputs, propellers off | 1 | `hitl` or `aircraft` |
+| `flight` | a real flight | 0 | `aircraft`, and only with `--flight` (the person confirms the aircraft is to fly with it) |
+
+A board without a role takes nothing. `tools/fly.py` flies simulated flights only and refuses a `flight` recipe. So a bench board never receives a flight recipe, an aircraft's flight controller never receives a HITL recipe (with its simulated faults, for example), and a real-flight setup is never written without the person's flag.
+
 ### SD files
 
 The boot file runs at the end of PX4's boot (ROMFS `rcS`, `/fs/microsd/etc/extras.txt`); it is how an external module starts without a change to PX4. The logger reads its topic list at start (`/fs/microsd/etc/logging/logger_topics.txt`); since v1.18 the list is added to the topics of `SDLOG_PROFILE`. Both are checked as their readers take them (`tools/mavftp.py`): nsh runs at most 15 words and 127 bytes per line, the logger reads 78 bytes per line and has 255 topic slots. A recipe without a file means the flight controller must not have one.
@@ -122,11 +135,12 @@ The user's PX4 tree (`--px4-root`, `SIM2HITL_PX4_ROOT` or `~/.config/px4-llm-sim
 <python with pymavlink> tools/deploy.py <recipe> --link /dev/serial/by-id/<the FC>            # plan: nothing written
 <python with pymavlink> tools/deploy.py <recipe> --link ... --reuse [--reset-unmanaged]       # parameters, SD files
 <python with pymavlink> tools/deploy.py <recipe> --link ... --flash                           # build if needed, flash, then the same
+<python with pymavlink> tools/deploy.py <recipe> --link ... --reuse --flight                  # a flight recipe (Roles)
 ```
 
 The plan reads the flight controller (identity, every parameter, both SD files) and says what would change. `--reuse` needs proof that the flight controller already runs the recipe's image: the identity it reports is not enough (it names the PX4 and NuttX commits only, so recipes that differ only in their external modules report the same), so the image must be current and the board record of this board (`~/.cache/px4-llm-sim2hitl/v2/boards/<uid>.json`, written by every `--flash`) must name the image's SHA-256; a board flashed by another tool needs one `--flash` first; `--flash` writes it first with PX4's uploader. Then the `set` values that differ are written, each confirmed by the flight controller with the same bytes; the SD files are made to hold the recipe's (written to a temporary file, read back, renamed); one reboot; and the proof: every parameter read and checked again (PASS), both SD files read again. It refuses an armed flight controller, and one whose `SYS_HITL` differs from the recipe's unless `--allow-hitl-change` says a person has made the aircraft safe. Nothing is rolled back on a failure; the report keeps the readback from before (`~/.cache/px4-llm-sim2hitl/v2/deploy/<UTC>_<recipe>/`).
 
-`tools/fc.py` does single operations: `identity`, `params-read`, `sd-list`, `sd-get`, `sd-put`, `sd-rm`, `logs`, `log-get`, `recover`.
+`tools/fc.py` does single operations: `identity`, `board-role`, `params-read`, `sd-list`, `sd-get`, `sd-put`, `sd-rm`, `logs`, `log-get`, `recover`, `params-restore` (only onto the board the readback came from, and without changing `SYS_HITL`, unless `--other-board` or `--allow-hitl-change` says a person decided otherwise).
 
 ## Flying
 

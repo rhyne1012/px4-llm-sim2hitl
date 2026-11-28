@@ -545,9 +545,12 @@ def answers(folder, configs, level, turns, sideslips, linear, height, check):
                                            'model diverges from the trim, so the sine check cannot run open loop'}
             elif check:
                 lin['check'] = sine_check(model, t, lin)
+            else:
+                lin['check'] = {'skipped': 'not run (--no-check)'}
+            if 'rows' in lin['check']:
                 print(f'  check: worst {lin["check"]["worst_db"]:.2f} dB, {lin["check"]["worst_deg"]:.1f} deg', file=sys.stderr)
             else:
-                print(f'  check: {lin["check"].get("skipped", "not run")}', file=sys.stderr)
+                print(f'  check: {lin["check"]["skipped"]}', file=sys.stderr)
             out['linear'].append(lin)
     return out
 
@@ -566,18 +569,28 @@ def compare(ref, new):
 
     def key(t):
         return t['kind'], t['airspeed_m_s'], t['requested_deg']
+    for what in ('inputs', 'outputs'):   # which commands exist and which PX4 outputs drive them, with which gains
+        items.append({'item': what, 'reference': ref.get(what), 'new': new.get(what), 'passed': ref.get(what) == new.get(what)})
     new_trims = {key(t): t for t in new['trims']}
+    if len(new_trims) != len(ref['trims']):
+        items.append({'item': 'trim cases', 'reference': len(ref['trims']), 'new': len(new_trims), 'passed': False})
     for t in ref['trims']:
         n = new_trims.get(key(t))
         label = f"trim {t['kind']} {t['airspeed_m_s']} m/s"
         if n is None:
             items.append({'item': label, 'passed': False, 'note': 'missing in the new answers'})
             continue
+        items.append({'item': f'{label} converged', 'reference': t['converged'], 'new': n['converged'],
+                      'passed': bool(t['converged'] and n['converged'])})
         for q in ('alpha_deg', 'pitch_deg', 'beta_deg', 'bank_deg'):
             item(f'{label} {q}', t[q], n[q], L['angle_deg'])
         for c, v in t['commands'].items():
             item(f'{label} {c}', v, n['commands'].get(c), L['throttle'] if c == 'throttle' else L['command'])
     new_lin = {l['trim']['airspeed_m_s']: l for l in new['linear']}
+    if len(new_lin) != len(ref['linear']):
+        items.append({'item': 'linear models', 'reference': len(ref['linear']), 'new': len(new_lin), 'passed': False})
+    if not ref['trims'] and not ref['linear']:
+        items.append({'item': 'reference answers', 'passed': False, 'note': 'the reference has no trims and no linear models'})
     for l in ref['linear']:
         v = l['trim']['airspeed_m_s']
         n = new_lin.get(v)
@@ -599,7 +612,12 @@ def compare(ref, new):
             item(f'linear {v} m/s servo {s} pole', rec['pole_rad_s'], n['servo'].get(s, {}).get('pole_rad_s'),
                  L['servo_relative'], True)
             item(f'linear {v} m/s servo {s} delay_s', rec['delay_s'], n['servo'].get(s, {}).get('delay_s'), L['delay_s'])
-        if 'rows' in l.get('check', {}) and 'rows' in n.get('check', {}):
+        lc, nc = l.get('check', {}), n.get('check', {})
+        if ('rows' in lc) != ('rows' in nc) or lc.get('passed', True) is False or nc.get('passed', True) is False:
+            items.append({'item': f'linear {v} m/s check', 'reference': lc.get('passed', lc.get('skipped')),
+                          'new': nc.get('passed', nc.get('skipped')), 'passed': False,
+                          'note': 'a check ran on one side only, or failed'})
+        if 'rows' in lc and 'rows' in nc:
             rows = {(r['pair'], r['rad_s']): r for r in n['check']['rows']}
             for r in l['check']['rows']:
                 o = rows.get((r['pair'], r['rad_s']))
@@ -656,7 +674,7 @@ def main():
     failed_checks = [l['trim']['airspeed_m_s'] for l in res['linear'] if l.get('check', {}).get('passed') is False]
     print(json.dumps({'out': a.out, 'trims': len(res['trims']), 'not_converged': len(bad), 'linear': len(res['linear']),
                       'checks_outside_limits': failed_checks}))
-    return 0
+    return 1 if bad or failed_checks else 0   # the answers are written either way; a failure is not a success
 
 
 if __name__ == '__main__':

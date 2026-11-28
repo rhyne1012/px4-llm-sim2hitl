@@ -20,7 +20,10 @@ check compares it. The committer is the vehicle repository's (sim2hitl.lock "fir
 "email"}}); changing it changes the hash of every recipe with a patch.
 
 Writes the image (.px4) and its parameter list next to firmware.json, records in firmware.json the outputs, the
-identity the FC will report (embedded), the build, and clears "flashed"; records the list's SHA-256 in params.json.
+identity the FC will report (embedded) and the build; records the list's SHA-256 in the params.json of every recipe
+that uses this firmware folder. A recipe patch is a file of the vehicle repository, or toolkit:px4/patches/<file> for one
+of the toolkit's. Nothing machine-local goes into the recipe (the build log path is printed; what a board runs is the
+board's record, written by tools/deploy.py).
 Prints one JSON line.
 """
 import argparse
@@ -42,6 +45,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from recipe import find_repo  # noqa: E402
 
+TOOLKIT = Path(__file__).resolve().parents[1]
 TOOLKIT_PX4 = tomllib.loads((Path(__file__).resolve().parents[1] / 'px4' / 'lock.toml').read_text())['px4']
 DEFAULT_COMMITTER = {'name': 'sim2hitl build', 'email': 'build@sim2hitl.invalid'}
 CACHE = Path(os.environ.get('XDG_CACHE_HOME') or Path.home() / '.cache') / 'px4-llm-sim2hitl' / 'v2' / 'firmware'
@@ -114,12 +118,19 @@ def build_tree(source, commit):
     return tree
 
 
+def patch_path(repo, file):
+    """A recipe patch: in the vehicle repository, or 'toolkit:<path>' for one of the toolkit's (px4/patches/)."""
+    if file.startswith('toolkit:'):
+        return TOOLKIT / file[len('toolkit:'):]
+    return Path(repo) / file
+
+
 def apply_patches(repo, tree, patches, committer):
     who = ['-c', f'user.name={committer["name"]}', '-c', f'user.email={committer["email"]}']
     env = dict(os.environ, GIT_COMMITTER_NAME=committer['name'], GIT_COMMITTER_EMAIL=committer['email'])
     applied = []
     for patch in patches:
-        target, file = tree / patch['repo'], Path(repo) / patch['file']
+        target, file = tree / patch['repo'], patch_path(repo, patch['file'])
         result = subprocess.run(['git', '-C', str(target), *who, 'am', '-q', '--committer-date-is-author-date',
                                  str(file)], capture_output=True, text=True, env=env)
         if result.returncode:
@@ -164,8 +175,16 @@ def needs_build(repo, recipe_dir):
     if not image.is_file() or sha256(image) != out.get('sha256'):
         return True, 'no built image matching firmware.json'
     build = info.get('build') or {}
-    recorded = {p['file']: p['sha256'] for p in build.get('patches', [])}
-    if recorded != {p['file']: sha256(Path(repo) / p['file']) for p in recipe.get('patches', [])}:
+    if build.get('make_target') != recipe.get('make_target'):
+        return True, 'make target changed (or not recorded)'
+    if build.get('px4_commit') != (info.get('px4') or {}).get('commit'):
+        return True, 'PX4 commit changed (or not recorded)'
+    if build.get('committer') != committer_of(repo):
+        return True, 'committer changed'
+    recorded = [(p['file'], p.get('repo', '.'), p['sha256']) for p in build.get('patches', [])]
+    current = [(p['file'], p.get('repo', '.'), sha256(patch_path(repo, p['file']))) for p in recipe.get('patches', [])
+               if patch_path(repo, p['file']).is_file()]
+    if recorded != current or len(current) != len(recipe.get('patches', [])):
         return True, 'patches changed'
     if {n: module_files(repo, n) for n in recipe.get('modules', [])} != build.get('modules', {}):
         return True, 'modules changed'
@@ -243,21 +262,25 @@ def build(recipe_dir, repo=None, px4=None):
     }
     gcc = subprocess.run(['arm-none-eabi-gcc', '--version'], capture_output=True, text=True).stdout.splitlines()
     info['build'] = {
-        'tool': 'px4-llm-sim2hitl tools/px4build.py', 'command': portable(' '.join(cmd), source, tree),
+        'tool': 'px4-llm-sim2hitl tools/px4build.py', 'make_target': target, 'px4_commit': commit,
+        'command': portable(' '.join(cmd), source, tree),
         'build_tree': '<PX4 build tree>', 'output_dir': portable(outdir, source, tree), 'committer': committer,
         'patches': applied, 'modules': {n: module_files(repo, n) for n in modules},
         'toolchain': gcc[0] if gcc else None,
         'built_at_utc': datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
-        'seconds': seconds, 'log': portable(log, source, tree),
+        'seconds': seconds,
     }
-    info['flashed'] = None
+    info.pop('flashed', None)   # what is on a board is the board's record (~/.cache/.../boards/<uid>.json), not the recipe's
     info_path.write_text(json.dumps(info, indent=2, ensure_ascii=False) + '\n')
     lock.close()
-    params_path = recipe_dir / 'params.json'
-    if params_path.is_file():
-        p = json.loads(params_path.read_text())
-        p['firmware_params'] = {'file': 'firmware/' + params.name, 'sha256': sha256(params)}
-        params_path.write_text(json.dumps(p, indent=2, ensure_ascii=False) + '\n')
+    # every recipe that uses this firmware folder (a recipe may link its firmware/ to another's)
+    shared = (recipe_dir / 'firmware').resolve()
+    for other in sorted(recipe_dir.parent.iterdir()):
+        params_path = other / 'params.json'
+        if (other / 'firmware').exists() and (other / 'firmware').resolve() == shared and params_path.is_file():
+            p = json.loads(params_path.read_text())
+            p['firmware_params'] = {'file': 'firmware/' + params.name, 'sha256': sha256(params)}
+            params_path.write_text(json.dumps(p, indent=2, ensure_ascii=False) + '\n')
     return {'status': 'PASS', 'recipe': str(recipe_dir), 'firmware_sha256': info['outputs']['firmware']['sha256'],
             'image_bin_sha256': info['outputs']['image_bin']['sha256'], 'git_hash': info['embedded']['git_hash'],
             'nuttx_git_hash': info['embedded']['nuttx_git_hash'],

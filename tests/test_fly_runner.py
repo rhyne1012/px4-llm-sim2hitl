@@ -74,6 +74,20 @@ class CheckResult(unittest.TestCase):
                 fly.Run(args(repo, root / 'run'))
 
 
+class Verdict(unittest.TestCase):
+    GOOD = {'check': {'verdict': 'PASS', 'checker_exit': 0}, 'pilot_exit': 0, 'after_state': 'complete'}
+
+    def test_pass(self):
+        s = dict(self.GOOD, simhost_problems=fly.simhost_problems({'lockstep_waits_timed_out': 0, 'late_steps': 0}, 'sitl'))
+        self.assertEqual(fly.verdict(s), 'PASS')
+
+    def test_simhost_timing_fails_the_flight(self):
+        for sim, mode in (({'lockstep_waits_timed_out': 1}, 'sitl'), ({'late_steps': 2, 'max_lateness_ms': 6.1}, 'hitl'),
+                          (None, 'sitl')):
+            s = dict(self.GOOD, simhost_problems=fly.simhost_problems(sim, mode))
+            self.assertEqual(fly.verdict(s), 'FAIL', (sim, mode))
+
+
 class SitlInstance(unittest.TestCase):
     def test_a_running_instance_is_refused_and_not_stopped(self):
         with tempfile.TemporaryDirectory() as d:
@@ -105,6 +119,44 @@ class SitlInstance(unittest.TestCase):
                 run.prepare_sitl()
             self.assertIsNone(run.sitl_log())   # the earlier log is not taken for this run
             self.assertFalse((root / 'run' / 'fc_log.ulg').exists())
+
+
+class HitlAfterDeploy(unittest.TestCase):
+    def test_an_image_built_by_the_deploy_is_the_one_checked(self):
+        """deploy --flash may build first (a new firmware.json): the FC check must compare with that, not the old one."""
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            repo = make_repo(root, '')
+            info = repo / 'recipe' / 'firmware' / 'firmware.json'
+            git = 'a' * 40
+            info.write_text(json.dumps({'embedded': {'board_id': 1, 'git_hash': git},
+                                        'outputs': {'firmware': {'sha256': 'old'}}}))
+            run = fly.Run(args(repo, root / 'run', mode='hitl', instance=None))
+            run.a.link, run.a.deploy = 'fake', 'flash'
+            boards = root / 'boards'
+            boards.mkdir()
+
+            def sh(cmd, **_):   # the deploy builds (a new image) and flashes it, as tools/deploy.py --flash does
+                info.write_text(json.dumps({'embedded': {'board_id': 1, 'git_hash': git},
+                                            'outputs': {'firmware': {'sha256': 'new'}}}))
+                (boards / '7.json').write_text(json.dumps({'uid': 7, 'image_sha256': 'new'}))
+                return subprocess.CompletedProcess(cmd, 0, json.dumps({'verdict': 'PASS'}) + '\n', '')
+
+            class FakeFC:
+                def __init__(self, *_): pass
+                def connect(self): return self
+                def identity(self): return {'uid': 7, 'armed': False, 'git_hash_prefix': git[:10], 'board_version': 1}
+                def get(self, name): return 1
+                def logs(self): return {}
+                def close(self): pass
+            run.sh = sh
+            saved = fly.FC, fly.BOARDS
+            fly.FC, fly.BOARDS = FakeFC, boards
+            try:
+                ready = run.prepare_hitl()
+            finally:
+                fly.FC, fly.BOARDS = saved
+            self.assertEqual(ready['board_record']['image_sha256'], 'new')
 
 
 if __name__ == '__main__':

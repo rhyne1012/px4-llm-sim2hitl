@@ -12,8 +12,8 @@ then:
    patches or modules changed). An old boot file that is not the recipe's is removed first: the new firmware runs it
    on its first boot. PX4's own uploader (<PX4 tree>/Tools/px4_uploader.py) writes the image, with one retry for a
    board left in its bootloader. Then the FC must report the recipe's identity (board, PX4 hash, NuttX hash), which
-   is recorded in firmware.json "flashed", and the board record (~/.cache/px4-llm-sim2hitl/v2/boards/<uid>.json)
-   notes which image went onto this board.
+   is recorded in the board record (~/.cache/px4-llm-sim2hitl/v2/boards/<uid>.json), which notes which image went onto
+   this board; the recipe's files are not changed.
    --reuse needs proof that the board already runs this recipe's image. The identity the FC reports is not enough:
    it names the PX4 and NuttX commits only, so two recipes with the same patches but different external modules (or
    a changed module) report the same identity. So --reuse requires the image to be current (built from the recipe's
@@ -57,7 +57,14 @@ from fc import FC, FCError  # noqa: E402
 from recipe import KINDS, Recipe, load_firmware_params  # noqa: E402
 
 CACHE = Path(os.environ.get('XDG_CACHE_HOME') or Path.home() / '.cache') / 'px4-llm-sim2hitl' / 'v2' / 'deploy'
-BOARDS = CACHE.parent / 'boards'   # <uid>.json: the image the toolkit last flashed onto that board
+BOARDS = CACHE.parent / 'boards'   # <uid>.json: the image the toolkit last flashed onto that board; <uid>.role.json: its role
+# Which recipe roles a board of each role takes (tools/fc.py board-role sets a board's role, a person's decision)
+BOARD_TAKES = {'hitl': {'hitl', 'bench'}, 'aircraft': {'bench', 'flight'}}
+
+
+def board_role(uid):
+    f = BOARDS / f'{uid}.role.json'
+    return json.loads(f.read_text()).get('role') if f.is_file() else None
 SD_FILES = (mavftp.BOOT_FILE, mavftp.LOGGER_TOPICS)
 FUNCTION = re.compile(r'_FUNC\d+$')
 SETTLE_S = 1.5     # PX4 sets an output's PWM values up to about 1 s after its function changes
@@ -145,9 +152,9 @@ class Deploy:
     def safe_to_write(self, version):
         if version.get('armed') is not False:
             raise FCError('the FC is armed (or its heartbeat says nothing): refusing to write')
-        want = self.recipe.managed().get('SYS_HITL', (None,))[0]
+        want = self.recipe.managed().get('SYS_HITL', (0,))[0]   # unstated: the firmware default, 0 (not in HITL)
         have = self.fc.get('SYS_HITL')
-        if want is not None and have != want and not self.a.allow_hitl_change:
+        if have != want and not self.a.allow_hitl_change:
             raise FCError(f'SYS_HITL is {have} on the FC and {want} in the recipe: --allow-hitl-change only when a '
                           'person has made the aircraft safe')
         return have
@@ -218,15 +225,7 @@ class Deploy:
         problems = self.identity_problems(version)
         if problems:
             raise RuntimeError('after flashing the FC does not report the recipe firmware: ' + '; '.join(problems))
-        info = json.loads(r.firmware_info_path.read_text())
-        info['flashed'] = {'status': 'PASS', 'at_utc': utc(), 'tool': 'px4-llm-sim2hitl tools/deploy.py',
-                           'uploader': f'<PX4 tree>/Tools/px4_uploader.py --noninteractive --port {port} {r.image.name}',
-                           'attempts': len(attempts),
-                           'after': {k: version.get(k) for k in ('px4_version', 'git_hash_prefix', 'os_hash_prefix',
-                                                                 'board_version')},
-                           'uid': version.get('uid'), 'image_sha256': info['outputs']['firmware']['sha256'],
-                           'evidence': str(self.run).replace(str(Path.home()), '~')}
-        r.firmware_info_path.write_text(json.dumps(info, indent=2, ensure_ascii=False) + '\n')
+        info = json.loads(r.firmware_info_path.read_text())   # read only: the recipe files are not changed by a flash
         BOARDS.mkdir(parents=True, exist_ok=True)
         (BOARDS / f'{version.get("uid")}.json').write_text(json.dumps({
             'uid': version.get('uid'), 'board_version': version.get('board_version'), 'recipe': r.name,
@@ -297,12 +296,30 @@ class Deploy:
             raise RuntimeError(f'final check {check["verdict"]}: see {self.run / "check.json"}')
         return version
 
+    def role_gate(self, version):
+        """Before any write: the recipe's role, the board's role (a person's decision, tools/fc.py board-role), and for
+        a flight recipe the person's --flight."""
+        r = self.recipe
+        problems = r.role_problems()
+        role, board = r.params.get('role'), board_role(version.get('uid'))
+        if board is None:
+            problems.append(f'board {version.get("uid")} has no role: a person sets it once, tools/fc.py --link <FC> '
+                            'board-role --role hitl|aircraft')
+        elif role not in BOARD_TAKES.get(board, set()):
+            problems.append(f'a {role} recipe does not go onto a board whose role is {board}')
+        if role == 'flight' and not self.a.flight:
+            problems.append('a flight recipe needs --flight (the person confirms the aircraft is to fly with it)')
+        self.step('roles', 'FAIL' if problems else 'PASS', recipe_role=role, board_role=board, problems=problems)
+        if problems:
+            raise RuntimeError('roles: ' + '; '.join(problems))
+
     def go(self):
         try:
             version, before, sd = self.plan()
             if self.mode == 'plan':
                 self.report['verdict'] = 'PLAN'
                 return
+            self.role_gate(version)
             self.report['sys_hitl_before'] = self.safe_to_write(version)
             if self.mode == 'flash':
                 self.flash(sd)
@@ -337,6 +354,7 @@ def main():
     g.add_argument('--flash', action='store_true')
     g.add_argument('--reuse', action='store_true')
     p.add_argument('--allow-hitl-change', action='store_true')
+    p.add_argument('--flight', action='store_true', help='a flight recipe: the person confirms the aircraft is to fly with it')
     p.add_argument('--reset-unmanaged', action='store_true',
                    help='also write back every parameter the recipe does not state that differs from its default, and '
                         'the recipe\'s airframe and boot values another recipe changed (moving an FC between recipes or vehicles)')

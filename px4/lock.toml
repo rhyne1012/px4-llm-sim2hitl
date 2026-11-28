@@ -11,8 +11,13 @@ file = "patches/cubeorangeplus_hil_variant.patch"
 boards = ["cubepilot_cubeorangeplus"]
 why = "the default Cube Orange+ build has no pwm_out_sim, which HITL needs; adds one board-variant file"
 
+[[patches]]
+file = "patches/sitl/vehicle_imu_first_sample.patch"
+builds = ["sitl"]
+why = "with simhost the sensors start seconds after PX4 boots; PX4's IMU integrators then take all that time as the first interval and calibration and EKF2 can start from a tilted gravity vector; the patch seeds them at zero dt (one file, sensors/vehicle_imu)"
+
 [builds.sitl]
-target = "px4_sitl_default"          # unpatched
+target = "px4_sitl_default"          # with the SITL patches above (tools/sitl_fc.py applies every px4/patches/sitl/ patch)
 
 [builds.cubeorangeplus_hitl]
 target = "cubepilot_cubeorangeplus_hil"

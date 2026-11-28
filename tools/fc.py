@@ -22,6 +22,7 @@ unknown name at all).
 import argparse
 import hashlib
 import json
+import os
 import math
 import struct
 import sys
@@ -45,6 +46,8 @@ PARAM_SET_TRIES = 3
 PARAM_SET_WAIT_S = 2.0
 PARAM_SAVE_WAIT_S = 3.0         # after the last write, before a reboot: PX4 autosaves >= 300 ms later, at most every 2 s
 RECONNECT_S = 45.0              # a reboot: the USB port back and a heartbeat
+REBOOT_ANSWER_TRIES = 10        # then AUTOPILOT_VERSION, asked up to this often (2 s each): once, right after a HITL
+                                # flight, a rebooted Cube Orange+ sent heartbeats but did not answer it for 6 s
 FTP_WAIT_S = 1.5                # one FTP request: the reply within this long, or the same request again
 FTP_TRIES = 3
 FTP_SESSION_TRIES = 3           # PX4 has one FTP session for every client of a link: busy -> start the step again
@@ -275,9 +278,23 @@ class FC:
             raise FCError(f'force disarm failed (result {forced}, armed {self.armed})')
         return {'disarm': 'force disarmed', 'normal_result': result}
 
+    def boot_ms(self):
+        """The FC's time since boot in ms, or None when it gives none. PX4 sends TIMESYNC requests (tc1 0) on every link
+        with its time since boot in ts1 (ns), also in HITL; SYSTEM_TIME is only asked for when none comes, since PX4
+        denies it while its clock has no date (in HITL until simhost's GPS gives one)."""
+        got = self.wait(lambda msg: msg.get_type() == 'TIMESYNC' and msg.tc1 == 0 and msg.ts1 > 0, 3.0)
+        if got is not None:
+            return int(got.ts1 // 1_000_000)
+        self.m.mav.command_long_send(*self.target, mav.MAV_CMD_REQUEST_MESSAGE, 0, mav.MAVLINK_MSG_ID_SYSTEM_TIME,
+                                     0, 0, 0, 0, 0, 0)
+        got = self.wait(lambda msg: msg.get_type() == 'SYSTEM_TIME', 2.0)
+        return int(got.time_boot_ms) if got is not None else None
+
     def reboot(self, wait_save=True):
         """Reboot (a serial FC: the USB port goes away and comes back) and connect again; the same board (uid) must
-        answer. wait_save: wait PARAM_SAVE_WAIT_S first, so PX4 has saved the last parameter change."""
+        answer, and it must have rebooted: an explicit refusal fails, and its time since boot must have started again
+        (or, if the FC gives no boot time, the command must have been accepted). wait_save: wait PARAM_SAVE_WAIT_S first,
+        so PX4 has saved the last parameter change."""
         if not self.serial:
             raise FCError('reboot over a UDP link: a SITL FC is restarted by tools/sitl_fc.py instead')
         if self.armed is not False:
@@ -285,17 +302,28 @@ class FC:
         uid = (self.version or self.identity())['uid']
         if wait_save:
             self.drain(PARAM_SAVE_WAIT_S)
+        before = self.boot_ms()
         result = self.command(mav.MAV_CMD_PREFLIGHT_REBOOT_SHUTDOWN, 1, wait=2.0, tries=1)
-        self.record('reboot', result=result)
+        self.record('reboot', result=result, boot_ms_before=before)
+        if result not in (None, mav.MAV_RESULT_ACCEPTED, mav.MAV_RESULT_IN_PROGRESS):
+            raise FCError(f'the FC refused the reboot (MAV_RESULT {result})')
         self.close()
         time.sleep(3.0)
         self.connect(RECONNECT_S)
-        now = self.identity()
+        self.record('reconnected')
+        now = self.identity(tries=REBOOT_ANSWER_TRIES)
         if now['uid'] != uid:
             raise FCError(f'after the reboot another board answers (uid {now["uid"]}, was {uid})')
         if now['armed'] is not False:
             raise FCError('armed after the reboot')
-        return now
+        after = self.boot_ms()
+        self.record('rebooted', boot_ms_before=before, boot_ms_after=after)
+        if before is not None and after is not None:
+            if after >= before:
+                raise FCError(f'the FC did not reboot: its time since boot went on ({before} ms, then {after} ms)')
+        elif result != mav.MAV_RESULT_ACCEPTED:
+            raise FCError('no evidence of a reboot: the command was not acknowledged and the FC gives no boot time')
+        return dict(now, boot_ms_before=before, boot_ms_after=after)
 
     def recover(self, force_disarm=False, expect_hitl=None):
         """The standard recover: disarm (force only if allowed and a normal disarm was refused), reboot, and the FC
@@ -692,8 +720,12 @@ def main():
     s.add_argument('--id', type=int)
     s.add_argument('--out', required=True)
     s.add_argument('--once', action='store_true', help='read it once (no second read to compare)')
+    s = sub.add_parser('board-role')
+    s.add_argument('--role', choices=['hitl', 'aircraft'], help='set the role (a person\'s decision); without: show it')
     s = sub.add_parser('params-restore')
     s.add_argument('--from', dest='source', required=True, help='a readback file (params-read, or a deploy report\'s params_before.json)')
+    s.add_argument('--other-board', action='store_true', help='the readback is of another board (a person\'s decision)')
+    s.add_argument('--allow-hitl-change', action='store_true', help='SYS_HITL may change: a person has made the aircraft safe')
     s = sub.add_parser('recover')
     s.add_argument('--force-disarm', action='store_true')
     s.add_argument('--expect-hitl', type=int, choices=[0, 1])
@@ -736,12 +768,30 @@ def main():
         if not logs:
             sys.exit('no logs on the FC')
         out = fc.log_download(a.id if a.id is not None else max(logs), a.out, twice=not a.once)
+    elif a.action == 'board-role':
+        uid = fc.identity()['uid']
+        boards = Path(os.environ.get('XDG_CACHE_HOME') or Path.home() / '.cache') / 'px4-llm-sim2hitl' / 'v2' / 'boards'
+        f = boards / f'{uid}.role.json'
+        if a.role:
+            boards.mkdir(parents=True, exist_ok=True)
+            f.write_text(json.dumps({'uid': uid, 'role': a.role, 'set_utc': time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime()),
+                                     'by': 'tools/fc.py board-role'}, indent=1) + '\n')
+        out = json.loads(f.read_text()) if f.is_file() else {'uid': uid, 'role': None}
     elif a.action == 'params-restore':
-        if fc.identity()['armed'] is not False:
+        ident = fc.identity()
+        if ident['armed'] is not False:
             sys.exit('the FC is armed or silent; refusing')
-        saved = {e['name']: e for e in json.loads(Path(a.source).read_text())['parameters']}
+        source = json.loads(Path(a.source).read_text())
+        saved_uid = (source.get('autopilot_version') or {}).get('uid')
+        if saved_uid != ident['uid'] and not a.other_board:
+            sys.exit(f'the readback is of board {saved_uid}, this FC is {ident["uid"]}: refusing (--other-board when a '
+                     'person means to copy parameters onto another board)')
+        saved = {e['name']: e for e in source['parameters']}
         now = {e['name']: e for e in fc.read_all(saved)['parameters']}
         todo = [n for n in sorted(saved) if n in now and (saved[n]['type'], saved[n]['bits']) != (now[n]['type'], now[n]['bits'])]
+        if 'SYS_HITL' in todo and not a.allow_hitl_change:
+            sys.exit('the readback has another SYS_HITL than the FC: refusing (--allow-hitl-change only when a person has '
+                     'made the aircraft safe: propellers off)')
         for n in todo:
             fc.set_bits(n, saved[n]['type'], bytes.fromhex(saved[n]['bits']))
         if todo:
