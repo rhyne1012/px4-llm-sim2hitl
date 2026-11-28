@@ -5,7 +5,7 @@ project(simhost CXX)
 #   JSBSIM_ROOT  install prefix of the locked JSBSim (include/JSBSim, lib/libJSBSim.a)
 #   PX4_ROOT     the locked PX4 source tree (MAVLink message definitions, World Magnetic Model tables)
 #   PYTHON       a Python that can import pymavlink (PX4's own copy under src/modules/mavlink/mavlink is used)
-set(JSBSIM_ROOT "$ENV{HOME}/.cache/px4-llm-sim2hitl/jsbsim-1.3.3-install" CACHE PATH "JSBSim install prefix")
+set(JSBSIM_ROOT "$ENV{HOME}/.cache/px4-jsbsim-sim2hitl/jsbsim-1.3.3-install" CACHE PATH "JSBSim install prefix")
 set(PX4_ROOT "$ENV{HOME}/px4/PX4-Autopilot-v1.18.0" CACHE PATH "PX4 source tree")
 find_package(Python3 REQUIRED COMPONENTS Interpreter)
 
