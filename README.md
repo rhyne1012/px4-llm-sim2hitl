@@ -4,7 +4,7 @@ An integration layer between PX4 and JSBSim for agent-driven flight-control deve
 
 **English** | [繁體中文](README.zh-TW.md) (translation; this English version is authoritative)
 
-> Status: v2.1.0, released 2026-11-28 ([release notes](docs/releases/v2.1.0.md); what is verified: [docs/verification.md](docs/verification.md)). v1 (Simulink → C → HITL) is archived as tag `v1-final` and branch `legacy-v1`.
+> Status: v2.1.2, released 2026-11-28 ([release notes](docs/releases/v2.1.2.md); what is verified: [docs/verification.md](docs/verification.md)). v1 (Simulink → C → HITL) is archived as tag `v1-final` and branch `legacy-v1`.
 
 ![Overview: PX4 and JSBSim at pinned versions; the toolkit as the glue layer (simhost, deploy and fly, fast core, agent rules); SITL, HITL and flight judged by one yardstick; vehicle repositories; a person decides and the AI does the technical work; the core spirit](images/overview_toolkit.svg)
 
