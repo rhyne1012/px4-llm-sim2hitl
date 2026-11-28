@@ -1,18 +1,18 @@
 # Architecture (v2)
 
-Status: draft, 2026-11-27. This page fixes the parts and the contracts between them; each part's own README holds the detail.
+Status: as of v2.1.0 (2026-11-28); a part marked planned is not built. This page fixes the parts and the contracts between them; each part's own README holds the detail.
 
 ## Layers
 
 ```
-PX4 (flight control)        JSBSim (flight dynamics)          upstream, locked versions, unmodified
+PX4 (flight control)        JSBSim (flight dynamics)          upstream, locked versions, not forked
         \                         /
      px4-llm-sim2hitl: simulation host, deployment, test cases, records, agent rules
                      |  pinned version
      vehicle repository: vehicle definition, PX4 modules, recipes, tasks, records
 ```
 
-- **Upstream projects** are used as released, at locked versions. Anything they cannot do is added beside them, never patched into them. A PX4 patch is a last resort; it is kept minimal and listed in the PX4 lock.
+- **Upstream projects** are used as released, at locked versions, and are not forked. Anything they cannot do is added beside them where it can be. A PX4 patch is a last resort; it is kept minimal and listed with its reason in the PX4 lock (`px4/lock.toml`).
 - **The toolkit** (this repository) holds no real vehicle. Its test vehicles (`vehicles/`) exist only to test the toolkit.
 - **A vehicle repository** pins a toolkit version and holds everything specific to one vehicle.
 
@@ -103,8 +103,9 @@ Python tools in `tools/` drive everything that is not physics:
 | `sitl_fc.py` | a recipe's SITL FC: PX4 SITL built with its modules and started like the flight controller | [sitl_fc.md](sitl_fc.md) |
 | `pilot.py`, `sequence.py` | the pilot (a fixed-wing takeoff flown with sticks) and the command scripts it runs | [pilot.md](pilot.md) |
 | `fly.py` | one test flight of a recipe, SITL or HITL: FC, simhost, pilot, recover, the flight's log, the check | [recipes.md](recipes.md) |
+| `linear.py` | trims, linear models and transfer functions of a fixed-wing vehicle, checked against the nonlinear model; the compare of two such records | its docstring; `linear_model.m` reads them into MATLAB |
 
-They enforce the safety rules: flight-controller identity, disarmed state, parameter read-back, a log newer than the flight's start, and the recovery after a HITL flight cannot be skipped.
+They enforce the safety rules: recipe and board roles (a flight recipe goes only onto a board a person marked for an aircraft, and only with `--flight`), flight-controller identity, disarmed state, parameter read-back, a proven reboot, a log newer than the flight's start, and the recovery after a HITL flight cannot be skipped.
 
 ### Anchor
 
@@ -115,11 +116,11 @@ The anchor is the recorded reference behaviour of a vehicle:
 - the ground roll
 - statistics of the wind response
 
-The anchor tools live here, and the anchor answers live in the vehicle repository. Changing a vehicle's anchor requires a person's approval.
+The anchor tools live here, and the anchor answers live in the vehicle repository. Changing a vehicle's anchor requires a person's approval. Partly built: `tools/linear.py` records the behaviour and compares two records; the lock is still the vehicle repository's own.
 
 ### Machine resources
 
-Several vehicle repositories can share one computer. A machine-wide registry and lock coordinates flight controllers, serial ports, SITL instance numbers and ports, and PX4 build trees per PX4 version.
+Planned. Several vehicle repositories can share one computer. A machine-wide registry and lock coordinates flight controllers, serial ports, SITL instance numbers and ports, and PX4 build trees per PX4 version.
 
 ## Versions
 

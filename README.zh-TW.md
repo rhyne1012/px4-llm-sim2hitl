@@ -4,7 +4,7 @@
 
 [English](README.md) | **繁體中文**（翻譯；以英文版為準）
 
-> 狀態：v2 草稿，開發中。v1（Simulink → C → HITL）封存於 tag `v1-final` 與分支 `legacy-v1`。
+> 狀態：v2.1.0，於 2026-11-28 發布（[發布說明](docs/releases/v2.1.0.md)；已驗證項目見 [docs/verification.md](docs/verification.md)）。v1（Simulink → C → HITL）封存於 tag `v1-final` 與分支 `legacy-v1`。
 
 ![總覽：鎖定版本的 PX4 與 JSBSim；本專案作為整合層（模擬主機、部署與飛行、快速核心、AI 工作規範）；SITL、HITL 與實機飛行採統一判準；載具儲存庫；由人決策，由 AI 執行技術工作；核心精神](images/overview_toolkit.svg)
 
@@ -12,7 +12,7 @@
 
 ## 概述
 
-本專案位於 PX4 與 JSBSim 之間。兩者都以鎖定的原始版本使用，不修改、不分叉；本專案只實作兩者之間缺少的部分：
+本專案位於 PX4 與 JSBSim 之間。兩者皆以鎖定版本使用，不分叉：JSBSim 不作任何修改；PX4 僅套用 `px4/lock.toml` 所列且註明原因的少量修補（Cube Orange+ 的 HITL 板型變體，以及一項 SITL 感測器修正）；本專案只實作兩者之間缺少的部分：
 
 - HITL 即時模擬
 - 部署流程
@@ -43,7 +43,7 @@
 ## 架構
 
 ```
-  PX4（飛控）          JSBSim（飛行動力學）     上游專案：鎖定版本，不修改
+  PX4（飛控）          JSBSim（飛行動力學）     上游專案：鎖定版本，不分叉
            \            /
         px4-llm-sim2hitl（整合層）           本儲存庫
                  |  鎖定版本使用
@@ -89,4 +89,4 @@
 
 ## 授權
 
-BSD 3-Clause，見 [LICENSE](LICENSE)。PX4（BSD 3-Clause）與 JSBSim（LGPL-2.1）依各自的授權原封不動使用；JSBSim 由鎖定版本的原始碼編譯。
+BSD 3-Clause，見 [LICENSE](LICENSE)。PX4（BSD 3-Clause）與 JSBSim（LGPL-2.1）依各自的授權使用：JSBSim 未經修改，由鎖定版本的原始碼編譯；PX4 套用 `px4/lock.toml` 所列的修補。

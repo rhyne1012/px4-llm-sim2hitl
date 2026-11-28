@@ -4,7 +4,7 @@ An integration layer between PX4 and JSBSim for agent-driven flight-control deve
 
 **English** | [繁體中文](README.zh-TW.md) (translation; this English version is authoritative)
 
-> Status: v2 draft, under development. v1 (Simulink → C → HITL) is archived as tag `v1-final` and branch `legacy-v1`.
+> Status: v2.1.0, released 2026-11-28 ([release notes](docs/releases/v2.1.0.md); what is verified: [docs/verification.md](docs/verification.md)). v1 (Simulink → C → HITL) is archived as tag `v1-final` and branch `legacy-v1`.
 
 ![Overview: PX4 and JSBSim at pinned versions; the toolkit as the glue layer (simhost, deploy and fly, fast core, agent rules); SITL, HITL and flight judged by one yardstick; vehicle repositories; a person decides and the AI does the technical work; the core spirit](images/overview_toolkit.svg)
 
@@ -12,7 +12,7 @@ An integration layer between PX4 and JSBSim for agent-driven flight-control deve
 
 ## Overview
 
-This project sits between [PX4](https://px4.io) (flight control) and [JSBSim](https://github.com/JSBSim-Team/jsbsim) (flight dynamics). Both are used unmodified, at locked versions. This project implements only what lies between them:
+This project sits between [PX4](https://px4.io) (flight control) and [JSBSim](https://github.com/JSBSim-Team/jsbsim) (flight dynamics). Both are used at locked versions and are not forked: JSBSim unmodified, PX4 with only the small patches listed with their reasons in `px4/lock.toml` (a Cube Orange+ board variant for HITL, one SITL sensor fix). This project implements only what lies between them:
 
 - real-time HITL simulation
 - a deployment pipeline
@@ -43,7 +43,7 @@ Each vehicle lives in its own repository and pins a version of this project. Thi
 ## Architecture
 
 ```
-  PX4 (flight control)     JSBSim (flight dynamics)     upstream: locked versions, unmodified
+  PX4 (flight control)     JSBSim (flight dynamics)     upstream: locked versions, not forked
             \                 /
         px4-llm-sim2hitl (integration layer)           this repository
                     |  pinned version
@@ -89,4 +89,4 @@ Give the URL of this repository to an AI agent (for example Claude Code or Codex
 
 ## License
 
-BSD 3-Clause, see [LICENSE](LICENSE). PX4 (BSD 3-Clause) and JSBSim (LGPL-2.1) are used unmodified under their own licenses; JSBSim is built from its locked source release.
+BSD 3-Clause, see [LICENSE](LICENSE). PX4 (BSD 3-Clause) and JSBSim (LGPL-2.1) are used under their own licenses: JSBSim unmodified, built from its locked source release; PX4 with the patches of `px4/lock.toml`.
